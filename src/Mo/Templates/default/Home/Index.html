@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="Mo,Asp,MoAspEnginer,Blog,MoBlog,艾恩" />
+    <meta name="description" content="基于JScript和VBScript的ASP开源MVC框架-MoAspEnginer。" />
+    <title>欢迎使用MoAspEnginer！</title>
+    <style type="text/css">
+	    body{padding:0;margin:0; text-align: center;font-family: "Consolas", "Monaco", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;}
+	    ul,li{ list-style: none;padding: 0; margin: 0;}
+	    .wapper {margin:20px auto; width:600px;text-align:left}
+	    .wapper .title {width:100%;text-align:center;font-weight:bold;font-size:24px;padding:10px 0; color:orange; text-shadow:1px 1px 1px rgba(0,0,0,0.3)}
+	    .orange{color:orange; font-weight:bold}
+	    li{padding:10px 0 0 0;line-height:18px; text-align: center;font-size:12px; border-bottom:1px dotted #eee}
+	    a{color:orange;}
+	</style>
+	<script type="text/javascript">
+		window.onload=function(){
+			var lis = document.getElementsByTagName("li");
+			for(var i=0;i<lis.length;i++){
+				lis[i].innerHTML = lis[i].innerHTML.replace(/(\w+)/igm,"<span class=\"orange\">$1</span>");
+			}
+		};
+	</script>
+</head>
+<body>
+	<div class="wapper">
+		<div class="title">欢迎使用{$Version}！</div>
+		<ul>
+			<li>单文件入口。</li>
+			<li>HTML代码和程序的真正分离。</li>
+			<li>模板编译ASP代码。</li>
+			<li>支持类库扩展以及模板自定义标签扩展。</li>
+			<li>模块和类库同时支持VBS和JScript两种语言。</li>
+			<li>支持多种数据库，默认支持ACCESS、MSSQL、MYSQL、SQLITE，可自定义其他类型数据库。</li>
+			<li>支持多数据库操作。</li>
+			<li>内置表单验证，HTTP请求数据可直接用来更新数据库。</li>
+			<li>内置HttpRequest，HttpUpload，Soap，OAUTH2.0。</li>
+			<li>内置CryptoJS库，提供AES/DES/Base64/MD5/SHA1/RC4/Rabbit/pbkdf2/ripemd160等算法。</li>
+			<li>内置Json解析和构建。</li>
+			<li>支持多种伪静态方式，包括404、URL、isapi_URLRewrite，完全自定义的Rewrite配置。</li>
+			<li>支持类库缓存，编译缓存，HTML缓存，数据库Model缓存。</li>
+			<li>资源统一管理，统一销毁，使您专心于业务逻辑处理。</li>
+			<li>换一种ASP的开发方式！！！</li>
+		</ul>
+		<div class="title"><a href="http://m.thinkasp.cn/" target="_blank">&gt;&gt;&gt;&gt;官网</a> <a href="{$$MO_ROOT}?m=home&a=home">示例</a></div>
+	</div>
+</body>
+</html>
