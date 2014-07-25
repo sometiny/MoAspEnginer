@@ -28,9 +28,9 @@ ActionHome.prototype.Index = function(){
 ActionHome.prototype.db2008 = function(){
 	Model__.allowDebug=true;
 	var cmd = Model__("Public","Id","Sql2008").createCommandManager("getrecords");
-	cmd.addReturn("@RETURN",3,4);
+	cmd.addReturn("@RETURN",ModelHelper.Enums.DataType.DBTYPE_I4,4);
 	cmd.addInputInt("@start",2);
-	cmd.addOutput("@output",200,50);
+	cmd.addOutput("@output",ModelHelper.Enums.DataType.VARCHAR,50);
 	var rc = cmd.execute(true).fetch();
 	F.echo(F.format("数据记录：{0}条",rc.recordcount),true);
 	F.echo(F.format("查询记录：{0}条",rc.count()),true);
@@ -44,14 +44,11 @@ ActionHome.prototype.db = function(){
 	Model__.allowDebug=true;
 	Model__.useCommandForUpdateOrInsert=true;
 	Model__("Public","Id").where("id=1").update("name","艾恩-" + F.random.word(10));
-	F.echo("影响行数："+Model__.lastRows,true);
-	//这里的rc就是Model自动创建的DataTable对象
+	this.assign("lastRows",Model__.lastRows);
 	var rc = Model__("Public","Id").limit(1,3).query().fetch();
-	F.echo(F.format("数据记录：{0}条",rc.recordcount),true);
-	F.echo(F.format("查询记录：{0}条",rc.count()),true);
-	rc.each(function(r){
-		F.echo(F.format("{0.id},{0.name},{0.age},{0.birthday:yyyy-MM-dd}",r),true);
-	});
+	this.assign("recordcount",rc.recordcount);
+	this.assign("count",rc.count());
+	rc.assign("data");
 
 	//使用数组（可选）初始化一个DataTable
 	rc = new DataTable([{
@@ -73,11 +70,8 @@ ActionHome.prototype.db = function(){
 		r.name="lilith";
 		r.age=26;
 		r.birthday="2014-7-8";
-	F.echo(F.format("数据记录：{0}条",rc.recordcount),true);
-	rc.each(function(r){
-		F.echo(F.format("{0.id},{0.name},{0.age},{0.birthday:yyyy-MM-dd}",r),true);
-	});
-	
+	rc.assign("dataself");
+	this.display("Data");
 };
 ActionHome.prototype.clearcache = function(){
 	Mo.ClearCompiledCache();
