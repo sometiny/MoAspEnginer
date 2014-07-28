@@ -1,9 +1,6 @@
 ﻿<script language="jscript" runat="server">
-function ActionHome(){
-	this.empty=function(){};
-}
-ActionHome.prototype = new IAction();
-ActionHome.prototype.Index = function(){
+ActionHome = IAction.create();
+ActionHome.extend("Index", function(){
 	this.assign("appname","MoAspEnginer");
 	this.assign("birthday",new Date());
 	this.assign("address","杭州");
@@ -24,8 +21,8 @@ ActionHome.prototype.Index = function(){
 	F.cookie("person.age",28);
 	this.assign("Debug",F.dump_(F.date.parse("1986-9-2 21:23:45.234")));
 	this.display("Home");
-};
-ActionHome.prototype.db2008 = function(){
+});
+ActionHome.extend("db2008", function(){
 	Model__.allowDebug=true;
 	var cmd = Model__("Public","Id","Sql2008").createCommandManager("getrecords");
 	cmd.addReturn("@RETURN",ModelHelper.Enums.DataType.DBTYPE_I4,4);
@@ -39,8 +36,8 @@ ActionHome.prototype.db2008 = function(){
 	rc.each(function(r){
 		F.echo(F.format("{0.id},{0.name},{0.age},{0.birthday:yyyy-MM-dd}",r),true);
 	});
-}
-ActionHome.prototype.db = function(){
+});
+ActionHome.extend("db", function(){
 	Model__.allowDebug=true;
 	Model__.useCommandForUpdateOrInsert=true;
 	Model__("Public","Id").where("id=1").update("name","艾恩-" + F.random.word(10));
@@ -72,11 +69,11 @@ ActionHome.prototype.db = function(){
 		r.birthday="2014-7-8";
 	rc.assign("dataself");
 	this.display("Data");
-};
-ActionHome.prototype.clearcache = function(){
+});
+ActionHome.extend("clearcache", function(){
 	Mo.ClearCompiledCache();
 	Mo.ModelCacheClear();
 	Mo.ClearLibraryCache();
 	if(F.server("HTTP_REFERER")!="")F.goto(F.server("HTTP_REFERER")); else F.goto("/");
-};
+});
 </script>

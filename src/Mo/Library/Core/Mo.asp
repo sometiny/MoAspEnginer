@@ -352,9 +352,13 @@ var Mo = Mo || (function(){
 			if(G.MO_COMPILE_CACHE)F.string.savetofile(cachepath,"<s" + "cript language=\"jscript\" runat=\"server\">\r\n" + vbscript + "\r\n</s"+"cript>",G.MO_CHARSET);
 		}
 		F.execute(vbscript,"Temp___");
-		if(!G.MO_DIRECT_OUTPUT)fetch = Temp___();
-		if(G.MO_CACHE && G.MO_CACHE_DIR != "" && !G.MO_DIRECT_OUTPUT){
-			if(F.exists(G.MO_CACHE_DIR,true)) F.string.savetofile(F.mappath(G.MO_CACHE_DIR + this.CacheFileName + ".cache"),fetch,G.MO_CHARSET);
+		try{
+			if(!G.MO_DIRECT_OUTPUT)fetch = Temp___();
+			if(G.MO_CACHE && G.MO_CACHE_DIR != "" && !G.MO_DIRECT_OUTPUT){
+				if(F.exists(G.MO_CACHE_DIR,true)) F.string.savetofile(F.mappath(G.MO_CACHE_DIR + this.CacheFileName + ".cache"),fetch,G.MO_CHARSET);
+			}
+		}catch(ex){
+			ExceptionManager.put(ex,"Mo.fetch()->Temp___()");
 		}
 		return fetch;
 	};
@@ -519,14 +523,14 @@ var Mo = Mo || (function(){
 				if(ModelClass[this.Action]){
 					ModelClass[this.Action]();
 				}else{
-					if(ModelClass["Empty"]){
-						this.RealAction = "Empty";
-						ModelClass.Empty(this.Action);
+					if(ModelClass["empty"]){
+						this.RealAction = "empty";
+						ModelClass["empty"](this.Action);
 					}else{
-						ExceptionManager.put(0x3a8,this.RealMethod + "." + this.RealAction,"未定义相应Action或Empty方法。");
+						ExceptionManager.put(0x3a8,this.RealMethod + "." + this.RealAction,"未定义相应Action或Empty方法，请扩展相应的方法。");
 					}
 				}
-				ModelClass.__dispose__();
+				ModelClass.__destruct();
 				ModelClass = null;
 			}catch(ex){
 				ExceptionManager.put(ex,this.RealMethod + "." + this.RealAction);
@@ -578,6 +582,9 @@ var Mo = Mo || (function(){
 		   		};
 		   		F.vbs.execute = function(script){
 			   		ScrCtl.ExecuteStatement(script);
+		   		};
+		   		F.vbs.ns = function(name,value){
+			   		ScrCtl.AddObject(name,value);
 		   		};
 			    F.vbs.run = function(){
 				    var args = [];for(var i = 0;i < arguments.length;i++)args.push("args" + i);var args_ = args.join(",");

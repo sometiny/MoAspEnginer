@@ -241,7 +241,6 @@ ModelCMDManager.prototype.exec = function(){
 	this.cmdobj.CommandText = this.cmd;
 	for(var i in this.parms_){
 		if(!this.parms_.hasOwnProperty(i))continue;
-		//F.echo(this.parms_[i].Name + " = " + this.parms_[i].Type + "," + this.parms_[i].Value + "," + this.parms_[i].Size,true);
 		this.cmdobj.Parameters.Append(this.parms_[i]);
 	}
 	if(this.withQuery){
@@ -254,8 +253,22 @@ function IAction(){
 	Mo.assign("MO_METHOD",Mo.RealMethod);
 	Mo.assign("MO_ACTION",Mo.RealAction);
 }
-IAction.prototype.assign = function(key,value){Mo.assign(key,value);};
-IAction.prototype.display = function(tpl){Mo.display(tpl);};
-IAction.prototype.call__ = function(fn){this[fn].call(this);};
-IAction.prototype.__dispose__ = function(){};
+IAction.extend = function(name,fn){
+	this.prototype[name] = fn;
+};
+IAction.extend("assign",function(key,value){Mo.assign(key,value);});
+IAction.extend("display",function(tpl){Mo.display(tpl);});
+IAction.extend("__destruct", function(){});
+IAction.create = function(__construct,__destruct){
+	var newAction = (function(fn){
+		return function(){
+			IAction.call(this);
+			if(typeof fn=="function")fn.call(this);
+		};
+	})(__construct);
+	newAction.extend = IAction.extend;
+	newAction.prototype = new IAction();
+	if(typeof __destruct=="function")newAction.prototype.__destruct = __destruct;
+	return newAction;
+};
 </script>
