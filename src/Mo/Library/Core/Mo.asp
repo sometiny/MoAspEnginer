@@ -511,7 +511,7 @@ var Mo = Mo || (function(){
 						this.RealAction = "empty";
 						ModelClass["empty"](this.Action);
 					}else{
-						ExceptionManager.put(0x3a8,this.RealMethod + "." + this.RealAction,"未定义相应Action或Empty方法，请扩展相应的方法。");
+						ExceptionManager.put(0x3a8,this.RealMethod + "." + this.RealAction,"未定义相应Action或empty方法，请扩展相应的方法。");
 					}
 				}
 				ModelClass.__destruct();
@@ -606,7 +606,7 @@ var Mo = Mo || (function(){
 		    })(objScrCtl);
 		    objScrCtl = null;
 	    }catch(ex){
-		    ExceptionManager.put(ex,"M.loadVBSHelper");
+		    ExceptionManager.put(ex,"Mo.loadVBSHelper");
 	    }
 	};
 	return M;
