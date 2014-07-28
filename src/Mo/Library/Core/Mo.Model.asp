@@ -146,7 +146,7 @@ Model__.connect = function(cfg){
 		base.open();
 		if(Model__.allowDebug)Model__.debug.put("database(" + cfg +") connect successfully.(time taken:" + F.timer.stop() + "MS)");
 
-		if(!(cfg_["DB_Type"] == "ACCESS" || cfg_["DB_Type"] == "MSSQL")){
+		if(!(cfg_["DB_Type"] == "ACCESS" || cfg_["DB_Type"] == "MSSQL" || !Mo.Config.Global.MO_LOAD_VBSHELPER)){
 			Model__.connections[cfg].useCommandForUpdateOrInsert = false;
 		}
 		if(Model__.connections[cfg].useCommandForUpdateOrInsert && !cfg_["DB_Schema"]){

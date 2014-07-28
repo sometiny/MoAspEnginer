@@ -5,8 +5,8 @@ var Mo = Mo || (function(){
 		Version : "MoAspEnginer 2.0(Beta)"
 		,Librarys : {}
 		,Language : {}
-		,Dicts : {}
-		,mvarUse : {}
+		,Assigns : {}
+		,Statics : {}
 		,Config : {}
 		,rewrite : false
 		,Action : ""
@@ -30,33 +30,12 @@ var Mo = Mo || (function(){
 	};
 	
 	var LoadLibrary = function( path, library, cls){
-		if(path == ""){
-			if(M.Librarys[library + "_" + cls] == "jscript"){
-				return F.initialize("Mo" + library + cls);
-			}else{
-				ExceptionManager.put(1,"LoadLibrary(path,library,cls)","can not load library \"" + library + "." + cls + "\".");
-			}
-			return;
-		}
 		try{
-			var ret,filesum = library + "." + cls,isnew = false;
 			path = F.mappath(path);
-			if(Application(G.MO_APP_NAME + ".lib." + filesum + "_lng") != "jscript" || !G.MO_LIB_CACHE){
-				ret = F.string.fromfile(path);
-				ret = F.string.trim(ret);
-				ret = F.string.trim(ret);
-				Application.Lock();
-				Application(G.MO_APP_NAME + ".lib." + filesum + "_cache") =ret;
-				Application(G.MO_APP_NAME + ".lib." + filesum + "_lng") ="jscript";
-				Application.UnLock() ;
-				isnew = true;
-			}else{
-				ret = Application(G.MO_APP_NAME + ".lib." + filesum + "_cache");
-			}
-			ret = F.string.replace(ret,/^<s(.+?)>(\s*)/i,"")
-			ret = F.string.replace(ret,/(\s*)<\/script>$/igm,"")
+			var ret = F.string.fromfile(path);
+			ret = F.string.replace(ret,/^(\s*)<s(.+?)>(\s*)/i,"");
+			ret = F.string.replace(ret,/(\s*)<\/script>(\s*)$/igm,"");
 			if(!F.execute(ret,"Mo" + library + cls))return false;
-			M.Librarys[library + "_" + cls] = "jscript";
 			return true;
 		}catch(ex){
 			ExceptionManager.put(ex, "LoadLibrary([path], \"" + library + "\", \"" + cls + "\")");
@@ -121,19 +100,37 @@ var Mo = Mo || (function(){
 		//if(!F.exists(cfg.MO_APP,true))cfg.MO_APP = cfg.MO_CORE;
 	}
 	var LoadModel = function(path,model){
-		if(M.Librarys["Action" + "_" + model] == "jscript")return true;
+		if(M.Librarys["Action_" + model] == "jscript")return true;
 		try{
 			var ret = F.string.fromfile(F.mappath(path),G.MO_CHARSET),language;
 			ret = F.string.replace(ret,/(^(\s+)|(\s+)$)/igm,"");
 			ret = F.string.replace(ret,"^<s" + "cript(.+?)>(\s*)","igm","")
 			ret = F.string.replace(ret,/(\s*)<\/script>/igm,"")
 			if(!F.execute(ret,"Action" + model))return false;
-			M.Librarys["Action" + "_" + model] = "jscript"
+			M.Librarys["Action_" + model] = "jscript"
 			return true;
 		}catch(ex){
 			ExceptionManager.put(ex,"Mo.LoadModel([path],\"" + model + "\")，加载模块时出现错误。")
 			return false;
 		}
+	};
+	var parseLibraryPath = function(lib){
+		var path,core,cls,library;
+		core = "Extend";
+		cls = lib;
+		library = "Lib";
+		if(lib.indexOf(":") > 0){
+			core = lib.substr(0,lib.indexOf(":"));
+			cls = lib.substr(lib.indexOf(":") + 1);
+		}
+		if(cls.indexOf(".") > 0){
+			library = cls.substr(0,cls.indexOf("."));
+			cls = cls.substr(cls.indexOf(".") + 1);
+		}
+		path = F.mappath(G.MO_APP + "Library/" + core + "/Mo." + library + "." + cls + ".asp");
+		if(!F.exists(path))path = F.mappath(G.MO_CORE + "Library/" + core + "/Mo." + library + "." + cls + ".asp");
+		if(F.exists(path))return [path,core,library,cls];
+		return ["",core,library,cls];
 	};
 	var G = {};
 	M.Initialize = function(cfg){
@@ -164,7 +161,7 @@ var Mo = Mo || (function(){
 			F.exit("核心库加载失败，原因：" + ex.message + "。")
 			return M;
 		}
-		M.loadVBSHelper();
+		if(G.MO_LOAD_VBSHELPER)M.loadVBSHelper();
 		try{
 			var em = F.convert.toEnumerator(F.fso.getfolder(F.mappath(G.MO_CORE + "Library/Common")).files);
 			while(!em.atEnd()){
@@ -210,8 +207,8 @@ var Mo = Mo || (function(){
 		F.dispose();
 		M.Debug_();
 		M.End__();
-		this.Dicts = null;
-		this.mvarUse = null;
+		this.Assigns = null;
+		this.Statics = null;
 		this.Config = null;
 		this.Language = null;
 		this.Librarys = null;
@@ -261,40 +258,27 @@ var Mo = Mo || (function(){
 		return M;
 	};
 	M["Static"] = function(lib){
-		if(!this.mvarUse.hasOwnProperty(lib))this.mvarUse[lib] = this["default"](lib);
-		return this.mvarUse[lib]
+		if(!this.Statics.hasOwnProperty(lib))this.Statics[lib] = this["default"](lib);
+		return this.Statics[lib]
 	};
 	M["default"] = function(lib){
 		var Msg = this.Use(lib);
-		if(M.Librarys[Msg[0] + "_" + Msg[1]] == "jscript"){
+		if(this.Librarys[lib] == "jscript"){
 			return F.initialize("Mo" + Msg[0] + Msg[1]);
 		}else{
 			ExceptionManager.put(1,"LoadLibrary(path,library,cls)","can not load library \"" + Msg[0] + "." + Msg[1] + "\".");
 		}
 	};
-	M["Use"] = function(lib){
-		var path,core,cls,library;
-		core = "Extend";
-		cls = lib;
-		library = "Lib";
-		if(lib.indexOf(":") > 0){
-			core = lib.substr(0,lib.indexOf(":"));
-			cls = lib.substr(lib.indexOf(":") + 1);
-		}
-		if(cls.indexOf(".") > 0){
-			library = cls.substr(0,cls.indexOf("."));
-			cls = cls.substr(cls.indexOf(".") + 1);
-		}
-		if(!this.Librarys.hasOwnProperty(library + "_" + cls)){
-			path = F.mappath(G.MO_APP + "Library/" + core + "/Mo." + library + "." + cls + ".asp");
-			if(!F.exists(path))path = F.mappath(G.MO_CORE + "Library/" + core + "/Mo." + library + "." + cls + ".asp");
-			if(F.exists(path)){
-				LoadLibrary(path,library,cls);
+	M.Use = function(lib){
+		var libinfo=parseLibraryPath(lib);
+		if(!this.Librarys.hasOwnProperty(lib)){
+			if(libinfo[0]!=""){
+				if(LoadLibrary(libinfo[0],libinfo[2],libinfo[3]))this.Librarys[lib]="jscript";
 			}else{
 				ExceptionManager.put(1,"Mo.Use(lib)","类库'" + lib + "'不存在。");
 			}
 		}
-		return [library,cls,core];
+		return [libinfo[2],libinfo[3],libinfo[1]];
 	};
 	M.ModelCacheExists = function(name){
 		if(name == "") return false;
@@ -375,21 +359,21 @@ var Mo = Mo || (function(){
 		return F.exists(path);
 	};
 	M.assign = function(key,value){
-		if(G.MO_COMPILE_STRICT) GLOBAL[key] = value; else this.Dicts[key] = value;
+		if(G.MO_COMPILE_STRICT) GLOBAL[key] = value; else this.Assigns[key] = value;
 	};
 	M.exists = function(key){
-		return this.Dicts.hasOwnProperty(key);
+		return this.Assigns.hasOwnProperty(key);
 	};
 	M.value = function(key){
 		if(G.MO_COMPILE_STRICT) return GLOBAL[key];
-		if(!this.Dicts.hasOwnProperty(key))return null;
-		return this.Dicts[key];
+		if(!this.Assigns.hasOwnProperty(key))return null;
+		return this.Assigns[key];
 	};
 	M.values = function(l,k){
 		if(G.MO_COMPILE_STRICT)return GLOBAL[l][k];
-		if(!this.Dicts.hasOwnProperty(l)) return null;
-		if(this.Dicts[l] !== null && typeof this.Dicts[l] == "object"){
-			if(this.Dicts[l].hasOwnProperty(k)) return this.Dicts[l][k];
+		if(!this.Assigns.hasOwnProperty(l)) return null;
+		if(this.Assigns[l] !== null && typeof this.Assigns[l] == "object"){
+			if(this.Assigns[l].hasOwnProperty(k)) return this.Assigns[l][k];
 		}
 		return null;
 	};
@@ -539,7 +523,7 @@ var Mo = Mo || (function(){
 		return M;
 	};
 	M.dump = function(){
-		F.dump(this.Dicts);
+		F.dump(this.Assigns);
 	}
 	M.loadVBSHelper = function(){
 		try{
@@ -549,6 +533,7 @@ var Mo = Mo || (function(){
 		    objScrCtl.AddObject("Model__",Model__);
 		    objScrCtl.AddObject("F",F);
 		    objScrCtl.AddObject("Mo",M);
+		    objScrCtl.AddObject("Request",Request);
 
 		    //用于获取查询影响行数的必要的vbs方法
 		    objScrCtl.ExecuteStatement(
@@ -592,6 +577,31 @@ var Mo = Mo || (function(){
 			    };
 			    F.vbs.require = function(name){
 				    return ScrCtl.eval("new " + name);
+			    };
+			    F.vbs.include = function(lib){
+					if(!M.Librarys.hasOwnProperty(lib)){
+					    var pathinfo = parseLibraryPath(lib);
+					    if(pathinfo[0]!=""){
+						    var ret = F.string.fromfile(pathinfo[0]);
+							ret = F.string.replace(ret,/^(\s*)\<\%(\s*)/i,"");
+							ret = F.string.replace(ret,/(\s*)\%\>(\s*)$/igm,"");
+							F.vbs.ctrl.error.clear();
+							F.vbs.execute(ret);
+							if(F.vbs.ctrl.error.number != 0){ 
+								ExceptionManager.put(F.vbs.ctrl.error.number,"F.vbs.include(lib)",F.vbs.ctrl.error.description);
+								F.vbs.ctrl.error.clear();
+								return false;
+							}else{
+								M.Librarys[lib]="vbs";
+								return true;
+							}
+					    }else{
+							ExceptionManager.put(0x00002CD, "F.vbs.include(lib)","待加载的类库'" + lib + "'不存在。");
+						    return false;
+					    }
+				    }else{
+					   return true; 
+				    }
 			    };
 		    })(objScrCtl);
 		    objScrCtl = null;

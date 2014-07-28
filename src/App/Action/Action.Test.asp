@@ -24,10 +24,9 @@ ActionTest.extend("Show",function(){
 	F.echo(this.Name,true);
 });
 ActionTest.extend("Test",function(){
-	var obj={name:"123"};
-	F.vbs.ns("obj",obj);
-    F.vbs.execute("obj.name=F.random.word(40)");
-    F.echo(obj.name,true);
+	F.vbs.include("Upload");
+	var upload = F.vbs.require("MoLibUpload");
+	F.echo(upload.Version,true);
 });
 ActionTest.extend("empty",function(name){
 	F.echo("调用不到" + name + "方法，就跑到Empty方法了！",true);

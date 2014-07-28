@@ -32,6 +32,7 @@ return {
 	MO_IMPORT_COMMON_FILES : "",
 	MO_SESSION_WITH_SINGLE_TAG : false,
 	DISABLED_FUNCTIONS : "F.execute,F.include,F.initialize,F.globalize,F.require,executeglobal,execute,include,eval,IncludeFile,LoadVBScript,LoadScript,LoadFile,SaveFile,VBSExecute",
-	DISABLED_MODELS : ""
+	DISABLED_MODELS : "",
+	MO_LOAD_VBSHELPER:true
 };
 </script>
