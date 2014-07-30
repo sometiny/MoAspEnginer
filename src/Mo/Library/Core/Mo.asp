@@ -330,7 +330,7 @@ var Mo = Mo || (function(){
 		if(!usecache){
 			html = LoadTemplateEx(template);
 			if(html == "")return "";
-			if(typeof MoAspEnginerView == "undefined")F.include(G.MO_CORE + "Library/Core/Mo.View.asp","gbk");
+			if(typeof MoAspEnginerView == "undefined")F.include(G.MO_CORE + "Library/Core/Mo.View.asp","utf-8");
 			var view_ = new MoAspEnginerView(html);
 			vbscript = view_.Content;
 			if(G.MO_COMPILE_CACHE)F.string.savetofile(cachepath,"<s" + "cript language=\"jscript\" runat=\"server\">\r\n" + vbscript + "\r\n</s"+"cript>",G.MO_CHARSET);
@@ -514,7 +514,7 @@ var Mo = Mo || (function(){
 						this.RealAction = "empty";
 						ModelClass["empty"](this.Action);
 					}else{
-						ExceptionManager.put(0x3a8,this.RealMethod + "." + this.RealAction,"未定义相应Action或empty方法，请扩展相应的方法。");
+						ExceptionManager.put(0x3a8,this.RealMethod + "." + this.RealAction,"未定义相应" + this.Action + "或empty方法。");
 					}
 				}
 				ModelClass.__destruct();

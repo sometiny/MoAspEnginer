@@ -1,4 +1,4 @@
-<script language="jscript" runat="server">
+ï»¿<script language="jscript" runat="server">
 var exports=["MoAspEnginerView"];
 var G = Mo.Config.Global;
 function MoAspEnginerView(content){
@@ -317,7 +317,7 @@ MoAspEnginerView.prototype.parseExpression=function(){
 	while(matches.length>0){
 		m_ = matches.pop();
 		expression = this.parseExpressionComponent(m_[1]);
-		if(expression=="") F.exit("template parse error,please check 'expression' tag¡£");
+		if(expression=="") F.exit("template parse error,please check 'expression' tagã€‚");
 		this.Content = F.replace(this.Content,m_[0],"<?MoAsp if(" + expression + "){\r\n MoAsp?>");
 	}
 	this.Content = F.string.replace(this.Content,/<(and|or)(.+?)\/>/igm,"")
@@ -329,7 +329,7 @@ MoAspEnginerView.prototype.parseExpressionElse=function(){
 	while(matches.length>0){
 		m_ = matches.pop();
 		expression = this.parseExpressionComponent(m_[1])
-		if(expression=="") F.exit("template parse error,please check 'expression' tag¡£");
+		if(expression=="") F.exit("template parse error,please check 'expression' tagã€‚");
 		this.Content = F.replace(this.Content,m_[0],"<?MoAsp }else if(" + expression + "){ MoAsp?>");
 	}
 };

@@ -1,4 +1,4 @@
-<script language="jscript" runat="server">
+﻿<script language="jscript" runat="server">
 var GLOBAL = this;
 var F = {
 	fso : null,post__ : null,get__ : {},server__ : {},activex__ : [],postinited : false,rewrite : false,exports : {},
@@ -66,27 +66,11 @@ var F = {
 			return true;
 		}catch(ex){return false;}
 	},
-	deletefile : function(path,isfolder){
-		path = F.iid(path,"");
-		if(isfolder !== true)isfolder = false;
-		if(path == "")return false;
-		try{
-			if(isfolder){
-				F.fso.deletefolder(F.mappath(path));
-			}else{
-				F.fso.deletefile(F.mappath(path));
-			}
-			return true;
-		}catch(ex){return false;}
-	},
 	stream : function(mode,type){
 		var stream = F.activex("Adodb.Stream");
 		if(mode !== undefined)stream.Mode = mode;
 		if(type !== undefined)stream.Type = type;
 		return stream;
-	},
-	file : {
-		"delete" : function(path){try{F.fso.deletefile(path);}catch(ex){}}
 	},
 	init : function(){
 		if((typeof fso_global) != "object")this.fso = F.activex("Scripting.FileSystemObject");
@@ -142,8 +126,8 @@ var F = {
 	},
 	all : function(key){
 		if(key == undefined)return"";
-		if(F.get.exists(key)) return F.get(key);
-		if(F.post.exists(key)) return F.post(key);
+		if(F.get__.hasOwnProperty(key)) return F.get(key);
+		if(F.post__.hasOwnProperty(key)) return F.post(key);
 		return "";
 	},
 	server : function(key,value){

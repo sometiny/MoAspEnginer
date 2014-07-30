@@ -1,4 +1,4 @@
-<script language="jscript" runat="server">
+﻿<script language="jscript" runat="server">
 var exports = ["ExceptionManager","Exception"];
 /****************************************************
 '@DESCRIPTION:	ExceptionManager
@@ -345,6 +345,7 @@ IAction.create = function(__construct,__destruct){
 	var newAction = (function(fn){
 		return function(){
 			IAction.call(this);
+			this.name = "Action" + Mo.RealMethod;
 			if(typeof fn=="function")fn.call(this);
 		};
 	})(__construct);
