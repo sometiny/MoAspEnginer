@@ -335,16 +335,19 @@ var Mo = Mo || (function(){
 			vbscript = view_.Content;
 			if(G.MO_COMPILE_CACHE)F.string.savetofile(cachepath,"<s" + "cript language=\"jscript\" runat=\"server\">\r\n" + vbscript + "\r\n</s"+"cript>",G.MO_CHARSET);
 		}
-		F.execute(vbscript,"Temp___");
+		
+		if(!G.MO_DIRECT_OUTPUT) F.execute(vbscript,"Temp___");
+		else F.execute(vbscript);
+		var content="";
 		try{
-			if(!G.MO_DIRECT_OUTPUT)fetch = Temp___();
+			if(!G.MO_DIRECT_OUTPUT)content = Temp___();
 			if(G.MO_CACHE && G.MO_CACHE_DIR != "" && !G.MO_DIRECT_OUTPUT){
 				if(F.exists(G.MO_CACHE_DIR,true)) F.string.savetofile(F.mappath(G.MO_CACHE_DIR + this.CacheFileName + ".cache"),fetch,G.MO_CHARSET);
 			}
 		}catch(ex){
 			ExceptionManager.put(ex,"Mo.fetch()->Temp___()");
 		}
-		return fetch;
+		return content;
 	};
 	M.templateIsInApp = function(template){
 		var vpath = ParseTemplatePath(template),path;

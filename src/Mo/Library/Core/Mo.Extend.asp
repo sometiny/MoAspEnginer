@@ -329,6 +329,30 @@ DataTableRow.prototype.assign = function(name){
 	Mo.assign(name,obj);
 	return this;
 };
+
+exports.push("IAction");
+function IAction(){
+	Mo.assign("MO_METHOD",Mo.RealMethod);
+	Mo.assign("MO_ACTION",Mo.RealAction);
+}
+IAction.extend = function(name,fn){
+	this.prototype[name] = fn;
+};
+IAction.extend("assign",function(key,value){Mo.assign(key,value);});
+IAction.extend("display",function(tpl){Mo.display(tpl);});
+IAction.extend("__destruct", function(){});
+IAction.create = function(__construct,__destruct){
+	var newAction = (function(fn){
+		return function(){
+			IAction.call(this);
+			if(typeof fn=="function")fn.call(this);
+		};
+	})(__construct);
+	newAction.extend = IAction.extend;
+	newAction.prototype = new IAction();
+	if(typeof __destruct=="function")newAction.prototype.__destruct = __destruct;
+	return newAction;
+};
 /****************************************************
 '@DESCRIPTION:	if the property is defined in the Object
 '@PARAM:	key [String] : property name

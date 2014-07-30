@@ -55,13 +55,13 @@ var F = {
 	},
 	activex : function(classid){
 		try{
-			F.activex__.push(new ActiveXObject(classid));
+			F.activex__.push(Server.CreateObject(classid));
 			return F.activex__[F.activex__.length - 1];
 		}catch(ex){return null;}
 	},
 	activex_ : function(classid){
 		try{
-			var obj = new ActiveXObject(classid);
+			var obj = Server.CreateObject(classid);
 			obj = null;
 			return true;
 		}catch(ex){return false;}

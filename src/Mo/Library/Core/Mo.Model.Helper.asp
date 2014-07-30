@@ -1,5 +1,5 @@
 ﻿<script language="jscript" runat="server">
-var exports=["ModelHelper","ModelCMDManager","IAction"];
+var exports=["ModelHelper","ModelCMDManager"];
 var ModelHelper={
 	Enums:{
 		ParameterDirection:{
@@ -249,26 +249,4 @@ ModelCMDManager.prototype.exec = function(){
 		Model__.RecordsAffectedCmd(this.cmdobj,false);
 	}
 }
-function IAction(){
-	Mo.assign("MO_METHOD",Mo.RealMethod);
-	Mo.assign("MO_ACTION",Mo.RealAction);
-}
-IAction.extend = function(name,fn){
-	this.prototype[name] = fn;
-};
-IAction.extend("assign",function(key,value){Mo.assign(key,value);});
-IAction.extend("display",function(tpl){Mo.display(tpl);});
-IAction.extend("__destruct", function(){});
-IAction.create = function(__construct,__destruct){
-	var newAction = (function(fn){
-		return function(){
-			IAction.call(this);
-			if(typeof fn=="function")fn.call(this);
-		};
-	})(__construct);
-	newAction.extend = IAction.extend;
-	newAction.prototype = new IAction();
-	if(typeof __destruct=="function")newAction.prototype.__destruct = __destruct;
-	return newAction;
-};
 </script>

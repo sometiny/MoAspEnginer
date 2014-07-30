@@ -87,9 +87,9 @@ MoAspEnginerView.prototype.parsePreCombine=function(){
 //****************************************************
 MoAspEnginerView.prototype.doSomethingToAsp=function(){
 	if(G.MO_DIRECT_OUTPUT){
-		this.Content = this.Content.replace(/__Mo__\.Echo\(/igm,"T = T `&&` (")
+		this.Content = "if(typeof Mo==\"undefined\"){Response.Write(\"invalid call.\");Response.End();}\r\n" + this.Content.replace(/__Mo__\.Echo\(/igm,"T = T `&&` (")
 	}else{
-		this.Content = "function Temp___(){\r\nvar WriteStreamText=function(st,txt){if(txt==null)txt=\"\";txt=txt.toString();st.WriteText(txt);};\r\n"
+		this.Content = "if(typeof Mo==\"undefined\"){Response.Write(\"invalid call.\");Response.End();}\r\nfunction Temp___(){\r\nvar WriteStreamText=function(st,txt){if(txt==null)txt=\"\";txt=txt.toString();st.WriteText(txt);};\r\n"
 		+"var TplStream = F.activex.stream();\r\n"
 		+"TplStream.Mode=3;\r\n"
 		+"TplStream.Type=2;\r\n"
@@ -114,6 +114,7 @@ MoAspEnginerView.prototype.doSomethingToAsp=function(){
 		this.Content = this.Content.replace(/T \= T `&&` \(/igm,"WriteStreamText(TplStream,")
 	}
 	this.Content = this.Content.replace(/WriteStreamText\(TplStream\,\"\\r\\n\"\);\n/igm,"");
+	this.Content = this.Content.replace(/Response\.Write\(\"\\r\\n\"\);\n/igm,"");
 }
 
 //****************************************************
@@ -144,7 +145,7 @@ MoAspEnginerView.prototype.parsePage=function(){
 			if(func=="") func = "CreatePageList";
 			if(this.loops.indexOf(";" + loopname + ";")>=0){
 				if(!G.MO_COMPILE_STRICT)nloopname = "D__" + loopname;
-				this.Content = F.replace(this.Content,match[0],"<?MoAsp if(Mo.exists(\"" + loopname + "\")){ MoAsp?><?MoAsp __Mo__.Echo(" + func + "(\"" + pageurl + "\"," + nloopname + ".recordcount," + nloopname + ".pagesize," + nloopname  + ".currentpage)); MoAsp?><?MoAsp } MoAsp?>");
+				this.Content = F.replace(this.Content,match[0],"<?MoAsp if(Mo.Assigns.hasOwnProperty(\"" + loopname + "\")){ MoAsp?><?MoAsp __Mo__.Echo(" + func + "(\"" + pageurl + "\"," + nloopname + ".recordcount," + nloopname + ".pagesize," + nloopname  + ".currentpage)); MoAsp?><?MoAsp } MoAsp?>");
 			}else{
 				this.Content = F.replace(this.Content,match[0],"");
 			}
@@ -187,8 +188,8 @@ MoAspEnginerView.prototype.parseLoop=function(){
 			if(!G.MO_COMPILE_STRICT)varname = "D__" + loopname;
 			vbscript = "<?MoAsp ";
 			if(!G.MO_COMPILE_STRICT){
-				vbscript += "if(Mo.exists(\"" + loopname + "\")){\r\n"
-				vbscript += varname + " = Mo.value(\"" + loopname + "\");\r\n";
+				vbscript += "if(Mo.Assigns.hasOwnProperty(\"" + loopname + "\")){\r\n"
+				vbscript += varname + " = Mo.Assigns[\"" + loopname + "\"];\r\n";
 			}
 			vbscript += varname + ".reset();\r\n";
 			var contenteof = attrs.getter__("eof");
@@ -247,9 +248,9 @@ MoAspEnginerView.prototype.parseForeach=function(){
 			loopname = attrs.getter__("name");
 			typ = attrs.getter__("type");
 			vbscript = "<?MoAsp ";
-			if(!G.MO_COMPILE_STRICT)vbscript += "if(Mo.exists(\"" + loopname + "\")){\r\n";
+			if(!G.MO_COMPILE_STRICT)vbscript += "if(Mo.Assigns.hasOwnProperty(\"" + loopname + "\")){\r\n";
 			if(!G.MO_COMPILE_STRICT){
-				vbscript += "var D__" + loopname + "=Mo.value(\"" + loopname + "\");\r\nfor(var C__" + loopname + " in D__" + loopname + "){\r\nif(!D__" + loopname + ".hasOwnProperty(C__" + loopname + "))continue;\r\n MoAsp?>\r\n"
+				vbscript += "var D__" + loopname + "=Mo[\"" + loopname + "\"];\r\nfor(var C__" + loopname + " in D__" + loopname + "){\r\nif(!D__" + loopname + ".hasOwnProperty(C__" + loopname + "))continue;\r\n MoAsp?>\r\n"
 			}else{
 				vbscript += "for(var C__" + loopname + " in " + loopname + "){\r\nif(!" + loopname + ".hasOwnProperty(C__" + loopname + "))continue;\r\n MoAsp?>\r\n"
 			}
