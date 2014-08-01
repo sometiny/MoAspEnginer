@@ -75,9 +75,7 @@ var F = {
 	init : function(){
 		if((typeof fso_global) != "object")this.fso = F.activex("Scripting.FileSystemObject");
 		else this.fso = fso_global;
-		F.each(Request.QueryString,function(q){
-			F.get__[q] = String(this(q));
-		});
+		F.each(Request.QueryString,function(q){F.get__[q] = String(this(q));});
 		F.each(Request.ServerVariables,function(q){
 			var v = String(this(q));
 			if(q == "URL" && v.indexOf("?") > 0) v = v.substr(0,v.indexOf("?"));
@@ -1084,13 +1082,7 @@ var F = {
 F.post.init = function(){
 	if(!F.postinited){
 		F.post__ = {};
-		F.each(Request.Form,function(q){
-			if(F.post__[q] != undefined){
-				F.post__[q] = F.post__[q] + ", " + String(this(q));
-			}else{
-				F.post__[q] = String(this(q));
-			}
-		});
+		F.each(Request.Form,function(q){F.post__[q] = String(this(q));});
 		F.postinited = true;
 	}
 };
@@ -1151,27 +1143,33 @@ F.session.parse = function(name){
 	});
 	return obj;
 }
-F.post.dump = function(){
+F.post.dump = function(returnValue){
 	F.post.init();
-	F.echo(F.dump_(F.post__,1));
+	var dump = F.dump_(F.post__,1);
+	if(returnValue===true) return dump;
+	F.echo(dump);
 };
-F.get.dump = function(){
-	F.echo(F.dump_(F.get__,1));
+F.get.dump = function(returnValue){
+	var dump = F.dump_(F.get__,1);
+	if(returnValue===true) return dump;
+	F.echo(dump);
 };
-F.session.dump = function(){
-	F.echo("session{\n");
-	F.echo("  [Timeout] => " + F.dump_(Session.Timeout) + "\n");
-	F.echo("  [CodePage] => " + F.dump_(Session.CodePage) + "\n");
-	F.echo("  [LCID] => " + F.dump_(Session.LCID) + "\n");
-	F.echo("  [SessionID] => " + F.dump_(Session.SessionID) + "\n");
-	F.echo("  [Contents] => {\n");
+F.session.dump = function(returnValue){
+	var dump = ("session{\n");
+	dump+=("  [Timeout] => " + F.dump_(Session.Timeout) + "\n");
+	dump+=("  [CodePage] => " + F.dump_(Session.CodePage) + "\n");
+	dump+=("  [LCID] => " + F.dump_(Session.LCID) + "\n");
+	dump+=("  [SessionID] => " + F.dump_(Session.SessionID) + "\n");
+	dump+=("  [Contents] => {\n");
 	F.each(Session.Contents,function(q){
 		var nq = q;
 		if(F.MO_SESSION_WITH_SINGLE_TAG)nq = F.string.trimLeft(q,F.MO_APP_NAME + "_");
-		F.echo("    [" + nq + "] => " + F.dump_(Session.Contents(q)) + "\n");
+		dump+=("    [" + nq + "] => " + F.dump_(Session.Contents(q)) + "\n");
 	});
-	F.echo("  }\n");
-	F.echo("}");
+	dump+=("  }\n");
+	dump+=("}");
+	if(returnValue===true) return dump;
+	F.echo(dump);
 }
 F.toURIString.split_char_1 = "=";
 F.toURIString.split_char_2 = "&";

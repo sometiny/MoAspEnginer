@@ -507,7 +507,9 @@ var Mo = Mo || (function(){
 		if(LoadModel(ModelPath,theMethod)){
 			try{
 				var ModelClass = F.initialize("Action" + theMethod);
-				if(ModelClass[this.Action]){
+				if(F.server("REQUEST_METHOD")=="POST" && ModelClass[this.Action+"_Post_"]){
+					ModelClass[this.Action+"_Post_"]();
+				}else if(ModelClass[this.Action]){
 					ModelClass[this.Action]();
 				}else{
 					if(ModelClass["empty"]){

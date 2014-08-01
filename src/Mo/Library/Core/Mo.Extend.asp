@@ -335,7 +335,20 @@ function IAction(){
 	Mo.assign("MO_METHOD",Mo.RealMethod);
 	Mo.assign("MO_ACTION",Mo.RealAction);
 }
-IAction.extend = function(name,fn){
+IAction.extend = function(name,isPost,fn){
+	if(name && typeof name=="object"){
+		for(var n in name){
+			if(!name.hasOwnProperty(n)) continue;
+			if(typeof name[n]=="function") this.prototype[n] = name[n];
+		}
+		return;
+	}
+	if(typeof isPost=="function"){fn = isPost;isPost=false;}
+	if(typeof fn!="function"){
+		ExceptionManager.put("0x5cd","IAction.extend(...)","argument 'fn' must be a function.");
+		return;
+	}
+	if(isPost===true)name=name+"_Post_";
 	this.prototype[name] = fn;
 };
 IAction.extend("assign",function(key,value){Mo.assign(key,value);});
