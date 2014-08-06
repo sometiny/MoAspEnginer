@@ -14,9 +14,9 @@ MoLibJsonParser.result=null;
 MoLibJsonParser.strict=true;
 
 /****************************************************
-'@DESCRIPTION:	if 'encode' property is true,you will see unicode char in unParsed json string.
+'@DESCRIPTION:	if 'encode' property is false,you will see unicode char in unParsed json string.
 '****************************************************/
-MoLibJsonParser.encode=false;
+MoLibJsonParser.encode=true;
 
 (function () {
     function f(n) {
