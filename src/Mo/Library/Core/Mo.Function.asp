@@ -1,6 +1,5 @@
 ﻿<script language="jscript" runat="server">
-var GLOBAL = this;
-var F = {
+var GLOBAL = this, exports={}, F = {
 	fso : null,post__ : null,get__ : {},server__ : {},activex__ : [],postinited : false,rewrite : false,exports : {},
 	MO_SESSION_WITH_SINGLE_TAG : false,MO_APP_NAME : "",MO_APP : "",MO_CORE : "",
 	TEXT : {BR : 1,NL : 2,BIN : 4,NLBR : 1|2},
@@ -293,9 +292,9 @@ var F = {
 		F.exports = F.exports || {};
 		var src = "",iscached = false;
 		if(F.cache.enabled && F.cache.exists(library))iscached = true;
+		var path_ ="";
 		if(!iscached){
 			var paths = [path || "",F.MO_APP + "Library/Extend/",F.MO_CORE + "Library/Extend/"];
-			var path_ ="";
 			for(var i = 0;i < paths.length;i++){
 				if(paths[i] == "")continue;
 				path_ = F.mappath(paths[i] + library);
@@ -320,7 +319,11 @@ var F = {
 		try{
 			var this_ = this;
 			if(this == F)this_ = null;
-			return (new Function("exports",src))(this_ || F.exports) || F.exports;
+			return (new Function("exports","__FILE__","__DIR__",src))(
+				this_ || F.exports,
+				path_,
+				path_==""?"":path_.substr(0,path_.lastIndexOf("\\"))
+			) || F.exports;
 		}catch(ex){
 			ExceptionManager.put(ex,"F.require");
 			return F.exports;
@@ -347,7 +350,7 @@ var F = {
 					return false;
 				}
 			}
-			if(F.execute(src)){
+			if(F.execute.call(path,src)){
 				if(!iscached && F.cache.enabled)F.cache.write(path,src);
 				return true;
 			}else{
@@ -361,7 +364,11 @@ var F = {
 	execute : function(){
 		if(arguments.length < 1)return false;
 		try{
+			var path = this;
+			if(this == F)path = "";
+			var dir = path==""?"":path.substr(0,path.lastIndexOf("\\"));
 			var args,src = (args = [].slice.apply(arguments)).shift();
+			var __FILE__=path,__DIR__=dir;
 			eval(src);
 			var exports = exports || args;
 			if(exports.constructor == Array && exports.length > 0){
