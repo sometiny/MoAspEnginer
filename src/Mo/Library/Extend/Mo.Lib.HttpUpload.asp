@@ -1,5 +1,5 @@
 ﻿<script language="jscript" runat="server">
-Mo.Use("HttpRequest");
+Mo.use("HttpRequest");
 function MoLibHttpUpload(url){
 	MoLibHttpRequest.apply(this,[url,"POST","",false]);
 	this.boundary = F.random.letter(22);

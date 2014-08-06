@@ -53,7 +53,7 @@ MoLibOAUTH20.prototype.FetchFromAPI = function(api, method, format){
 };
 
 MoLibOAUTH20.prototype.SendData = function(url,method,data,format){
-	Mo.Use("HttpRequest");
+	Mo.use("HttpRequest");
 	var myhttp = new MoLibHttpRequest(url,method,data);
 	myhttp.autoClearBuffer=false;
 	myhttp.send();

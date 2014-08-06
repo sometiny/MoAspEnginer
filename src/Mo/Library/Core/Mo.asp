@@ -257,25 +257,13 @@ var Mo = Mo || (function(){
 		})(G,M);
 		return M;
 	};
-	M["Static"] = function(lib){
-		if(!this.Statics.hasOwnProperty(lib))this.Statics[lib] = this["default"](lib);
-		return this.Statics[lib]
-	};
-	M["default"] = function(lib){
-		var Msg = this.Use(lib);
-		if(this.Librarys[lib] == "jscript"){
-			return F.initialize("Mo" + Msg[0] + Msg[1]);
-		}else{
-			ExceptionManager.put(1,"LoadLibrary(path,library,cls)","can not load library \"" + Msg[0] + "." + Msg[1] + "\".");
-		}
-	};
-	M.Use = function(lib){
+	M.use = function(lib){
 		var libinfo=parseLibraryPath(lib);
 		if(!this.Librarys.hasOwnProperty(lib)){
 			if(libinfo[0]!=""){
 				if(LoadLibrary(libinfo[0],libinfo[2],libinfo[3]))this.Librarys[lib]="jscript";
 			}else{
-				ExceptionManager.put(1,"Mo.Use(lib)","类库'" + lib + "'不存在。");
+				ExceptionManager.put(1,"Mo.use(lib)","类库'" + lib + "'不存在。");
 			}
 		}
 		return [libinfo[2],libinfo[3],libinfo[1]];
@@ -297,10 +285,12 @@ var Mo = Mo || (function(){
 		return F.fso.deletefile(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"));
 	};
 	M.ModelCacheClear = function(){
-		return Mo["Static"]("Folder").clear(F.mappath(G.MO_APP + "Cache/Model"));
+		M.use("Folder");
+		return MoLibFolder.clear(F.mappath(G.MO_APP + "Cache/Model"));
 	};
 	M.ClearCompiledCache = function(){
-		return Mo["Static"]("Folder").clear(F.mappath(G.MO_APP + "Cache/Compiled"));
+		M.use("Folder");
+		return MoLibFolder.clear(F.mappath(G.MO_APP + "Cache/Compiled"));
 	}
 	M.ClearLibraryCache = function(){
 		return F.cache.clear(G.MO_APP_NAME + ".lib.");
@@ -425,7 +415,7 @@ var Mo = Mo || (function(){
 		var filepath = F.mappath(G.MO_APP + "Config/" + lib + ".asp");
 		if(!F.exists(filepath)) filepath = F.mappath(G.MO_CORE + "Config/" + lib + ".asp");
 		if(F.exists(filepath)){
-			M.Use("JsonParser");
+			M.use("JsonParser");
 			F.string.savetofile(filepath,"<scrip" + "t language=\"jscript\" runat=\"server\">return " + MoLibJsonParser.unParse(data,"\t") + ";</scrip" + "t>","utf-8");
 		}else{
 			ExceptionManager.put(4,"Mo.C(lib)","配置[" + lib + "]无法加载,请检查配置文件是否存在");
@@ -451,7 +441,7 @@ var Mo = Mo || (function(){
 		if(G.MO_PRE_LIB != ""){
 			var libs = G.MO_PRE_LIB.split(","),lib,T__;
 			for(var i = 0;i < libs.length;i++){
-				Mo.Use("PreLib:Pre." + libs[i]);
+				M.use("PreLib:Pre." + libs[i]);
 				F.initialize("MoPre" + libs[i]).Index();
 			}
 		}
@@ -460,7 +450,7 @@ var Mo = Mo || (function(){
 		if(G.MO_END_LIB != ""){
 			var libs = G.MO_END_LIB.split(","),lib,T__;
 			for(var i = 0;i < libs.length;i++){
-				Mo.Use("EndLib:End." + libs[i]);
+				M.use("EndLib:End." + libs[i]);
 				F.initialize("MoEnd" + libs[i]).Index();
 			}
 		}

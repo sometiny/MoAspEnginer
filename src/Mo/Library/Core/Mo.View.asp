@@ -25,7 +25,7 @@ MoAspEnginerView.prototype.parse=function(){
 			lib = libs[i];
 			closetag = true;
 			tagcontent = "";
-			Mo.Use("TagLib:Tag." + lib);
+			Mo.use("TagLib:Tag." + lib);
 			var taglib = F.initialize("MoTag" + lib),match,
 			regexp = new RegExp("\\<" + lib + "\\b([\\s\\S]*?)\\>([\\s\\S]*?)\\<\\/" + lib + "\\>","igm"),
 			matches = F.string.matches(this.Content,regexp);

@@ -1,7 +1,7 @@
 ﻿<script language="jscript" runat="server">
 /*'by anlige at www.9fn.net*/
 //if you use this library withot MoAspEnginer,you should copy 'Mo.Lib.JsonParser.asp' together and include it in this file.
-Mo.Use("JsonParser"); 
+Mo.use("JsonParser"); 
 
 /****************************************************
 '@DESCRIPTION:	define MoLibJsonGenerater object
