@@ -29,6 +29,6 @@ ActionTest.extend("Test",function(){
 	F.echo(upload.Version,true);
 });
 ActionTest.extend("empty",function(name){
-	F.echo("调用不到" + name + "方法，就跑到Empty方法了！",true);
+	F.echo("调用不到" + name + "方法，就跑到empty方法了！",true);
 });
 </script>
