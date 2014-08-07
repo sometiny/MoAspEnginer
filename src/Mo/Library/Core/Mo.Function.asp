@@ -848,7 +848,7 @@ var GLOBAL = this, Exports, F = {
 	base64 : {
 		keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
 		encode : function (Str) {    
-			Str = F.string.getByteArray(Str);    
+			if(typeof Str=="string") Str = F.string.getByteArray(Str);    
 			var output = "";    
 			var chr1, chr2, chr3 = "";    
 			var enc1, enc2, enc3, enc4 = "";    
