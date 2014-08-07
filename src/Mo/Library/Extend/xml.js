@@ -260,4 +260,4 @@ MoLibXML.LoadText = function(content){
 	dom.loadXML(content);
 	return new MoLibXML(dom);	
 }
-return MoLibXML;
+return exports.xml = MoLibXML;

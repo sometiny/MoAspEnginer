@@ -319,4 +319,4 @@ var MoLibPunycode=
 		}
 	}
 }
-return MoLibPunycode;
+return exports.punycode = MoLibPunycode;

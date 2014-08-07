@@ -409,4 +409,6 @@ Object.prototype.removeer__ = function(key){
 Object.prototype.globalize__ = function(globalizedname){
 	F.globalize(this,globalizedname);
 }
+String.prototype.toBase64String = function(){return F.base64.encode(this);};
+String.prototype.fromBase64String = function(){return F.base64.decode(this);};
 </script>

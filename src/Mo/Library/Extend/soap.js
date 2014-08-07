@@ -200,4 +200,4 @@ MoLibSoap.prototype.b2s = function(bytSource, Cset){ //ef bb bf,c0 fd
   Objstream = null;
   return byts;
 };
-return MoLibSoap;
+return exports.soap = MoLibSoap;

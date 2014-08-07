@@ -39,7 +39,7 @@ MoLibFormValidatee.prototype["default"] = function(value){
 	return this;
 };
 MoLibFormValidatee.prototype.required = function(value){
-	this.set("required",value!==false);
+	this.set("required",value!==false?"true":"false");
 	return this;
 };
 MoLibFormValidatee.prototype.minLength = function(value){
@@ -270,4 +270,4 @@ MoLibFormValidatee.prototype.Validate=function(){
 	}
 	return succeed;
 };
-return MoLibFormValidatee;
+return exports.validatee = MoLibFormValidatee;

@@ -54,4 +54,4 @@ var MoLibNet={
 	'****************************************************/
 	IsIP:function(c){if(c.indexOf(".")<=0){return false}var a=c.split(".");if(a.length!=4){return false}for(var b=0;b<4;b++){if(a[b]==""||isNaN(a[b])||parseInt(a[b])<0||parseInt(a[b])>255){return false}}return true}
 };
-return MoLibNet;
+return exports.net = MoLibNet;

@@ -18,7 +18,7 @@ var addUnsigned = function(lX, lY) {
 	}
 }
 
-var F = function(x, y, z) {
+var F0 = function(x, y, z) {
 	return (x & y) | ((~ x) & z);
 }
 
@@ -35,7 +35,7 @@ var I = function(x, y, z) {
 }
 
 var FF = function(a, b, c, d, x, s, ac) {
-	a = addUnsigned(a, addUnsigned(addUnsigned(F(b, c, d), x), ac));
+	a = addUnsigned(a, addUnsigned(addUnsigned(F0(b, c, d), x), ac));
 	return addUnsigned(rotateLeft(a, s), b);
 };
 
@@ -66,7 +66,7 @@ var convertToWordArray = function(string) {
 	while (lByteCount < lMessageLength) {
 		lWordCount = (lByteCount - (lByteCount % 4)) / 4;
 		lBytePosition = (lByteCount % 4) * 8;
-		lWordArray[lWordCount] = (lWordArray[lWordCount] | (string.charCodeAt(lByteCount) << lBytePosition));
+		lWordArray[lWordCount] = (lWordArray[lWordCount] | (string[lByteCount] << lBytePosition));
 		lByteCount++;
 	}
 	lWordCount = (lByteCount - (lByteCount % 4)) / 4;
@@ -86,29 +86,9 @@ var wordToHex = function(lValue) {
 	}
 	return WordToHexValue;
 };
-
-var uTF8Encode = function(string) {
-	//string = string.replace(/\x0d\x0a/g, "\x0a");
-	var output = "";
-	for (var n = 0; n < string.length; n++) {
-		var c = string.charCodeAt(n);
-		if (c < 128) {
-			output += String.fromCharCode(c);
-		} else if ((c > 127) && (c < 2048)) {
-			output += String.fromCharCode((c >> 6) | 192);
-			output += String.fromCharCode((c & 63) | 128);
-		} else {
-			output += String.fromCharCode((c >> 12) | 224);
-			output += String.fromCharCode(((c >> 6) & 63) | 128);
-			output += String.fromCharCode((c & 63) | 128);
-		}
-	}
-	return output;
-};
 	
 var String2Bytes = function(content){
 	content = encodeURIComponent(content);
-	content = content.replace(/\+/igm," ");
 	var ret="",i=0,c;
 	while(i<content.length){
 		c = content.substr(i,1);
@@ -130,7 +110,7 @@ var MoLibMD5 = function(string) {
 	var S21=5, S22=9 , S23=14, S24=20;
 	var S31=4, S32=11, S33=16, S34=23;
 	var S41=6, S42=10, S43=15, S44=21;
-	string = String2Bytes(string);
+	string = F.string.getByteArray(string);
 	x = convertToWordArray(string);
 	a = 0x67452301; b = 0xEFCDAB89; c = 0x98BADCFE; d = 0x10325476;
 	for (k = 0; k < x.length; k += 16) {
@@ -207,4 +187,4 @@ var MoLibMD5 = function(string) {
 	var tempValue = wordToHex(a) + wordToHex(b) + wordToHex(c) + wordToHex(d);
 	return tempValue.toLowerCase();
 };
-exports.md5 = MoLibMD5;
+return exports.md5 = MoLibMD5;

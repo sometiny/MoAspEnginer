@@ -1,10 +1,11 @@
 ﻿<script language="jscript" runat="server">
-var GLOBAL = this, exports={}, F = {
-	fso : null,post__ : null,get__ : {},server__ : {},activex__ : [],postinited : false,rewrite : false,exports : {},
+var GLOBAL = this, Exports, F = {
+	fso : null,post__ : null,get__ : {},server__ : {},activex__ : [],postinited : false,rewrite : false,exports : {},required:{},
 	MO_SESSION_WITH_SINGLE_TAG : false,MO_APP_NAME : "",MO_APP : "",MO_CORE : "",
 	TEXT : {BR : 1,NL : 2,BIN : 4,NLBR : 1|2},
 	has : function(obj,key){return obj.hasOwnProperty(key);},
 	vbs : {},
+	toString:function(){return "v1";},
 	extend : function(name,obj){F.exports[name] = obj;},
 	exists : function(path,folder){
 		if(folder === true){
@@ -269,6 +270,7 @@ var GLOBAL = this, exports={}, F = {
 		}
 	},
 	require : function(library,required,path){
+		if(F.required[library]===true)return;
 		if(typeof required == "string"){
 			path = required;
 			required = [];
@@ -319,6 +321,7 @@ var GLOBAL = this, exports={}, F = {
 		try{
 			var this_ = this;
 			if(this == F)this_ = null;
+			F.required[library]=true;
 			return (new Function("exports","__FILE__","__DIR__",src))(
 				this_ || F.exports,
 				path_,
@@ -818,6 +821,28 @@ var GLOBAL = this, exports={}, F = {
 			Objstream.savetofile(path,2);
 			Objstream.Close();
 			Objstream = null;
+		},
+		getByteArray:function(string){
+			if(string=="")return [];
+			var enc = encodeURIComponent(string);
+			var byteArray=[];
+			for(var i=0;i<enc.length;i++){
+				if(enc.substr(i,1)=="%"){
+					byteArray.push(parseInt(enc.substr(i+1,2),16));
+					i+=2;
+				}else{
+					byteArray.push(enc.charCodeAt(i));
+				}
+			}
+			return byteArray;
+		},
+		fromByteArray:function(byteArray){
+			if(byteArray.constructor!=Array || byteArray.length<=0)return"";
+			var string="";
+			for(var i=0;i<byteArray.length;i++){
+				string += "%" + byteArray[i].toString(16);
+			}
+			return decodeURIComponent(string);
 		}
 	},
 	convert : {
@@ -827,15 +852,15 @@ var GLOBAL = this, exports={}, F = {
 	base64 : {
 		keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
 		encode : function (Str) {    
-			Str = escape(Str);    
+			Str = F.string.getByteArray(Str);    
 			var output = "";    
 			var chr1, chr2, chr3 = "";    
 			var enc1, enc2, enc3, enc4 = "";    
 			var i = 0;    
 			do {    
-		        chr1 = Str.charCodeAt(i++);    
-		        chr2 = Str.charCodeAt(i++);    
-		        chr3 = Str.charCodeAt(i++);    
+		        chr1 = Str[i++];    
+		        chr2 = Str[i++];    
+		        chr3 = Str[i++];    
 		        enc1 = chr1 >> 2;    
 		        enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);    
 		        enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);    
@@ -848,7 +873,7 @@ var GLOBAL = this, exports={}, F = {
 			return output;    
 		}, 
 		decode : function(Str) {    
-			var output = "";    
+			var output = [];    
 			var chr1, chr2, chr3 = "";    
 			var enc1, enc2, enc3, enc4 = "";    
 			var i = 0;    
@@ -863,14 +888,20 @@ var GLOBAL = this, exports={}, F = {
 		        chr1 = (enc1 << 2) | (enc2 >> 4);    
 		        chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);    
 		        chr3 = ((enc3 & 3) << 6) | enc4;    
-		        output = output + String.fromCharCode(chr1);    
-		        if (enc3 != 64) {output = output + String.fromCharCode(chr2);}    
-		        if (enc4 != 64) {output = output + String.fromCharCode(chr3);}    
+		        output.push(chr1);    
+		        if (enc3 != 64) {output.push(chr2);}    
+		        if (enc4 != 64) {output.push(chr3);}    
 		        chr1 = chr2 = chr3 = "";    
 		        enc1 = enc2 = enc3 = enc4 = "";    
 			} while (i < Str.length);    
-			return unescape(output);    
-		}    
+			return F.string.fromByteArray(output);    
+		},
+		getBytes:function(str){
+			var xmlstr="<?xml version=\"1.0\" encoding=\"gb2312\"?><root xmlns:dt=\"urn:schemas-microsoft-com:datatypes\"><data dt:dt=\"bin.base64\">" + str + "</data></root>"
+			var xmldom = F.activex("Microsoft.XMLDOM");
+			xmldom.loadXML(xmlstr);
+			return xmldom.selectSingleNode("//root/data").nodeTypedValue;
+		}
 	},
 	dump_ : function(parm,level){
 		if(typeof F.dump_.helper != "function"){
@@ -1048,12 +1079,12 @@ var GLOBAL = this, exports={}, F = {
 		}
 	},
 	md5 : function(src){
-		if(!F.exports["md5"])F.require("md5");
+		if(!F.exports.md5)F.require("md5");
 		if(!F.exports["md5"]){
-			ExceptionManager.put(0x000003A8,"F.md5","can not load 'md5'.");
+			ExceptionManager.put(0x000003A8,"F.md5","can not load 'md5' method.");
 			return "";
 		}
-		return F.exports["md5"](src);
+		return F.exports.md5(src);
 	},
 	delgate : function(){
 		try{
@@ -1086,6 +1117,7 @@ var GLOBAL = this, exports={}, F = {
 		return F.delgate.apply(null,arguments);
 	}
 };
+Exports = F.exports;
 F.post.init = function(){
 	if(!F.postinited){
 		F.post__ = {};

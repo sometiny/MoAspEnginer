@@ -285,12 +285,12 @@ var Mo = Mo || (function(){
 		return F.fso.deletefile(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"));
 	};
 	M.ModelCacheClear = function(){
-		M.use("Folder");
-		return MoLibFolder.clear(F.mappath(G.MO_APP + "Cache/Model"));
+		F.require("io.folder");
+		return Exports.io.folder.clear(F.mappath(G.MO_APP + "Cache/Model"));
 	};
 	M.ClearCompiledCache = function(){
-		M.use("Folder");
-		return MoLibFolder.clear(F.mappath(G.MO_APP + "Cache/Compiled"));
+		F.require("io.folder");
+		return Exports.io.folder.clear(F.mappath(G.MO_APP + "Cache/Compiled"));
 	}
 	M.ClearLibraryCache = function(){
 		return F.cache.clear(G.MO_APP_NAME + ".lib.");
@@ -415,8 +415,8 @@ var Mo = Mo || (function(){
 		var filepath = F.mappath(G.MO_APP + "Config/" + lib + ".asp");
 		if(!F.exists(filepath)) filepath = F.mappath(G.MO_CORE + "Config/" + lib + ".asp");
 		if(F.exists(filepath)){
-			M.use("JsonParser");
-			F.string.savetofile(filepath,"<scrip" + "t language=\"jscript\" runat=\"server\">return " + MoLibJsonParser.unParse(data,"\t") + ";</scrip" + "t>","utf-8");
+			F.require("json.parser");
+			F.string.savetofile(filepath,"<scrip" + "t language=\"jscript\" runat=\"server\">return " + Exports.json.parser.unParse(data,"\t") + ";</scrip" + "t>","utf-8");
 		}else{
 			ExceptionManager.put(4,"Mo.C(lib)","配置[" + lib + "]无法加载,请检查配置文件是否存在");
 		}
