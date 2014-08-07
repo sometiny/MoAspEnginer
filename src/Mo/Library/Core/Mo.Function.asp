@@ -824,7 +824,7 @@ var GLOBAL = this, Exports, F = {
 		},
 		getByteArray:function(string){
 			if(string=="")return [];
-			var enc = encodeURIComponent(string);
+			var enc = F.encode(string);
 			var byteArray=[];
 			for(var i=0;i<enc.length;i++){
 				if(enc.substr(i,1)=="%"){
@@ -842,12 +842,8 @@ var GLOBAL = this, Exports, F = {
 			for(var i=0;i<byteArray.length;i++){
 				string += "%" + byteArray[i].toString(16);
 			}
-			return decodeURIComponent(string);
+			return F.decode(string);
 		}
-	},
-	convert : {
-		toVbArray : function(src){return new VBArray(src).toArray();},
-		toEnumerator : function(src){return new Enumerator(src);}
 	},
 	base64 : {
 		keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",

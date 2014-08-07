@@ -163,7 +163,7 @@ var Mo = Mo || (function(){
 		}
 		if(G.MO_LOAD_VBSHELPER)M.loadVBSHelper();
 		try{
-			var em = F.convert.toEnumerator(F.fso.getfolder(F.mappath(G.MO_CORE + "Library/Common")).files);
+			var em = new Enumerator(F.fso.getfolder(F.mappath(G.MO_CORE + "Library/Common")).files);
 			while(!em.atEnd()){
 				var file = em.item();
 				if(F.string.endWith(file.name,".asp"))F.include(file.path);
