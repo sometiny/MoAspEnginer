@@ -990,23 +990,6 @@ var GLOBAL = this, Exports, F = {
 	dump : function(parm){
 		F.echo(F.dump_(parm,1));
 	},
-	toURIString : function(src,charset){
-		var fn = charset == "utf-8" ? F.encode : escape;
-		if(F.toURIString.fn == 0)fn = function(src){return src;};
-		var returnValue = "";
-		for(var i in src){
-			if(!src.hasOwnProperty(i))continue;
-			var cn = true;
-			for(var j = 0;j < F.toURIString.filter.length;j++){
-				if(F.toURIString.filter[j].substr(0,1) == "!" && i == F.toURIString.filter[j].substr(1))cn = false;
-				if(F.toURIString.filter[j].substr(0,1) == "@" && !F.string.startWith(i,F.toURIString.filter[j].substr(1)))cn = false;
-				if(!cn)break;
-			}
-			if(cn)returnValue += fn(i) + F.toURIString.split_char_1 + fn(src[i]) + F.toURIString.split_char_2;
-		}
-		if(returnValue != "")returnValue = returnValue.substr(0,returnValue.length - 1);
-		return returnValue;
-	},
 	object : {
 		sort : function(src,asc){
 			F.sortable.data__ = F.object.keys(src);
@@ -1046,6 +1029,23 @@ var GLOBAL = this, Exports, F = {
 					return obj;
 				})(i,key,value));
 			}
+			return returnValue;
+		},
+		toURIString : function(src,charset){
+			var fn = charset == "utf-8" ? F.encode : escape;
+			if(F.object.toURIString.fn == 0)fn = function(src){return src;};
+			var returnValue = "";
+			for(var i in src){
+				if(!src.hasOwnProperty(i))continue;
+				var cn = true;
+				for(var j = 0;j < F.object.toURIString.filter.length;j++){
+					if(F.object.toURIString.filter[j].substr(0,1) == "!" && i == F.object.toURIString.filter[j].substr(1))cn = false;
+					if(F.object.toURIString.filter[j].substr(0,1) == "@" && !F.string.startWith(i,F.object.toURIString.filter[j].substr(1)))cn = false;
+					if(!cn)break;
+				}
+				if(cn)returnValue += fn(i) + F.object.toURIString.split_char_1 + fn(src[i]) + F.object.toURIString.split_char_2;
+			}
+			if(returnValue != "")returnValue = returnValue.substr(0,returnValue.length - 1);
 			return returnValue;
 		}
 	},
@@ -1206,40 +1206,40 @@ F.session.dump = function(returnValue){
 	if(returnValue===true) return dump;
 	F.echo(dump);
 }
-F.toURIString.split_char_1 = "=";
-F.toURIString.split_char_2 = "&";
-F.toURIString.filter = [];
-F.toURIString.clearFilter = function(){while(F.toURIString.filter.length > 0)F.toURIString.filter.pop();};
-F.toURIString.fn = 1;
+F.object.toURIString.split_char_1 = "=";
+F.object.toURIString.split_char_2 = "&";
+F.object.toURIString.filter = [];
+F.object.toURIString.clearFilter = function(){while(F.object.toURIString.filter.length > 0)F.object.toURIString.filter.pop();};
+F.object.toURIString.fn = 1;
 F.get.keys = function(){return F.object.keys(F.get__);};
 F.post.keys = function(){return F.object.keys(F.post__);};
 F.get.values = function(){return F.object.values(F.get__);};
 F.post.values = function(){return F.object.values(F.post__);};
 F.get.fromURIString = function(src){
-	var ucs = src.split(F.toURIString.split_char_2);
+	var ucs = src.split(F.object.toURIString.split_char_2);
 	for(var i = 0;i < ucs.length;i++){
-		if(ucs[i].indexOf(F.toURIString.split_char_1) > 0){
-			F.get__[F.decode(ucs[i].substr(0,ucs[i].indexOf(F.toURIString.split_char_1)))] = F.decode(F.string.trimLeft(ucs[i].substr(ucs[i].indexOf(F.toURIString.split_char_1)),F.toURIString.split_char_1));
+		if(ucs[i].indexOf(F.object.toURIString.split_char_1) > 0){
+			F.get__[F.decode(ucs[i].substr(0,ucs[i].indexOf(F.object.toURIString.split_char_1)))] = F.decode(F.string.trimLeft(ucs[i].substr(ucs[i].indexOf(F.object.toURIString.split_char_1)),F.object.toURIString.split_char_1));
 		}
 	}
 };
 F.post.fromURIString = function(src){
 	F.post.init();
-	var ucs = src.split(F.toURIString.split_char_2);
+	var ucs = src.split(F.object.toURIString.split_char_2);
 	for(var i = 0;i < ucs.length;i++){
-		if(ucs[i].indexOf(F.toURIString.split_char_1) > 0){
-			F.post__[F.decode(ucs[i].substr(0,ucs[i].indexOf(F.toURIString.split_char_1)))] = F.decode(F.string.trimLeft(ucs[i].substr(ucs[i].indexOf(F.toURIString.split_char_1)),F.toURIString.split_char_1));
+		if(ucs[i].indexOf(F.object.toURIString.split_char_1) > 0){
+			F.post__[F.decode(ucs[i].substr(0,ucs[i].indexOf(F.object.toURIString.split_char_1)))] = F.decode(F.string.trimLeft(ucs[i].substr(ucs[i].indexOf(F.object.toURIString.split_char_1)),F.object.toURIString.split_char_1));
 		}
 	}
 };
 F.get.toURIString = function(charset){
-	return F.toURIString(F.get__,charset || "utf-8");
+	return F.object.toURIString(F.get__,charset || "utf-8");
 };
 F.post.toURIString = function(charset){
-	return F.toURIString(F.post__,charset || "utf-8");
+	return F.object.toURIString(F.post__,charset || "utf-8");
 };
 F.server.toURIString = function(charset){
-	return F.toURIString(F.server__,charset || "utf-8");
+	return F.object.toURIString(F.server__,charset || "utf-8");
 };
 F.session.toURIString = function(charset){
 	charset = charset || "utf-8"
@@ -1395,4 +1395,8 @@ F.foreach({
 });
 F.timer.ticks = F.timer.stop;
 F.init();
+for(var i in F){
+	if(!F.hasOwnProperty(i))continue;
+	
+}
 </script>
