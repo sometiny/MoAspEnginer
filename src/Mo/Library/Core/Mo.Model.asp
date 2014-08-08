@@ -652,7 +652,7 @@ __Model__.prototype.assign = function(name,asobject){
 '@DESCRIPTION:	insert a record into table.
 '@RETURN:	[Object] return self.
 '****************************************************/
-__Model__.prototype.insert = function(){
+__Model__.prototype.Insert = __Model__.prototype.insert = function(){
 	var data = null;
 	if(arguments.length == 1){
 		 if((typeof arguments[0] == "object") && arguments[0]["table"] != undefined) data = arguments[0];
@@ -684,7 +684,7 @@ __Model__.prototype.insert = function(){
 '@DESCRIPTION:	update a record
 '@RETURN:	[Object] return self.
 '****************************************************/
-__Model__.prototype.update = function(){
+__Model__.prototype.Update = __Model__.prototype.update = function(){
 	var data = null;
 	if(arguments.length == 1){
 		if((typeof arguments[0] == "object") && arguments[0]["table"] != undefined) data = arguments[0];
@@ -723,7 +723,7 @@ __Model__.prototype.update = function(){
 '@DESCRIPTION:	Delete a record
 '@RETURN:	[Object] return self.
 '****************************************************/
-__Model__.prototype.Delete = function(force){
+__Model__.prototype.del = __Model__.prototype.Delete = function(force){
 	force = force === true;
 	if(this.strwhere == "" && !force)return this;
 	this.query("delete from " + this.table +(this.strwhere != ""?(" where " + this.strwhere):""));

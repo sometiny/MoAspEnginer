@@ -6,10 +6,10 @@ function is_empty(variable){
 function CreatePageList(URL, RecordCount, PageSize, CurrentPage){
 	var PageCount ,PageStr="";
 	if(URL==""){
-		F.toURIString.clearFilter();
-		F.toURIString.filter.push("!page");
+		F.object.toURIString.clearFilter();
+		F.object.toURIString.filter.push("!page");
 		URL=("?" + F.get.toURIString() + "&page={#page}").replace("?&","?");
-		F.toURIString.clearFilter();
+		F.object.toURIString.clearFilter();
 	}
 	CurrentPage = parseInt(CurrentPage);
 	RecordCount = parseInt(RecordCount);
