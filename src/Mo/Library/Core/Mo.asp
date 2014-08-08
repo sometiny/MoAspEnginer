@@ -423,7 +423,7 @@ var Mo = Mo || (function(){
 	};
 	M.A = function(lib){
 		if(this.Librarys["Action" + "_" + lib] == "jscript"){
-			return F.initialize(Action + lib);
+			return F.initialize("Action" + lib);
 		}
 		var filepath = F.mappath(G.MO_APP + "Action/Action." + lib + ".asp");
 		if(!F.exists(filepath)) filepath = F.mappath(G.MO_CORE + "Action/Action." + lib + ".asp");

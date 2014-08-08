@@ -664,11 +664,11 @@ MoAspEnginerView.prototype.parseMoAsAsp=function(){
 		this.mvarDicts[id] = m_[0];
 		this.Content = F.replace(this.Content,m_[0],"\r\n<?MoAsp" + id + "MoAsp?>\r\n");
 	}
-	this.Content = F.string.trim(this.Content);
-	this.Content = F.string.replace(this.Content,/(\r\n){2,}/igm,"\r\n");
-	this.Content = F.string.replace(this.Content,/\"/igm,"\\\"");
-	this.Content = F.string.replace(this.Content,/(^|\r\n)/igm,"$1__Mo__.Echo(\"");
-	this.Content = F.string.replace(this.Content,/($|\r\n)/igm,"\");$1" );
+	this.Content = this.Content.replace(/(^(\s+)|(\s+)$)/ig,"");
+	this.Content = this.Content.replace(/(\r\n){2,}/igm,"\r\n");
+	this.Content = this.Content.replace(/\\/igm,"\\\\");
+	this.Content = this.Content.replace(/\"/igm,"\\\"");
+	this.Content = this.Content.replace(/^(.+?)$/igm,"__Mo__.Echo(\"$1\");");
 	regexp = /__Mo__\.Echo\(\"<\?MoAsp([\w]+?)MoAsp\?>\"\);/igm;
 	var ms_ = F.string.matches(this.Content,regexp);
 	while(ms_.length>0){
@@ -678,8 +678,6 @@ MoAspEnginerView.prototype.parseMoAsAsp=function(){
 	}
 	this.Content = F.string.replace(this.Content,/<\?MoAsp /igm,"");
 	this.Content = F.string.replace(this.Content,/(\s*)MoAsp\?>/igm,"");
-	//this.Content = replace(this.Content,"""" + vbcrlf + "__Mo__.Echo ""","")
-	//this.Content = replace(this.Content,"""" + vbcrlf + "__Mo__.Echo ",""" + ")
 };
 	
 MoAspEnginerView.prototype.getRndid=function(){
