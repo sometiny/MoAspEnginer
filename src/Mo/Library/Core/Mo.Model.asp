@@ -607,9 +607,9 @@ __Model__.prototype.fetch = function(){
 '****************************************************/
 __Model__.prototype.read = function(name){
 	var obj = this.fetch();
-	if(!obj.Eof()){
-		if(name === undefined) return obj.Read();
-		return obj.Read().getter__(name);
+	if(!obj.eof()){
+		if(name === undefined) return obj.read();
+		return obj.read().getter__(name);
 	}
 	if(name === undefined) return {};
 	return "";
@@ -633,8 +633,8 @@ __Model__.prototype.assign = function(name,asobject){
 		Mo.assign(name,this.fetch());
 	}else{
 		var obj = this.fetch();
-		if(!obj.Eof()){
-			var d_ = obj.Read();
+		if(!obj.eof()){
+			var d_ = obj.read();
 			if(asobject){
 				Mo.assign(name,d_);
 			}else{

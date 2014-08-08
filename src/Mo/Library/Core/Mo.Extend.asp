@@ -359,7 +359,8 @@ IAction.create = function(__construct,__destruct){
 		return function(){
 			IAction.call(this);
 			this.name = "Action" + Mo.RealMethod;
-			if(typeof fn=="function")fn.call(this);
+			this.__STATUS__=true;
+			if(typeof fn=="function")this.__STATUS__ = fn.call(this)!==false;
 		};
 	})(__construct);
 	newAction.extend = IAction.extend;

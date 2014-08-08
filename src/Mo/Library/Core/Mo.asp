@@ -496,21 +496,23 @@ var Mo = Mo || (function(){
 		this.RealAction = this.Action;
 		if(LoadModel(ModelPath,theMethod)){
 			try{
-				var ModelClass = F.initialize("Action" + theMethod);
-				if(F.server("REQUEST_METHOD")=="POST" && ModelClass[this.Action+"_Post_"]){
-					ModelClass[this.Action+"_Post_"]();
-				}else if(ModelClass[this.Action]){
-					ModelClass[this.Action]();
-				}else{
-					if(ModelClass["empty"]){
-						this.RealAction = "empty";
-						ModelClass["empty"](this.Action);
+				var MC = F.initialize("Action" + theMethod);
+				if(MC.__STATUS__===true){
+					if(F.server("REQUEST_METHOD")=="POST" && MC[this.Action+"_Post_"]){
+						MC[this.Action+"_Post_"]();
+					}else if(MC[this.Action]){
+						MC[this.Action]();
 					}else{
-						ExceptionManager.put(0x3a8,this.RealMethod + "." + this.RealAction,"未定义相应" + this.Action + "或empty方法。");
+						if(MC["empty"]){
+							this.RealAction = "empty";
+							MC["empty"](this.Action);
+						}else{
+							ExceptionManager.put(0x3a8,this.RealMethod + "." + this.RealAction,"未定义相应" + this.Action + "或empty方法。");
+						}
 					}
 				}
-				ModelClass.__destruct();
-				ModelClass = null;
+				MC.__destruct();
+				MC = null;
 			}catch(ex){
 				ExceptionManager.put(ex,this.RealMethod + "." + this.RealAction);
 			}
