@@ -1,5 +1,5 @@
 ﻿<script language="jscript" runat="server">
-var exports=["CreatePageList","is_empty"];
+var exports=["CreatePageList","is_empty","IsEmpty"];
 function is_empty(variable){
 	return variable==""||variable===null||variable===undefined;
 }
@@ -33,4 +33,5 @@ function CreatePageList(URL, RecordCount, PageSize, CurrentPage){
 	}
 	return PageStr;
 }
+var IsEmpty = is_empty;
 </script>
