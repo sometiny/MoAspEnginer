@@ -1,5 +1,5 @@
 ﻿/*'by anlige at www.9fn.net*/
-var MoLibSHA1={
+var $sha1={
 	hex:function(b){
 		var c="0123456789abcdef";
 		var d="";
@@ -49,7 +49,7 @@ var MoLibSHA1={
 	'@RETURN:	[String] checksum
 	'****************************************************/
 	SHA1:function(v){
-		var u=MoLibSHA1.AlignSHA1(v);
+		var u=$sha1.AlignSHA1(v);
 		var y=new Array(80);
 		var s=1732584193;
 		var r=-271733879;
@@ -62,22 +62,22 @@ var MoLibSHA1={
 				if(g<16){
 					y[g]=u[l+g]
 				}else{
-					y[g]=MoLibSHA1.rol(y[g-3]^y[g-8]^y[g-14]^y[g-16],1)
+					y[g]=$sha1.rol(y[g-3]^y[g-8]^y[g-14]^y[g-16],1)
 				}
-				t=MoLibSHA1.add(MoLibSHA1.add(MoLibSHA1.rol(s,5),MoLibSHA1.ft(g,r,q,p)),MoLibSHA1.add(MoLibSHA1.add(o,y[g]),MoLibSHA1.kt(g)));
+				t=$sha1.add($sha1.add($sha1.rol(s,5),$sha1.ft(g,r,q,p)),$sha1.add($sha1.add(o,y[g]),$sha1.kt(g)));
 				o=p;
 				p=q;
-				q=MoLibSHA1.rol(r,30);
+				q=$sha1.rol(r,30);
 				r=s;
 				s=t
 			}
-			s=MoLibSHA1.add(s,n);
-			r=MoLibSHA1.add(r,m);
-			q=MoLibSHA1.add(q,k);
-			p=MoLibSHA1.add(p,h);
-			o=MoLibSHA1.add(o,f);
+			s=$sha1.add(s,n);
+			r=$sha1.add(r,m);
+			q=$sha1.add(q,k);
+			p=$sha1.add(p,h);
+			o=$sha1.add(o,f);
 		}
-		return MoLibSHA1.hex(s)+MoLibSHA1.hex(r)+MoLibSHA1.hex(q)+MoLibSHA1.hex(p)+MoLibSHA1.hex(o);
+		return $sha1.hex(s)+$sha1.hex(r)+$sha1.hex(q)+$sha1.hex(p)+$sha1.hex(o);
 	},
 	/****************************************************
 	'@DESCRIPTION:	i write this method to get a complex SHA1 result.
@@ -85,11 +85,11 @@ var MoLibSHA1={
 	'@RETURN:	[String] complex result
 	'****************************************************/
 	SHA2:function(v){
-		var sha1 = MoLibSHA1.SHA1(v||"");
+		var sha1 = $sha1.SHA1(v||"");
 		for(var i=0;i<13;i++){
-			sha1 = MoLibSHA1.Complex2(MoLibSHA1.Split(sha1));
+			sha1 = $sha1.Complex2($sha1.Split(sha1));
 		}
-		return MoLibSHA1.SHA1(sha1);
+		return $sha1.SHA1(sha1);
 	},
 	Split:function(sha1){
 		var block=[2,5,8,17,1,7];
@@ -117,4 +117,4 @@ var MoLibSHA1={
 		return blocks.join("");
 	}
 };
-return exports.sha1 = MoLibSHA1;
+return exports.sha1 = $sha1;

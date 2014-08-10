@@ -1,5 +1,5 @@
 ﻿/*'by anlige at www.9fn.net*/
-function MoLibHashTable(){
+function $hashtable(){
 	this.table=[];
 	this.index=0;
 	var args=[];
@@ -14,11 +14,12 @@ function MoLibHashTable(){
 		this.Set(args[i],args[i+1]);
 	}
 }
-MoLibHashTable.prototype.New = MoLibHashTable.New = function(){return new MoLibHashTable(arguments);};
-MoLibHashTable.prototype.GetEnumerator=function(){
+$hashtable.fn = $hashtable.prototype;
+$hashtable.fn.New = $hashtable.New = function(){return new $hashtable(arguments);};
+$hashtable.fn.GetEnumerator=function(){
 		return new Enumerator(this.table);
 	};
-MoLibHashTable.prototype.Sort = function(order,key){
+$hashtable.fn.Sort = function(order,key){
 	if(this.Count()<=0){return ;}
 	var isASC = true;
 	if(order.toLowerCase()=="asc"){
@@ -38,7 +39,7 @@ MoLibHashTable.prototype.Sort = function(order,key){
 		}
 	}
 };
-MoLibHashTable.prototype.Set = function(key,value,dataType){
+$hashtable.fn.Set = function(key,value,dataType){
 	value = value ||"value";
 	dataType = dataType ||"string";
 	if(this.table.length==0){
@@ -58,7 +59,7 @@ MoLibHashTable.prototype.Set = function(key,value,dataType){
 		}
 	}
 };
-MoLibHashTable.prototype.Add = function(key,value){
+$hashtable.fn.Add = function(key,value){
 	if(!value){value="";}
 	if(this.table.length==0){
 		this.table[0]={"key":key,"value":value};
@@ -80,9 +81,9 @@ MoLibHashTable.prototype.Add = function(key,value){
 		}
 	}
 };
-MoLibHashTable.prototype.Count = function(){return this.table.length;};
+$hashtable.fn.Count = function(){return this.table.length;};
 
-MoLibHashTable.prototype.Get = function(key){
+$hashtable.fn.Get = function(key){
 	if(this.Count()<=0){return "";}
 	for(var i=0;i<this.Count();i++){
 		if(this.table[i]["key"].toLowerCase()==key.toLowerCase()){
@@ -91,7 +92,7 @@ MoLibHashTable.prototype.Get = function(key){
 	}
 	return "";
 };
-MoLibHashTable.prototype.Remove = function(key){
+$hashtable.fn.Remove = function(key){
 	if(this.Count()<=0){return;}
 	if(!key){this.table=[];return;}
 	var ___temp=[];
@@ -102,14 +103,14 @@ MoLibHashTable.prototype.Remove = function(key){
 	}
 	this.table=___temp;
 };
-MoLibHashTable.prototype.Each = function(fn){
+$hashtable.fn.Each = function(fn){
 	if(this.table.length<=0){return;}
 	if(typeof fn!="function"){return;}
 	for(var i=0;i<this.Count();i++){
 		fn.apply(this.table[i],[i]);
 	}
 };
-MoLibHashTable.prototype.UriComponents = function(){
+$hashtable.fn.UriComponents = function(){
 	var str="";
 	this.Each(function(){
 		str+=encodeURIComponent(this.key) + "="+encodeURIComponent(this.value)+"&";				   
@@ -117,7 +118,7 @@ MoLibHashTable.prototype.UriComponents = function(){
 	if(str!="")str = str.substr(0,str.length-1);
 	return str;
 };
-MoLibHashTable.prototype.toString = function(split1,split2){
+$hashtable.fn.toString = function(split1,split2){
 	split1 = split1 || "";
 	split2 = split2 || "";
 	var str="";
@@ -127,4 +128,4 @@ MoLibHashTable.prototype.toString = function(split1,split2){
 	if(str!="")str = str.substr(0,str.length-split2.length);
 	return str;
 };
-return exports.hashtable = MoLibHashTable;
+return exports.hashtable = $hashtable;

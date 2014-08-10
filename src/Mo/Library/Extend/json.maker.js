@@ -1,76 +1,77 @@
 ﻿/*'by anlige at www.9fn.net*/
 /****************************************************
-'@DESCRIPTION:	define MoLibJsonGenerater object
+'@DESCRIPTION:	define $maker object
 '@PARAM:	t [String] : json data type. two options: 'object' or 'array'
 '****************************************************/
-function MoLibJsonGenerater(t) {
+function $maker(t) {
 	this.setDataType(t);
 }
+$maker.fn = $maker.prototype;
 /****************************************************
 '@DESCRIPTION:	set json data type.
 '@PARAM:	t [String] : json data type. two options: 'object' or 'array'
 '****************************************************/
-MoLibJsonGenerater.prototype.setDataType = function(t) {
+$maker.fn.setDataType = function(t) {
 	this.table = {};
 	this.datatype = t || "object";
 	if (this.datatype == "array") this.table = [];
 };
 
 /****************************************************
-'@DESCRIPTION:	create an instance of MoLibJsonGenerater
+'@DESCRIPTION:	create an instance of $maker
 '@PARAM:	t [String] : json data type. two options: 'object' or 'array'
 '@PARAM:	df [String] : forget it
-'@RETURN:	[Object] instance of MoLibJsonGenerater
+'@RETURN:	[Object] instance of $maker
 '****************************************************/
-MoLibJsonGenerater.New = function(t, df) {
-	return new MoLibJsonGenerater(t);
+$maker.New = function(t, df) {
+	return new $maker(t);
 };
 
-MoLibJsonGenerater.ParsePath = function(path){
+$maker.ParsePath = function(path){
 	if(/([^\w\.\[\]]+)/.test(path)){
 		throw {"description":"path error"};
 		return;
 	}
 	return path.replace(/\b([a-zA-Z]\w*)\b/igm,"[\"$1\"]").replace(/\./igm,"");
 };
-MoLibJsonGenerater.prototype.push = function(path, value){
-	(new Function("value","this.table"+MoLibJsonGenerater.ParsePath(path)+"=value;")).apply(this,[value]);
+$maker.fn.push = function(path, value){
+	(new Function("value","this.table"+$maker.ParsePath(path)+"=value;")).apply(this,[value]);
 };
 
-MoLibJsonGenerater.prototype.pushAsObject = function(path){
-	(new Function("this.table"+MoLibJsonGenerater.ParsePath(path)+"={};")).apply(this,[]);
+$maker.fn.pushAsObject = function(path){
+	(new Function("this.table"+$maker.ParsePath(path)+"={};")).apply(this,[]);
 };
 
-MoLibJsonGenerater.prototype.pushAsArray = function(path){
-	(new Function("this.table"+MoLibJsonGenerater.ParsePath(path)+"=[];")).apply(this,[]);
+$maker.fn.pushAsArray = function(path){
+	(new Function("this.table"+$maker.ParsePath(path)+"=[];")).apply(this,[]);
 };
 
-MoLibJsonGenerater.prototype.pushVBArray = function(path, value){
-	(new Function("value","this.table"+MoLibJsonGenerater.ParsePath(path)+"=(new VBArray(value)).toArray();")).apply(this,[value]);
+$maker.fn.pushVBArray = function(path, value){
+	(new Function("value","this.table"+$maker.ParsePath(path)+"=(new VBArray(value)).toArray();")).apply(this,[value]);
 };
 
 /****************************************************
-'@DESCRIPTION:	put new MoLibJsonGenerater instance to current instance and return it;
+'@DESCRIPTION:	put new $maker instance to current instance and return it;
 '@PARAM:	key [String] : json data key.
-'@PARAM:	t [String] : json data type or new MoLibJsonGenerater instance. two options: 'object' or 'array'
-'@RETURN:	[Object] new instance of MoLibJsonGenerater
+'@PARAM:	t [String] : json data type or new $maker instance. two options: 'object' or 'array'
+'@RETURN:	[Object] new instance of $maker
 '****************************************************/
-MoLibJsonGenerater.prototype.putnew = function(key, t) {
+$maker.fn.putnew = function(key, t) {
 	if (this.datatype == "array"){
 		t = key;
 		key=null;
 	}
-	return this.put(key, new MoLibJsonGenerater(t));
+	return this.put(key, new $maker(t));
 };
 
 /****************************************************
-'@DESCRIPTION:	put new array MoLibJsonGenerater instance to current instance and return it.
+'@DESCRIPTION:	put new array $maker instance to current instance and return it.
 '@PARAM:	key [String] : json data key.
-'@RETURN:	[Object] new instance of MoLibJsonGenerater
+'@RETURN:	[Object] new instance of $maker
 '****************************************************/
-MoLibJsonGenerater.prototype.putnewarray = function(key) {
+$maker.fn.putnewarray = function(key) {
 	if (this.datatype == "array")key=null;
-	return this.put(key, new MoLibJsonGenerater("array"));
+	return this.put(key, new $maker("array"));
 };
 
 /****************************************************
@@ -78,52 +79,52 @@ MoLibJsonGenerater.prototype.putnewarray = function(key) {
 '@PARAM:	key [String] : json data key.
 '@PARAM:	rs [Recordset] : dataset that you read from database
 '@PARAM:	pagesize [Int] : records count per page
-'@RETURN:	[Object] new array instance of MoLibJsonGenerater
+'@RETURN:	[Object] new array instance of $maker
 '****************************************************/
-MoLibJsonGenerater.prototype.putrows = function(key, rs, pagesize) {
+$maker.fn.putrows = function(key, rs, pagesize) {
 	if (this.datatype == "array"){
 		pagesize = rs;
 		rs = key;
 		key=null;
 	}
-	return this.put(key, (new MoLibJsonGenerater()).fromrows(rs, pagesize));
+	return this.put(key, (new $maker()).fromrows(rs, pagesize));
 };
 
 /****************************************************
 '@DESCRIPTION:	put dictionary data to current instance, and return new object instance with dictionary data.
 '@PARAM:	key [String] : json data key.
 '@PARAM:	dir [Object] : an 'Scripting.Dictionary' instance
-'@RETURN:	[Object] new object instance of MoLibJsonGenerater
+'@RETURN:	[Object] new object instance of $maker
 '****************************************************/
-MoLibJsonGenerater.prototype.putdictionary = function(key, dir) {
+$maker.fn.putdictionary = function(key, dir) {
 	if (this.datatype == "array"){
 		dir = key
 		key=null;
 	}
-	return this.put(key, (new MoLibJsonGenerater()).fromdictionary(dir));
+	return this.put(key, (new $maker()).fromdictionary(dir));
 };
 
 /****************************************************
 '@DESCRIPTION:	put request data to current instance, and return new object instance with request data.
 '@PARAM:	key [String] : json data key.
 '@PARAM:	isFromGet [Boolean] : if the value is true, data is from F.get, or data is from F.post;
-'@RETURN:	[Object] new object instance of MoLibJsonGenerater
+'@RETURN:	[Object] new object instance of $maker
 '****************************************************/
-MoLibJsonGenerater.prototype.putrequest = function(key, isFromGet) {
+$maker.fn.putrequest = function(key, isFromGet) {
 	if (this.datatype == "array"){
 		isFromGet = key
 		key=null;
 	}
-	return this.put(key, (new MoLibJsonGenerater()).fromrequest(isFromGet));
+	return this.put(key, (new $maker()).fromrequest(isFromGet));
 };
 
 /****************************************************
 '@DESCRIPTION:	put vbarray to current instance
 '@PARAM:	key [String] : json data key.
 '@PARAM:	value [VBArray] : vbarray
-'@RETURN:	[Object] current or arguments instance of MoLibJsonGenerater
+'@RETURN:	[Object] current or arguments instance of $maker
 '****************************************************/
-MoLibJsonGenerater.prototype.putvbarray = function(key, value) {
+$maker.fn.putvbarray = function(key, value) {
 	if (this.datatype == "array"){
 		value = key
 		key=null;
@@ -135,9 +136,9 @@ MoLibJsonGenerater.prototype.putvbarray = function(key, value) {
 '@DESCRIPTION:	put array list to current instance
 '@PARAM:	key [String] : json data key.
 '@PARAM:	value [String] : Arraylist string which is splited with ',';
-'@RETURN:	[Object] current instance of MoLibJsonGenerater
+'@RETURN:	[Object] current instance of $maker
 '****************************************************/
-MoLibJsonGenerater.prototype.putarraylist = function(key, value) {
+$maker.fn.putarraylist = function(key, value) {
 	if (this.datatype == "array"){
 		value = key
 		key=null;
@@ -148,14 +149,14 @@ MoLibJsonGenerater.prototype.putarraylist = function(key, value) {
 /****************************************************
 '@DESCRIPTION:	put value to current instance
 '@PARAM:	key [String] : json data key.
-'@PARAM:	value [Variant] : key value. i can be an instance of MoLibJsonGenerater.
-'@RETURN:	[Object] current or arguments instance of MoLibJsonGenerater
+'@PARAM:	value [Variant] : key value. i can be an instance of $maker.
+'@RETURN:	[Object] current or arguments instance of $maker
 '****************************************************/
-MoLibJsonGenerater.prototype.put = function(key, value) {
+$maker.fn.put = function(key, value) {
 	if (this.datatype == "object") {
 		if (value === undefined) return this;
 		if (typeof value == "date") value = new Date(value);
-		if (value instanceof MoLibJsonGenerater) {
+		if (value instanceof $maker) {
 			this.table[key] = value.table;
 			return value;
 		}
@@ -165,7 +166,7 @@ MoLibJsonGenerater.prototype.put = function(key, value) {
 		if(key==null){
 			return this.put(value);
 		}
-		else if (key instanceof MoLibJsonGenerater) {
+		else if (key instanceof $maker) {
 			this.table.push(key.table);
 			return key;
 		} 
@@ -178,9 +179,9 @@ MoLibJsonGenerater.prototype.put = function(key, value) {
 /****************************************************
 '@DESCRIPTION:	put request data to current instance
 '@PARAM:	isFromGet [Boolean] : if the value is true, data is from F.get, or data is from F.post;
-'@RETURN:	[Object] current instance of MoLibJsonGenerater
+'@RETURN:	[Object] current instance of $maker
 '****************************************************/
-MoLibJsonGenerater.prototype.fromrequest = function(isFromGet){
+$maker.fn.fromrequest = function(isFromGet){
 	isFromGet = isFromGet===true;
 	this.setDataType("object");
 	if(isFromGet) this.table=F.get__;
@@ -191,9 +192,9 @@ MoLibJsonGenerater.prototype.fromrequest = function(isFromGet){
 /****************************************************
 '@DESCRIPTION:	put dictionary data to current instance;
 '@PARAM:	value [Object] : an 'Scripting.Dictionary' instance
-'@RETURN:	[Object] current instance of MoLibJsonGenerater
+'@RETURN:	[Object] current instance of $maker
 '****************************************************/
-MoLibJsonGenerater.prototype.fromdictionary = function(value) {
+$maker.fn.fromdictionary = function(value) {
 	this.setDataType("object");
 	var keys = (new VBArray(value.keys())).toArray();
 	if (keys.length <= 0) return this;
@@ -207,9 +208,9 @@ MoLibJsonGenerater.prototype.fromdictionary = function(value) {
 '@DESCRIPTION:	put recordset data to current instance;
 '@PARAM:	rs [Recordset] : dataset that you read from database
 '@PARAM:	pagesize [Int] : records count per page
-'@RETURN:	[Object] current instance of MoLibJsonGenerater
+'@RETURN:	[Object] current instance of $maker
 '****************************************************/
-MoLibJsonGenerater.prototype.fromrows = function(rs, pagesize) {
+$maker.fn.fromrows = function(rs, pagesize) {
 	this.setDataType("array");
 	if (pagesize == undefined) pagesize = -1;
 	var ps = rs.Bookmark;
@@ -235,7 +236,7 @@ MoLibJsonGenerater.prototype.fromrows = function(rs, pagesize) {
 '@PARAM:	key [String[option]] : if key is not blank,i will append current json string to a new json object and return new json object string;
 '@RETURN:	[String] json string
 '****************************************************/
-MoLibJsonGenerater.prototype.toString = function(formatstring, key) {
+$maker.fn.toString = function(formatstring, key) {
 	key = key || "";
 	formatstring = formatstring || "";
 	var ret = exports.json.parser.unParse(this.table, formatstring);
@@ -243,5 +244,5 @@ MoLibJsonGenerater.prototype.toString = function(formatstring, key) {
 	return ret;
 };
 if(!exports.json)exports.json={};
-if(!exports.json.json2) F.require("json.parser");
-return exports.json.maker = MoLibJsonGenerater;
+if(!exports.json.parser) F.require("json.parser");
+return exports.json.maker = $maker;

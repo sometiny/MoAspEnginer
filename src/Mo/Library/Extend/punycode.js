@@ -1,7 +1,7 @@
 ﻿/*
 by anlige at www.9fn.net
 */
-var MoLibPunycode=
+var $punycode=
 {
 	TMIN : 1,
 	TMAX : 26,
@@ -319,4 +319,4 @@ var MoLibPunycode=
 		}
 	}
 }
-return exports.punycode = MoLibPunycode;
+return exports.punycode = $punycode;

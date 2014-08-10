@@ -2,20 +2,20 @@
     http://www.JSON.org/json2.js
 */
 /****************************************************
-'@DESCRIPTION:	define MoLibJsonParser object
+'@DESCRIPTION:	define $parser object
 '****************************************************/
-var MoLibJsonParser = MoLibJsonParser || {};
-MoLibJsonParser.result=null;
+var $parser = $parser || {};
+$parser.result=null;
 
 /****************************************************
 '@DESCRIPTION:	it is not safe if you set 'strict' property to false;
 '****************************************************/
-MoLibJsonParser.strict=true;
+$parser.strict=true;
 
 /****************************************************
 '@DESCRIPTION:	if 'encode' property is false,you will see unicode char in unParsed json string.
 '****************************************************/
-MoLibJsonParser.encode=true;
+$parser.encode=true;
 
 (function () {
     function f(n) {
@@ -88,7 +88,7 @@ MoLibJsonParser.encode=true;
                 return typeof c === 'string' ? c :
                     '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
             }) + '"' :
-            '"' + (MoLibJsonParser.encode?js(string):string) + '"';
+            '"' + ($parser.encode?js(string):string) + '"';
     }
     function str(key, holder) {
         var i,
@@ -161,22 +161,22 @@ MoLibJsonParser.encode=true;
         }
     }
     
-    if (typeof MoLibJsonParser.unParse !== 'function') {
+    if (typeof $parser.unParse !== 'function') {
 	    /****************************************************
 	    '@DESCRIPTION:	unParse json object to string
 	    '@PARAM:	value [Object] : available json object
 	    '@PARAM:	space [String] : used to format json string. such as '\t',' ' ...
 	    '@RETURN:	[String] json string
 	    '****************************************************/
-	    MoLibJsonParser.unParse = function (value, space) {
-		    return MoLibJsonParser.stringify(value, null, space);
+	    $parser.unParse = function (value, space) {
+		    return $parser.stringify(value, null, space);
 	    }
     }
-    if (typeof MoLibJsonParser.stringify !== 'function') {
+    if (typeof $parser.stringify !== 'function') {
 	    /****************************************************
 	    '@DESCRIPTION:	forget this strangely name ,use unParse method!!!!!
 	    '****************************************************/
-        MoLibJsonParser.stringify = function (value, replacer, space) {
+        $parser.stringify = function (value, replacer, space) {
             var i;
             gap = '';
             indent = '';
@@ -196,7 +196,7 @@ MoLibJsonParser.encode=true;
             return str('', {'': value});
         };
     }
-    if (typeof MoLibJsonParser.tryParse !== 'function') {
+    if (typeof $parser.tryParse !== 'function') {
 	    /****************************************************
 	    '@DESCRIPTION:	try parse json string as json object
 	    '@PARAM:	text [String] : json string
@@ -204,25 +204,25 @@ MoLibJsonParser.encode=true;
 	    '@PARAM:	obj [Ref Object] : forget it;
 	    '@RETURN:	[Boolean] ifjson string is parsed successfully, assign parse result to 'result' property and return true, or return false;
 	    '****************************************************/
-	    MoLibJsonParser.tryParse = function(text, reviver,obj){
+	    $parser.tryParse = function(text, reviver,obj){
 		    try{
-			    MoLibJsonParser.result = MoLibJsonParser.parse(text, reviver);
-			    if(arguments.length==2 && !(typeof reviver === 'function')) reviver = MoLibJsonParser.result;
-			    if(arguments.length==3) obj = MoLibJsonParser.result;
+			    $parser.result = $parser.parse(text, reviver);
+			    if(arguments.length==2 && !(typeof reviver === 'function')) reviver = $parser.result;
+			    if(arguments.length==3) obj = $parser.result;
 			    return true;
 		    }catch(ex){
 			    return false;
 		    }
 	    };
     }
-    if (typeof MoLibJsonParser.parse !== 'function') {
+    if (typeof $parser.parse !== 'function') {
 	    /****************************************************
 	    '@DESCRIPTION:	parse json string as json object
 	    '@PARAM:	text [String] : json string
 	    '@PARAM:	reviver [Function] : i don't know
 	    '@RETURN:	[Object] json object
 	    '****************************************************/
-        MoLibJsonParser.parse = function (text, reviver) {
+        $parser.parse = function (text, reviver) {
             var j;
             function walk(holder, key) {
                 var k, v, value = holder[key];
@@ -247,7 +247,7 @@ MoLibJsonParser.encode=true;
                         ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
                 });
             }
-            if (/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, '')) || !MoLibJsonParser.strict) {
+            if (/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, '')) || !$parser.strict) {
 				try{
 	                j = eval('(' + text + ')');
 	                return typeof reviver === 'function' ?
@@ -261,4 +261,4 @@ MoLibJsonParser.encode=true;
     }
 }());
 if(!exports.json)exports.json={};
-return exports.json.parser = MoLibJsonParser;
+return exports.json.parser = $parser;

@@ -1,7 +1,7 @@
 ﻿/****************************************************
-'@DESCRIPTION:	define MoLibJmail object
+'@DESCRIPTION:	define $jmail object
 '****************************************************/
-function MoLibJmail(){
+function $jmail(){
 	this.Exception="";
 	this.jmail=null;
 	this.charset="GB2312";
@@ -14,12 +14,9 @@ function MoLibJmail(){
 	'****************************************************/
 	this.enabled=function(classid){
 		classid = classid || "JMail.Message";
-		try{
-			this.jmail = new ActiveXObject(classid);
-			return true;
-		}catch(ex){
-			return false;
-		}
+		this.jmail = F.activex(classid);
+		if(this.jmaill==null) return false;
+		return true;
 	};
 	this.setting={
 		"MailAddress":"",
@@ -119,8 +116,8 @@ function MoLibJmail(){
 	}
 }
 /****************************************************
-'@DESCRIPTION:	create an instance of MoLibJmail
-'@RETURN:	[MoLibJmail] instance
+'@DESCRIPTION:	create an instance of $jmail
+'@RETURN:	[$jmail] instance
 '****************************************************/
-MoLibJmail.New = function(){return new MoLibJmail();};
-return exports.jmail = MoLibJmail;
+$jmail.New = function(){return new $jmail();};
+return exports.jmail = $jmail;

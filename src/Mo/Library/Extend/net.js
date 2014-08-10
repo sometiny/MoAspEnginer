@@ -1,11 +1,11 @@
 ﻿/*
 'by anlige at www.9fn.net
-MoLibNet.IpToLong
-MoLibNet.LongToIp
-MoLibNet.InSameNetWork
-MoLibNet.IsIP
+$net.IpToLong
+$net.LongToIp
+$net.InSameNetWork
+$net.IsIP
 */
-var MoLibNet={
+var $net={
 	/****************************************************
 	'@DESCRIPTION:	convert ip string to long
 	'@PARAM:	d [String] : ip string
@@ -33,9 +33,9 @@ var MoLibNet={
 		b=parseInt(b);
 		var a=new Array(4);
 		a[0]=b>>>24;
-		a[1]=(b<<8)>>>24;
-		a[2]=(b<<16)>>>24;
-		a[3]=(b<<24)>>>24;
+		a[1]=(b>>>16) & 0xff;
+		a[2]=(b>>>8) & 0xff;
+		a[3]=b  & 0xff;
 		return a.join(".");
 	},
 	/****************************************************
@@ -54,4 +54,4 @@ var MoLibNet={
 	'****************************************************/
 	IsIP:function(c){if(c.indexOf(".")<=0){return false}var a=c.split(".");if(a.length!=4){return false}for(var b=0;b<4;b++){if(a[b]==""||isNaN(a[b])||parseInt(a[b])<0||parseInt(a[b])>255){return false}}return true}
 };
-return exports.net = MoLibNet;
+return exports.net = $net;

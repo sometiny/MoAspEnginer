@@ -777,50 +777,50 @@ var GLOBAL = this, Exports, F = {
 		toget : function(str){F.string.to(str,"get");},
 		topost : function(str){F.string.to(str,"post");},
 		frombinary : function(bin,charset){
-			var byts,Objstream = F.stream(3,1);
-			Objstream.Open();
-			Objstream.Write(bin);
-			Objstream.Position = 0;
-			Objstream.Type = 2;
-			Objstream.CharSet = charset || "utf-8";
-			byts = Objstream.ReadText();
-			Objstream.Close();
-			Objstream = null;
+			var byts,stream = F.stream(3,1);
+			stream.Open();
+			stream.Write(bin);
+			stream.Position = 0;
+			stream.Type = 2;
+			stream.CharSet = charset || "utf-8";
+			byts = stream.ReadText();
+			stream.Close();
+			stream = null;
 			return byts;
 		},
 		fromfile : function(path,charset){
 			if(!F.fso.fileexists(path))return "";
-			var byts,Objstream = F.stream(3,2);
-			Objstream.CharSet = charset || "utf-8";
-			Objstream.Open();
-			Objstream.LoadFromFile(path);
-			Objstream.Position = 0;
-			byts = Objstream.ReadText();
-			Objstream.Close();
-			Objstream = null;
+			var byts,stream = F.stream(3,2);
+			stream.CharSet = charset || "utf-8";
+			stream.Open();
+			stream.LoadFromFile(path);
+			stream.Position = 0;
+			byts = stream.ReadText();
+			stream.Close();
+			stream = null;
 			return byts;
 		},
 		savetofile : function(path,content,charset){
-			var byts,Objstream = F.stream(3,2);
-			Objstream.CharSet = charset || "utf-8";
-			Objstream.Open();
-			Objstream.writetext(content)
-			Objstream.savetofile(path,2);
-			Objstream.Close();
-			Objstream = null;
+			var byts,stream = F.stream(3,2);
+			stream.CharSet = charset || "utf-8";
+			stream.Open();
+			stream.writetext(content)
+			stream.savetofile(path,2);
+			stream.Close();
+			stream = null;
 		},
 		appendtofile : function(path,content,charset){
-			var byts,Objstream = F.stream(3,2);
-			Objstream.CharSet = charset || "utf-8";
-			Objstream.Open();
+			var byts,stream = F.stream(3,2);
+			stream.CharSet = charset || "utf-8";
+			stream.Open();
 			if(!F.fso.fileexists(path)){
-				Objstream.LoadFromFile(path);
-				Objstream.Position = Objstream.Size;
+				stream.LoadFromFile(path);
+				stream.Position = stream.Size;
 			}
-			Objstream.writetext(content)
-			Objstream.savetofile(path,2);
-			Objstream.Close();
-			Objstream = null;
+			stream.writetext(content)
+			stream.savetofile(path,2);
+			stream.Close();
+			stream = null;
 		},
 		getByteArray:function(string){
 			if(string=="")return [];

@@ -1,5 +1,5 @@
 /*by anlige at www.9fn.net*/
-var MoLibFile = {
+var $file = {
 	exception:"",
 	classid:{fso:"Scripting.FileSystemObject",stream:"ADODB.STREAM"},
 	fso:null,
@@ -258,4 +258,4 @@ var MoLibFile = {
 	}
 }
 if(!exports.io)exports.io={};
-return exports.io.file = MoLibFile;
+return exports.io.file = $file;

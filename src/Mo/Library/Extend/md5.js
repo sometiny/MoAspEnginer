@@ -102,7 +102,7 @@ var String2Bytes = function(content){
 	}
 	return ret;
 }
-var MoLibMD5 = function(string) {
+var $md5 = function(string) {
 	string = string +"";
 	var x = Array();
 	var k, AA, BB, CC, DD, a, b, c, d;
@@ -187,4 +187,4 @@ var MoLibMD5 = function(string) {
 	var tempValue = wordToHex(a) + wordToHex(b) + wordToHex(c) + wordToHex(d);
 	return tempValue.toLowerCase();
 };
-return exports.md5 = MoLibMD5;
+return exports.md5 = $md5;

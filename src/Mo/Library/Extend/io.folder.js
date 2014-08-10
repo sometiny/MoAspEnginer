@@ -1,5 +1,5 @@
 ﻿/*by anlige at www.9fn.net*/
-var MoLibFolder = {
+var $folder = {
 	exception:"",
 	classid:{fso:"Scripting.FileSystemObject"},
 	fso:null,
@@ -115,4 +115,4 @@ var MoLibFolder = {
 	}
 }
 if(!exports.io)exports.io={};
-return exports.io.folder = MoLibFolder;
+return exports.io.folder = $folder;

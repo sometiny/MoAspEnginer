@@ -1,4 +1,4 @@
-﻿function safeCode(sessionKey){
+﻿function $safecode(sessionKey){
 	function getrndcolor(){
 		return [F.random(0,128),F.random(0,128),F.random(0,128)];
 	}
@@ -95,4 +95,4 @@
 	}
 	F.echo(F.base64.getBytes(F.base64.encode(output)),F.TEXT.BIN);
 }
-exports.safecode = safeCode;
+exports.safecode = $safecode;

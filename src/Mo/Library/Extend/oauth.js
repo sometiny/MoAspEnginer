@@ -1,24 +1,25 @@
-﻿function MoLibOAUTH20(client_id, client_secret,redirect_uri){
+﻿function $oauth(client_id, client_secret,redirect_uri){
 	this.table=[];
 	this.client_id = client_id||"";
 	this.redirect_uri = redirect_uri||"";
 	this.client_secret = client_secret||"";
 	this.debug={};
 }
-MoLibOAUTH20.New = function(client_id, client_secret, redirect_uri){
-	return new MoLibOAUTH20(client_id, client_secret, redirect_uri);
+$oauth.fn = $oauth.prototype;
+$oauth.New = function(client_id, client_secret, redirect_uri){
+	return new $oauth(client_id, client_secret, redirect_uri);
 };
-MoLibOAUTH20.prototype.toString=function(){
-	return "OAUTH 2.0(MoLibOAUTH20 1.0) BY Anlige";	
+$oauth.fn.toString=function(){
+	return "OAUTH 2.0($oauth 1.0) BY Anlige";	
 };
-MoLibOAUTH20.prototype.getAuthorizationUrl = function(authorization_url){
+$oauth.fn.getAuthorizationUrl = function(authorization_url){
 	var url = authorization_url + "?client_id=" + F.encode(this.client_id) + "&response_type=code";
 	if(this.redirect_uri!="") url += "&redirect_uri=" + F.encode(this.redirect_uri);
 	var data = this.APISTring("utf-8")
 	if(data!="") url += "&" + data;
 	return url;
 }
-MoLibOAUTH20.prototype.getAccessToken = function(access_token_url, code , method, format){
+$oauth.fn.getAccessToken = function(access_token_url, code , method, format){
 	if(!format){format = "text";}
 	if(!method){method = "GET";}
 	var data = "grant_type=authorization_code&code=" + F.encode(code)
@@ -30,7 +31,7 @@ MoLibOAUTH20.prototype.getAccessToken = function(access_token_url, code , method
 	return this.SendData(access_token_url,method,data,format);
 };
 
-MoLibOAUTH20.prototype.RefreshToken = function(refresh_token_url, refresh_token , method, format){
+$oauth.fn.RefreshToken = function(refresh_token_url, refresh_token , method, format){
 	if(!format){format = "text";}
 	if(!method){method = "GET";}
 	var data = "grant_type=refresh_token&client_id=" + F.encode(this.client_id) + "&refresh_token=" + F.encode(refresh_token) + "&client_secret=" + F.encode(this.client_secret)
@@ -41,13 +42,13 @@ MoLibOAUTH20.prototype.RefreshToken = function(refresh_token_url, refresh_token 
 	if(data1!="") data += "&" + data1;
 	return this.SendData(refresh_token_url,method,data,format);
 };
-MoLibOAUTH20.prototype.FetchFromAPI = function(api, method, format){
+$oauth.fn.FetchFromAPI = function(api, method, format){
 	format = format || "text";
 	method = method || "GET";
 	return this.SendData(api,method,this.APISTring("utf-8"),format);
 };
 
-MoLibOAUTH20.prototype.SendData = function(url,method,data,format){
+$oauth.fn.SendData = function(url,method,data,format){
 	F.require("http.request");
 	var myhttp = new F.exports.http.request(url,method,data);
 	myhttp.autoClearBuffer=false;
@@ -66,7 +67,7 @@ MoLibOAUTH20.prototype.SendData = function(url,method,data,format){
 	return result;	
 };
 
-MoLibOAUTH20.prototype.Sort = function(order,key){
+$oauth.fn.Sort = function(order,key){
 	if(this.Count()<=0){return ;}
 	var isASC = true;
 	if(order.toLowerCase()=="asc"){
@@ -88,7 +89,7 @@ MoLibOAUTH20.prototype.Sort = function(order,key){
 };
 
 
-MoLibOAUTH20.prototype.APISTring = function(charset,split1,split2){
+$oauth.fn.APISTring = function(charset,split1,split2){
 	charset ? charset : (charset="no");
 	charset = charset.toLowerCase();
 	if(!split1){split1="=";}
@@ -114,7 +115,7 @@ MoLibOAUTH20.prototype.APISTring = function(charset,split1,split2){
 	return str;	
 };
 
-MoLibOAUTH20.prototype.Set = function(key,value,isdefault){
+$oauth.fn.Set = function(key,value,isdefault){
 	if(!value){value="";}
 	if(!isdefault){isdefault=false;};
 	if(this.table.length==0){
@@ -135,7 +136,7 @@ MoLibOAUTH20.prototype.Set = function(key,value,isdefault){
 	}
 };
 
-MoLibOAUTH20.prototype.Add = function(key,value){
+$oauth.fn.Add = function(key,value){
 	if(!value){value="";}
 	if(this.table.length==0){
 		this.table[0]={"key":key,"value":value};
@@ -158,9 +159,9 @@ MoLibOAUTH20.prototype.Add = function(key,value){
 	}
 };
 
-MoLibOAUTH20.prototype.Count = function(){return this.table.length;};
+$oauth.fn.Count = function(){return this.table.length;};
 
-MoLibOAUTH20.prototype.Parm = function(key){
+$oauth.fn.Parm = function(key){
 	if(this.Count()<=0){return "";}
 	for(var i=0;i<this.Count();i++){
 		if(this.table[i]["key"].toLowerCase()==key.toLowerCase()){
@@ -170,7 +171,7 @@ MoLibOAUTH20.prototype.Parm = function(key){
 	return "";
 };
 
-MoLibOAUTH20.prototype.Remove = function(key){
+$oauth.fn.Remove = function(key){
 	if(this.Count()<=0){return;}
 	if(!key){this.table=[];return;}
 	var ___temp=[];
@@ -181,7 +182,7 @@ MoLibOAUTH20.prototype.Remove = function(key){
 	}
 	this.table=___temp;
 };
-MoLibOAUTH20.prototype.rndstr=function(len){
+$oauth.fn.rndstr=function(len){
 	var slen = "0123456789qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM";
 	var retstr="";
 	for(var i=0;i<len;i++){
@@ -189,4 +190,4 @@ MoLibOAUTH20.prototype.rndstr=function(len){
 	}
 	return retstr;
 };
-return exports.oauth = MoLibOAUTH20;
+return exports.oauth = $oauth;

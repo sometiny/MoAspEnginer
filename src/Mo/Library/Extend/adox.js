@@ -6,7 +6,7 @@
 '@PARAM:	dbtype [String] : database type, support 'ACCESS' and 'MSSQL'
 '@PARAM:	dbversion [String] : database software version
 '****************************************************/
-function MoLibADOX(path,dbtype,dbversion){
+function $adox(path,dbtype,dbversion){
 	this.dbversion = (dbversion==undefined?"2000":dbversion);
 	this.path = path||"";
 	this.dbtype = dbtype || "ACCESS";
@@ -20,53 +20,53 @@ function MoLibADOX(path,dbtype,dbversion){
 	var self = this;
 	var ext = this.datatype.split(",");
 	for(var i in ext){
-		MoLibADOX.Field.prototype[ext[i]] = (function(dt){
+		$adox.Field.prototype[ext[i]] = (function(dt){
 			return function(df,len){
 				return this.datatype(dt,df,len);
 			}
 		})(ext[i]);
 	}
 }
-
+$adox.fn = $adox.prototype;
 /****************************************************
 '@DESCRIPTION:	create ADOX object. You can use this method in vbscript.
 '@PARAM:	path [String] : ACCESS data file path
 '@PARAM:	dbtype [String] : database type, support 'ACCESS' and 'MSSQL'
 '@RETURN:	[Object] ADOX object
 '****************************************************/
-MoLibADOX.New = function(path,dbtype){return new MoLibADOX(path,dbtype,dbversion);};
+$adox.New = function(path,dbtype){return new $adox(path,dbtype,dbversion);};
 
 /****************************************************
 '@DESCRIPTION:	create ADOX object for ACCESS.
 '@PARAM:	path [String] : ACCESS data file path
 '@RETURN:	[Object] ADOX object
 '****************************************************/
-MoLibADOX.ACCESS = function(path){return new MoLibADOX(path,"ACCESS");};
+$adox.ACCESS = function(path){return new $adox(path,"ACCESS");};
 
 /****************************************************
 '@DESCRIPTION:	create ADOX object for MSSQL 2000
 '@RETURN:	[Object] ADOX object
 '****************************************************/
-MoLibADOX.MSSQL = function(){return new MoLibADOX("","MSSQL");};
+$adox.MSSQL = function(){return new $adox("","MSSQL");};
 
 /****************************************************
 '@DESCRIPTION:	create ADOX object for MSSQL2005. Forget it now.
 '@RETURN:	[Object] ADOX object
 '****************************************************/
-MoLibADOX.MSSQL2005 = function(){return new MoLibADOX("","MSSQL","2005");};
+$adox.MSSQL2005 = function(){return new $adox("","MSSQL","2005");};
 
 /****************************************************
 '@DESCRIPTION:	create ADOX object for MSSQL2008. Forget it now.
 '@RETURN:	[Object] ADOX object
 '****************************************************/
-MoLibADOX.MSSQL2008 = function(){return new MoLibADOX("","MSSQL","2008");};
+$adox.MSSQL2008 = function(){return new $adox("","MSSQL","2008");};
 
 /****************************************************
 '@DESCRIPTION:	override 'Server.Mappath' method
 '@PARAM:	path [String] : a path,such as 'E:\a.mdb','/a.mdb','a.mdb'
 '@RETURN:	[String] local path of file
 '****************************************************/
-MoLibADOX.Mappath = function(path){
+$adox.Mappath = function(path){
 	if(path.length<2)return Server.MapPath(path)
 	if(path.substr(1,1)==":") return path;
 	return Server.MapPath(path);	
@@ -77,7 +77,7 @@ MoLibADOX.Mappath = function(path){
 '@DESCRIPTION:	create fields collection object
 '@RETURN:	[Object] fields collection object
 '****************************************************/
-MoLibADOX.prototype.CreateFieldsCollection = function(){
+$adox.fn.CreateFieldsCollection = function(){
 	return new function(){
 		this.fields=[];
 		this.Append = function(field){
@@ -114,14 +114,14 @@ MoLibADOX.prototype.CreateFieldsCollection = function(){
 '@PARAM:	name [String] : field name.
 '@RETURN:	[Object] Field Object.
 '****************************************************///define Field
-MoLibADOX.prototype.CreateField = function(name){return new MoLibADOX.Field(name,this.dbtype);};
+$adox.fn.CreateField = function(name){return new $adox.Field(name,this.dbtype);};
 
 /****************************************************
 '@DESCRIPTION:	defined Field object
 '@PARAM:	name [String] : field name.
 '@PARAM:	dbtype [String] : i will give it a value automatic.
 '****************************************************/
-MoLibADOX.Field = function(name,dbtype){
+$adox.Field = function(name,dbtype){
 	this.set__={
 		"dbtype":dbtype,
 		"name":"",
@@ -142,7 +142,7 @@ MoLibADOX.Field = function(name,dbtype){
 '@PARAM:	nullable [Boolean] : Default value is null.
 '@RETURN:	[Object] field object itself.
 '****************************************************/
-MoLibADOX.Field.prototype.nullable=function(nullable){
+$adox.Field.prototype.nullable=function(nullable){
 	if(nullable===true && this.set__.dbtype!="ACCESS")this.set__.nullable=true;
 	if(nullable===false)this.set__.nullable=false;
 	return this;
@@ -153,7 +153,7 @@ MoLibADOX.Field.prototype.nullable=function(nullable){
 '@PARAM:	IDENTITY [Boolean]
 '@RETURN:	[Object] field object itself.
 '****************************************************/
-MoLibADOX.Field.prototype.IDENTITY=function(IDENTITY){
+$adox.Field.prototype.IDENTITY=function(IDENTITY){
 	this.set__.IDENTITY=IDENTITY===true;
 	return this;
 };
@@ -163,7 +163,7 @@ MoLibADOX.Field.prototype.IDENTITY=function(IDENTITY){
 '@PARAM:	COLLATE [String]
 '@RETURN:	[Object] field object itself.
 '****************************************************/
-MoLibADOX.Field.prototype.COLLATE=function(COLLATE){
+$adox.Field.prototype.COLLATE=function(COLLATE){
 	this.set__.COLLATE=COLLATE||"";
 	return this;
 };
@@ -173,7 +173,7 @@ MoLibADOX.Field.prototype.COLLATE=function(COLLATE){
 '@PARAM:	name [String] : field name
 '@RETURN:	[Object] field object itself.
 '****************************************************/
-MoLibADOX.Field.prototype.name=function(name){
+$adox.Field.prototype.name=function(name){
 	this.set__.name=name;
 	return this;
 };
@@ -183,7 +183,7 @@ MoLibADOX.Field.prototype.name=function(name){
 '@PARAM:	length [Int] : field length
 '@RETURN:	[Object] field object itself.
 '****************************************************/
-MoLibADOX.Field.prototype.length=function(length){
+$adox.Field.prototype.length=function(length){
 	this.set__.length=length;
 	return this;
 };
@@ -193,7 +193,7 @@ MoLibADOX.Field.prototype.length=function(length){
 '@PARAM:	default_ [Variant]
 '@RETURN:	[Object] field object itself.
 '****************************************************/
-MoLibADOX.Field.prototype.Default=function(default_){
+$adox.Field.prototype.Default=function(default_){
 	if(this.set__.dbtype=="ACCESS" && this.set__.type=="DATETIME" && default_.toLowerCase()=="getdate()")default_="Now()";
 	this.set__["default"]=default_;
 	return this;
@@ -206,7 +206,7 @@ MoLibADOX.Field.prototype.Default=function(default_){
 '@PARAM:	len [Int] : field length. it can be blank.
 '@RETURN:	[Object] field object itself.
 '****************************************************/
-MoLibADOX.Field.prototype.datatype = function(ty,df,len){
+$adox.Field.prototype.datatype = function(ty,df,len){
 	ty = ty ||"";
 	ty=""+ty+"";
 	this.set__.type=ty.toUpperCase();
@@ -220,7 +220,7 @@ MoLibADOX.Field.prototype.datatype = function(ty,df,len){
 '@PARAM:	isprimarykey [Boolean] : if isprimarykey!==false, the value is true 
 '@RETURN:	[Object] field object itself.
 '****************************************************/
-MoLibADOX.Field.prototype.primarykey = function(isprimarykey){
+$adox.Field.prototype.primarykey = function(isprimarykey){
 	this.set__.primarykey=(isprimarykey!==false);
 	return this;
 };
@@ -230,7 +230,7 @@ MoLibADOX.Field.prototype.primarykey = function(isprimarykey){
 '@PARAM:	isdefaultnow [Boolean] 
 '@RETURN:	[Object] field object itself.
 '****************************************************/
-MoLibADOX.Field.prototype.defaultnow = function(isdefaultnow){
+$adox.Field.prototype.defaultnow = function(isdefaultnow){
 	this.set__.datedefaultnow=(isdefaultnow!==false);
 	return this;
 };
@@ -241,7 +241,7 @@ MoLibADOX.Field.prototype.defaultnow = function(isdefaultnow){
 '@PARAM:	name [String] : field name. if this argument is blank, the value of tablename will be assigned to name and the lasttablename will be assigned to tablename.
 '@RETURN:	[Boolean] if delete successfully,return true,or return false.
 '****************************************************/
-MoLibADOX.prototype.DropField = function(tablename,name){
+$adox.fn.DropField = function(tablename,name){
 	if(name==undefined){
 		name = 	tablename;
 		tablename = null;
@@ -268,12 +268,12 @@ MoLibADOX.prototype.DropField = function(tablename,name){
 '@PARAM:	database [String] : database name
 '@RETURN:	[Boolean] if open database successfully, return true, or return false.
 '****************************************************/
-MoLibADOX.prototype.Open = function(server,username,password,database){
+$adox.fn.Open = function(server,username,password,database){
 	if(this.dbtype=="MSSQL") return this.OpenSqlServer(server,username,password,database);
 	if(this.conn.state==1)return true;
 	this.path = this.path || server;
 	try{
-		this.conn.open("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + MoLibADOX.Mappath(this.path));
+		this.conn.open("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + $adox.Mappath(this.path));
 		return true;
 	}catch(ex){
 		this.exception.push("Open："+ex.description);
@@ -289,7 +289,7 @@ MoLibADOX.prototype.Open = function(server,username,password,database){
 '@PARAM:	database [String] : database name
 '@RETURN:	[Boolean] if open database successfully, return true, or return false.
 '****************************************************/
-MoLibADOX.prototype.OpenSqlServer = function(server,username,password,database){
+$adox.fn.OpenSqlServer = function(server,username,password,database){
 	if(this.conn.state==1)return true;
 	try{
 		if(this.dbversion=="2000"){
@@ -309,7 +309,7 @@ MoLibADOX.prototype.OpenSqlServer = function(server,username,password,database){
 '@DESCRIPTION:	set lasttablename
 '@PARAM:	tablename [String] : table name.
 '****************************************************/
-MoLibADOX.prototype.Select = function(tablename){
+$adox.fn.Select = function(tablename){
 	this.lasttablename = tablename;
 };
 
@@ -318,12 +318,12 @@ MoLibADOX.prototype.Select = function(tablename){
 '@PARAM:	path [String] : database file path
 '@RETURN:	[Boolean] if database was created successfully,return true,or return false.
 '****************************************************/
-MoLibADOX.prototype.Create = function(path){
+$adox.fn.Create = function(path){
 	if(this.dbtype!="ACCESS")return;
 	this.path = this.path || path;
 	try{
 		var Cate = new ActiveXObject("ADOX.Catalog");
-		Cate.create("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + MoLibADOX.Mappath(this.path));
+		Cate.create("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + $adox.Mappath(this.path));
 		Cate = null;
 		return this.Open();
 	}catch(e){
@@ -337,7 +337,7 @@ MoLibADOX.prototype.Create = function(path){
 '@PARAM:	sql [String] : sql string
 '@RETURN:	[Boolean] if sql string wae executed successfully, return true, or return false.
 '****************************************************/
-MoLibADOX.prototype.Exec = function(sql){
+$adox.fn.Exec = function(sql){
 	if(!sql || sql=="")return false;
 	if(this.conn.state!=1)return false;
 	try{
@@ -356,7 +356,7 @@ MoLibADOX.prototype.Exec = function(sql){
 '@PARAM:	delete_ [Boolean] : if delete the table when the tables is exists.
 '@RETURN:	[Boolean] if the table was created successfully, return true, or return false.
 '****************************************************/
-MoLibADOX.prototype.CreateTable = function(name,fields,delete_){
+$adox.fn.CreateTable = function(name,fields,delete_){
 	name = name || this.lasttablename;
 	if(!name || name=="" || !/[0-9a-zA-Z\_]/ig.test(name))return false;
 	if(this.conn.state!=1)return false;
@@ -383,7 +383,7 @@ MoLibADOX.prototype.CreateTable = function(name,fields,delete_){
 '@PARAM:	noerror [Boolean] : throw error
 '@RETURN:	[Boolean] if the table was deleted successfully, return true, or return false.
 '****************************************************/
-MoLibADOX.prototype.DropTable = function(name,noerror){
+$adox.fn.DropTable = function(name,noerror){
 	if(noerror!==true)noerror=false;
 	name = name || this.lasttablename;
 	if(!name || name=="" || !/[0-9a-zA-Z\_]/ig.test(name))return false;
@@ -402,14 +402,14 @@ MoLibADOX.prototype.DropTable = function(name,noerror){
 '@DESCRIPTION:	Debug sth.
 '@RETURN:	[String] debug string
 '****************************************************/
-MoLibADOX.prototype.Debug=function(){
+$adox.fn.Debug=function(){
 	return this.exception.join("<br />");
 };
 
 /****************************************************
 '@DESCRIPTION:	Close database
 '****************************************************/
-MoLibADOX.prototype.Close = function(){
+$adox.fn.Close = function(){
 	try{this.conn.close();}catch(ex){}	
 };
-return exports.adox = MoLibADOX;
+return exports.adox = $adox;

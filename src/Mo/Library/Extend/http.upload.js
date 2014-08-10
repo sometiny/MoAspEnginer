@@ -1,30 +1,31 @@
 ﻿if(!exports.http)exports.http={};
 F.require("http.request");
-function MoLibHttpUpload(url){
+function $httpupload(url){
 	F.exports.http.request.apply(this,[url,"POST","",false]);
 	this.boundary = F.random.letter(22);
 	this.forms=[];
 }
-MoLibHttpUpload.prototype = new F.exports.http.request();
-MoLibHttpUpload.New = MoLibHttpUpload.prototype.New = function(url){
-	return new MoLibHttpUpload(url);
+$httpupload.prototype = new F.exports.http.request();
+$httpupload.fn = $httpupload.prototype;
+$httpupload.New = $httpupload.fn.New = function(url){
+	return new $httpupload(url);
 };
-MoLibHttpUpload.prototype.appendfile = function(key,value,contenttype){
+$httpupload.fn.appendfile = function(key,value,contenttype){
 	contenttype = contenttype ||"application/octet-stream";
 	var path = F.mappath(value);
 	if(!F.fso.fileexists(path))return;
 	this.forms.push({"type":"file", "name":key, "path":path,"filename":path.substr(path.lastIndexOf("\\")+1),"contenttype":contenttype});
 };
-MoLibHttpUpload.prototype.appendform = function(key,value){
+$httpupload.fn.appendform = function(key,value){
 	this.forms.push({"type":"form", "name":key, "value":value});
 };
-MoLibHttpUpload.prototype.init=function(){
+$httpupload.fn.init=function(){
 	var datasetstr="";
 	this.response=null;
 	if(this.method=="POST") this.headers.push("Content-Type:multipart/form-data; boundary=" + this.boundary);
 	if(!this.charset || this.charset=="") this.charset = "utf-8";
 };
-MoLibHttpUpload.prototype.send = function(url){
+$httpupload.fn.send = function(url){
 	if(url!==undefined)this.url = url;
 	var stream = F.activex("ADODB.STREAM");
 	stream.type=1;
@@ -32,14 +33,14 @@ MoLibHttpUpload.prototype.send = function(url){
 	stream.open();
 	for(var i=0;i<this.forms.length;i++){
 		if(this.forms[i]["type"]=="form"){
-			stream.write(MoLibHttpUpload.string2bytes(F.format("--{0}\r\nContent-Disposition: form-data; name=\"{1}\"\r\n\r\n{2}\r\n", this.boundary, this.forms[i]["name"],this.forms[i]["value"])));
+			stream.write($httpupload.string2bytes(F.format("--{0}\r\nContent-Disposition: form-data; name=\"{1}\"\r\n\r\n{2}\r\n", this.boundary, this.forms[i]["name"],this.forms[i]["value"])));
 		}else{
-			stream.write(MoLibHttpUpload.string2bytes(F.format("--{0}\r\nContent-Disposition: form-data; name=\"{1}\"; filename=\"{2}\"\r\nContent-Type: {3}\r\n\r\n", this.boundary, this.forms[i]["name"],this.forms[i]["filename"], this.forms[i]["contenttype"],6179)));
-			stream.write(MoLibHttpUpload.readbinaryfile(this.forms[i]["path"]));
-            stream.write(MoLibHttpUpload.string2bytes("\r\n"));
+			stream.write($httpupload.string2bytes(F.format("--{0}\r\nContent-Disposition: form-data; name=\"{1}\"; filename=\"{2}\"\r\nContent-Type: {3}\r\n\r\n", this.boundary, this.forms[i]["name"],this.forms[i]["filename"], this.forms[i]["contenttype"],6179)));
+			stream.write($httpupload.readbinaryfile(this.forms[i]["path"]));
+            stream.write($httpupload.string2bytes("\r\n"));
 		}
 	}
-	stream.write(MoLibHttpUpload.string2bytes(F.format("--{0}--\r\n", this.boundary)));
+	stream.write($httpupload.string2bytes(F.format("--{0}--\r\n", this.boundary)));
 	stream.position=0;
 	this.data = stream;
 	this.header("Content-Length:" + stream.size);
@@ -49,7 +50,7 @@ MoLibHttpUpload.prototype.send = function(url){
 	return this;
 };
 
-MoLibHttpUpload.prototype.uploadfromclient = function(){
+$httpupload.fn.uploadfromclient = function(){
 	var TotalBytes = Request.TotalBytes,BytesRead=0,ChunkReadSize=1024 * 16,PartSize;
 	var stream = F.activex("ADODB.STREAM");
 	stream.type=1;
@@ -79,22 +80,22 @@ MoLibHttpUpload.prototype.uploadfromclient = function(){
 	return this;
 };
 
-MoLibHttpUpload.string2bytes = function(string){
+$httpupload.string2bytes = function(string){
 	return F.base64.getBytes(F.base64.encode(string))
 };
-MoLibHttpUpload.filesize=0;
-MoLibHttpUpload.readbinaryfile = function(path){
+$httpupload.filesize=0;
+$httpupload.readbinaryfile = function(path){
 	if(!F.fso.fileexists(path))return null;
 	var stream = F.activex("ADODB.STREAM");
 	stream.type=1;
 	stream.mode=3;
 	stream.open();
 	stream.loadfromfile(path);
-	MoLibHttpUpload.filesize = stream.size;
+	$httpupload.filesize = stream.size;
 	stream.position=0;
 	var result = stream.read();
 	stream.close();
 	stream = null;
 	return result;
 };
-return exports.http.upload = MoLibHttpUpload;
+return exports.http.upload = $httpupload;

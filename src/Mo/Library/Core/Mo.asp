@@ -556,8 +556,16 @@ var Mo = Mo || (function(){
 		    /*如下仅仅是利用VBS扩展功能*/
 		    (function(ScrCtl){
 			    F.vbs.ctrl=ScrCtl;
+			    F.vbs.getbyteinited=false;
 		   		F.vbs.chrb = function(chrcode){
 			   		return ScrCtl.eval("chrb(" + chrcode + ")");
+		   		};
+		   		F.vbs.ascb = function(chrb1){
+			   		if(!F.vbs.getbyteinited){
+				   		F.vbs.execute("function getbytecode(v)\r\ngetbytecode=ascb(v)\r\nend function");
+				   		F.vbs.getbyteinited = true;
+			   		}
+			   		return F.vbs.run("getbytecode",chrb1);
 		   		};
 		   		F.vbs.eval = function(script){
 			   		return ScrCtl.eval(script);
