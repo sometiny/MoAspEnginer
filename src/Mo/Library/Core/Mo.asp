@@ -552,20 +552,32 @@ var Mo = Mo || (function(){
 		    	"end function\r\n" +
 		    	"set Model__.RecordsAffectedCmd=GetRef(\"RecordsAffectedCmd\")"
 		    );
+	   		objScrCtl.ExecuteStatement(
+	   			"function getByteArray(v)\r\n" +
+	   			"dim ret(),i,length\r\n" +
+	   			"length = lenb(v)\r\n" +
+	   			"redim ret(length-1)\r\n" +
+	   			"for i=0 to length-1\r\n" +
+	   			"	ret(i) = ascb(midb(v,i+1,1))\r\n" +
+	   			"next\r\n" +
+	   			"getByteArray = ret\r\n" +
+	   			"end function"
+	   		);
+	   		objScrCtl.ExecuteStatement("function getbytecode(v)\r\ngetbytecode=ascb(v)\r\nend function");
 		    
 		    /*如下仅仅是利用VBS扩展功能*/
 		    (function(ScrCtl){
 			    F.vbs.ctrl=ScrCtl;
-			    F.vbs.getbyteinited=false;
+			    F.vbs.getByteInited=false;
+			    F.vbs.getByteArrayinited=false;
 		   		F.vbs.chrb = function(chrcode){
 			   		return ScrCtl.eval("chrb(" + chrcode + ")");
 		   		};
 		   		F.vbs.ascb = function(chrb1){
-			   		if(!F.vbs.getbyteinited){
-				   		F.vbs.execute("function getbytecode(v)\r\ngetbytecode=ascb(v)\r\nend function");
-				   		F.vbs.getbyteinited = true;
-			   		}
-			   		return F.vbs.run("getbytecode",chrb1);
+			   		return ScrCtl.Run("getbytecode",chrb1);
+		   		};
+		   		F.vbs.getByteArray = function(chrs){
+			   		return ScrCtl.Run("getByteArray",chrs).toArray();
 		   		};
 		   		F.vbs.eval = function(script){
 			   		return ScrCtl.eval(script);
