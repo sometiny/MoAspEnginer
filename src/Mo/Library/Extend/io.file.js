@@ -256,6 +256,6 @@ var $file = {
 			return false;	
 		}
 	}
-}
+};
 if(!exports.io)exports.io={};
 return exports.io.file = $file;
