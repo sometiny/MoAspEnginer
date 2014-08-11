@@ -15,10 +15,13 @@ ActionEncoding = IAction.create();
 */
 ActionEncoding.extend("Index",function(){
 	F.require("encoding");
-	var string="小蜻蜓123abcdefg！";
+	var string="小蜻蜓123abcdefg+%&=！";
 	var gbka = F.exports.encoding.gbk.getByteArray(string);
 	var gbkc = F.exports.encoding.gbk.getWordArray(string);
-	var gbkb = F.exports.encoding.gbk.toString(gbka);
+	var gbkb = F.exports.encoding.gbk.toString(gbkc);
+	F.echo("encodeURIComponent(gbk)：" + F.exports.encoding.encodeURIComponent(string,"gbk"),true);
+	F.echo("encodeURI(gbk)：" + F.exports.encoding.encodeURI(string,"gbk"),true);
+	F.echo("decode(gbk)：" + F.exports.encoding.decode("%d0%a1%f2%df%f2%d1123abcdefg%2b%25%26%3d%a3%a1","gbk"),true);
 	F.echo("GBKByteArray："+gbka,true);
 	F.echo("GBKWordArray："+gbkc,true);
 	F.echo("GBKBytesHex："+F.exports.encoding.hex.stringify(gbka),true);
@@ -29,6 +32,9 @@ ActionEncoding.extend("Index",function(){
 	var utf8a = F.exports.encoding.utf8.getByteArray(string);
 	var utf8c = F.exports.encoding.utf8.getWordArray(string);
 	var utf8b = F.exports.encoding.utf8.toString(utf8c);
+	F.echo("encodeURIComponent(UTF-8)：" + F.exports.encoding.encodeURIComponent(string),true);
+	F.echo("encodeURI(UTF-8)：" + F.exports.encoding.encodeURI(string),true);
+	F.echo("decode(UTF-8)：" + F.exports.encoding.decode("%e5%b0%8f%e8%9c%bb%e8%9c%93123abcdefg%2b%25%26%3d%ef%bc%81"),true);
 	F.echo("UTF8ByteArray："+utf8a,true);
 	F.echo("UTF8WordArray："+utf8c,true);
 	F.echo("UTF8BytesHex："+ F.exports.encoding.hex.stringify(utf8a),true);

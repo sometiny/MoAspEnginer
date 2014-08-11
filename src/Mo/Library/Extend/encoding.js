@@ -1,8 +1,13 @@
 ﻿/*
 ** give some method for encoding
 */
-exports.encoding=exports.encoding||{
-	wordtobytes:function(u){
+exports.encoding=exports.encoding||(function(){
+	var $enc={};
+	$enc.SPEC={};
+    $enc.SPEC.S1 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'()";/*for URIComponent*/
+    $enc.SPEC.S2 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'();/?:@&=+$,#";/*for URI*/
+    $enc.SPEC.S3 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.*@+/";/*for escape*/
+	$enc.wordtobytes = function(u){
 		if(u>0xffffffff)return [];
 		else if(u>0xffffff) {
 			return [u >>> 24,(u >> 16) & 0xff,(u >> 8) & 0xff,u & 0xff];
@@ -16,8 +21,49 @@ exports.encoding=exports.encoding||{
 		else{
 			return [u];
 		}
-	}
-};
+	};
+	$enc.encodeURIComponent = function(string,enc){
+		return $enc.encode(string,enc,"S1");
+	};
+	$enc.encodeURI = function(string,enc){
+		return $enc.encode(string,enc,"S2");
+	};
+	$enc.decode = function(string,enc){
+		enc = (enc || "utf-8").toUpperCase();
+		var $enc = exports.encoding[enc=="UTF-8"?"utf8":"gbk"];
+		var i=0,c,ret=[];
+		while(i<string.length){
+			c = string.substr(i,1);
+			if(c=="%" && /^%([0-9a-z]{2})$/i.test(string.substr(i,3))){
+				ret.push(parseInt("0x"+string.substr(i+1,2)));
+				i+=2;
+			}else{
+				ret.push(string.charCodeAt(i));
+			}
+			i++;
+		}
+		return $enc.toString($enc.bytesToWords(ret));
+	};
+	$enc.encode = function(string,enc,t){
+		enc = (enc || "utf-8").toUpperCase();
+		t = (t || "S1").toUpperCase();
+		var ret="", i=0, c, chr, bytes = exports.encoding[enc=="UTF-8"?"utf8":"gbk"].getWordArray(string);
+		while(i<bytes.length){
+			c = bytes[i++];
+			if(c<=0x7f){
+				chr = String.fromCharCode(c);
+				if($enc.SPEC[t].indexOf(chr)>=0) ret += chr;
+				else ret += "%" + exports.encoding.hex.stringify([c]);
+			}else{
+				var hex = c.toString(16);
+				if(hex.length%2!=0)hex="0"+hex;
+				ret += hex.replace(/([0-9a-z]{2})/ig,"%$1");
+			}
+		}
+		return ret;
+	};
+	return $enc;
+})();
 exports.encoding.hex = exports.encoding.hex || (function(){
 	var $hex = {};
 	$hex.parse = function(string){
@@ -50,46 +96,48 @@ exports.encoding.hex = exports.encoding.hex || (function(){
 })();
 exports.encoding.utf8 = exports.encoding.utf8 || (function(){
 	var utoutf8=function(u){
+		var a,b,c,d;
 		if(u<=0x7f) return u;
 		else if(u<=0x07FF){
-			var a = 0xc0 | (u >> 6);
-			var b = 0x80 | (u & 0x3f);
+			a = 0xc0 | (u >> 6);
+			b = 0x80 | (u & 0x3f);
 			return (a<<8)+b;
 		}
 		else if(u<=0xFFFF){
-			var a = 0xe0 | (u >> 12);
-			var b = 0x80 | ((u >> 6) & 0x3f);
-			var c = 0x80 | (u & 0x3f);
+			a = 0xe0 | (u >> 12);
+			b = 0x80 | ((u >> 6) & 0x3f);
+			c = 0x80 | (u & 0x3f);
 			return (a<<16)+(b<<8)+c;
 		}
 		else if(u<=0x10FFFF){
-			var a = 0xf0 | (u >> 18);
-			var b = 0x80 | ((u >> 12) & 0x3f);
-			var c = 0x80 | ((u >> 6) & 0x3f);
-			var d = 0x80 | (u & 0x3f);
+			a = 0xf0 | (u >> 18);
+			b = 0x80 | ((u >> 12) & 0x3f);
+			c = 0x80 | ((u >> 6) & 0x3f);
+			d = 0x80 | (u & 0x3f);
 			var ret = (a<<24)+(b<<16)+(c<<8)+d;
 			if(ret<0)ret+=0x100000000;
 			return ret;
 		}else return 0;
 	};
 	var utf8tou=function(u){
+		var a,b,c,d;
 		if(u<=0x7f) return u;
 		else if(u<=0xdfbf) {
-			var a = (u >> 8) & 0x1f;
-			var b = u & 0x3f;
+			a = (u >> 8) & 0x1f;
+			b = u & 0x3f;
 			return (a << 6) + b;
 		}
 		else if(u<=0xefbfbf) {
-			var a = (u >> 16) & 0xf;
-			var b = (u >> 8) & 0x3f;
-			var c = u & 0x3f;
+			a = (u >> 16) & 0xf;
+			b = (u >> 8) & 0x3f;
+			c = u & 0x3f;
 			return (a << 12) + (b << 6) + c;
 		}
 		else if(u<=0xf48fbfbf) {
-			var a = (u >>> 24) & 0x7;
-			var b = (u >> 16) & 0x3f;
-			var c = (u >> 8) & 0x3f;
-			var d = u & 0x3f;
+			a = (u >>> 24) & 0x7;
+			b = (u >> 16) & 0x3f;
+			c = (u >> 8) & 0x3f;
+			d = u & 0x3f;
 			return (a << 18) + (b << 12) + (c << 6) + d;
 		}
 		else return 0;
@@ -246,9 +294,8 @@ exports.encoding.gbk = exports.encoding.gbk || (function(){
 		while(i<bytes.length){
 			if(bytes[i]<0x7f) ret.push(bytes[i]);
 			else{
-				var u = g2u((bytes[i]<<8)+bytes[i+1]);
+				var u = g2u(bytes[i]);
 				ret.push((u[1]<<8)+u[0]);
-				i++;
 			}
 			i++;
 		}
@@ -271,7 +318,7 @@ exports.encoding.unicode = exports.encoding.unicode || (function(){
 		if(u.length<=0)return [];
 		var i=0,c,ret=[];
 		while(i<u.length){
-			var c=u.charCodeAt(i++);
+			c=u.charCodeAt(i++);
 			ret.push( c & 0xff);
 			ret.push( (c>>8) & 0xff); /*Little-Endian*/
 		}
