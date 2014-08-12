@@ -1,11 +1,39 @@
 ﻿/*
 ** give some method for encoding
+** encoding for 'hex','gbk','utf-8','unicode'
+** methods for uricomponent or uri;
+** ======================================= **
+** var Encoding = F.require("encoding");
+** Encoding.encodeURIComponent(string,enc);
+** Encoding.encodeURI(string,enc);
+** Encoding.decode(string,enc);
+** ======================================= **
+** Encoding.hex.parse(string);
+** Encoding.hex.stringify(byte[]);
+** ======================================= **
+** Encoding.utf8.getWordArray(string);
+** Encoding.utf8.getByteArray(string);
+** Encoding.utf8.bytesToWords(byte[]);
+** Encoding.utf8.toString(word[]);
+** ======================================= **
+** Encoding.gbk.getWordArray(string);
+** Encoding.gbk.getByteArray(string);
+** Encoding.gbk.bytesToWords(byte[]);
+** Encoding.gbk.toString(word[]);
+** ======================================= **
+** Encoding.unicode.getWordArray(string);
+** Encoding.unicode.getByteArray(string);
+** Encoding.unicode.bytesToWords(byte[]);
+** Encoding.unicode.toString(word[]);
+** ======================================= **
+** var base64str_e = F.base64.e(Encoding.gbk.getByteArray("admin"));
+** var base64str_d = Encoding.gbk.toString(Encoding.gbk.bytesToWords(F.base64.d(base64str_e)));
 */
 exports.encoding=exports.encoding||(function(){
 	var $enc={};
 	$enc.SPEC={};
-    $enc.SPEC.S1 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'()";/*for URIComponent*/
-    $enc.SPEC.S2 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'();/?:@&=+$,#";/*for URI*/
+	$enc.SPEC.S1 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'()";/*for URIComponent*/
+	$enc.SPEC.S2 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'();/?:@&=+$,#";/*for URI*/
 	$enc.wordtobytes = function(u){
 		if(u>0xffffffff)return [];
 		else if(u>0xffffff) {
@@ -348,3 +376,4 @@ exports.encoding.unicode = exports.encoding.unicode || (function(){
 	};
 	return $unicode;
 })();
+return exports.encoding;

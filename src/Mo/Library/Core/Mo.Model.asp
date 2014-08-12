@@ -772,7 +772,7 @@ __Model__.prototype.parseData = function(table){
 				if(tableschema["CHARACTER_MAXIMUM_LENGTH"] != null)parm.Size = tableschema["CHARACTER_MAXIMUM_LENGTH"];
 				if(tableschema["NUMERIC_SCALE"] != null)parm.Scale = tableschema["NUMERIC_SCALE"];
 			}else{
-				if(table[i]["type"] != "exp" && (typeof table[i]["value"] == "string"))v = ("'" + table[i]["value"].replace(/\'/igm,"''") + "'");
+				if(table[i]["type"] != "exp" && (typeof table[i]["value"] == "string")) v = ("'" + table[i]["value"].replace(/\'/igm,"''") + "'").replace(/\0/ig,"");
 				values.push(v);
 				update.push(this.base.splitChars[0]+i+this.base.splitChars[1]+"=" + v);
 			}
