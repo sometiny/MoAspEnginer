@@ -7,12 +7,6 @@
 */
 ActionEncoding = IAction.create(); 
 
-/*
-** 为新Action对象扩展一个新方法，对应相应的动作；
-** 语法：newAction.extend(funcName,callback);
-** funcName：方法名；
-** callback：要执行的函数；
-*/
 ActionEncoding.extend("Index",function(){
 	F.require("encoding");
 	var string="小蜻蜓123abcdefg+%&=！";

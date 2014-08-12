@@ -81,7 +81,7 @@ $httpupload.fn.uploadfromclient = function(){
 };
 
 $httpupload.string2bytes = function(string){
-	return F.base64.getBytes(F.base64.encode(string))
+	return F.base64.toBinary(F.base64.encode(string))
 };
 $httpupload.filesize=0;
 $httpupload.readbinaryfile = function(path){

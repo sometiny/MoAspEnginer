@@ -845,10 +845,8 @@ var GLOBAL = this, Exports, F = {
 			return F.decode(string);
 		}
 	},
-	base64 : {
-		keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
-		encode : function (Str) {    
-			if(typeof Str=="string") Str = F.string.getByteArray(Str);    
+	base64 : (function(){
+		var encode_ = function (Str) {
 			var output = "";    
 			var chr1, chr2, chr3 = "";    
 			var enc1, enc2, enc3, enc4 = "";    
@@ -867,8 +865,8 @@ var GLOBAL = this, Exports, F = {
 		        enc1 = enc2 = enc3 = enc4 = "";    
 			} while (i < Str.length);    
 			return output;    
-		}, 
-		decode : function(Str) {    
+		};
+		var decode_ = function(Str) {    
 			var output = [];    
 			var chr1, chr2, chr3 = "";    
 			var enc1, enc2, enc3, enc4 = "";    
@@ -877,7 +875,7 @@ var GLOBAL = this, Exports, F = {
 			if (base64test.exec(Str)){}    
 			Str = Str.replace(/[^A-Za-z0-9\+\/\=]/g, "");    
 			do {    
-		        enc1 = F.base64.keyStr.indexOf(Str.charAt(i++));    
+		        enc1 = F.base64.keyStr.indexOf(Str.charAt(i++));
 		        enc2 = F.base64.keyStr.indexOf(Str.charAt(i++));    
 		        enc3 = F.base64.keyStr.indexOf(Str.charAt(i++));    
 		        enc4 = F.base64.keyStr.indexOf(Str.charAt(i++));    
@@ -890,15 +888,32 @@ var GLOBAL = this, Exports, F = {
 		        chr1 = chr2 = chr3 = "";    
 		        enc1 = enc2 = enc3 = enc4 = "";    
 			} while (i < Str.length);    
-			return F.string.fromByteArray(output);    
-		},
-		getBytes:function(str){
-			var xmlstr="<?xml version=\"1.0\" encoding=\"gb2312\"?><root xmlns:dt=\"urn:schemas-microsoft-com:datatypes\"><data dt:dt=\"bin.base64\">" + str + "</data></root>"
+			return output;    
+		};
+		var $base64={};
+		$base64.keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+		$base64.e=encode_;
+		$base64.d=decode_;
+		$base64.encode = function (Str) {    
+			if(typeof Str=="string") Str = F.string.getByteArray(Str);
+			return encode_(Str);    
+		};
+		$base64.decode = function (Str) {    
+			return F.string.fromByteArray(decode_(Str));    
+		};
+		$base64.toBinary = function(str){
 			var xmldom = F.activex("Microsoft.XMLDOM");
-			xmldom.loadXML(xmlstr);
+			xmldom.loadXML("<?xml version=\"1.0\" encoding=\"gb2312\"?><root xmlns:dt=\"urn:schemas-microsoft-com:datatypes\"><data dt:dt=\"bin.base64\">" + str + "</data></root>");
 			return xmldom.selectSingleNode("//root/data").nodeTypedValue;
-		}
-	},
+		};
+		$base64.fromBinary = function(str){
+			var xmldom = F.activex("Microsoft.XMLDOM");
+			xmldom.loadXML("<?xml version=\"1.0\" encoding=\"gb2312\"?><root xmlns:dt=\"urn:schemas-microsoft-com:datatypes\"><data dt:dt=\"bin.base64\"></data></root>");
+			xmldom.selectSingleNode("//root/data").nodeTypedValue=str;
+			return xmldom.selectSingleNode("//root/data").text;
+		};
+		return $base64;
+	})(),
 	dump_ : function(parm,level){
 		if(typeof F.dump_.helper != "function"){
 			F.dump_.helper = function(l){var returnValue = "";for(var i = 0;i < l;i++)returnValue += "  ";return returnValue;};

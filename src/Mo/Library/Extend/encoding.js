@@ -6,7 +6,6 @@ exports.encoding=exports.encoding||(function(){
 	$enc.SPEC={};
     $enc.SPEC.S1 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'()";/*for URIComponent*/
     $enc.SPEC.S2 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'();/?:@&=+$,#";/*for URI*/
-    $enc.SPEC.S3 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.*@+/";/*for escape*/
 	$enc.wordtobytes = function(u){
 		if(u>0xffffffff)return [];
 		else if(u>0xffffff) {
@@ -214,7 +213,7 @@ exports.encoding.gbk = exports.encoding.gbk || (function(){
 			offset=u-0xFF01+0x9FA6-0x4E00;
 		}  
 		CP.gbk.stream.u2g.position=offset*2;
-		return F.vbs.getByteArray(CP.gbk.stream.u2g.read(2));
+		return F.base64.d(F.base64.fromBinary(CP.gbk.stream.u2g.read(2)));
 	};
 	var g2u=function(g){
 		var offset, ch = g >> 8, cl = g & 0xff;
@@ -222,7 +221,7 @@ exports.encoding.gbk = exports.encoding.gbk || (function(){
 		cl -= 0x40;
 		if(ch<=0x7d && cl<=0xbe){
 			CP.gbk.stream.g2u.position=(ch*0xbf+cl)*2;
-			return F.vbs.getByteArray(CP.gbk.stream.g2u.read(2));
+			return F.base64.d(F.base64.fromBinary(CP.gbk.stream.g2u.read(2)));
 		}else{
 			return [0x1f,0xff];
 		}
@@ -244,6 +243,12 @@ exports.encoding.gbk = exports.encoding.gbk || (function(){
 		CP.gbk.stream[cp]=null;
 	};
 	var $gbk={};
+	$gbk.Test = function(u){
+		opencp();
+		var ret = u2g(u.charCodeAt(0));
+		closecp();
+		return ret;
+	};
 	$gbk.getWordArray = function(u){
 		if(u.length<=0)return [];
 		if(!opencp())return [];
@@ -290,17 +295,17 @@ exports.encoding.gbk = exports.encoding.gbk || (function(){
 	$gbk.toString = function(bytes){
 		if(bytes.length<=0)return "";
 		if(!opencp("g2u"))return "";
-		var ret=[],i=0;
+		var ret="",i=0;
 		while(i<bytes.length){
-			if(bytes[i]<0x7f) ret.push(bytes[i]);
+			if(bytes[i]<0x7f) ret+=String.fromCharCode(bytes[i]);
 			else{
 				var u = g2u(bytes[i]);
-				ret.push((u[1]<<8)+u[0]);
+				ret+=String.fromCharCode((u[1]<<8)+u[0]);
 			}
 			i++;
 		}
 		closecp("g2u");
-		return exports.encoding.unicode.toString(ret);
+		return ret;
 	};
 	return $gbk;
 })();
@@ -337,7 +342,7 @@ exports.encoding.unicode = exports.encoding.unicode || (function(){
 		if(u.length<=0)return "";
 		var i=0,c,ret="";
 		while(i<u.length){
-			ret+=String.fromCharCode(u[i++])
+			ret+=String.fromCharCode(u[i++]);
 		}
 		return ret;
 	};

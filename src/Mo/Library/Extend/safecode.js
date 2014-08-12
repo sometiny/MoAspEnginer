@@ -93,6 +93,6 @@
 			}
 		}
 	}
-	F.echo(F.base64.getBytes(F.base64.encode(output)),F.TEXT.BIN);
+	F.echo(F.base64.toBinary(F.base64.e(output)),F.TEXT.BIN);
 }
 exports.safecode = $safecode;
