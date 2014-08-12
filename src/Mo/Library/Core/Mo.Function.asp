@@ -313,7 +313,7 @@ var GLOBAL = this, Exports, F = {
 				return F.exports;
 			}
 			src = F.string.fromfile(path_);
-			src = src.replace(/^(\s*)<sc(.+)>/im,"").replace(/<\/script>(\s*)/im,"");
+			src = src.replace(/^(\s*)<sc(.+)>/ig,"").replace(/<\/script>(\s*)$/ig,"");
 			if(F.cache.enabled)F.cache.write(library,src);
 		}else{
 			src = F.cache.read(library);
@@ -347,7 +347,7 @@ var GLOBAL = this, Exports, F = {
 			}
 			if(!iscached){
 				src = F.string.fromfile(path,charset || "utf-8");
-				src = src.replace(/^(\s*)<sc(.+)>/im,"").replace(/<\/script>(\s*)/im,"");
+				src = src.replace(/^(\s*)<sc(.+)>/ig,"").replace(/<\/script>(\s*)$/ig,"");
 				if(src == ""){
 					ExceptionManager.put(new Exception(0,"F.include","read file failed:" + path));
 					return false;
@@ -376,10 +376,10 @@ var GLOBAL = this, Exports, F = {
 			var exports = exports || args;
 			if(exports.constructor == Array && exports.length > 0){
 				for(var i = 0;i < exports.length;i++){
-					(new Function("obj_",exports[i] + " = obj_;"))(eval(exports[i]));
+					(new Function("sc",exports[i] + " = sc;"))(eval(exports[i]));
 				}
 			}else if(exports.constructor == String){
-				(new Function("obj_",exports + " = obj_;"))(eval(exports));
+				(new Function("sc",exports + " = sc;"))(eval(exports));
 			}
 			return true;
 		}catch(ex){

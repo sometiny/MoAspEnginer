@@ -1,28 +1,27 @@
 ﻿<!--#include file="Mo.Function.asp"-->
 <script language="jscript" runat="server">
 var Mo = Mo || (function(){
-	var M={
-		Version : "MoAspEnginer 2.0(Beta)"
-		,Librarys : {}
-		,Language : {}
-		,Assigns : {}
-		,Statics : {}
-		,Config : {}
-		,rewrite : false
-		,Action : ""
-		,Method : ""
-		,Group : ""
-		,CacheFileName : ""
-		,RealAction : ""
-		,RealMethod : ""
-		,Status : ""
-		,runtime : {
-			start : 0,
-			ticks : function(){
-				return (new Date()) - this.start;
-			}
+	var M={};
+	M.Version = "MoAspEnginer 2.0(Beta)";
+	M.Librarys = {};
+	M.Language = {};
+	M.Assigns = {};
+	M.Statics = {};
+	M.Config = {};
+	M.rewrite = false;
+	M.Action = "";
+	M.Method = "";
+	M.Group = "";
+	M.CacheFileName = "";
+	M.RealAction = "";
+	M.RealMethod = "";
+	M.Status = "";
+	M.runtime = {
+		start : 0,
+		ticks : function(){
+			return (new Date()) - M.runtime.start;
 		}
-	}; 
+	};
 	var extend = function(src,dest){
 		for(var c in dest){
 			if(dest.hasOwnProperty(c)) src[c] = dest[c];
@@ -35,7 +34,7 @@ var Mo = Mo || (function(){
 			var ret = F.string.fromfile(path);
 			ret = F.string.replace(ret,/^(\s*)<s(.+?)>(\s*)/i,"");
 			ret = F.string.replace(ret,/(\s*)<\/script>(\s*)$/igm,"");
-			if(!F.execute(ret,"Mo" + library + cls))return false;
+			if(!F.execute.call(path,ret,"Mo" + library + cls))return false;
 			return true;
 		}catch(ex){
 			ExceptionManager.put(ex, "LoadLibrary([path], \"" + library + "\", \"" + cls + "\")");
@@ -102,11 +101,12 @@ var Mo = Mo || (function(){
 	var LoadModel = function(path,model){
 		if(M.Librarys["Action_" + model] == "jscript")return true;
 		try{
-			var ret = F.string.fromfile(F.mappath(path),G.MO_CHARSET),language;
-			ret = F.string.replace(ret,/(^(\s+)|(\s+)$)/igm,"");
-			ret = F.string.replace(ret,"^<s" + "cript(.+?)>(\s*)","igm","")
-			ret = F.string.replace(ret,/(\s*)<\/script>/igm,"")
-			if(!F.execute(ret,"Action" + model))return false;
+			path = F.mappath(path);
+			var ret = F.string.fromfile(path,G.MO_CHARSET),language;
+			ret = F.string.replace(ret,/(^(\s+)|(\s+)$)/ig,"");
+			ret = F.string.replace(ret,"^<s" + "cript(.+?)>(\s*)","ig","")
+			ret = F.string.replace(ret,/(\s*)<\/script>(\s*)$/ig,"")
+			if(!F.execute.call(path,ret,"Action" + model))return false;
 			M.Librarys["Action_" + model] = "jscript"
 			return true;
 		}catch(ex){
@@ -313,7 +313,7 @@ var Mo = Mo || (function(){
 				}
 				if(usecache){
 					vbscript = F.string.fromfile(cachepath,G.MO_CHARSET);
-					vbscript = vbscript.replace(/^<s(.+?)>\r\n/igm,"").replace(/\r\n<\/script>$/igm,"");
+					vbscript = vbscript.replace(/^<s(.+?)>\r\n/ig,"").replace(/\r\n<\/script>$/ig,"");
 				}
 			}
 		}
@@ -601,7 +601,7 @@ var Mo = Mo || (function(){
 					    if(pathinfo[0]!=""){
 						    var ret = F.string.fromfile(pathinfo[0]);
 							ret = F.string.replace(ret,/^(\s*)\<\%(\s*)/i,"");
-							ret = F.string.replace(ret,/(\s*)\%\>(\s*)$/igm,"");
+							ret = F.string.replace(ret,/(\s*)\%\>(\s*)$/ig,"");
 							F.vbs.ctrl.error.clear();
 							F.vbs.execute(ret);
 							if(F.vbs.ctrl.error.number != 0){ 
