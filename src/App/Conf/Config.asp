@@ -14,7 +14,7 @@ return {
 	MO_ACTION_CHAR : "a",
 	MO_PRE_LIB : "",
 	MO_TAG_LIB : "",
-	MO_END_LIB : "Test",
+	MO_END_LIB : "",
 	MO_DIRECT_OUTPUT : false,
 	MO_LIB_CACHE : false,
 	MO_REWRITE_MODE : "",
