@@ -1,4 +1,4 @@
-﻿<!--#include file="Mo/Library/Core/Mo.asp"-->
+﻿<!--#include file="Mo/Library/MAE/Mo.asp"-->
 <script language="jscript" runat="server">
 Mo.Initialize({
 	MO_APP_NAME : "App",
