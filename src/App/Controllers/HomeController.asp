@@ -1,6 +1,7 @@
 ﻿<script language="jscript" runat="server">
 HomeController = IController.create();
-HomeController.extend("Index", function(){
+HomeController.extend("Home", function(){
+	this.assign("Version",Mo.Version);
 	this.assign("appname","MoAspEnginer");
 	this.assign("birthday",new Date());
 	this.assign("address","杭州");

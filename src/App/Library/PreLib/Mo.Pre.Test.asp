@@ -1,7 +1,6 @@
 ﻿<script language="jscript" runat="server">
-function MoPreTest(){
-}
-MoPreTest.prototype.Index = function(){
+MoPreTest = IClass.create();
+MoPreTest.extend("Index", function(){
 	F.timer.run();
-};
+});
 </script>

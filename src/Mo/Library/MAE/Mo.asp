@@ -96,7 +96,6 @@ var Mo = Mo || (function(){
 		if(cfg.MO_APP.substr(cfg.MO_APP.length - 1) != "/")cfg.MO_APP = cfg.MO_APP + "/";
 		if(cfg.MO_CORE.substr(cfg.MO_CORE.length - 1) != "/")cfg.MO_CORE = cfg.MO_CORE + "/";
 		if(!F.exists(cfg.MO_CORE,true))F.exit("核心目录[" + cfg.MO_CORE + "]不存在，请检查初始配置参数。");	
-		//if(!F.exists(cfg.MO_APP,true))cfg.MO_APP = cfg.MO_CORE;
 	}
 	var LoadController = function(path,controller){
 		if(M.Librarys["Controller_" + controller] == "jscript")return true;
@@ -132,6 +131,40 @@ var Mo = Mo || (function(){
 		if(F.exists(path))return [path,core,library,cls];
 		return ["",core,library,cls];
 	};
+	var start__ = function(){
+		if(G.MO_PRE_LIB != ""){
+			var libs = G.MO_PRE_LIB.split(","),lib,T__;
+			for(var i = 0;i < libs.length;i++){
+				var result = parseLibraryPath("PreLib:Pre." + libs[i]);
+				if(result[0]!=""){
+					if(F.include(result[0])){
+						var pre = F.initialize("MoPre" + libs[i]);
+						pre.Index();
+						pre.__destruct();
+					}
+				}
+			}
+		}
+ 	};
+	var end__ = function(){
+		if(G.MO_END_LIB != ""){
+			var libs = G.MO_END_LIB.split(","),lib,T__;
+			for(var i = 0;i < libs.length;i++){
+				var result = parseLibraryPath("EndLib:End." + libs[i]);
+				if(result[0]!=""){
+					if(F.include(result[0])){
+						var end = F.initialize("MoEnd" + libs[i]);
+						end.Index();
+						end.__destruct();
+					}
+				}
+			}
+		}
+	};
+	var debug_ = function(){
+		if(G.MO_SHOW_SERVER_ERROR)F.echo(ExceptionManager.debug());
+		Model__.debug();
+	};
 	var G = {};
 	M.Initialize = function(cfg){
 		this.runtime.start = new Date();
@@ -152,7 +185,6 @@ var Mo = Mo || (function(){
 		F.MO_APP_NAME = G.MO_APP_NAME;
 		F.MO_APP = G.MO_APP;
 		F.MO_CORE = G.MO_CORE;
-		M.Start__();
 		try{
 			F.foreach(["Mo.Extend","Mo.Model","Mo.Model.Helper"],function(i,v){
 				F.include(G.MO_CORE +"Library/MAE/" + v + ".asp");
@@ -200,13 +232,15 @@ var Mo = Mo || (function(){
 		}catch(ex){
 			ExceptionManager.put(ex,"Mo.Initialize");
 		}
+		M.assign("VERSION",Mo.Version);
+		start__();
 		return M;
 	};
 	M.Terminate = function(){
+		end__();
 		Model__.dispose();
 		F.dispose();
-		M.Debug_();
-		M.End__();
+		debug_();
 		this.Assigns = null;
 		this.Statics = null;
 		this.Config = null;
@@ -352,6 +386,7 @@ var Mo = Mo || (function(){
 		return F.exists(path);
 	};
 	M.assign = function(key,value){
+		if(!/^(\w+)$/ig.test(key)) return ExceptionManager.put(0x2e4c,"Mo.assign","Parameter 'key' is invalid.");
 		if(G.MO_COMPILE_STRICT) GLOBAL[key] = value; else this.Assigns[key] = value;
 	};
 	M.exists = function(key){
@@ -446,28 +481,6 @@ var Mo = Mo || (function(){
 			ExceptionManager.put(6,"Mo.A(ctrl)","模块[" + ctrl + "]无法加载,请检查模块文件是否存在");
 		}
 	};
-	M.Start__ = function(){
-		if(G.MO_PRE_LIB != ""){
-			var libs = G.MO_PRE_LIB.split(","),lib,T__;
-			for(var i = 0;i < libs.length;i++){
-				M.use("PreLib:Pre." + libs[i]);
-				F.initialize("MoPre" + libs[i]).Index();
-			}
-		}
- 	};
-	M.End__ = function(){
-		if(G.MO_END_LIB != ""){
-			var libs = G.MO_END_LIB.split(","),lib,T__;
-			for(var i = 0;i < libs.length;i++){
-				M.use("EndLib:End." + libs[i]);
-				F.initialize("MoEnd" + libs[i]).Index();
-			}
-		}
-	};
-	M.Debug_ = function(){
-		if(G.MO_SHOW_SERVER_ERROR)F.echo(ExceptionManager.debug());
-		Model__.debug();
-	};
 	M.Run = function(){
 		this.Method = F.string.trim(F.get(G.MO_METHOD_CHAR))
 		this.Action = F.string.trim(F.get(G.MO_ACTION_CHAR))
@@ -497,7 +510,13 @@ var Mo = Mo || (function(){
 				if(!F.exists(ModelPath)){
 					ModelPath = G.MO_CORE + "Controllers/" + this.Group + "EmptyController.asp";
 					theMethod ="Empty";
-					if(!F.exists(ModelPath)) F.exit("模块[" + this.Method + "]不存在");
+					if(!F.exists(ModelPath)){
+						if(M.templateIsInApp(this.Action) || M.templateIsInCore(this.Action)){
+							M.display(this.Action);
+						}else{
+							F.exit("模块[" + this.Method + "]不存在");
+						}
+					}
 				}
 			}
 		}
@@ -511,6 +530,8 @@ var Mo = Mo || (function(){
 						MC[this.Action+"_Post_"]();
 					}else if(MC[this.Action]){
 						MC[this.Action]();
+					}else if(M.templateIsInApp(this.Action) || M.templateIsInCore(this.Action)){
+						M.display(this.Action);
 					}else{
 						if(MC["empty"]){
 							this.RealAction = "empty";

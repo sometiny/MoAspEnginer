@@ -7,7 +7,7 @@
 */
 TestController = IController.create(
 	function(){
-		this.Name="我来自另外的Action！";
+		this.Name="我来自另外的Controller！";
 	}
 ); 
 
@@ -24,9 +24,9 @@ TestController.extend("Show",function(){
 	F.echo(this.Name,true);
 });
 TestController.extend("Test",function(){
-	F.vbs.include("Upload");
-	var upload = F.vbs.require("MoLibUpload");
-	F.echo(upload.Version,true);
+	F.echo("<pre>");
+	F.dump(F.server__);
+	F.echo("</pre>");
 });
 TestController.extend("empty",function(name){
 	F.echo("调用不到" + name + "方法，就跑到empty方法了！",true);

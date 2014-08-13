@@ -1,6 +1,6 @@
 ﻿<script language="jscript" runat="server">
 var GLOBAL = this, Exports, F = {
-	fso : null,post__ : null,get__ : {},server__ : {},activex__ : [],postinited : false,rewrite : false,exports : {},required:{},
+	fso : null,post__ : null,get__ : {},server__ : {},activex__ : [],postinited : false,rewrite : false,exports : {},required:{},included:{},
 	MO_SESSION_WITH_SINGLE_TAG : false,MO_APP_NAME : "",MO_APP : "",MO_CORE : "",
 	TEXT : {BR : 1,NL : 2,BIN : 4,NLBR : 1|2},
 	has : function(obj,key){return obj.hasOwnProperty(key);},
@@ -334,6 +334,7 @@ var GLOBAL = this, Exports, F = {
 		}
 	},
 	include : function(path,charset){
+		if(F.included[path]===true)return true;
 		try{
 			path = F.mappath(path);
 			if(!F.fso.fileexists(path)){
@@ -356,7 +357,7 @@ var GLOBAL = this, Exports, F = {
 			}
 			if(F.execute.call(path,src)){
 				if(!iscached && F.cache.enabled)F.cache.write(path,src);
-				return true;
+				return F.included[path] = true;
 			}else{
 				return false;
 			}
