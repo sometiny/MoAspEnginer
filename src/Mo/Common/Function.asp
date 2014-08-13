@@ -1,8 +1,34 @@
 ﻿<script language="jscript" runat="server">
+/*
+** File: Function.asp
+** Usage: common functions for global. 
+**		if you add some functions, you should add the names to exports.
+**		or you can not use then in your business.
+** About: 
+**		support@mae.im
+*/
+/*export the functions*/
 var exports=["CreatePageList","is_empty","IsEmpty"];
+
+
+/****************************************************
+'@description	ensure the variable is empty or not.
+'@parameter	variable [Variant] : the variable needs to ensure
+'@return	[Boolean] description
+'****************************************************/
 function is_empty(variable){
 	return variable==""||variable===null||variable===undefined;
 }
+
+
+/****************************************************
+'@description	create page string for records
+'@parameter	URL [String] : can be empty. if it is empty, i will fetch from current request.
+'@parameter	RecordCount [Int] : records count in the query result.
+'@parameter	PageSize [Int] : records count of every page
+'@parameter	CurrentPage [Int] : current page number
+'@return	[String]
+'****************************************************/
 function CreatePageList(URL, RecordCount, PageSize, CurrentPage){
 	var PageCount ,PageStr="";
 	if(URL==""){
@@ -33,5 +59,7 @@ function CreatePageList(URL, RecordCount, PageSize, CurrentPage){
 	}
 	return PageStr;
 }
+
+/*create a cname of is_empty, and export it to global Env. too*/
 var IsEmpty = is_empty;
 </script>

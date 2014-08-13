@@ -1,4 +1,10 @@
 ﻿<script language="jscript" runat="server">
+/*
+** File: Mo.Function.asp
+** Usage: define many method for MAE, such as post, get, server and so on...
+** About: 
+**		support@mae.im
+*/
 var GLOBAL = this, Exports, F = {
 	fso : null,post__ : null,get__ : {},server__ : {},activex__ : [],postinited : false,rewrite : false,exports : {},required:{},included:{},
 	MO_SESSION_WITH_SINGLE_TAG : false,MO_APP_NAME : "",MO_APP : "",MO_CORE : "",

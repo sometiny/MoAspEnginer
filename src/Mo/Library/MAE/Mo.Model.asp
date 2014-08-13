@@ -1,4 +1,10 @@
 ﻿<script language="jscript" runat="server">
+/*
+** File: Mo.Model.asp
+** Usage: define datebase operate methods and classes.
+** About: 
+**		support@mae.im
+*/
 var exports = ["Model__","__Model__"];
 /****************************************************
 '@DESCRIPTION:	create a Model. You can use this function in VBScript.

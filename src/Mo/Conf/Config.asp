@@ -1,4 +1,11 @@
 ﻿<script language="jscript" runat="server">
+/*
+** File: Config.asp
+** Usage: global configures
+**		you can define configure with a same name in your app's config file to override the follow configures;
+** About: 
+**		support@mae.im
+*/
 return {
 	MO_ROOT : "",
 	MO_APP_NAME : "App",

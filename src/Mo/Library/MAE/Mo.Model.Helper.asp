@@ -1,4 +1,10 @@
 ﻿<script language="jscript" runat="server">
+/*
+** File: Mo.Model.Helper.asp
+** Usage: define helper methods and classes for datebase operate.
+** About: 
+**		support@mae.im
+*/
 var exports=["ModelHelper","ModelCMDManager"];
 var ModelHelper={
 	Enums:{

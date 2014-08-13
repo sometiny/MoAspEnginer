@@ -1,4 +1,10 @@
 ﻿<script language="jscript" runat="server">
+/*
+** File: Mo.View.asp
+** Usage: parse template to jscript codes.
+** About: 
+**		support@mae.im
+*/
 var exports=["MoAspEnginerView"];
 var G = Mo.Config.Global;
 function MoAspEnginerView(content){

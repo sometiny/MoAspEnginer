@@ -1,12 +1,17 @@
 ﻿<!--#include file="Mo.Function.asp"-->
 <script language="jscript" runat="server">
+/*
+** File: Mo.asp
+** Usage: core code of MAE, don't change 'Mo' to other name.
+** About: 
+**		support@mae.im
+*/
 var Mo = Mo || (function(){
 	var M={};
 	M.Version = "MoAspEnginer 2.1";
 	M.Librarys = {};
 	M.Language = {};
 	M.Assigns = {};
-	M.Statics = {};
 	M.Config = {};
 	M.rewrite = false;
 	M.Action = "";
@@ -16,18 +21,20 @@ var Mo = Mo || (function(){
 	M.RealAction = "";
 	M.RealMethod = "";
 	M.Status = "";
+
 	M.runtime = {
 		start : 0,
 		ticks : function(){
 			return (new Date()) - M.runtime.start;
 		}
 	};
+	
 	var extend = function(src,dest){
 		for(var c in dest){
 			if(dest.hasOwnProperty(c)) src[c] = dest[c];
 		}
 	};
-	
+
 	var LoadLibrary = function( path, library, cls){
 		try{
 			path = F.mappath(path);
@@ -41,6 +48,7 @@ var Mo = Mo || (function(){
 			return false;
 		}
 	};
+	
 	var RightCopy = function(src,target){
 		var i = 0;
 		while(true){
@@ -50,6 +58,7 @@ var Mo = Mo || (function(){
 		}
 		return src;
 	};
+
 	var LoadTemplateEx = function(template){
 		var templatelist,vpath,path,templatelist2;
 		
@@ -76,6 +85,7 @@ var Mo = Mo || (function(){
 		}
 		return tempStr;
 	};
+
 	var ParseTemplatePath = function(template){
 		var templatelist,vpath;
 		templatelist = template.split(":");
@@ -88,6 +98,7 @@ var Mo = Mo || (function(){
 		}
 		return vpath;
 	};
+
 	var InitializePath = function(cfg,url_){
 		if(cfg.MO_APP_NAME == "")F.exit("未定义应用名称：MO_APP_NAME，请检查初始配置参数。")
 		if(cfg.MO_ROOT == "")cfg.MO_ROOT = url_.substr(0,url_.lastIndexOf("/") + 1);
@@ -97,6 +108,7 @@ var Mo = Mo || (function(){
 		if(cfg.MO_CORE.substr(cfg.MO_CORE.length - 1) != "/")cfg.MO_CORE = cfg.MO_CORE + "/";
 		if(!F.exists(cfg.MO_CORE,true))F.exit("核心目录[" + cfg.MO_CORE + "]不存在，请检查初始配置参数。");	
 	}
+
 	var LoadController = function(path,controller){
 		if(M.Librarys["Controller_" + controller] == "jscript")return true;
 		try{
@@ -113,6 +125,7 @@ var Mo = Mo || (function(){
 			return false;
 		}
 	};
+
 	var parseLibraryPath = function(lib){
 		var path,core,cls,library;
 		core = "Extend";
@@ -131,6 +144,7 @@ var Mo = Mo || (function(){
 		if(F.exists(path))return [path,core,library,cls];
 		return ["",core,library,cls];
 	};
+
 	var start__ = function(){
 		if(G.MO_PRE_LIB != ""){
 			var libs = G.MO_PRE_LIB.split(","),lib,T__;
@@ -146,6 +160,7 @@ var Mo = Mo || (function(){
 			}
 		}
  	};
+ 	
 	var end__ = function(){
 		if(G.MO_END_LIB != ""){
 			var libs = G.MO_END_LIB.split(","),lib,T__;
@@ -161,11 +176,13 @@ var Mo = Mo || (function(){
 			}
 		}
 	};
+
 	var debug_ = function(){
 		if(G.MO_SHOW_SERVER_ERROR)F.echo(ExceptionManager.debug());
 		Model__.debug();
 	};
 	var G = {};
+
 	M.Initialize = function(cfg){
 		this.runtime.start = new Date();
 		Response.Charset = "utf-8";
@@ -242,7 +259,6 @@ var Mo = Mo || (function(){
 		F.dispose();
 		debug_();
 		this.Assigns = null;
-		this.Statics = null;
 		this.Config = null;
 		this.Language = null;
 		this.Librarys = null;
