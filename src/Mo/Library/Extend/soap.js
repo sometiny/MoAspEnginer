@@ -1,6 +1,9 @@
-﻿/****************************************************
-'@DESCRIPTION:	define $soap object
-'****************************************************/
+﻿/*
+** File: soap.js
+** Usage: soap request for webservices.
+** About: 
+**		support@mae.im
+*/
 function $soap(url,namespace){
 	function def(v){
 		if(v==undefined)return "";

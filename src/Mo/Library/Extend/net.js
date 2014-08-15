@@ -1,9 +1,13 @@
 ﻿/*
-'by anlige at www.9fn.net
-$net.IpToLong
-$net.LongToIp
-$net.InSameNetWork
-$net.IsIP
+** File: net.js
+** Usage: some methods for ip
+** About: 
+**		support@mae.im
+
+**	$net.IpToLong
+**	$net.LongToIp
+**	$net.InSameNetWork
+**	$net.IsIP
 */
 var $net={
 	/****************************************************

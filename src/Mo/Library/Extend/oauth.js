@@ -1,4 +1,11 @@
-﻿function $oauth(client_id, client_secret,redirect_uri){
+﻿/*
+** File: oauth.js
+** Usage: create oauth(2.0) request. you know it !
+** About: 
+**		support@mae.im
+*/
+
+function $oauth(client_id, client_secret,redirect_uri){
 	this.table=[];
 	this.client_id = client_id||"";
 	this.redirect_uri = redirect_uri||"";

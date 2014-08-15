@@ -1,4 +1,9 @@
-﻿/*'by anlige at www.9fn.net*/
+﻿/*
+** File: sha1.js
+** Usage: compute sha1
+** About: 
+**		support@mae.im
+*/
 var $sha1={
 	hex:function(b){
 		var c="0123456789abcdef";

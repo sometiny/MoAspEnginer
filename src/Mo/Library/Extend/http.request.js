@@ -1,4 +1,55 @@
-﻿/****************************************************
+﻿/*
+** File: http.request.js
+** Usage: a library for http request
+** About: 
+**		support@mae.im
+*/
+
+var cfg={
+	method : "GET",
+	data : "",
+	autoClearBuffer : false,
+	url : "",
+	timeout : [10000, 10000, 10000, 30000],
+	charset : "utf-8",
+	headers : []
+};
+
+
+var getXmlHttpRequestObject = function() {
+	var b = null;
+	var httplist = ["MSXML2.serverXMLHttp.3.0", "MSXML2.serverXMLHttp", "MSXML2.XMLHttp.3.0", "MSXML2.XMLHttp", "Microsoft.XMLHttp"];
+	for (var i = 0; i <= httplist.length - 1; i++) {
+		try {
+			b = new ActiveXObject(httplist[i]);
+			(function(o) {
+				getXmlHttpRequestObject = function() {
+					return new ActiveXObject(o)
+				};
+			})(httplist[i]);
+			return b;
+		} catch (ex) {
+			//
+		}
+	}
+	return b;
+};
+
+var bytesToString = function(bytSource, Cset) { //ef bb bf,c0 fd
+	var stream = new ActiveXObject("ADODB.Stream"), byts;
+	stream.Type = 1;
+	stream.Mode = 3;
+	stream.Open();
+	stream.Write(bytSource);
+	stream.Position = 0;
+	stream.Type = 2;
+	stream.CharSet = Cset;
+	byts = stream.ReadText();
+	stream.Close();
+	stream = null;
+	return byts;
+};
+/****************************************************
 '@DESCRIPTION:	define $httprequest object. All the parms can be assigned after create instance
 '@PARAM:	url [String[option]] : target URL.
 '@PARAM:	method [String[option]] : request method. POST/GET/HEADER....
@@ -6,26 +57,37 @@
 '@PARAM:	autoClearBuffer [Boolean[option]] : auto clear buffer when request
 '****************************************************/
 function $httprequest(url, method, data, autoClearBuffer) {
-	if (typeof method == "undefined") method = "GET";
-	if (typeof data == "undefined") data = "";
-	if (typeof autoClearBuffer == "undefined") autoClearBuffer = true;
-	if (method == "") method = "GET";
-	method = method.toUpperCase();
-	if (method == "POST") autoClearBuffer = false;
-	this.timeout = [10000, 10000, 10000, 30000];
+	var $g={};
+	F.extend($g,cfg);
+	if(typeof url == "object") F.extend($g,url);
+	else{
+		F.extend($g,{
+			url : url,
+			method : method,
+			data : data,
+			autoClearBuffer : autoClearBuffer
+		});
+	}
+	$g.method = $g.method || "GET";
+	$g.data = $g.data || "";
+	$g.autoClearBuffer = $g.autoClearBuffer || false;
+	if ($g.method == "") $g.method = "GET";
+	$g.method = $g.method.toUpperCase();
+	if ($g.method == "POST") $g.autoClearBuffer = false;
+	this.timeout = $g.timeout;
 	this.istimeout = false;
 	this.sended = false;
-	this.method = method;
-	this.url = url;
-	this.data = data;
-	this.charset = "utf-8";
-	this.http = null;
-	this.headers = [];
+	this.method = $g.method;
+	this.url = $g.url;
+	this.data = $g.data;
+	this.charset = $g.charset;
+	this.base = null;
+	this.headers = $g.headers;
 	this.status = 0;
 	this.readyState = 0;
 	this.content = null;
 	this.msg = "";
-	this.autoClearBuffer = autoClearBuffer;
+	this.autoClearBuffer = $g.autoClearBuffer;
 	this.response = null;
 	this.dataset = {
 		charset: "utf-8",
@@ -75,19 +137,15 @@ function $httprequest(url, method, data, autoClearBuffer) {
 			this.dataset.data = [];
 		}
 	};
+	if(typeof this.data == "object"){
+		for(var k in this.data){
+			if(!this.data.hasOwnProperty(k))continue;
+			this.dataset.append(k,this.data[k]);
+		}
+		this.data="";
+	}
 }
 $httprequest.fn = $httprequest.prototype;
-/****************************************************
-'@DESCRIPTION:	create an instance of $httprequest
-'@PARAM:	url [String[option]] : target URL.
-'@PARAM:	method [String[option]] : request method. POST/GET/HEADER....
-'@PARAM:	data [String[option]] : data need to send
-'@PARAM:	autoClearBuffer [Boolean[option]] : auto clear buffer when request
-'@RETURN:	[Object] instance of $httprequest
-'****************************************************/
-$httprequest.New = $httprequest.fn.New = function(url, method, data, autoClearBuffer) {
-	return new $httprequest(url, method, data, autoClearBuffer);
-};
 
 /****************************************************
 '@DESCRIPTION:	init. I will call this method automaticly.
@@ -131,7 +189,7 @@ $httprequest.fn.header = function(headstr) {
 '@DESCRIPTION:	set http request timeout. Support four argument at most.
 '@RETURN:	[Object] return self;
 '****************************************************/
-$httprequest.fn.timeout = function() {
+$httprequest.fn.timeouts = function() {
 	if (arguments.length > 4) {
 		return this;
 	}
@@ -150,30 +208,30 @@ $httprequest.fn.timeout = function() {
 $httprequest.fn.send = function(fn) {
 	this.init();
 	if (typeof fn == "function") fn.apply(this, []);
-	this.http = this.getobj();
-	if (this.http == null) {
+	this.base = getXmlHttpRequestObject();
+	if (this.base == null) {
 		return this;
 	}
 	try {
-		this.http.setOption(2) = 13056;
-		this.http.setTimeouts(this.timeout[0], this.timeout[1], this.timeout[2], this.timeout[3]);
+		this.base.setOption(2) = 13056;
+		this.base.setTimeouts(this.timeout[0], this.timeout[1], this.timeout[2], this.timeout[3]);
 	} catch (ex) {}
-	this.http.open(this.method, this.url, false);
+	this.base.open(this.method, this.url, false);
 	if (this.headers.length > 0) {
 		for (var i = 0; i < this.headers.length; i++) {
 			var Sindex = this.headers[i].indexOf(":");
 			var key = this.headers[i].substr(0, Sindex);
 			var value = this.headers[i].substr(Sindex + 1);
-			this.http.setRequestHeader(key, value);
+			this.base.setRequestHeader(key, value);
 		}
 	}
 	try {
-		this.http.send(this.data);
+		this.base.send(this.data);
 		this.sended = true;
-		this.readyState = this.http.readyState;
-		if (this.http.readyState == 4) {
-			this.status = parseInt(this.http.status);
-			this.content = this.http.responseBody;
+		this.readyState = this.base.readyState;
+		if (this.base.readyState == 4) {
+			this.status = parseInt(this.base.status);
+			this.content = this.base.responseBody;
 		}
 	} catch (ex) {
 		this.sended = true;
@@ -187,16 +245,16 @@ $httprequest.fn.send = function(fn) {
 '@PARAM:	filepath [String] : local file path
 '@RETURN:	[Object] return self;
 '****************************************************/
-$httprequest.fn.saveToFile = function(filepath) {
+$httprequest.fn.save = function(filepath) {
 	if (!this.sended) this.send();
-	var Objstream = new ActiveXObject("Adodb.Stream");
-	Objstream.Type = 1;
-	Objstream.Mode = 3;
-	Objstream.Open();
-	Objstream.Write(this.content);
-	Objstream.saveToFile(filepath, 2);
-	Objstream.Close();
-	Objstream = null;
+	var stream = new ActiveXObject("Adodb.Stream");
+	stream.Type = 1;
+	stream.Mode = 3;
+	stream.Open();
+	stream.Write(this.content);
+	stream.saveToFile(filepath, 2);
+	stream.Close();
+	stream = null;
 	return this;
 };
 
@@ -218,7 +276,7 @@ $httprequest.fn.gettext = function(charset) {
 	if (!this.sended) this.send();
 	if (this.readyState == -1) return "";
 	try {
-		return this.b2s(this.content, charset ? charset : this.charset);
+		return bytesToString(this.content, charset ? charset : this.charset);
 	} catch (ex) {
 		this.msg = ex.description;
 		return "";
@@ -242,23 +300,6 @@ $httprequest.fn.getjson = function(charset) {
 };
 
 /****************************************************
-'@DESCRIPTION:	fetch response as json.
-'@PARAM:	charset [String] : text charset
-'@RETURN:	[Boolean] if json was parsed successfully, assign json object to 'response' property and return true, or return false;
-'****************************************************/
-$httprequest.fn.getjson1 = function(charset) {
-	if (!this.sended) this.send();
-	if (this.readyState == -1) return false;
-	try {
-		this.response = (new Function("return " + this.gettext(charset) + ";"))();
-		return true;
-	} catch (ex) {
-		this.msg = ex.description;
-		return false;
-	}
-};
-
-/****************************************************
 '@DESCRIPTION:	get response header
 '@PARAM:	key [String] : header name
 '@RETURN:	[String] header value
@@ -268,11 +309,11 @@ $httprequest.fn.getheader = function(key) {
 	if (key) {
 		if (key.toUpperCase() == "SET-COOKIE") {
 			key = key.replace("-", "\-");
-			var headers = this.http.getAllResponseHeaders();
-			var regexp = new RegExp("\n" + key + "\:(.+?)\r", "ig");
-			var resstr = "";
+			var headers = this.base.getAllResponseHeaders(),
+				regexp = new RegExp("\n" + key + "\:(.+?)\r", "ig"),
+				resstr = "", val;
 			while ((res = regexp.exec(headers)) != null) {
-				var val = this.trim(res[1]);
+				var val =res[1].replace(/(^(\s+)|(\s+)$)/igm, "");
 				resstr = resstr + val.substr(0, val.indexOf(";")) + "; "
 			}
 			if (resstr != "") {
@@ -280,10 +321,10 @@ $httprequest.fn.getheader = function(key) {
 			}
 			return resstr;
 		} else {
-			return this.http.getResponseHeader(key);
+			return this.base.getResponseHeader(key);
 		}
 	} else {
-		return this.http.getAllResponseHeaders();
+		return this.base.getAllResponseHeaders();
 	}
 };
 
@@ -303,56 +344,6 @@ $httprequest.fn.getxml = function(charset) {
 		this.msg = ex.description;
 		return null;
 	}
-};
-
-$httprequest.fn.getobj = function() {
-	var b = null;
-	var httplist = ["MSXML2.serverXMLHttp.3.0", "MSXML2.serverXMLHttp", "MSXML2.XMLHttp.3.0", "MSXML2.XMLHttp", "Microsoft.XMLHttp"];
-	for (var i = 0; i <= httplist.length - 1; i++) {
-		try {
-			b = new ActiveXObject(httplist[i]);
-			(function(o) {
-				$httprequest.fn.getobj = function() {
-					return new ActiveXObject(o)
-				};
-			})(httplist[i]);
-			return b;
-		} catch (ex) {
-			//
-		}
-	}
-	return b;
-};
-
-$httprequest.fn.getrnd = function() {
-	return Math.random().toString().substr(2);
-};
-
-$httprequest.fn.b2s = function(bytSource, Cset) { //ef bb bf,c0 fd
-	var Objstream, c1, c2, c3;
-	var byts;
-	Objstream = Server.CreateObject("ADODB.Stream");
-	Objstream.Type = 1;
-	Objstream.Mode = 3;
-	Objstream.Open();
-	Objstream.Write(bytSource);
-	Objstream.Position = 0;
-	Objstream.Type = 2;
-	Objstream.CharSet = Cset;
-	byts = Objstream.ReadText();
-	Objstream.Close();
-	Objstream = null;
-	return byts;
-};
-$httprequest.fn.urlencode = function(str) {
-	return encodeURIComponent(str).replace(/\+/, "%2B");
-};
-$httprequest.fn.urldecode = function(str) {
-	return decodeURIComponent(str);
-};
-$httprequest.fn.trim = function(src) {
-	src = src || "";
-	return src.replace(/(^(\s+)|(\s+)$)/igm, "");
 };
 if (!exports.http) exports.http = {};
 return exports.http.request = $httprequest;

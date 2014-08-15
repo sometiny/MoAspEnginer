@@ -1,5 +1,8 @@
 ﻿/*
-by anlige at www.9fn.net
+** File: punycode.js
+** Usage: encode or decode punycode.
+** About: 
+**		support@mae.im
 */
 var $punycode=
 {

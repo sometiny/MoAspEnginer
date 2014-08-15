@@ -1,4 +1,9 @@
-﻿/*'by anlige at www.9fn.net*/
+﻿/*
+** File: json.maker.js
+** Usage: a class to create json data.
+** About: 
+**		support@mae.im
+*/
 /****************************************************
 '@DESCRIPTION:	define $maker object
 '@PARAM:	t [String] : json data type. two options: 'object' or 'array'

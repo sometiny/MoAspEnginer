@@ -1,6 +1,9 @@
-﻿/****************************************************
-'@DESCRIPTION:	define $$ object
-'****************************************************/
+﻿/*
+** File: validatee.js
+** Usage: Validate form data that get from client.
+** About: 
+**		support@mae.im
+*/
 function $$() {
 	this.settings = {};
 	this.exception = "";

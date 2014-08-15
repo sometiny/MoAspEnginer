@@ -12,7 +12,16 @@ var GLOBAL = this, Exports, F = {
 	has : function(obj,key){return obj.hasOwnProperty(key);},
 	vbs : {},
 	toString:function(){return "v1";},
-	extend : function(name,obj){F.exports[name] = obj;},
+	extend : function(src){
+		if(arguments.length<2)return;
+		for(var i=1;i<arguments.length;i++)
+		{
+			for(var c in arguments[i])
+			{
+				if(arguments[i].hasOwnProperty(c)) src[c] = arguments[i][c];
+			}
+		}
+	},
 	exists : function(path,folder){
 		if(folder === true){
 			return F.fso.folderexists(F.mappath(path));

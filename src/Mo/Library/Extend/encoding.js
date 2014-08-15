@@ -1,5 +1,7 @@
 ﻿/*
-** give some method for encoding
+** File: encoding.js
+** Usage: give some methods to process text encoding.
+
 ** encoding for 'hex','gbk','utf-8','unicode'
 ** methods for uricomponent or uri;
 ** ======================================= **
@@ -28,6 +30,9 @@
 ** ======================================= **
 ** var base64str_e = F.base64.e(Encoding.gbk.getByteArray("admin"));
 ** var base64str_d = Encoding.gbk.toString(Encoding.gbk.bytesToWords(F.base64.d(base64str_e)));
+
+** About: 
+**		support@mae.im
 */
 exports.encoding=exports.encoding||(function(){
 	var $enc={};

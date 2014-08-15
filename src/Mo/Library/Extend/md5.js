@@ -1,3 +1,10 @@
+/*
+** File: md5.js
+** Usage: compute md5
+** About: 
+**		support@mae.im
+*/
+
 var rotateLeft = function(lValue, iShiftBits) {
 	return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
 }

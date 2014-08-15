@@ -7,8 +7,8 @@ it means that i can build a website without any Controller. understand?
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="keywords" content="Mo,Asp,MoAspEnginer,JScript.Blog,MoBlog,艾恩" />
-    <meta name="description" content="基于JScript的ASP开源MVC框架-MoAspEnginer。" />
-    <title>欢迎使用MoAspEnginer！</title>
+    <meta name="description" content="基于JScript的ASP开源MVC框架-MoAspEnginer。A JScript-based MVC framework for ASP." />
+    <title>MoAspEnginer-{$VERSION}！</title>
     <style type="text/css">
 		.clearfix:after {content:"\0020"; display: block; height: 0;clear: both; visibility: hidden; }
 		.clearfix {zoom: 1;} 
@@ -18,7 +18,7 @@ it means that i can build a website without any Controller. understand?
 	    .wapper {margin:20px auto; width:800px;text-align:left}
 	    .wapper .title {width:100%;text-align:center;font-weight:bold;font-size:24px;padding:10px 0; color:orange; text-shadow:1px 1px 1px rgba(0,0,0,0.3)}
 	    .orange{color:orange; font-weight:bold}
-	    li{padding:10px 0 0 0;line-height:18px; font-size:12px; border-bottom:1px dotted #eee; width:390px; float: left;}
+	    li{padding:10px 5px 0 5px;line-height:18px; font-size:12px; border-bottom:1px dotted #eee; width:390px; float: left;}
 	    li.doubleheight{height:36px;line-height:26px; }
 	    a{color:orange;}
 	</style>
@@ -28,9 +28,9 @@ it means that i can build a website without any Controller. understand?
 			for(var i=0;i<lis.length;i++){
 				if(i%2==0){
 					lis[i].innerHTML = lis[i].innerHTML.replace(/(\w+)/igm,"<span class=\"orange\">$1</span>");
-					lis[i].style.cssText = "text-align:left";
+					lis[i].style.cssText = "text-align:right";
 				}else{
-					lis[i].style.cssText="color:#999;text-align:right";
+					lis[i].style.cssText="color:#999;text-align:left";
 				}
 			}
 		};
@@ -38,8 +38,10 @@ it means that i can build a website without any Controller. understand?
 </head>
 <body>
 	<div class="wapper">
-		<div class="title">欢迎使用{$VERSION}！</div>
+		<div class="title">{$VERSION}！</div>
 		<ul class="clearfix">
+			<li>一款基于JScript的ASP开源MVC框架。</li>
+			<li>A JScript-based MVC framework for ASP.</li>
 			<li>单文件入口。</li>
 			<li>Single entry point.</li>
 			<li>HTML代码和程序的真正分离。</li>

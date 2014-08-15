@@ -1,4 +1,10 @@
 ﻿/*
+** File: json.parser.js
+** Usage: json2, an object to parse and stringify json data.
+** About: 
+**		support@mae.im
+*/
+/*
     http://www.JSON.org/json2.js
 */
 /****************************************************

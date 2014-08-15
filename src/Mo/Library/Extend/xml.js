@@ -1,6 +1,9 @@
-﻿/****************************************************
-'@DESCRIPTION:	define $xml object
-'****************************************************/
+﻿/*
+** File: xml.js
+** Usage: give some methods to read or write xml document.
+** About: 
+**		support@mae.im
+*/
 function $xml(dom) {
 	this.DOM = dom || null;
 	this.ROOT = null;

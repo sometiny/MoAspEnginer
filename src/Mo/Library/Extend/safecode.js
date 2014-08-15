@@ -1,4 +1,11 @@
-﻿function $safecode(sessionKey){
+﻿/*
+** File: safecode.js
+** Usage: a method to create safecode.Use 0-9a-zA-Z.
+** About: 
+**		support@mae.im
+*/
+
+function $safecode(sessionKey){
 	function getrndcolor(){
 		return [F.random(0,128),F.random(0,128),F.random(0,128)];
 	}

@@ -1,6 +1,7 @@
 ﻿<assign name="title" value="Form演示" />
 <include file="top.html" />
 	<h3>Form演示：程序-/App/Controllers/FormController.asp，模板-/App/Views/default/Home/Form.html</h3>
+	<h5>普通测试(Sample Test)</h5>
 	<form action="?m=Form" method="post">
 		<nempty name="description"><span style="color:red">{$description}</span><br /><pre>{$dump}</pre></nempty>
 		title:<input type="text" name="title" value="asdfdasf" /><br />
@@ -10,4 +11,18 @@
 		<input type="checkbox" name="chk" value="3" checked="checked" />3<br />
 		<input type="submit" value="submit" />
 	</form>
+	<h5>上传测试(Upload Test)-这里引用了vbs的上传类(I import a vbs class here)。</h5>
+	<form action="?m=Form&a=Upload" method="post" enctype="multipart/form-data">
+		表单(form):<input type="text" name="form1" value="表单1" /><br />
+		选择项(select):<select name="select1"><option value="选项1(option1)">选项1(option1)</option><option value="option2">option2</option></select><br />
+		文件1(file1):<input type="file" name="file1" /><br />
+		文件2(file2):<input type="file" name="file2" /><br />
+		<input type="submit" value="上传(upload)" />
+	</form>
+	<h5>上传结果(Upload Result)</h5>
+	异常(exception) => {$exception}<br />
+	form1 => {$form1}<br />
+	select1 => {$select1}<br />
+	file1 => {$file1}<br />
+	file2 => {$file2}<br />
 <include file="foot.html" />

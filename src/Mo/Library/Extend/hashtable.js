@@ -1,4 +1,9 @@
-﻿/*'by anlige at www.9fn.net*/
+﻿/*
+** File: hashtable.js
+** Usage: realize hashtable
+** About: 
+**		support@mae.im
+*/
 function $hashtable(){
 	this.table=[];
 	this.index=0;

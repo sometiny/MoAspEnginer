@@ -1,6 +1,9 @@
-﻿/****************************************************
-'@DESCRIPTION:	define $jmail object
-'****************************************************/
+﻿/*
+** File: jmail.js
+** Usage: a package for jmail.
+** About: 
+**		support@mae.im
+*/
 function $jmail(){
 	this.Exception="";
 	this.jmail=null;
@@ -115,9 +118,4 @@ function $jmail(){
 		}catch(ex){this.Exception = ex.description;return false}
 	}
 }
-/****************************************************
-'@DESCRIPTION:	create an instance of $jmail
-'@RETURN:	[$jmail] instance
-'****************************************************/
-$jmail.New = function(){return new $jmail();};
 return exports.jmail = $jmail;

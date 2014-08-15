@@ -515,20 +515,22 @@ var Mo = Mo || (function(){
 				return;
 			}
 		}
-		var theMethod = this.Method;
-		var ModelPath = G.MO_APP + "Controllers/" + this.Group + this.Method + "Controller.asp";
+		var ModelPath = G.MO_APP + "Controllers/" + this.Group + this.Method + "Controller.asp", canLoadController=true;
+		this.RealMethod = this.Method;
+		this.RealAction = this.Action;
 		if(!F.exists(ModelPath)){
 			ModelPath = G.MO_APP + "Controllers/" + this.Group + "EmptyController.asp";
-			theMethod ="Empty";
+			this.RealMethod ="Empty";
 			if(!F.exists(ModelPath)){
 				ModelPath =G.MO_CORE + "Controllers/" + this.Group + this.Method + "Controller.asp";
-				theMethod =this.Method;
+				this.RealMethod =this.Method;
 				if(!F.exists(ModelPath)){
 					ModelPath = G.MO_CORE + "Controllers/" + this.Group + "EmptyController.asp";
-					theMethod ="Empty";
+					this.RealMethod ="Empty";
 					if(!F.exists(ModelPath)){
 						if(M.templateIsInApp(this.Action) || M.templateIsInCore(this.Action)){
 							M.display(this.Action);
+							canLoadController= false;
 						}else{
 							F.exit("模块[" + this.Method + "]不存在");
 						}
@@ -536,11 +538,10 @@ var Mo = Mo || (function(){
 				}
 			}
 		}
-		this.RealMethod = theMethod;
-		this.RealAction = this.Action;
-		if(LoadController(ModelPath,theMethod)){
+		if(!canLoadController)return M;
+		if(LoadController(ModelPath,this.RealMethod)){
 			try{
-				var MC = F.initialize(theMethod + "Controller");
+				var MC = F.initialize(this.RealMethod + "Controller");
 				if(MC.__STATUS__===true){
 					if(F.server("REQUEST_METHOD")=="POST" && MC[this.Action+"_Post_"]){
 						MC[this.Action+"_Post_"]();
@@ -598,38 +599,23 @@ var Mo = Mo || (function(){
 		    	"end function\r\n" +
 		    	"set Model__.RecordsAffectedCmd=GetRef(\"RecordsAffectedCmd\")"
 		    );
-	   		objScrCtl.ExecuteStatement(
-	   			"function getByteArray(v)\r\n" +
-	   			"dim ret(),i,length\r\n" +
-	   			"length = lenb(v)\r\n" +
-	   			"redim ret(length-1)\r\n" +
-	   			"for i=0 to length-1\r\n" +
-	   			"	ret(i) = ascb(midb(v,i+1,1))\r\n" +
-	   			"next\r\n" +
-	   			"getByteArray = ret\r\n" +
-	   			"end function"
-	   		);
-	   		objScrCtl.ExecuteStatement("function getbytecode(v)\r\ngetbytecode=ascb(v)\r\nend function");
+		    objScrCtl.ExecuteStatement(
+		    	"function charcodeb(b)\r\n" +
+		    	"	charcodeb = ascb(b)\r\n" +
+		    	"end function\r\n"
+		    );
 		    
 		    /*如下仅仅是利用VBS扩展功能*/
 		    (function(ScrCtl){
 			    F.vbs.ctrl=ScrCtl;
-			    F.vbs.getByteInited=false;
-			    F.vbs.getByteArrayinited=false;
-		   		F.vbs.chrb = function(chrcode){
-			   		return ScrCtl.eval("chrb(" + chrcode + ")");
-		   		};
-		   		F.vbs.ascb = function(chrb1){
-			   		return ScrCtl.Run("getbytecode",chrb1);
-		   		};
-		   		F.vbs.getByteArray = function(chrs){
-			   		return ScrCtl.Run("getByteArray",chrs).toArray();
-		   		};
 		   		F.vbs.eval = function(script){
 			   		return ScrCtl.eval(script);
 		   		};
 		   		F.vbs.execute = function(script){
 			   		ScrCtl.ExecuteStatement(script);
+		   		};
+		   		F.vbs.ascb = function(b){
+			   		return ScrCtl.Run("charcodeb",b);
 		   		};
 		   		F.vbs.ns = function(name,value){
 			   		ScrCtl.AddObject(name,value);
@@ -642,12 +628,19 @@ var Mo = Mo || (function(){
 				    return ScrCtl.eval("new " + name);
 			    };
 			    F.vbs.include = function(lib){
-					if(!M.Librarys.hasOwnProperty(lib)){
-					    var pathinfo = parseLibraryPath(lib);
-					    if(pathinfo[0]!=""){
-						    var ret = F.string.fromfile(pathinfo[0]);
-							ret = F.string.replace(ret,/^(\s*)\<\%(\s*)/i,"");
-							ret = F.string.replace(ret,/(\s*)\%\>(\s*)$/ig,"");
+				    if(!/^([\w\.]+)$/.test(lib)){
+						ExceptionManager.put(0x00003CD,"F.vbs.include(lib)","Parameter 'lib' is invalid.");
+					    return false;
+				    }
+					if(!M.Librarys.hasOwnProperty("vbs-"+lib)){
+					    var pathinfo = G.MO_APP + "Library/Extend/" + lib + ".vbs";
+					    if(!F.exists(pathinfo)) pathinfo = G.MO_CORE + "Library/Extend/" + lib + ".vbs";
+					    if(!F.exists(pathinfo))
+					    {
+							ExceptionManager.put(0x00002CD, "F.vbs.include(lib)","待加载的类库'" + lib + "'不存在。");
+						    return false;
+					    }else{
+						    var ret = F.string.fromfile(F.mappath(pathinfo));
 							F.vbs.ctrl.error.clear();
 							F.vbs.execute(ret);
 							if(F.vbs.ctrl.error.number != 0){ 
@@ -655,12 +648,9 @@ var Mo = Mo || (function(){
 								F.vbs.ctrl.error.clear();
 								return false;
 							}else{
-								M.Librarys[lib]="vbs";
+								M.Librarys["vbs-" + lib]="vbs";
 								return true;
 							}
-					    }else{
-							ExceptionManager.put(0x00002CD, "F.vbs.include(lib)","待加载的类库'" + lib + "'不存在。");
-						    return false;
 					    }
 				    }else{
 					   return true; 
