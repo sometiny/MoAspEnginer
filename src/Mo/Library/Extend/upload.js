@@ -108,7 +108,7 @@ $upload.save = function(File, Option, OverWrite){
 		File="";
 	}
 	if($upload.$base==null){
-		if($upload.$cfg.RaiseServerError) ExceptionManager.put("0x5800","F.exports.upload.save()","base upload manager is null.");
+		if($upload.$cfg.RaiseServerError) ExceptionManager.put(0x5800,"F.exports.upload.save()","base upload manager is null.");
 		else $upload.exception = "base upload manager is null.";
 		return 0;
 	}
