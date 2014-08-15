@@ -109,26 +109,26 @@ $upload.save = function(File, Option, OverWrite){
 	}
 	if($upload.$base==null){
 		if($upload.$cfg.RaiseServerError) ExceptionManager.put("0x5800","F.exports.upload.save()","base upload manager is null.");
-		else $upload.exception = "base upload manage is null.";
+		else $upload.exception = "base upload manager is null.";
 		return 0;
 	}
 	if(Option===undefined) Option=0;
 	if(OverWrite!==false) OverWrite=true;
 	if(Option!=0 && Option!=1 && Option!=-1){
-		if($upload.$cfg.RaiseServerError) ExceptionManager.put("0x5800","F.exports.upload.save()","argument 'Option' error.");
+		if($upload.$cfg.RaiseServerError) ExceptionManager.put(0x5800,"F.exports.upload.save()","argument 'Option' error.");
 		else $upload.exception = "argument 'Option' error.";
 		return 0;
 	}
 	try{
 		if(File==null){
-			if($upload.$cfg.RaiseServerError) ExceptionManager.put("0x9000","F.exports.upload.save()","File item is null.");
+			if($upload.$cfg.RaiseServerError) ExceptionManager.put(0x9000,"F.exports.upload.save()","File item is null.");
 			else $upload.exception = "File item is null.";
 		}
 		else if(typeof File == "object")
 		{
 			$upload.$base.Save(File, Option, OverWrite);
 			if(File.Exception!="") {
-				if($upload.$cfg.RaiseServerError) ExceptionManager.put("0x7000","F.exports.upload.save()",File.Exception);
+				if($upload.$cfg.RaiseServerError) ExceptionManager.put(0x7000,"F.exports.upload.save()",File.Exception);
 				else $upload.exception = File.Exception;
 				return 0;
 			}
@@ -143,14 +143,14 @@ $upload.save = function(File, Option, OverWrite){
 					fileCount++;
 					$upload.$base.Save($upload.files[i], Option, OverWrite);
 					if($upload.files[i].Exception!=""){
-						if($upload.$cfg.RaiseServerError) ExceptionManager.put("0x8100","F.exports.upload.save()",$upload.files[i].Exception);
+						if($upload.$cfg.RaiseServerError) ExceptionManager.put(0x8100,"F.exports.upload.save()",$upload.files[i].Exception);
 						else $upload.exception = $upload.files[i].Exception;
 						return 0;
 					}
 				}
 			}
 			if(fileCount==0){
-				if($upload.$cfg.RaiseServerError) ExceptionManager.put("0x8800","F.exports.upload.save()","file '" + File + "' can not be found.");
+				if($upload.$cfg.RaiseServerError) ExceptionManager.put(0x8800,"F.exports.upload.save()","file '" + File + "' can not be found.");
 				else $upload.exception = "file '" + File + "' can not be found.";
 				return 0;
 			}else{
