@@ -22,13 +22,21 @@
 ** About: 
 **		support@mae.im
 */
-var cfg={
+var cfg = {
 	AllowFileTypes : "",
 	AllowMaxSize : -1,
 	AllowMaxFileSize : -1,
 	Charset : "gb2312",
 	SavePath : "",
-	RaiseServerError : true
+	RaiseServerError : true,
+	OnSucceed:function(files,cfg){},
+	OnError:function(exception){}
+};
+var cfg_f = {
+	OverWrite : true,
+	Type : 0,
+	OnError : function(exception){},
+	OnSucceed : function(fileCount,fileArray){}
 };
 function $fileManager(){
 	
@@ -91,75 +99,71 @@ function $upload(cfg_){
 	$base.Charset = $g.Charset;
 	if(!$base.getData()) 
 	{
+		$g.OnError.call($upload,$base.Description,$g);
 		if($g.RaiseServerError)ExceptionManager.put(0x2005,"F.exports.upload.getData()",$base.Description);
 		else $upload.exception = $base.Description;
 		return false;
 	}
+	$g.OnSucceed.call($upload,$g);
 	return true;
 };
 $upload.$cfg=null;
 $upload.$exception="";
 $upload.$base=null;
 $upload.files=[];
-$upload.save = function(File, Option, OverWrite){
-	if(typeof File != "string" && typeof File != "object"){
-		OverWrite = Option;
-		Option = File;
+$upload.save = function(File,opt){
+	if(arguments.length==1){
+		opt = File;
 		File="";
 	}
+	var $opt = {}, exception;
+	F.extend($opt, cfg_f, opt);
+
 	if($upload.$base==null){
-		if($upload.$cfg.RaiseServerError) ExceptionManager.put(0x5800,"F.exports.upload.save()","base upload manager is null.");
-		else $upload.exception = "base upload manager is null.";
+		$opt.OnError.call(null,"base upload manager is null.");
 		return 0;
 	}
-	if(Option===undefined) Option=0;
-	if(OverWrite!==false) OverWrite=true;
-	if(Option!=0 && Option!=1 && Option!=-1){
-		if($upload.$cfg.RaiseServerError) ExceptionManager.put(0x5800,"F.exports.upload.save()","argument 'Option' error.");
-		else $upload.exception = "argument 'Option' error.";
+	if($opt.Type!=0 && $opt.Type!=1 && $opt.Type!=-1){
+		$opt.OnError.call(null,"argument 'Type' error.");
 		return 0;
 	}
 	try{
-		if(File==null){
-			if($upload.$cfg.RaiseServerError) ExceptionManager.put(0x9000,"F.exports.upload.save()","File item is null.");
-			else $upload.exception = "File item is null.";
-		}
+		if(File==null) $opt.OnError.call(null,"File item is null.");
 		else if(typeof File == "object")
 		{
-			$upload.$base.Save(File, Option, OverWrite);
+			$upload.$base.Save(File, $opt.Type, $opt.OverWrite);
 			if(File.Exception!="") {
-				if($upload.$cfg.RaiseServerError) ExceptionManager.put(0x7000,"F.exports.upload.save()",File.Exception);
-				else $upload.exception = File.Exception;
+				$opt.OnError.call(null,File.Exception);
 				return 0;
 			}
+			$opt.OnSucceed.call(1,[File]);
 			return 1;
 		}
 		else
 		{
 			File = File.toLowerCase();
-			var fileCount=0;
+			var fileCount=0, fileArray=[];
 			for(var i=0;i< $upload.files.length;i++){
 				if($upload.files[i].FormName.toLowerCase()==File || File == ""){
 					fileCount++;
-					$upload.$base.Save($upload.files[i], Option, OverWrite);
+					$upload.$base.Save($upload.files[i], $opt.Type, $opt.OverWrite);
 					if($upload.files[i].Exception!=""){
-						if($upload.$cfg.RaiseServerError) ExceptionManager.put(0x8100,"F.exports.upload.save()",$upload.files[i].Exception);
-						else $upload.exception = $upload.files[i].Exception;
+						$opt.OnError.call(null,$upload.files[i].Exception);
 						return 0;
 					}
+					fileArray.push($upload.files[i]);
 				}
 			}
 			if(fileCount==0){
-				if($upload.$cfg.RaiseServerError) ExceptionManager.put(0x8800,"F.exports.upload.save()","file '" + File + "' can not be found.");
-				else $upload.exception = "file '" + File + "' can not be found.";
+				$opt.OnError.call(null,"file '" + File + "' can not be found.");
 				return 0;
 			}else{
+				$opt.OnSucceed.call(fileCount,fileArray);
 				return fileCount;
 			}
 		}
 	}catch(ex){
-		if($upload.$cfg.RaiseServerError) ExceptionManager.put(ex, "F.exports.upload.save");
-		else $upload.exception = ex.description;
+		$opt.OnError.call(null,ex.description);
 		return 0;
 	}
 };
