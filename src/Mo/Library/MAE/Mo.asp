@@ -38,7 +38,7 @@ var Mo = Mo || (function(){
 	var LoadLibrary = function( path, library, cls){
 		try{
 			path = F.mappath(path);
-			var ret = F.string.fromfile(path);
+			var ret = F.string.fromFile(path);
 			ret = F.string.replace(ret,/^(\s*)<s(.+?)>(\s*)/i,"");
 			ret = F.string.replace(ret,/(\s*)<\/script>(\s*)$/igm,"");
 			if(!F.execute.call(path,ret,"Mo" + library + cls))return false;
@@ -75,7 +75,7 @@ var Mo = Mo || (function(){
 		if(!F.exists(path)) path = G.MO_CORE + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
 		path = F.mappath(path);
 		if(!F.exists(path))return;
-		var tempStr = F.string.fromfile(path,G.MO_CHARSET);
+		var tempStr = F.string.fromFile(path,G.MO_CHARSET);
 		var regexp = new RegExp("<include file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />","igm");
 		var Matches = F.string.matches(tempStr,regexp);
 		while(Matches.length > 0){
@@ -113,7 +113,7 @@ var Mo = Mo || (function(){
 		if(M.Librarys["Controller_" + controller] == "jscript")return true;
 		try{
 			path = F.mappath(path);
-			var ret = F.string.fromfile(path,G.MO_CHARSET);
+			var ret = F.string.fromFile(path,G.MO_CHARSET);
 			ret = F.string.replace(ret,/(^(\s+)|(\s+)$)/ig,"");
 			ret = F.string.replace(ret,"^<s" + "cript(.+?)>(\s*)","ig","");
 			ret = F.string.replace(ret,/(\s*)<\/script>(\s*)$/ig,"");
@@ -341,11 +341,11 @@ var Mo = Mo || (function(){
 	};
 	M.ModelCacheSave = function(name,content){
 		if(name == "") return false;
-		return F.string.savetofile(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"),content,G.MO_CHARSET);
+		return F.string.saveToFile(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"),content,G.MO_CHARSET);
 	};
 	M.ModelCacheLoad = function(name){
 		if(name == "") return "";
-		return F.string.fromfile(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"),G.MO_CHARSET);
+		return F.string.fromFile(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"),G.MO_CHARSET);
 	};
 	M.ModelCacheDelete = function(name){
 		if(name == "") return false;
@@ -379,7 +379,7 @@ var Mo = Mo || (function(){
 					if(F.date.datediff("s",OldHash,new Date()) >= G.MO_COMPILE_CACHE_EXPIRED)usecache = false;
 				}
 				if(usecache){
-					vbscript = F.string.fromfile(cachepath,G.MO_CHARSET);
+					vbscript = F.string.fromFile(cachepath,G.MO_CHARSET);
 					vbscript = vbscript.replace(/^<s(.+?)>\r\n/ig,"").replace(/\r\n<\/script>$/ig,"");
 				}
 			}
@@ -390,7 +390,7 @@ var Mo = Mo || (function(){
 			if(typeof MoAspEnginerView == "undefined")F.include(G.MO_CORE + "Library/MAE/Mo.View.asp","utf-8");
 			var view_ = new MoAspEnginerView(html);
 			vbscript = view_.Content;
-			if(G.MO_COMPILE_CACHE)F.string.savetofile(cachepath,"<s" + "cript language=\"jscript\" runat=\"server\">\r\n" + vbscript + "\r\n</s"+"cript>",G.MO_CHARSET);
+			if(G.MO_COMPILE_CACHE)F.string.saveToFile(cachepath,"<s" + "cript language=\"jscript\" runat=\"server\">\r\n" + vbscript + "\r\n</s"+"cript>",G.MO_CHARSET);
 		}
 		
 		if(!G.MO_DIRECT_OUTPUT) F.execute(vbscript,"Temp___");
@@ -399,7 +399,7 @@ var Mo = Mo || (function(){
 		try{
 			if(!G.MO_DIRECT_OUTPUT)content = Temp___();
 			if(G.MO_CACHE && G.MO_CACHE_DIR != "" && !G.MO_DIRECT_OUTPUT){
-				if(F.exists(G.MO_CACHE_DIR,true)) F.string.savetofile(F.mappath(G.MO_CACHE_DIR + this.CacheFileName + ".cache"),fetch,G.MO_CHARSET);
+				if(F.exists(G.MO_CACHE_DIR,true)) F.string.saveToFile(F.mappath(G.MO_CACHE_DIR + this.CacheFileName + ".cache"),fetch,G.MO_CHARSET);
 			}
 		}catch(ex){
 			ExceptionManager.put(ex,"Mo.fetch()->Temp___()");
@@ -497,7 +497,7 @@ var Mo = Mo || (function(){
 		if(!F.exists(filepath)) filepath = F.mappath(G.MO_CORE + "Conf/" + conf + ".asp");
 		if(F.exists(filepath)){
 			F.require("json.parser");
-			F.string.savetofile(filepath,"<scrip" + "t language=\"jscript\" runat=\"server\">return " + Exports.json.parser.unParse(data,"\t") + ";</scrip" + "t>","utf-8");
+			F.string.saveToFile(filepath,"<scrip" + "t language=\"jscript\" runat=\"server\">return " + Exports.json.parser.unParse(data,"\t") + ";</scrip" + "t>","utf-8");
 		}else{
 			ExceptionManager.put(4,"Mo.C.Save(conf)","配置[" + conf + "]不存在。");
 		}
@@ -532,7 +532,7 @@ var Mo = Mo || (function(){
 		if(G.MO_CACHE){
 			this.CacheFileName = F.md5(F.server("URL") + F.get.toURIString() + "");
 			if(F.exists(G.MO_CACHE_DIR + this.CacheFileName + ".cache")){
-				Response.Write(F.string.fromfile(F.mappath(G.MO_CACHE_DIR + this.CacheFileName + ".cache"),G.MO_CHARSET));
+				Response.Write(F.string.fromFile(F.mappath(G.MO_CACHE_DIR + this.CacheFileName + ".cache"),G.MO_CHARSET));
 				return;
 			}
 		}
@@ -661,7 +661,7 @@ var Mo = Mo || (function(){
 							ExceptionManager.put(0x00002CD, "F.vbs.include(lib)","待加载的类库'" + lib + "'不存在。");
 						    return false;
 					    }else{
-						    var ret = F.string.fromfile(F.mappath(pathinfo));
+						    var ret = F.string.fromFile(F.mappath(pathinfo));
 							F.vbs.ctrl.error.clear();
 							F.vbs.execute(ret);
 							if(F.vbs.ctrl.error.number != 0){ 

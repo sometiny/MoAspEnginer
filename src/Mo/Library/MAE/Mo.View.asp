@@ -5,6 +5,20 @@
 ** About: 
 **		support@mae.im
 */
+
+var readAttrs__ = function(src){
+	if(typeof src != "string")return {};
+	if(!src)return {};
+	src = $f.string.trim($f.string.trim(src).replace(/^<(\w+)([\s\S]+?)(\/)?>([\s\S]*?)$/i,"$2"));
+	var returnValue = {};
+	var reg = /\b([\w\.]+)\=\"(.+?)\"( |$)/igm;
+	var a =reg.exec(src);
+	while(a != null){
+		returnValue[a[1]] = a[2];
+		a = reg.exec(src);
+	}
+	return returnValue;
+};
 var exports=["MoAspEnginerView"];
 var G = Mo.Config.Global;
 function MoAspEnginerView(content){
@@ -46,7 +60,7 @@ MoAspEnginerView.prototype.parse=function(){
 				match = matches.pop();
 				if(!closetag) tagcontent = match[2];
 				while(this.Content.indexOf(match[0])>=0){
-					this.Content = this.Content.replace(match[0],taglib.Index(F.readAttrs(match[1]),tagcontent))
+					this.Content = this.Content.replace(match[0],taglib.Index(readAttrs__(match[1]),tagcontent))
 				}
 			}
 		}
@@ -132,7 +146,7 @@ MoAspEnginerView.prototype.parsePage=function(){
 	matches = F.string.matches(this.Content,regexp);
 	while(matches.length>0){
 		match = matches.pop();
-		attrs = F.readAttrs(match[1]);
+		attrs = readAttrs__(match[1]);
 		if(attrs.getter__("for")!=""){
 			this.mvarDicts["EOF_OF_" + attrs.getter__("for")] = match[2];
 			this.Content = F.replace(this.Content,match.value,"<page " + match[1] + "/>")
@@ -142,7 +156,7 @@ MoAspEnginerView.prototype.parsePage=function(){
 	matches = F.string.matches(this.Content,regexp);
 	while(matches.length>0){
 		match = matches.pop();
-		attrs = F.readAttrs(match[1]);
+		attrs = readAttrs__(match[1]);
 		if(attrs.getter__("for")!=""){
 			loopname = attrs.getter__("for");
 			nloopname = loopname;
@@ -173,7 +187,7 @@ MoAspEnginerView.prototype.getLoops=function(name){
 	matches = F.string.matches(this.Content,regexp);
 	while(matches.length>0){
 		match = matches.pop();
-		attrs = F.readAttrs(match[1]);
+		attrs = readAttrs__(match[1]);
 		if(attrs.getter__("name")!="") this.loops += attrs.getter__("name") + ";"
 	}
 }
@@ -187,7 +201,7 @@ MoAspEnginerView.prototype.parseLoop=function(){
 	matches = F.string.matches(this.Content,regexp);
 	while(matches.length>0){
 		match = matches.pop();
-		attrs = F.readAttrs(match[1]);
+		attrs = readAttrs__(match[1]);
 		if(attrs.getter__("name")!=""){
 			loopname = attrs.getter__("name");
 			varname = loopname;
@@ -249,7 +263,7 @@ MoAspEnginerView.prototype.parseForeach=function(){
 	while(matches.length>0){
 		match = matches.pop();
 		var m_,ms_, k,v,c;
-		attrs = F.readAttrs(match[1]);
+		attrs = readAttrs__(match[1]);
 		if(attrs.getter__("name")!=""){
 			loopname = attrs.getter__("name");
 			typ = attrs.getter__("type");
@@ -291,7 +305,7 @@ MoAspEnginerView.prototype.parseSwitch=function(){
 	matches = F.string.matches(this.Content,regexp);
 	while(matches.length>0){
 		m_ = matches.pop();
-		attrs = F.readAttrs(m_[1]);
+		attrs = readAttrs__(m_[1]);
 		if(attrs.getter__("name")!="")this.Content = F.replace(this.Content,m_[0],"<?MoAsp switch(" + this.parseAssign(attrs.getter__("name")) + "){ MoAsp?>");
 	}
 	this.parseCase();
@@ -306,7 +320,7 @@ MoAspEnginerView.prototype.parseCase=function(){
 	matches = F.string.matches(this.Content,regexp);
 	while(matches.length>0){
 		m_ = matches.pop();
-		attrs = F.readAttrs(m_[1]);
+		attrs = readAttrs__(m_[1]);
 		quto="\"";
 		if("|bool|number|money|date|assign|".indexOf("|" + attrs.getter__("type") + "|")>0)quto="";
 		this.Content = F.replace(this.Content,m_[0],"<?MoAsp case " + quto + attrs.getter__("value") + quto + ": MoAsp?>");
@@ -408,7 +422,7 @@ MoAspEnginerView.prototype.parseCompare=function(tag){
 	matches = F.string.matches(this.Content,regexp);
 	while(matches.length>0){
 		m_ = matches.pop();
-		attrs = F.readAttrs(m_[1]);
+		attrs = readAttrs__(m_[1]);
 		if(attrs.getter__("name")!=""){
 			var newexpression = attrs.getter__("name") + " " + tag + " " + attrs.getter__("value");
 			if(attrs.getter__("type")!="")newexpression += " as " + attrs.getter__("type");
@@ -426,7 +440,7 @@ MoAspEnginerView.prototype.parseEmpty=function(){
 	matches = F.string.matches(this.Content,regexp);
 	while(matches.length>0){
 		m_ = matches.pop();
-		attrs = F.readAttrs(m_[2]);
+		attrs = readAttrs__(m_[2]);
 		if(attrs.getter__("name")!=""){
 			s="";
 			if(m_[1]=="n")s=" !";
@@ -444,7 +458,7 @@ MoAspEnginerView.prototype.parseAssignName=function(){
 	matches = F.string.matches(this.Content,regexp);
 	while(matches.length>0){
 		m_ = matches.pop();
-		attrs = F.readAttrs(m_[1]);
+		attrs = readAttrs__(m_[1]);
 		if(attrs.getter__("name")!="")this.Content = F.replace(this.Content,m_[0],"<?MoAsp Mo.assign(\"" + attrs.getter__("name") + "\",\"" + F.string.replace(attrs.getter__("value"),/\"/igm,"\\\"") + "\"); MoAsp?>");
 	}
 };
@@ -458,7 +472,7 @@ MoAspEnginerView.prototype.parseSource=function(){
 	matches = F.string.matches(this.Content,regexp);
 	while(matches.length>0){
 		m_ = matches.pop();
-		attrs = F.readAttrs(m_[2]);
+		attrs = readAttrs__(m_[2]);
 		filepath = "";
 		if(attrs.getter__("file")!="")filepath = attrs.getter__("file");
 		if(attrs.getter__("href")!="")filepath = attrs.getter__("href");

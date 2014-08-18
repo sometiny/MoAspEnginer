@@ -254,7 +254,7 @@ $xml.Load = function(url, charset) {
 		var WS = new ActiveXObject("MSXML2.ServerXMLHTTP.3.0");
 		WS.open("GET", url, false);
 		WS.send();
-		if (WS.readyState == 4) xml = F.string.frombinary(WS.responseBody, charset || "utf-8");
+		if (WS.readyState == 4) xml = F.string.fromBinary(WS.responseBody, charset || "utf-8");
 		WS = null;
 	}
 	if (xml != "") {

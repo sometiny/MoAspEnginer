@@ -20,7 +20,7 @@ HomeController.extend("Home", function(){
 	F.session("name","艾恩");
 	F.cookie("name","艾恩");
 	F.cookie("person.age",28);
-	this.assign("Debug",F.dump_(F.date.parse("1986-9-2 21:23:45.234")));
+	this.assign("Debug",F.dump(F.date.parse("1986-9-2 21:23:45.234"),true));
 	this.display("Home");
 });
 HomeController.extend("db2008", function(){
