@@ -41,9 +41,9 @@ HomeController.extend("db2008", function(){
 HomeController.extend("db", function(){
 	Model__.allowDebug=true;
 	Model__.useCommandForUpdateOrInsert=true;
-	Model__("Public","Id").where("id=1").update("name","艾恩-" + F.random.word(10));
+	M("Public","Id").where("id=1").update("name","艾恩-" + F.random.word(10));
 	this.assign("lastRows",Model__.lastRows);
-	var rc = Model__("Public","Id").limit(1,3).query().fetch();
+	var rc = M("Public","Id").limit(1,3).query().fetch();
 	this.assign("recordcount",rc.recordcount);
 	this.assign("count",rc.count());
 	rc.assign("data");

@@ -113,15 +113,29 @@ var Mo = Mo || (function(){
 		if(M.Librarys["Controller_" + controller] == "jscript")return true;
 		try{
 			path = F.mappath(path);
-			var ret = F.string.fromfile(path,G.MO_CHARSET),language;
+			var ret = F.string.fromfile(path,G.MO_CHARSET);
 			ret = F.string.replace(ret,/(^(\s+)|(\s+)$)/ig,"");
-			ret = F.string.replace(ret,"^<s" + "cript(.+?)>(\s*)","ig","")
-			ret = F.string.replace(ret,/(\s*)<\/script>(\s*)$/ig,"")
-			if(!F.execute.call(path,ret,controller+"Controller"))return false;
-			M.Librarys["Controller_" + controller] = "jscript"
-			return true;
+			ret = F.string.replace(ret,"^<s" + "cript(.+?)>(\s*)","ig","");
+			ret = F.string.replace(ret,/(\s*)<\/script>(\s*)$/ig,"");
+			try{
+				(new Function("__FILE__","__DIR__","M","C","L",ret))(
+					path,
+					path==""?"":path.substr(0,path.lastIndexOf("\\")),
+					M.M,M.C,M.L
+				);
+				if(typeof GLOBAL[controller + "Controller"] == "function"){
+					M.Librarys["Controller_" + controller] = "jscript";
+					return true;
+				}else{
+					ExceptionManager.put(0x8300,"Mo.LoadController()","加载控制器时出现错误，请检查是否已经定义相关控制器'" + controller + "'");
+					return false;
+				}
+			}catch(ex){
+				ExceptionManager.put(ex.number,"Mo.LoadController()","加载控制器\"" + controller + "\"时出现错误:" + ex.description);
+				return false;
+			}
 		}catch(ex){
-			ExceptionManager.put(ex,"Mo.LoadController([path],\"" + controller + "\")，加载模块时出现错误。")
+			ExceptionManager.put(ex.number,"Mo.LoadController()","加载控制器\"" + controller + "\"时出现错误:" + ex.description);
 			return false;
 		}
 	};
@@ -287,7 +301,10 @@ var Mo = Mo || (function(){
 			var C = M.C(G.MO_REWRITE_CONF);
 			if(C == undefined)return M;
 			for(var i in C.Rules){
-				uri = uri.replace(C.Rules[i].LookFor,C.Rules[i].SendTo);
+				if(C.Rules[i].LookFor.test(uri)){
+					uri = uri.replace(C.Rules[i].LookFor,C.Rules[i].SendTo);
+					break;
+				}
 			}
 			mat = /^\/\?(.+?)$/i.exec(uri);
 			if(mat && mat.length > 0) uri = mat[1];
@@ -431,14 +448,14 @@ var Mo = Mo || (function(){
 			lib = key.substr(0,key.indexOf("."));
 			key = key.substr(key.indexOf(".") + 1);
 		}
-		if(this.Language.hasOwnProperty(lib)) return this.Language[lib].getter__(key);
+		if(M.Language.hasOwnProperty(lib)) return M.Language[lib].getter__(key);
 		var filepath = F.mappath(G.MO_APP + "Lang/" + lib + ".asp");
 		if(!F.exists(filepath))filepath = F.mappath(G.MO_CORE + "Lang/" + lib + ".asp");
 		if(F.exists(filepath)){
 			var cfg = null;
 			if(cfg = F.require(filepath)){
-				this.Language[lib] = cfg;
-				return this.Language[lib].getter__(key);
+				M.Language[lib] = cfg;
+				return M.Language[lib].getter__(key);
 			}else{
 				ExceptionManager.put(3,"Mo.L(key)","语言包[" + lib + "]无法加载,请检查语言包是否正确");
 			}
@@ -446,24 +463,28 @@ var Mo = Mo || (function(){
 			ExceptionManager.put(4,"Mo.L(key)","语言包[" + lib + "]无法加载,请检查语言包是否存在");
 		}
 	};
+	M.M = function(){
+		return Model__.apply(GLOBAL,arguments);
+	};
 	M.C = function(conf,value){
 		var key="";
 		if(conf.indexOf(".")>0){
 			key = conf.substr(conf.indexOf(".")+1);
 			conf = conf.substr(0,conf.indexOf("."));
+			if(conf=="@")conf = "Global";
 		}
-		if(this.Config.hasOwnProperty(conf)){
-			if(key!="" && value!==undefined) this.Config[conf][key] = value;
-			return (key=="" ? this.Config[conf] : this.Config[conf][key]);
+		if(M.Config.hasOwnProperty(conf)){
+			if(key!="" && value!==undefined) M.Config[conf][key] = value;
+			return (key=="" ? M.Config[conf] : M.Config[conf][key]);
 		}
 		var filepath = F.mappath(G.MO_APP + "Conf/" + conf + ".asp");
 		if(!F.exists(filepath)) filepath = F.mappath(G.MO_CORE + "Conf/" + conf + ".asp");
 		if(F.exists(filepath)){
 			var cfg = null;
 			if(cfg = F.require(filepath)){
-				this.Config[conf] = cfg;
-				if(key!="" && value!==undefined) this.Config[conf][key] = value;
-				return (key=="" ? this.Config[conf] : this.Config[conf][key]);
+				M.Config[conf] = cfg;
+				if(key!="" && value!==undefined) M.Config[conf][key] = value;
+				return (key=="" ? M.Config[conf] : M.Config[conf][key]);
 			}else{
 				ExceptionManager.put(3,"Mo.C(conf,value)","配置[" + conf + "]无法加载,请检查配置文件是否正确");
 			}
