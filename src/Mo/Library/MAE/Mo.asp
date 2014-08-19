@@ -7,7 +7,9 @@
 **		support@mae.im
 */
 var Mo = Mo || (function(){
-	var M={};
+	var M = function(opt){
+		M.Run(opt);
+	};
 	M.Version = "MoAspEnginer 2.1";
 	M.Librarys = {};
 	M.Language = {};
@@ -29,13 +31,14 @@ var Mo = Mo || (function(){
 		}
 	};
 	
-	var extend = function(src,dest){
+	var _extend = function(src,dest){
 		for(var c in dest){
 			if(dest.hasOwnProperty(c)) src[c] = dest[c];
 		}
+		return src;
 	};
 
-	var LoadLibrary = function( path, library, cls){
+	var _LoadLibrary = function( path, library, cls){
 		try{
 			path = F.mappath(path);
 			var ret = F.string.fromFile(path);
@@ -44,12 +47,12 @@ var Mo = Mo || (function(){
 			if(!F.execute.call(path,ret,"Mo" + library + cls))return false;
 			return true;
 		}catch(ex){
-			ExceptionManager.put(ex, "LoadLibrary([path], \"" + library + "\", \"" + cls + "\")");
+			ExceptionManager.put(ex, "_LoadLibrary([path], \"" + library + "\", \"" + cls + "\")");
 			return false;
 		}
 	};
 	
-	var RightCopy = function(src,target){
+	var _RightCopy = function(src,target){
 		var i = 0;
 		while(true){
 			if(i >= src.length || i >= target.length)break;
@@ -59,7 +62,7 @@ var Mo = Mo || (function(){
 		return src;
 	};
 
-	var LoadTemplateEx = function(template){
+	var _LoadTemplate = function(template){
 		var templatelist,vpath,path,templatelist2;
 		
 		templatelist = template.split(":");
@@ -80,13 +83,13 @@ var Mo = Mo || (function(){
 		var Matches = F.string.matches(tempStr,regexp);
 		while(Matches.length > 0){
 			var Match = Matches.pop();
-			templatelist2 = RightCopy(templatelist,Match[1].split(":"));
-			tempStr = F.replace(tempStr,Match[0], LoadTemplateEx(templatelist2.join(":")));
+			templatelist2 = _RightCopy(templatelist,Match[1].split(":"));
+			tempStr = F.replace(tempStr,Match[0], _LoadTemplate(templatelist2.join(":")));
 		}
 		return tempStr;
 	};
 
-	var ParseTemplatePath = function(template){
+	var _ParseTemplatePath = function(template){
 		var templatelist,vpath;
 		templatelist = template.split(":");
 		if(templatelist.length == 1){
@@ -99,7 +102,8 @@ var Mo = Mo || (function(){
 		return vpath;
 	};
 
-	var InitializePath = function(cfg,url_){
+	var _InitializePath = function(cfg){
+		var url_ = F.server("URL");
 		if(cfg.MO_APP_NAME == "")F.exit("未定义应用名称：MO_APP_NAME，请检查初始配置参数。")
 		if(cfg.MO_ROOT == "")cfg.MO_ROOT = url_.substr(0,url_.lastIndexOf("/") + 1);
 		if(cfg.MO_APP == "")cfg.MO_APP = cfg.MO_ROOT + cfg.MO_APP_NAME + "/";
@@ -107,9 +111,13 @@ var Mo = Mo || (function(){
 		if(cfg.MO_APP.substr(cfg.MO_APP.length - 1) != "/")cfg.MO_APP = cfg.MO_APP + "/";
 		if(cfg.MO_CORE.substr(cfg.MO_CORE.length - 1) != "/")cfg.MO_CORE = cfg.MO_CORE + "/";
 		if(!F.exists(cfg.MO_CORE,true))F.exit("核心目录[" + cfg.MO_CORE + "]不存在，请检查初始配置参数。");	
+		if(cfg.MO_APP_ENTRY == ""){
+			cfg.MO_APP_ENTRY = url_.substr(url_.lastIndexOf("/") + 1);
+			if(cfg.MO_APP_ENTRY.toLowerCase() == "default.asp")cfg.MO_APP_ENTRY = "";
+		}
 	}
 
-	var LoadController = function(path,controller){
+	var _LoadController = function(path,controller){
 		if(M.Librarys["Controller_" + controller] == "jscript")return true;
 		try{
 			path = F.mappath(path);
@@ -127,20 +135,20 @@ var Mo = Mo || (function(){
 					M.Librarys["Controller_" + controller] = "jscript";
 					return true;
 				}else{
-					ExceptionManager.put(0x8300,"Mo.LoadController()","加载控制器时出现错误，请检查是否已经定义相关控制器'" + controller + "'");
+					ExceptionManager.put(0x8300,"_LoadController()","加载控制器时出现错误，请检查是否已经定义相关控制器'" + controller + "'");
 					return false;
 				}
 			}catch(ex){
-				ExceptionManager.put(ex.number,"Mo.LoadController()","加载控制器\"" + controller + "\"时出现错误:" + ex.description);
+				ExceptionManager.put(ex.number,"_LoadController()","加载控制器\"" + controller + "\"时出现错误:" + ex.description);
 				return false;
 			}
 		}catch(ex){
-			ExceptionManager.put(ex.number,"Mo.LoadController()","加载控制器\"" + controller + "\"时出现错误:" + ex.description);
+			ExceptionManager.put(ex.number,"_LoadController()","加载控制器\"" + controller + "\"时出现错误:" + ex.description);
 			return false;
 		}
 	};
 
-	var parseLibraryPath = function(lib){
+	var _parseLibraryPath = function(lib){
 		var path,core,cls,library;
 		core = "Extend";
 		cls = lib;
@@ -159,11 +167,11 @@ var Mo = Mo || (function(){
 		return ["",core,library,cls];
 	};
 
-	var start__ = function(){
+	var _start = function(){
 		if(G.MO_PRE_LIB != ""){
 			var libs = G.MO_PRE_LIB.split(","),lib,T__;
 			for(var i = 0;i < libs.length;i++){
-				var result = parseLibraryPath("PreLib:Pre." + libs[i]);
+				var result = _parseLibraryPath("PreLib:Pre." + libs[i]);
 				if(result[0]!=""){
 					if(F.include(result[0])){
 						var pre = F.initialize("MoPre" + libs[i]);
@@ -175,11 +183,11 @@ var Mo = Mo || (function(){
 		}
  	};
  	
-	var end__ = function(){
+	var _end = function(){
 		if(G.MO_END_LIB != ""){
 			var libs = G.MO_END_LIB.split(","),lib,T__;
 			for(var i = 0;i < libs.length;i++){
-				var result = parseLibraryPath("EndLib:End." + libs[i]);
+				var result = _parseLibraryPath("EndLib:End." + libs[i]);
 				if(result[0]!=""){
 					if(F.include(result[0])){
 						var end = F.initialize("MoEnd" + libs[i]);
@@ -191,38 +199,38 @@ var Mo = Mo || (function(){
 		}
 	};
 
-	var debug_ = function(){
+	var _debug = function(){
 		if(G.MO_SHOW_SERVER_ERROR)F.echo(ExceptionManager.debug());
 		Model__.debug();
 	};
 	var G = {};
 
 	M.Initialize = function(cfg){
+		cfg = _extend({
+			MO_APP_NAME : "App",
+			MO_APP : "App",
+			MO_APP_ENTRY : "",
+			MO_ROOT : "",
+			MO_CORE : "Mo"
+		},cfg);
 		this.runtime.start = new Date();
 		Response.Charset = "utf-8";
 		if(!cfg || typeof cfg != "object")F.exit("请设置初始配置参数。")
-		var url_ = F.server("URL");
+		M.Config.Global = cfg;
 		this.Status = "200 OK";
-		InitializePath(cfg,url_);
+		_InitializePath(cfg);
 		if(F.exists(cfg.MO_CORE + "Conf/Config.asp")) G = M.Config.Global = F.require(F.mappath(cfg.MO_CORE + "Conf/Config.asp"));
-		extend(G,cfg);
-		if(G.MO_APP_ENTRY == ""){
-			G.MO_APP_ENTRY = url_.substr(url_.lastIndexOf("/") + 1);
-			if(G.MO_APP_ENTRY.toLowerCase() == "default.asp")G.MO_APP_ENTRY = "";
-		}
-		if(!F.string.test(G.MO_METHOD_CHAR,"^(\w+)$")) G.MO_METHOD_CHAR = "m";
-		if(!F.string.test(G.MO_ACTION_CHAR,"^(\w+)$")) G.MO_ACTION_CHAR = "a";
-		if(!F.string.test(G.MO_GROUP_CHAR,"^(\w+)$")) G.MO_GROUP_CHAR = "g";
-		F.MO_APP_NAME = G.MO_APP_NAME;
-		F.MO_APP = G.MO_APP;
-		F.MO_CORE = G.MO_CORE;
+		_extend(G,cfg);
+		if(!G.MO_METHOD_CHAR) G.MO_METHOD_CHAR = "m";
+		if(!G.MO_ACTION_CHAR) G.MO_ACTION_CHAR = "a";
+		if(!G.MO_GROUP_CHAR) G.MO_GROUP_CHAR = "g";
 		try{
 			F.foreach(["Mo.Extend","Mo.Model","Mo.Model.Helper"],function(i,v){
 				F.include(G.MO_CORE +"Library/MAE/" + v + ".asp");
 			});
 		}catch(ex){
 			F.exit("核心库加载失败，原因：" + ex.message + "。")
-			return M;
+			return;
 		}
 		if(G.MO_LOAD_VBSHELPER)M.loadVBSHelper();
 		try{
@@ -242,10 +250,9 @@ var Mo = Mo || (function(){
 			}
 			if(F.exists(G.MO_APP + "Conf/Config.asp")){
 				cfg = F.require(F.mappath(G.MO_APP + "Conf/Config.asp"));
-				extend(G,cfg || {});
+				_extend(G,cfg || {});
 			}
 			if(G.MO_CHARSET != "utf-8")Response.Charset = G.MO_CHARSET;
-			F.MO_SESSION_WITH_SINGLE_TAG = G.MO_SESSION_WITH_SINGLE_TAG;
 			if(F.exists((G.MO_APP + "Common/Function.asp"))) F.include(G.MO_APP + "Common/Function.asp");
 			if(G.MO_IMPORT_COMMON_FILES != ""){
 				var files = G.MO_IMPORT_COMMON_FILES.split(";")
@@ -264,14 +271,14 @@ var Mo = Mo || (function(){
 			ExceptionManager.put(ex,"Mo.Initialize");
 		}
 		M.assign("VERSION",Mo.Version);
-		start__();
-		return M;
+		_start();
+		return;
 	};
 	M.Terminate = function(){
-		end__();
+		_end();
 		Model__.dispose();
 		F.dispose();
-		debug_();
+		_debug();
 		this.Assigns = null;
 		this.Config = null;
 		this.Language = null;
@@ -325,10 +332,10 @@ var Mo = Mo || (function(){
 		return M;
 	};
 	M.use = function(lib){
-		var libinfo=parseLibraryPath(lib);
+		var libinfo=_parseLibraryPath(lib);
 		if(!this.Librarys.hasOwnProperty(lib)){
 			if(libinfo[0]!=""){
-				if(LoadLibrary(libinfo[0],libinfo[2],libinfo[3]))this.Librarys[lib]="jscript";
+				if(_LoadLibrary(libinfo[0],libinfo[2],libinfo[3]))this.Librarys[lib]="jscript";
 			}else{
 				ExceptionManager.put(1,"Mo.use(lib)","类库'" + lib + "'不存在。");
 			}
@@ -385,7 +392,7 @@ var Mo = Mo || (function(){
 			}
 		}
 		if(!usecache){
-			html = LoadTemplateEx(template);
+			html = _LoadTemplate(template);
 			if(html == "")return "";
 			if(typeof MoAspEnginerView == "undefined")F.include(G.MO_CORE + "Library/MAE/Mo.View.asp","utf-8");
 			var view_ = new MoAspEnginerView(html);
@@ -407,14 +414,14 @@ var Mo = Mo || (function(){
 		return content;
 	};
 	M.templateIsInApp = function(template){
-		var vpath = ParseTemplatePath(template),path;
+		var vpath = _ParseTemplatePath(template),path;
 		path = G.MO_APP + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
 		if(vpath.indexOf("@") > 0)path = G.MO_ROOT + vpath.substr(vpath.indexOf("@") + 1) + "/Views/" + vpath.substr(0,vpath.indexOf("@")) + "." + G.MO_TEMPLATE_PERX;
 		return F.exists(path);
 	};
 	M.templateIsInCore = function(template){
 		var vpath,path;
-		vpath = ParseTemplatePath(template);
+		vpath = _ParseTemplatePath(template);
 		path = G.MO_CORE + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
 		return F.exists(path);
 	};
@@ -509,7 +516,7 @@ var Mo = Mo || (function(){
 		var filepath = F.mappath(G.MO_APP + "Controllers/" + ctrl + "Controller.asp");
 		if(!F.exists(filepath)) filepath = F.mappath(G.MO_CORE + "Controllers/" + ctrl + "Controller.asp");
 		if(F.exists(filepath)){
-			if(LoadController(filepath,ctrl)){
+			if(_LoadController(filepath,ctrl)){
 				return F.initialize(ctrl + "Controller");
 			}else{
 				ExceptionManager.put(5,"Mo.A(ctrl)","模块[" + ctrl + "]无法加载,请检查模块文件");
@@ -518,7 +525,9 @@ var Mo = Mo || (function(){
 			ExceptionManager.put(6,"Mo.A(ctrl)","模块[" + ctrl + "]无法加载,请检查模块文件是否存在");
 		}
 	};
-	M.Run = function(){
+	M.Run = function(opt){
+		M.Initialize(opt);
+		M.Route();
 		this.Method = F.string.trim(F.get(G.MO_METHOD_CHAR))
 		this.Action = F.string.trim(F.get(G.MO_ACTION_CHAR))
 		this.Group = F.string.trim(F.get(G.MO_GROUP_CHAR))
@@ -536,7 +545,7 @@ var Mo = Mo || (function(){
 				return;
 			}
 		}
-		var ModelPath = G.MO_APP + "Controllers/" + this.Group + this.Method + "Controller.asp", canLoadController=true;
+		var ModelPath = G.MO_APP + "Controllers/" + this.Group + this.Method + "Controller.asp", can_LoadController=true;
 		this.RealMethod = this.Method;
 		this.RealAction = this.Action;
 		if(!F.exists(ModelPath)){
@@ -551,7 +560,7 @@ var Mo = Mo || (function(){
 					if(!F.exists(ModelPath)){
 						if(M.templateIsInApp(this.Action) || M.templateIsInCore(this.Action)){
 							M.display(this.Action);
-							canLoadController= false;
+							can_LoadController= false;
 						}else{
 							F.exit("模块[" + this.Method + "]不存在");
 						}
@@ -559,8 +568,8 @@ var Mo = Mo || (function(){
 				}
 			}
 		}
-		if(!canLoadController)return M;
-		if(LoadController(ModelPath,this.RealMethod)){
+		if(!can_LoadController)return M;
+		if(_LoadController(ModelPath,this.RealMethod)){
 			try{
 				var MC = F.initialize(this.RealMethod + "Controller");
 				if(MC.__STATUS__===true){
@@ -585,6 +594,7 @@ var Mo = Mo || (function(){
 				ExceptionManager.put(ex,this.RealMethod + "." + this.RealAction);
 			}
 		}
+		M.Terminate();
 		return M;
 	};
 	M.dump = function(){

@@ -6,7 +6,7 @@
 **		support@mae.im
 */
 var GLOBAL = this,
-	Exports, F = F || (function() {
+	F = F || (function() {
 		var ws = [
 			["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
 			["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -36,10 +36,6 @@ var GLOBAL = this,
 				});
 			};
 		var $f = {};
-		$f.MO_SESSION_WITH_SINGLE_TAG = false;
-		$f.MO_APP_NAME = "";
-		$f.MO_APP = "";
-		$f.MO_CORE = "";
 		$f.TEXT = {
 			BR: 1,
 			NL: 2,
@@ -47,7 +43,6 @@ var GLOBAL = this,
 			NLBR: 1 | 2
 		};
 		$f.fso = null;
-		$f.rewrite = false;
 		$f.exports = {};
 		$f.vbs = {};
 		$f.has = function(obj, key) {
@@ -104,9 +99,6 @@ var GLOBAL = this,
 			}
 			return returnValue;
 		};
-		$f.iid = function(cond, value) {
-			return (cond === undefined ? value : cond);
-		};
 		$f.mappath = function(path) {
 			if (path.length < 2) return Server.MapPath(path)
 			if (path.substr(1, 1) == ":") return path;
@@ -122,10 +114,9 @@ var GLOBAL = this,
 				return null;
 			}
 		};
-		$f.activex_ = function(classid) {
+		$f.activex.enabled = function(classid) {
 			try {
-				var obj = Server.CreateObject(classid);
-				obj = null;
+				Server.CreateObject(classid);
 				return true;
 			} catch (ex) {
 				return false;
@@ -165,7 +156,7 @@ var GLOBAL = this,
 		};
 		$f.session = function(key, value) {
 			if (key == undefined) return "";
-			if ($f.MO_SESSION_WITH_SINGLE_TAG) key = $f.MO_APP_NAME + "_" + key;
+			if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
 			if (value === null) {
 				Session.Contents.Remove(key);
 				return
@@ -182,7 +173,7 @@ var GLOBAL = this,
 				$f.get.remove(key);
 				return;
 			}
-			if (value === undefined) return $f.iid(get__[key], "");
+			if (value === undefined) return (get__.hasOwnProperty(key) ? get__[key] : "");
 			get__[key] = value;
 			return;
 		};
@@ -198,7 +189,7 @@ var GLOBAL = this,
 				delete server__[key];
 				return;
 			}
-			if (value === undefined) return $f.iid(server__[key], "");
+			if (value === undefined) return (server__.hasOwnProperty(key) ? server__[key] : "");
 			server__[key] = value;
 			return;
 		};
@@ -340,20 +331,11 @@ var GLOBAL = this,
 				$f.echo("<s" + "cript type=\"text/javascript\">window.location=decodeURIComponent(\"" + $f.encode(url) + "\");</s" + "cript>");
 			}
 		};
-		$f.require = function(library, required, path) {
+		$f.vendor = function(library){
+			return $f.require.call(this,library,[Mo.Config.Global.MO_APP + "Library/Vendor/", Mo.Config.Global.MO_CORE + "Library/Vendor/"]);
+		};
+		$f.require = function(library, path) {
 			if (required__[library] === true) return;
-			if (typeof required == "string") {
-				path = required;
-				required = [];
-			} else if (required && required.constructor != Array) {
-				ExceptionManager.put(new Exception(0, "F.require", "error arguments."));
-				return null;
-			}
-			if (required && required.length > 0) {
-				$f.foreach(required, function(i, v) {
-					$f.require(v, path);
-				});
-			}
 			if (library.length > 2 && library.substr(1, 1) == ":" && $f.fso.fileexists(library)) {
 				path = library.substr(0, library.lastIndexOf("\\") + 1);
 				library = library.substr(library.lastIndexOf("\\") + 1);
@@ -362,40 +344,34 @@ var GLOBAL = this,
 				ExceptionManager.put(new Exception(0, "F.require", "library '" + library + "' format error."));
 				return null;
 			}
-			$f.exports = $f.exports || {};
-			var src = "",
-				iscached = false;
-			if ($f.cache.enabled && $f.cache.exists(library)) iscached = true;
-			var path_ = "";
-			if (!iscached) {
-				var paths = [path || "", $f.MO_APP + "Library/Extend/", $f.MO_CORE + "Library/Extend/"];
-				for (var i = 0; i < paths.length; i++) {
-					if (paths[i] == "") continue;
-					path_ = $f.mappath(paths[i] + library);
-					if ($f.fso.fileexists(path_)) break;
-					path_ = $f.mappath(paths[i] + library + ".js");
-					if ($f.fso.fileexists(path_)) break;
-					if ($f.fso.folderexists($f.mappath(paths[i] + library))) {
-						path_ = $f.mappath(paths[i] + library + "/index.js");
-						if ($f.fso.fileexists(path_)) break;
-					}
+			var _statement = "",
+				_targetPaths = [],
+				_path = "";
+				
+			if (path) _targetPaths = _targetPaths.concat(path);
+			else _targetPaths = _targetPaths.concat([Mo.Config.Global.MO_APP + "Library/Extend/", Mo.Config.Global.MO_CORE + "Library/Extend/"]);
+			for (var i = 0; i < _targetPaths.length; i++) {
+				_path = $f.mappath(_targetPaths[i] + library);
+				if ($f.fso.fileexists(_path)) break;
+				_path = $f.mappath(_targetPaths[i] + library + ".js");
+				if ($f.fso.fileexists(_path)) break;
+				if ($f.fso.folderexists($f.mappath(_targetPaths[i] + library))) {
+					_path = $f.mappath(_targetPaths[i] + library + "/index.js");
+					if ($f.fso.fileexists(_path)) break;
 				}
-				if (!$f.fso.fileexists(path_)) {
-					ExceptionManager.put(new Exception(0, "F.require", "required library '" + library + "' is not exists."));
-					return $f.exports;
-				}
-				src = $f.string.fromFile(path_);
-				src = src.replace(/^(\s*)<sc(.+)>/ig, "").replace(/<\/script>(\s*)$/ig, "");
-				if ($f.cache.enabled) $f.cache.write(library, src);
-			} else {
-				src = $f.cache.read(library);
 			}
+			if (_path=="" || !$f.fso.fileexists(_path)) {
+				ExceptionManager.put(new Exception(0, "F.require", "required library '" + library + "' is not exists."));
+				return $f.exports;
+			}
+			_statement = $f.string.fromFile(_path);
+			_statement = _statement.replace(/^(\s*)<sc(.+)>/ig, "").replace(/<\/script>(\s*)$/ig, "");
 			try {
 				var this_ = this;
 				if (this == F) this_ = null;
 				required__[library] = true;
-				return (new Function("exports", "__FILE__", "__DIR__", src))(
-				this_ || $f.exports, path_, path_ == "" ? "" : path_.substr(0, path_.lastIndexOf("\\"))) || $f.exports;
+				return (new Function("exports", "__FILE__", "__DIR__", _statement))(
+				this_ || $f.exports, _path, _path == "" ? "" : _path.substr(0, _path.lastIndexOf("\\"))) || $f.exports;
 			} catch (ex) {
 				ExceptionManager.put(ex, "F.require");
 				return $f.exports;
@@ -1416,7 +1392,7 @@ var GLOBAL = this,
 		};
 		$f.session.exists = function(key) {
 			if (key == undefined) return false;
-			if ($f.MO_SESSION_WITH_SINGLE_TAG) key = $f.MO_APP_NAME + "_" + key;
+			if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
 			if (Session.Contents(key) != undefined) return true;
 			return false;
 		};
@@ -1429,7 +1405,7 @@ var GLOBAL = this,
 				Session.Contents.RemoveAll();
 				return;
 			}
-			if ($f.MO_SESSION_WITH_SINGLE_TAG) key = $f.MO_APP_NAME + "_" + key;
+			if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
 			if (Session.Contents(key) != undefined) {
 				Session.Contents.Remove(key);
 				return;
@@ -1442,7 +1418,7 @@ var GLOBAL = this,
 			var obj = {};
 			$f.each(Session.Contents, function(q) {
 				var nq = q;
-				if ($f.MO_SESSION_WITH_SINGLE_TAG) nq = $f.string.trimLeft(q, $f.MO_APP_NAME + "_");
+				if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) nq = $f.string.trimLeft(q, Mo.Config.Global.MO_APP_NAME + "_");
 				if ($f.string.startWith(nq, name + ".")) {
 					obj[nq.substr(name.length + 1)] = Session.Contents(q);
 				}
@@ -1469,7 +1445,7 @@ var GLOBAL = this,
 			dump += ("  [Contents] => {\n");
 			$f.each(Session.Contents, function(q) {
 				var nq = q;
-				if ($f.MO_SESSION_WITH_SINGLE_TAG) nq = $f.string.trimLeft(q, $f.MO_APP_NAME + "_");
+				if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) nq = $f.string.trimLeft(q, Mo.Config.Global.MO_APP_NAME + "_");
 				dump += ("    [" + nq + "] => " + dump__(Session.Contents(q)) + "\n");
 			});
 			dump += ("  }\n");
@@ -1528,7 +1504,7 @@ var GLOBAL = this,
 			var returnValue = "";
 			$f.each(Session.Contents, function(q) {
 				var nq = q;
-				if ($f.MO_SESSION_WITH_SINGLE_TAG) nq = $f.string.trimLeft(q, $f.MO_APP_NAME + "_");
+				if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) nq = $f.string.trimLeft(q, Mo.Config.Global.MO_APP_NAME + "_");
 				returnValue += fn(nq) + "=" + fn(Session.Contents(q)) + "&";
 			});
 			if (returnValue != "") returnValue = returnValue.substr(0, returnValue.length - 1);
@@ -1597,8 +1573,10 @@ var GLOBAL = this,
 			};
 		});
 		$f.timer.ticks = $f.timer.stop;
-		Exports = $f.exports;
 		init();
 		return $f;
-	})();
+	})(), 
+	Exports = F.exports, 
+	Require = function(){F.require.apply(F,arguments);}, 
+	Vendor = function(){F.vendor.apply(F,arguments);};
 </script>

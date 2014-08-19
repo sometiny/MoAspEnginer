@@ -21,7 +21,7 @@ TestController.extend("Index",function(){
 	return this.Name;
 });
 TestController.extend("Show",function(){
-	F.echo(this.Name,true);
+	/*statement*/
 });
 TestController.extend("Test",function(){
 	/*todo*/
@@ -31,6 +31,7 @@ TestController.extend("Test",function(){
 	};
 	var parser = function(src,name){
 		F.echo("<pre>");
+		var members={};
 		if(typeof src == "object"){
 			var $F = F.object.sort(src);
 			for(var i in $F){
@@ -39,51 +40,56 @@ TestController.extend("Test",function(){
 					for(var j in $F[i]){
 						if(!$F[i].hasOwnProperty(j))continue;
 						if(typeof $F[i][j] == "function"){
-							F.echo(name + "." + i + "." + j + getfunction($F[i][j]) +"[静态方法]",F.TEXT.NL);
+							members[name + "." + i + "." + j] = name + "." + i + "." + j + getfunction($F[i][j]) +"[静态方法]";
 						}else{
-							F.echo(name + "." + i + "." + j +"[静态属性]",F.TEXT.NL);
+							members[name + "." + i + "." + j] = name + "." + i + "." + j +"[静态属性]";
 						}
 					}
 				}else if(typeof $F[i] == "function"){
-					F.echo(name + "." + i + getfunction($F[i]),F.TEXT.NL);
+					members[name + "." + i] = name + "." + i + getfunction($F[i]);
 					for(var j in $F[i]){
 						if(!$F[i].hasOwnProperty(j))continue;
 						if(typeof $F[i][j] == "function"){
-							F.echo(name + "." + i + "." + j + getfunction($F[i][j]) +"[静态方法]",F.TEXT.NL);
+							members[name + "." + i + "." + j] = name + "." + i + "." + j + getfunction($F[i][j]) +"[静态方法]";
 						}else{
-							F.echo(name + "." + i + "." + j +"[静态属性]",F.TEXT.NL);
+							members[name + "." + i + "." + j] = name + "." + i + "." + j +"[静态属性]";
 						}
 					}
 					for(var j in $F[i].prototype){
 						if(!$F[i].prototype.hasOwnProperty(j))continue;
 						if(typeof $F[i].prototype[j] == "function"){
-							F.echo(name + "." + i + "." + j + getfunction($F[i].prototype[j]),F.TEXT.NL);
+							members[name + "." + i + "." + j] = name + "." + i + "." + j + getfunction($F[i].prototype[j]);
 						}else{
-							F.echo(name + "." + i + "." + j,F.TEXT.NL);
+							members[name + "." + i + "." + j] = name + "." + i + "." + j;
 						}
 					}
 				}else{
-					F.echo(name + "." + i,F.TEXT.NL);
+					members[name + "." + i] = name + "." + i;
 				}
 			}
 		}else if(typeof src=="function"){
-			F.echo(name + getfunction(src),F.TEXT.NL);
+			members[name] = name + getfunction(src);
 			for(var j in src){
 				if(!src.hasOwnProperty(j))continue;
 				if(typeof src[j] == "function"){
-					F.echo(name + "." + j + getfunction(src[j]) +"[静态方法]",F.TEXT.NL);
+					members[name + "." + j] = name + "." + j + getfunction(src[j]) +"[静态方法]";
 				}else{
-					F.echo(name + "." + j + "[静态属性]",F.TEXT.NL);
+					members[name + "." + j] = name + "." + j + "[静态属性]";
 				}
 			}
 			for(var j in src.prototype){
 				if(!src.prototype.hasOwnProperty(j))continue;
 				if(typeof src.prototype[j] == "function"){
-					F.echo(name + "." + j + getfunction(src.prototype[j]),F.TEXT.NL);
+					members[name + "." + j] = name + "." + j + getfunction(src.prototype[j]);
 				}else{
-					F.echo(name + "." + j,F.TEXT.NL);
+					members[name + "." + j] = name + "." + j;
 				}
 			}
+		}
+		members = F.object.sort(members);
+		for(var i in members){
+			if(!members.hasOwnProperty(i))continue;
+			F.echo(members[i],F.TEXT.NL);
 		}
 		F.echo("</pre>");
 	}
@@ -97,7 +103,6 @@ TestController.extend("Test",function(){
 	parser(IController,"IController");
 	parser(ExceptionManager,"ExceptionManager");
 	parser(Exception,"Exception");
-	parser(ModelHelper,"ModelHelper");
 	parser(ModelCMDManager,"ModelCMDManager");
 });
 TestController.extend("empty",function(name){
