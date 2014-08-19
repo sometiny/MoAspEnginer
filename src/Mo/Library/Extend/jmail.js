@@ -10,11 +10,6 @@ function $jmail(){
 	this.charset="GB2312";
 	this.contenttype="text/html";
 	
-	/****************************************************
-	'@DESCRIPTION:	ensure jmail is available.
-	'@PARAM:	classid [String] : jmail class id. Default value is 'JMail.Message';
-	'@RETURN:	[Boolean] if jmail is available, return true, or return false.
-	'****************************************************/
 	this.enabled=function(classid){
 		classid = classid || "JMail.Message";
 		this.jmail = F.activex(classid);
@@ -30,12 +25,6 @@ function $jmail(){
 		"Email":"",
 		"DisplayName":""
 		};
-	/****************************************************
-	'@DESCRIPTION:	set login information
-	'@PARAM:	server [String] : mail server
-	'@PARAM:	username [String] : login username
-	'@PARAM:	password [String] : login password
-	'****************************************************/
 	this.login = function(server,username,password){
 		this.setting["MailAddress"]=server||"";
 		this.setting["LoginName"]=username||"";
@@ -44,11 +33,6 @@ function $jmail(){
 		this.jmail.MailServerPassword = this.setting["LoginPass"];
 	};
 
-	/****************************************************
-	'@DESCRIPTION:	set sender
-	'@PARAM:	email [String] : email address
-	'@PARAM:	display [String] : display name.
-	'****************************************************/
 	this.from=function(email,display){
 		this.setting["Sender"]=display||"";
 		this.setting["Fromer"]=email||"";
@@ -56,32 +40,17 @@ function $jmail(){
 		this.jmail.FromName = this.setting["Sender"] ;
 	};
 
-	/****************************************************
-	'@DESCRIPTION:	set receiver
-	'@PARAM:	email [String] : email address
-	'@PARAM:	display [String] : display name.
-	'****************************************************/
 	this.to=function(email,display){
 		this.setting["Email"]=email||"";
 		this.setting["DisplayName"]=display||this.setting["Email"];
 		this.jmail.AddRecipient(this.setting["Email"],this.setting["DisplayName"]);
 	};
 
-	/****************************************************
-	'@DESCRIPTION:	set mail message. if you don't call this method,you must set subject and content when you call 'send' method.
-	'@PARAM:	Subject [String] : mail subject
-	'@PARAM:	Content [String] : mail content
-	'****************************************************/
 	this.setMessage = function(Subject,Content){
 		this.jmail.Subject = Subject;
 		this.jmail.Body = Content; 
 	};
-
-	/****************************************************
-	'@DESCRIPTION:	ddd recipient email
-	'@PARAM:	email [String] : email address
-	'@PARAM:	display [String] : display name.
-	'****************************************************/
+	
 	this.addEmailAddress = function(email,display){
 		email = email ||"";
 		if(email=="")return;
@@ -89,12 +58,6 @@ function $jmail(){
 		this.jmail.AddRecipient(email,display);
 	};
 
-	/****************************************************
-	'@DESCRIPTION:	send email
-	'@PARAM:	Subject [String[option]] : mail subject.s
-	'@PARAM:	Content [String[option]] : mail content.
-	'@RETURN:	[Boolean] if mail was sent successfully, return true, or return false;
-	'****************************************************/
 	this.send = function(Subject,Content) {
 		if(this.jmail==null)return false;
 		try{

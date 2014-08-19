@@ -18,13 +18,6 @@ function $$() {
 	this.currentnames = [];
 }
 $$.fn = $$.prototype;
-/****************************************************
-'@DESCRIPTION:	create an instance of $$. You can use it in vbscript.
-'@RETURN:	[Object] instance of $$
-'****************************************************/
-$$.New = $$.fn.New = function() {
-	return new $$();
-};
 $$.fn.set = function(key, value) {
 	F.foreach(this.currentnames, function(i, v, _this) {
 		_this.settings[v][key] = value;

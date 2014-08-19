@@ -4,19 +4,11 @@ var $folder = {
 	classid:{fso:"Scripting.FileSystemObject"},
 	fso:null,
 	inited:false,
-	/****************************************************
-	'@DESCRIPTION:	override 'Server.Mappath' method
-	'@PARAM:	path [String] : path. eg: 'E:\a.asp','/a.asp','a.asp'
-	'@RETURN:	[String] local file path
-	'****************************************************/
 	mappath:function(path){
 		if(path.length<2)return Server.MapPath(path)
 		if(path.substr(1,1)==":") return path;
 		return Server.MapPath(path);	
 	},
-	/****************************************************
-	'@DESCRIPTION:	init
-	'****************************************************/
 	init:function(){
 		try{
 			this.fso = new ActiveXObject(this.classid.fso);
@@ -27,28 +19,15 @@ var $folder = {
 			return false;
 		}
 	},
-	/****************************************************
-	'@DESCRIPTION:	uninit
-	'****************************************************/
 	uninit:function(){
 		this.fso = null;
 		this.inited = false;
 	},
-	/****************************************************
-	'@DESCRIPTION:	ensure that the directory exists.
-	'@PARAM:	path [String] : directory path
-	'@RETURN:	[Boolean] if the directory exists,return true, or return false
-	'****************************************************/
 	exists:function(path){
 		if(!this.inited)this.init();
 		path = this.mappath(path);	
 		return this.fso.FolderExists(path);
 	},
-	/****************************************************
-	'@DESCRIPTION:	Delete directory
-	'@PARAM:	path [String] : directory path
-	'@RETURN:	[Boolean] if the directory is deleted successfully, return true, or return false;
-	'****************************************************/
 	Delete:function(path){
 		if(!this.inited)this.init();
 		path = this.mappath(path);	
@@ -63,11 +42,6 @@ var $folder = {
 			return false;	
 		}		
 	},
-	/****************************************************
-	'@DESCRIPTION:	create directory. if the parent directory don't exists, we will create it.
-	'@PARAM:	path [String] : directory path
-	'@RETURN:	[Boolean] if the directory is created successfully, return true, or return false;
-	'****************************************************/
 	create:function(path){
 		path = this.mappath(path);
 		if(this.exists(path))return true;
@@ -80,12 +54,6 @@ var $folder = {
 			return false;
 		}
 	},
-	/****************************************************
-	'@DESCRIPTION:	clear directory
-	'@PARAM:	path [String] : directory path
-	'@PARAM:	includeself [Boolean] : if includeself is true, this method equals 'delete' method.
-	'@RETURN:	[Boolean] if the directory is cleared successfully, return true, or return false;
-	'****************************************************/
 	clear:function(path,includeself){
 		if(!this.inited)this.init();
 		if(includeself!==true)includeself=false;

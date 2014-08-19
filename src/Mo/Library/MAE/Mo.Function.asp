@@ -1577,6 +1577,6 @@ var GLOBAL = this,
 		return $f;
 	})(), 
 	Exports = F.exports, 
-	Require = function(){F.require.apply(F,arguments);}, 
-	Vendor = function(){F.vendor.apply(F,arguments);};
+	Require = function(){return F.require.apply(F,arguments);}, 
+	Vendor = function(){return F.vendor.apply(F,arguments);};
 </script>

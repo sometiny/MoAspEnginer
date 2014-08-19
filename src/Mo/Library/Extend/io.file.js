@@ -5,19 +5,11 @@ var $file = {
 	fso:null,
 	stream:null,
 	inited:false,
-	/****************************************************
-	'@DESCRIPTION:	override 'Server.Mappath' method
-	'@PARAM:	path [String] : path. eg: 'E:\a.asp','/a.asp','a.asp'
-	'@RETURN:	[String] local file path
-	'****************************************************/
 	mappath:function(path){
 		if(path.length<2)return Server.MapPath(path)
 		if(path.substr(1,1)==":") return path;
 		return Server.MapPath(path);	
 	},
-	/****************************************************
-	'@DESCRIPTION:	init
-	'****************************************************/
 	init:function(){
 		try{
 			this.fso = new ActiveXObject(this.classid.fso);
@@ -29,30 +21,17 @@ var $file = {
 			return false;
 		}
 	},
-	/****************************************************
-	'@DESCRIPTION:	uninit
-	'****************************************************/
 	uninit:function(){
 		try{this.stream.close();}catch(ex){}
 		this.stream=null;
 		this.fso = null;
 		this.inited = false;
 	},
-	/****************************************************
-	'@DESCRIPTION:	ensure that the file exists.
-	'@PARAM:	path [String] : file path
-	'@RETURN:	[Boolean] if the file exists,return true, or return false
-	'****************************************************/
 	exists:function(path){
 		if(!this.inited)this.init();
 		path = this.mappath(path);	
 		return this.fso.FileExists(path);
 	},
-	/****************************************************
-	'@DESCRIPTION:	Delete file
-	'@PARAM:	path [String] : file path
-	'@RETURN:	[Boolean] if the file is deleted successfully, return true, or return false;
-	'****************************************************/
 	Delete:function(path){
 		if(!this.inited)this.init();
 		path = this.mappath(path);	
@@ -68,11 +47,6 @@ var $file = {
 			return false;	
 		}
 	},
-	/****************************************************
-	'@DESCRIPTION:	open stream
-	'@PARAM:	mode [Int] : stream mode. 1 for read, 2 for write, 3 for write/read ...
-	'@PARAM:	type [Int] : stream type. 1 for binary, 2 for text
-	'****************************************************/
 	open:function(mode,type){
 		if(!this.inited)this.init();
 		try{this.stream.close();}catch(ex){}
@@ -81,12 +55,6 @@ var $file = {
 		this.stream.open();
 	},
 
-	/****************************************************
-	'@DESCRIPTION:	read text from local file
-	'@PARAM:	path [String] : local file path
-	'@PARAM:	charset [String] : file text charset
-	'@RETURN:	[String] text string
-	'****************************************************/
 	readtext:function(path,charset){
 		if(!this.inited)this.init();
 		path = this.mappath(path);	
@@ -108,13 +76,6 @@ var $file = {
 		}
 	},
 
-	/****************************************************
-	'@DESCRIPTION:	read binary from local file
-	'@PARAM:	path [String] : local file path
-	'@PARAM:	position [Int[option]] : read start position
-	'@PARAM:	length [Int[option]] : length need to read
-	'@RETURN:	[Binary] binary data
-	'****************************************************/
 	read:function(path,position,length){
 		if(!this.inited)this.init();
 		path = this.mappath(path);	
@@ -137,13 +98,6 @@ var $file = {
 		}
 	},
 
-	/****************************************************
-	'@DESCRIPTION:	write text to local file
-	'@PARAM:	path [String] : local file path
-	'@PARAM:	content [String] : content need to write to file
-	'@PARAM:	charset [String] : text charset
-	'@RETURN:	[Boolean] if text was wroten successfully, return true, or return false;
-	'****************************************************/
 	writetext:function(path,content,charset){
 		if(!this.inited)this.init();
 		try{
@@ -161,13 +115,6 @@ var $file = {
 		}
 	},
 
-	/****************************************************
-	'@DESCRIPTION:	append text to local file
-	'@PARAM:	path [String] : local file path
-	'@PARAM:	content [String] : content need to append to file
-	'@PARAM:	charset [String] : text charset
-	'@RETURN:	[Boolean] if text was appended successfully, return true, or return false;
-	'****************************************************/
 	appendtext:function(path,content,charset){
 		if(!this.inited)this.init();
 		try{
@@ -186,12 +133,6 @@ var $file = {
 			return false;	
 		}
 	},
-	/****************************************************
-	'@DESCRIPTION:	write binary data to local file
-	'@PARAM:	path [String] : local file path
-	'@PARAM:	content [Binary] : binary data need to write
-	'@RETURN:	[Boolean] if binary data was wroten successfully, return true, or return false;
-	'****************************************************/
 	write:function(path,content){
 		if(!this.inited)this.init();
 		try{
@@ -206,13 +147,6 @@ var $file = {
 			return false;	
 		}
 	},
-
-	/****************************************************
-	'@DESCRIPTION:	append binary data to local file
-	'@PARAM:	path [String] : local file path
-	'@PARAM:	content [Binary] : binary data need to write
-	'@RETURN:	[Boolean] if binary data was appended successfully, return true, or return false;
-	'****************************************************/
 	append:function(path,content){
 		if(!this.inited)this.init();
 		try{
@@ -230,14 +164,6 @@ var $file = {
 		}
 	},
 
-	/****************************************************
-	'@DESCRIPTION:	join to local file
-	'@PARAM:	target [String] : target local file string.
-	'@PARAM:	src [String] : source local file string.
-	'@PARAM:	astext [Boolean] : forget it.
-	'@PARAM:	charset [String] : text charset
-	'@RETURN:	[Boolean] if files was joined successfully, return true, or return false;
-	'****************************************************/
 	join:function(target,src,astext,charset){
 		if(!this.inited)this.init();
 		if(astext!==true)astext=false;

@@ -13,9 +13,6 @@ function $oauth(client_id, client_secret,redirect_uri){
 	this.debug={};
 }
 $oauth.fn = $oauth.prototype;
-$oauth.New = function(client_id, client_secret, redirect_uri){
-	return new $oauth(client_id, client_secret, redirect_uri);
-};
 $oauth.fn.toString=function(){
 	return "OAUTH 2.0($oauth 1.0) BY Anlige";	
 };

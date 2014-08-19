@@ -49,13 +49,6 @@ var bytesToString = function(bytSource, Cset) { //ef bb bf,c0 fd
 	stream = null;
 	return byts;
 };
-/****************************************************
-'@DESCRIPTION:	define $httprequest object. All the parms can be assigned after create instance
-'@PARAM:	url [String[option]] : target URL.
-'@PARAM:	method [String[option]] : request method. POST/GET/HEADER....
-'@PARAM:	data [String[option]] : data need to send
-'@PARAM:	autoClearBuffer [Boolean[option]] : auto clear buffer when request
-'****************************************************/
 function $httprequest(url, method, data, autoClearBuffer) {
 	var $g={};
 	F.extend($g,cfg);
@@ -147,9 +140,6 @@ function $httprequest(url, method, data, autoClearBuffer) {
 }
 $httprequest.fn = $httprequest.prototype;
 
-/****************************************************
-'@DESCRIPTION:	init. I will call this method automaticly.
-'****************************************************/
 $httprequest.fn.init = function() {
 	var datasetstr = "";
 	this.response = null;
@@ -175,20 +165,11 @@ $httprequest.fn.init = function() {
 	if (!this.charset || this.charset == "") this.charset = "utf-8";
 };
 
-/****************************************************
-'@DESCRIPTION:	set http request header
-'@PARAM:	headstr [String] : hearder string. eg: header("User-Agent:MoHttpRequest1.0")
-'@RETURN:	[Object] return self;
-'****************************************************/
 $httprequest.fn.header = function(headstr) {
 	if (headstr.indexOf(":") >= 0) this.headers.push(headstr);
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	set http request timeout. Support four argument at most.
-'@RETURN:	[Object] return self;
-'****************************************************/
 $httprequest.fn.timeouts = function() {
 	if (arguments.length > 4) {
 		return this;
@@ -201,10 +182,6 @@ $httprequest.fn.timeouts = function() {
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	send request.if you don't call this method,I will call it automaticly.
-'@RETURN:	[Object] return self;
-'****************************************************/
 $httprequest.fn.send = function(fn) {
 	this.init();
 	if (typeof fn == "function") fn.apply(this, []);
@@ -240,11 +217,6 @@ $httprequest.fn.send = function(fn) {
 	}
 	return this;
 }
-/****************************************************
-'@DESCRIPTION:	save http response to local file
-'@PARAM:	filepath [String] : local file path
-'@RETURN:	[Object] return self;
-'****************************************************/
 $httprequest.fn.save = function(filepath) {
 	if (!this.sended) this.send();
 	var stream = new ActiveXObject("Adodb.Stream");
@@ -258,20 +230,11 @@ $httprequest.fn.save = function(filepath) {
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	fetch response as binary
-'@RETURN:	[Binary] response binary
-'****************************************************/
 $httprequest.fn.getbinary = function() {
 	if (!this.sended) this.send();
 	return this.content;
 };
 
-/****************************************************
-'@DESCRIPTION:	fetch response as text
-'@PARAM:	charset [String] : text charset
-'@RETURN:	[String] response text
-'****************************************************/
 $httprequest.fn.gettext = function(charset) {
 	if (!this.sended) this.send();
 	if (this.readyState == -1) return "";
@@ -283,11 +246,6 @@ $httprequest.fn.gettext = function(charset) {
 	}
 };
 
-/****************************************************
-'@DESCRIPTION:	fetch response as json
-'@PARAM:	charset [String] : text charset
-'@RETURN:	[Object] json object
-'****************************************************/
 $httprequest.fn.getjson = function(charset) {
 	if (!this.sended) this.send();
 	if (this.readyState == -1) return null;
@@ -299,11 +257,6 @@ $httprequest.fn.getjson = function(charset) {
 	}
 };
 
-/****************************************************
-'@DESCRIPTION:	get response header
-'@PARAM:	key [String] : header name
-'@RETURN:	[String] header value
-'****************************************************/
 $httprequest.fn.getheader = function(key) {
 	if (!this.sended) this.send();
 	if (key) {
@@ -328,11 +281,6 @@ $httprequest.fn.getheader = function(key) {
 	}
 };
 
-/****************************************************
-'@DESCRIPTION:	fetch response as xml document
-'@PARAM:	charset [String] : text charset
-'@RETURN:	[XMLDocument] return null when parse failed
-'****************************************************/
 $httprequest.fn.getxml = function(charset) {
 	if (!this.sended) this.send();
 	if (this.readyState == -1) return null;

@@ -82,9 +82,6 @@ $soap.ParseArgumentsForHttp = function(arg){
 	return arg;
 };
 $soap.prototype = new $soap.ParmsManager();
-$soap.New = $soap.fn.New = function(url,namespace){
-	return new $soap(url,namespace);	
-};
 $soap.fn.CreateParmsManager=function(){
 	return new $soap.ParmsManager(this);
 };

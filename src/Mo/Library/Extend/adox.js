@@ -28,55 +28,16 @@ function $adox(path,dbtype,dbversion){
 	}
 }
 $adox.fn = $adox.prototype;
-/****************************************************
-'@DESCRIPTION:	create ADOX object. You can use this method in vbscript.
-'@PARAM:	path [String] : ACCESS data file path
-'@PARAM:	dbtype [String] : database type, support 'ACCESS' and 'MSSQL'
-'@RETURN:	[Object] ADOX object
-'****************************************************/
-$adox.New = function(path,dbtype){return new $adox(path,dbtype,dbversion);};
-
-/****************************************************
-'@DESCRIPTION:	create ADOX object for ACCESS.
-'@PARAM:	path [String] : ACCESS data file path
-'@RETURN:	[Object] ADOX object
-'****************************************************/
 $adox.ACCESS = function(path){return new $adox(path,"ACCESS");};
-
-/****************************************************
-'@DESCRIPTION:	create ADOX object for MSSQL 2000
-'@RETURN:	[Object] ADOX object
-'****************************************************/
 $adox.MSSQL = function(){return new $adox("","MSSQL");};
-
-/****************************************************
-'@DESCRIPTION:	create ADOX object for MSSQL2005. Forget it now.
-'@RETURN:	[Object] ADOX object
-'****************************************************/
 $adox.MSSQL2005 = function(){return new $adox("","MSSQL","2005");};
-
-/****************************************************
-'@DESCRIPTION:	create ADOX object for MSSQL2008. Forget it now.
-'@RETURN:	[Object] ADOX object
-'****************************************************/
 $adox.MSSQL2008 = function(){return new $adox("","MSSQL","2008");};
-
-/****************************************************
-'@DESCRIPTION:	override 'Server.Mappath' method
-'@PARAM:	path [String] : a path,such as 'E:\a.mdb','/a.mdb','a.mdb'
-'@RETURN:	[String] local path of file
-'****************************************************/
 $adox.Mappath = function(path){
 	if(path.length<2)return Server.MapPath(path)
 	if(path.substr(1,1)==":") return path;
 	return Server.MapPath(path);	
 };
 
-
-/****************************************************
-'@DESCRIPTION:	create fields collection object
-'@RETURN:	[Object] fields collection object
-'****************************************************/
 $adox.fn.CreateFieldsCollection = function(){
 	return new function(){
 		this.fields=[];
@@ -109,18 +70,8 @@ $adox.fn.CreateFieldsCollection = function(){
 	}
 };
 
-/****************************************************
-'@DESCRIPTION:	Create instance of Field Object.
-'@PARAM:	name [String] : field name.
-'@RETURN:	[Object] Field Object.
-'****************************************************///define Field
 $adox.fn.CreateField = function(name){return new $adox.Field(name,this.dbtype);};
 
-/****************************************************
-'@DESCRIPTION:	defined Field object
-'@PARAM:	name [String] : field name.
-'@PARAM:	dbtype [String] : i will give it a value automatic.
-'****************************************************/
 $adox.Field = function(name,dbtype){
 	this.set__={
 		"dbtype":dbtype,
@@ -137,75 +88,38 @@ $adox.Field = function(name,dbtype){
 	if(name!=undefined)this.set__.name = name;
 }
 
-/****************************************************
-'@DESCRIPTION:	if the field is nullable
-'@PARAM:	nullable [Boolean] : Default value is null.
-'@RETURN:	[Object] field object itself.
-'****************************************************/
 $adox.Field.prototype.nullable=function(nullable){
 	if(nullable===true && this.set__.dbtype!="ACCESS")this.set__.nullable=true;
 	if(nullable===false)this.set__.nullable=false;
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	if the field is  IDENTITY
-'@PARAM:	IDENTITY [Boolean]
-'@RETURN:	[Object] field object itself.
-'****************************************************/
 $adox.Field.prototype.IDENTITY=function(IDENTITY){
 	this.set__.IDENTITY=IDENTITY===true;
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	set the field's COLLATE
-'@PARAM:	COLLATE [String]
-'@RETURN:	[Object] field object itself.
-'****************************************************/
 $adox.Field.prototype.COLLATE=function(COLLATE){
 	this.set__.COLLATE=COLLATE||"";
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	set the field's name
-'@PARAM:	name [String] : field name
-'@RETURN:	[Object] field object itself.
-'****************************************************/
 $adox.Field.prototype.name=function(name){
 	this.set__.name=name;
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	set the field's length
-'@PARAM:	length [Int] : field length
-'@RETURN:	[Object] field object itself.
-'****************************************************/
 $adox.Field.prototype.length=function(length){
 	this.set__.length=length;
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	set the field's  default value
-'@PARAM:	default_ [Variant]
-'@RETURN:	[Object] field object itself.
-'****************************************************/
 $adox.Field.prototype.Default=function(default_){
 	if(this.set__.dbtype=="ACCESS" && this.set__.type=="DATETIME" && default_.toLowerCase()=="getdate()")default_="Now()";
 	this.set__["default"]=default_;
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	set the field's datatype
-'@PARAM:	ty [String] : field datatype
-'@PARAM:	df [Variant] : default value. it can be blank.
-'@PARAM:	len [Int] : field length. it can be blank.
-'@RETURN:	[Object] field object itself.
-'****************************************************/
 $adox.Field.prototype.datatype = function(ty,df,len){
 	ty = ty ||"";
 	ty=""+ty+"";
@@ -215,32 +129,16 @@ $adox.Field.prototype.datatype = function(ty,df,len){
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	if the field is primarykey
-'@PARAM:	isprimarykey [Boolean] : if isprimarykey!==false, the value is true 
-'@RETURN:	[Object] field object itself.
-'****************************************************/
 $adox.Field.prototype.primarykey = function(isprimarykey){
 	this.set__.primarykey=(isprimarykey!==false);
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	if the filed's default value is now.
-'@PARAM:	isdefaultnow [Boolean] 
-'@RETURN:	[Object] field object itself.
-'****************************************************/
 $adox.Field.prototype.defaultnow = function(isdefaultnow){
 	this.set__.datedefaultnow=(isdefaultnow!==false);
 	return this;
 };
-		
-/****************************************************
-'@DESCRIPTION:	Drop a Field
-'@PARAM:	tablename [String] : table name.
-'@PARAM:	name [String] : field name. if this argument is blank, the value of tablename will be assigned to name and the lasttablename will be assigned to tablename.
-'@RETURN:	[Boolean] if delete successfully,return true,or return false.
-'****************************************************/
+
 $adox.fn.DropField = function(tablename,name){
 	if(name==undefined){
 		name = 	tablename;
@@ -260,14 +158,6 @@ $adox.fn.DropField = function(tablename,name){
 	}
 };
 
-/****************************************************
-'@DESCRIPTION:	Open database. for access,you should ignore all the follow arguments
-'@PARAM:	server [String] : server name(for mssql)
-'@PARAM:	username [String] : database login name(for mssql)
-'@PARAM:	password [String] : database login password(for mssql)
-'@PARAM:	database [String] : database name
-'@RETURN:	[Boolean] if open database successfully, return true, or return false.
-'****************************************************/
 $adox.fn.Open = function(server,username,password,database){
 	if(this.dbtype=="MSSQL") return this.OpenSqlServer(server,username,password,database);
 	if(this.conn.state==1)return true;
@@ -281,14 +171,6 @@ $adox.fn.Open = function(server,username,password,database){
 	}
 };
 
-/****************************************************
-'@DESCRIPTION:	Open SqlServer databse
-'@PARAM:	server [String] : server name(for mssql)
-'@PARAM:	username [String] : database login name(for mssql)
-'@PARAM:	password [String] : database login password(for mssql)
-'@PARAM:	database [String] : database name
-'@RETURN:	[Boolean] if open database successfully, return true, or return false.
-'****************************************************/
 $adox.fn.OpenSqlServer = function(server,username,password,database){
 	if(this.conn.state==1)return true;
 	try{
@@ -305,19 +187,10 @@ $adox.fn.OpenSqlServer = function(server,username,password,database){
 	}
 };
 
-/****************************************************
-'@DESCRIPTION:	set lasttablename
-'@PARAM:	tablename [String] : table name.
-'****************************************************/
 $adox.fn.Select = function(tablename){
 	this.lasttablename = tablename;
 };
 
-/****************************************************
-'@DESCRIPTION:	Create access database
-'@PARAM:	path [String] : database file path
-'@RETURN:	[Boolean] if database was created successfully,return true,or return false.
-'****************************************************/
 $adox.fn.Create = function(path){
 	if(this.dbtype!="ACCESS")return;
 	this.path = this.path || path;
@@ -332,11 +205,6 @@ $adox.fn.Create = function(path){
 	}
 };
 
-/****************************************************
-'@DESCRIPTION:	Execute sql string
-'@PARAM:	sql [String] : sql string
-'@RETURN:	[Boolean] if sql string wae executed successfully, return true, or return false.
-'****************************************************/
 $adox.fn.Exec = function(sql){
 	if(!sql || sql=="")return false;
 	if(this.conn.state!=1)return false;
@@ -349,13 +217,6 @@ $adox.fn.Exec = function(sql){
 	}
 };
 
-/****************************************************
-'@DESCRIPTION:	Create a Table from fields collection
-'@PARAM:	name [String] : tables name.
-'@PARAM:	fields [Collection] : fields collection.
-'@PARAM:	delete_ [Boolean] : if delete the table when the tables is exists.
-'@RETURN:	[Boolean] if the table was created successfully, return true, or return false.
-'****************************************************/
 $adox.fn.CreateTable = function(name,fields,delete_){
 	name = name || this.lasttablename;
 	if(!name || name=="" || !/[0-9a-zA-Z\_]/ig.test(name))return false;
@@ -367,7 +228,6 @@ $adox.fn.CreateTable = function(name,fields,delete_){
 	}
 	try{
 		var sql="create table " + name +"(" + fields.ToString() + ")"+ (this.dbtype=="MSSQL" ? " ON [PRIMARY]" :"");
-		//this.exception.push(sql);
 		this.conn.execute(sql);
 		this.lasttablename = name;
 		return true;
@@ -377,12 +237,6 @@ $adox.fn.CreateTable = function(name,fields,delete_){
 	}
 };
 
-/****************************************************
-'@DESCRIPTION:	delete a table
-'@PARAM:	name [String] : table name
-'@PARAM:	noerror [Boolean] : throw error
-'@RETURN:	[Boolean] if the table was deleted successfully, return true, or return false.
-'****************************************************/
 $adox.fn.DropTable = function(name,noerror){
 	if(noerror!==true)noerror=false;
 	name = name || this.lasttablename;
@@ -398,17 +252,10 @@ $adox.fn.DropTable = function(name,noerror){
 	}
 };
 
-/****************************************************
-'@DESCRIPTION:	Debug sth.
-'@RETURN:	[String] debug string
-'****************************************************/
 $adox.fn.Debug=function(){
 	return this.exception.join("<br />");
 };
 
-/****************************************************
-'@DESCRIPTION:	Close database
-'****************************************************/
 $adox.fn.Close = function(){
 	try{this.conn.close();}catch(ex){}	
 };
