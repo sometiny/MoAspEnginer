@@ -68,8 +68,10 @@ var Mo = Mo || (function(){
 		templatelist = template.split(":");
 		if(templatelist.length == 1){
 			vpath = G.MO_TEMPLATE_NAME + "/" + M.Method + G.MO_TEMPLATE_SPLIT + template;
+			templatelist = [G.MO_TEMPLATE_NAME,M.Method,template];
 		}else if(templatelist.length == 2){
 			vpath = G.MO_TEMPLATE_NAME + "/" + template.replace(":",G.MO_TEMPLATE_SPLIT);
+			templatelist = [G.MO_TEMPLATE_NAME].concat(templatelist);
 		}else if(templatelist.length == 3){
 			vpath = templatelist[0] + "/" + templatelist[1] + G.MO_TEMPLATE_SPLIT + templatelist[2];
 		}
@@ -565,8 +567,7 @@ var Mo = Mo || (function(){
 				}
 			}
 		}
-		if(!can_LoadController)return M;
-		if(_LoadController(ModelPath,this.RealMethod)){
+		if(can_LoadController && _LoadController(ModelPath,this.RealMethod)){
 			try{
 				var MC = F.initialize(this.RealMethod + "Controller");
 				if(MC.__STATUS__===true){

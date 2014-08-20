@@ -257,7 +257,7 @@ MoAspEnginerView.prototype.parseLoop=function(){
 //@DESCRIPTION:	parse foreach tag.
 //****************************************************
 MoAspEnginerView.prototype.parseForeach=function(){
-	var matches,match,loopname,vbscript,typ,basezero,attrs;
+	var matches,match,loopname,vbscript,basezero,attrs;
 	var regexp = /\<foreach ([\s\S]+?)\>/igm;
 	matches = F.string.matches(this.Content,regexp);
 	while(matches.length>0){
@@ -266,7 +266,6 @@ MoAspEnginerView.prototype.parseForeach=function(){
 		attrs = readAttrs__(match[1]);
 		if(attrs.getter__("name")!=""){
 			loopname = attrs.getter__("name");
-			typ = attrs.getter__("type");
 			vbscript = "<?MoAsp ";
 			if(!G.MO_COMPILE_STRICT)vbscript += "if(Mo.Assigns.hasOwnProperty(\"" + loopname + "\")){\r\n";
 			if(!G.MO_COMPILE_STRICT){
@@ -480,7 +479,7 @@ MoAspEnginerView.prototype.parseSource=function(){
 		if(filepath!=""){
 			id="";
 			cs="";
-			if(filepath.indexOf(".")>0)ext = filepath.substr(filepath.lastIndexOf("."));
+			if(filepath.indexOf(".")>0)ext = filepath.substr(filepath.lastindexOf("."));
 			if(attrs.getter__("id")!="")id=" id=\"" + attrs.getter__("id") + "\"";
 			if(attrs.getter__("charset")!="")cs=" charset=\"" + attrs.getter__("charset") + "\"";
 			if(m_[1]=="js" || ext==".js"){
@@ -534,7 +533,7 @@ MoAspEnginerView.prototype.parseAssign=function(key){
 				if(G.MO_COMPILE_STRICT)
 					rv = l;
 				else
-					rv = "Mo.value(\"" + l + "\")";
+					rv = "Mo.Assigns[\"" + l + "\"]";
 			}else if(F.string.startWith(l.toLowerCase(),"c.") || F.string.startWith(l.toLowerCase(),"g.")){
 				rv = l.substr(2);
 			}else if(F.string.startWith(l.toLowerCase(),"mo.session.")){
@@ -555,12 +554,12 @@ MoAspEnginerView.prototype.parseAssign=function(key){
 				rv = "Mo.L(\"" + l.substr(5) + "\")";
 			}else if(F.string.startWith(l.toLowerCase(),"mo.c.")){
 				cf = l.substr(5);
-				if(cf.IndexOf(".")>0){
-					rv = "Mo.C(\"" + cf.substr(0,cf.indexOf(".")) + "\")." + cf.substr(cf.indexOf(".")+1);
+				if(cf.indexOf(".")>0){
+					rv = "Mo.C(\"" + cf.substr(0,cf.indexOf(".")) + "." + cf.substr(cf.indexOf(".")+1) + "\")";
 				}
 			}else if(F.string.startWith(l.toLowerCase(),"mo.a.")){
 				cf = l.substr(5);
-				if(cf.IndexOf(".")>0){
+				if(cf.indexOf(".")>0){
 					rv = "Mo.A(\"" + cf.substr(0,cf.indexOf(".")) + "\")." + cf.substr(cf.indexOf(".")+1);
 				}
 			}else{
@@ -579,7 +578,7 @@ MoAspEnginerView.prototype.parseAssign=function(key){
 					if(G.MO_COMPILE_STRICT)
 						rv = l + "." + k;
 					else
-						rv = "Mo.values(\"" + l + "\",\"" + k + "\")";
+						rv = "Mo.Assigns[\"" + l + "\"][\"" + k + "\"]";
 				}
 			}
 			if(rv!="")rv += ms_[2];
@@ -590,7 +589,7 @@ MoAspEnginerView.prototype.parseAssign=function(key){
 				if(G.MO_COMPILE_STRICT){
 					return parsed.replace("{{k}}",l+ ms_[2]);
 				}else{
-					return parsed.replace("{{k}}","Mo.value(\"" + l + "\")"+ ms_[2]);
+					return parsed.replace("{{k}}","Mo.Assigns[\"" + l + "\"]"+ ms_[2]);
 				}
 			}else if(F.string.startWith(l.toLowerCase(),"c.") || F.string.startWith(l.toLowerCase(),"g.")){
 				return parsed.replace("{{k}}",l.substr(2));
@@ -612,12 +611,12 @@ MoAspEnginerView.prototype.parseAssign=function(key){
 				return parsed.replace("{{k}}","Mo.L(\"" + l.substr(5) + "\")");
 			}else if(F.string.startWith(l.toLowerCase(),"mo.c.")){
 				cf = l.substr(5);
-				if(cf.IndexOf(".")>0){
+				if(cf.indexOf(".")>0){
 					return parsed.replace("{{k}}","Mo.C(\"" + cf.substr(0,cf.indexOf(".")) + "\")." + cf.substr(cf.indexOf(".")+1));
 				}
 			}else if(F.string.startWith(l.toLowerCase(),"mo.a.")){
 				cf = l.substr(5);
-				if(cf.IndexOf(".")>0){
+				if(cf.indexOf(".")>0){
 					return parsed.replace("{{k}}","Mo.A(\"" + cf.substr(0,cf.indexOf(".")) + "\")." + cf.substr(cf.indexOf(".")+1));
 				}
 			}else{
@@ -632,7 +631,7 @@ MoAspEnginerView.prototype.parseAssign=function(key){
 					if(G.MO_COMPILE_STRICT)
 						return parsed.replace("{{k}}",l + "." + k+ ms_[2]);
 					else
-						return parsed.replace("{{k}}","Mo.values(\"" + l + "\",\"" + k + "\")"+ ms_[2]);
+						return parsed.replace("{{k}}","Mo.Assigns[\"" + l + "\"][\"" + k + "\"]"+ ms_[2]);
 				}
 			}
 		}
