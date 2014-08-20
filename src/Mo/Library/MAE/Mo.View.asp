@@ -658,7 +658,7 @@ MoAspEnginerView.prototype.parseFormatVari=function(format){
 	}else if(func.length>2 && F.string.startWith(func.toLowerCase(),"f.")){
 		func = "F." + func.substr(2);
 	}
-	if(("," + G.DISABLED_FUNCTIONS.toLowerCase() + ",").indexOf("," + func.toLowerCase() + ",")>=0){
+	if(("," + G.MO_DISABLED_FUNCTIONS.toLowerCase() + ",").indexOf("," + func.toLowerCase() + ",")>=0){
 		return "\"disabled function:" + func + "\"";
 	}
 	ret=func + "({{k}}" + vars + ")";

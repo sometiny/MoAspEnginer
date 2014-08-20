@@ -10,25 +10,10 @@
 /*export the functions*/
 var exports=["CreatePageList","is_empty","IsEmpty"];
 
-
-/****************************************************
-'@description	ensure the variable is empty or not.
-'@parameter	variable [Variant] : the variable needs to ensure
-'@return	[Boolean] description
-'****************************************************/
 function is_empty(variable){
-	return variable==""||variable===null||variable===undefined;
+	return variable===""||variable===null||variable===undefined;
 }
 
-
-/****************************************************
-'@description	create page string for records
-'@parameter	URL [String] : can be empty. if it is empty, i will fetch from current request.
-'@parameter	RecordCount [Int] : records count in the query result.
-'@parameter	PageSize [Int] : records count of every page
-'@parameter	CurrentPage [Int] : current page number
-'@return	[String]
-'****************************************************/
 function CreatePageList(URL, RecordCount, PageSize, CurrentPage){
 	var PageCount ,PageStr="";
 	if(URL==""){

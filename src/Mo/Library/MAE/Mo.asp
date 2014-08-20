@@ -129,7 +129,7 @@ var Mo = Mo || (function(){
 				(new Function("__FILE__","__DIR__","M","C","L",ret))(
 					path,
 					path==""?"":path.substr(0,path.lastIndexOf("\\")),
-					M.M,M.C,M.L
+					Model__,M.C,M.L
 				);
 				if(typeof GLOBAL[controller + "Controller"] == "function"){
 					M.Librarys["Controller_" + controller] = "jscript";
@@ -470,9 +470,6 @@ var Mo = Mo || (function(){
 			ExceptionManager.put(4,"Mo.L(key)","语言包[" + lib + "]无法加载,请检查语言包是否存在");
 		}
 	};
-	M.M = function(){
-		return Model__.apply(GLOBAL,arguments);
-	};
 	M.C = function(conf,value){
 		var key="";
 		if(conf.indexOf(".")>0){
@@ -535,8 +532,8 @@ var Mo = Mo || (function(){
 		if(!F.string.test(this.Method,/^(\w+)$/i)) this.Method = "Home";
 		if(!F.string.test(this.Group,/^(\w+)$/i)) this.Group = "";
 		if(this.Group != "") this.Group += "/";
-		if(G.DISABLED_MODELS != ""){
-			if(("," + G.DISABLED_MODELS.toLowerCase() + ",").indexOf("," + this.Method.toLowerCase() + ",") >= 0)F.exit("模块[" + this.Method + "]已被禁止自动调用。");
+		if(G.MO_DISABLED_CONTROLLERS != ""){
+			if(("," + G.MO_DISABLED_CONTROLLERS.toLowerCase() + ",").indexOf("," + this.Method.toLowerCase() + ",") >= 0)F.exit("模块[" + this.Method + "]已被禁止自动调用。");
 		}
 		if(G.MO_CACHE){
 			this.CacheFileName = F.md5(F.server("URL") + F.get.toURIString() + "");

@@ -6,12 +6,7 @@
 **		support@mae.im
 */
 var exports = ["Model__","__Model__"];
-/****************************************************
-'@DESCRIPTION:	create a Model. You can use this function in VBScript.
-'@PARAM:	tablename [String] : table name whit out prefix
-'@PARAM:	pk [String] : primary key of the table. Default value is 'id'.
-'@PARAM:	dbConf [String] : DB config name. Default value is 'DB'.
-'****************************************************/
+
 function Model__(tablename,pk,dbConf,tablePrex){
 	Model__.list.push(new __Model__(tablename,pk,dbConf,tablePrex));
 	return Model__.list[Model__.list.length - 1];	
@@ -24,49 +19,24 @@ Model__.allowDebug = false;
 Model__.debugs = [];
 Model__.connections = {};
 Model__.lastRows = -1;
-
-
-/****************************************************
-'@DESCRIPTION:	set default database config
-'@PARAM:	dbConf [String] : DB config name
-'****************************************************/
 Model__.setDefault = function(dbConf){
 	Model__.defaultDBConf = dbConf || "DB";
 };
 
-/****************************************************
-'@DESCRIPTION:	set default primary key
-'@PARAM:	pk [String] : default primary key
-'****************************************************/
 Model__.setDefaultPK = function(pk){
 	Model__.defaultPK = pk || "id";
 };
 
-/****************************************************
-'@DESCRIPTION:	begin
-'@PARAM:	cfg [String] : DB config name which need to BeginTrans
-'@RETURN:	[Boolean] true/false
-'****************************************************/
 Model__.begin = function(cfg){
 	Model__.getConnection(cfg).BeginTrans();
 	return true;
 };
 
-/****************************************************
-'@DESCRIPTION:	commit
-'@PARAM:	cfg [String] : DB config name which need to CommitTrans
-'@RETURN:	[Boolean] true/false
-'****************************************************/
 Model__.commit = function(cfg){
 	Model__.getConnection(cfg).CommitTrans();
 	return true;
 };
 
-/****************************************************
-'@DESCRIPTION:	rollback
-'@PARAM:	cfg [String] : DB config name which need to RollbackTrans
-'@RETURN:	[Boolean] true/false
-'****************************************************/
 Model__.rollback = function(cfg){
 	Model__.getConnection(cfg).RollbackTrans();
 	return true;
@@ -77,9 +47,7 @@ Model__.getConnection = function(cfg){
 	if(Model__.connections[cfg] === undefined)return null;
 	return Model__.connections[cfg].base;
 };
-/****************************************************
-'@DESCRIPTION:	dispose all the objects
-'****************************************************/
+
 Model__.dispose = function(){
 	while(Model__.list.length > 0){
 		var M = Model__.list.pop().dispose();
@@ -102,9 +70,6 @@ Model__.dispose = function(){
 	Model__.connections = {};
 };
 
-/****************************************************
-'@DESCRIPTION:	debug Model logs
-'****************************************************/
 Model__.debug = function(){
 	for(var i = 0;i < Model__.debugs.length;i++){
 		F.echo(F.format("[0x{0:X8}] {1}<br />\r\n",i+1,Model__.debugs[i]));
@@ -114,11 +79,6 @@ Model__.debug.put = function(log){
 	Model__.debugs.push(log);
 };
 
-/****************************************************
-'@DESCRIPTION:	connect
-'@PARAM:	dbConf [Variant] : dbconfig
-'@RETURN:	[Variant] description
-'****************************************************/
 Model__.connect = function(cfg){
 	var cfg_=null;
 	var base = null;
@@ -188,12 +148,7 @@ Model__.RecordsAffectedCmd = function(cmd,withQuery){
 		Model__.lastRows = RecordsAffectedvar;
 	}
 };
-/****************************************************
-'@DESCRIPTION:	create a Model
-'@PARAM:	tablename [String] : table name whit out prefix
-'@PARAM:	pk [String] : primary key of the table. Default value is 'id'.
-'@PARAM:	dbConf [String] : DB config name. Default value is 'DB'.
-'****************************************************/
+
 function __Model__(tablename,pk,cfg,tablePrex){
 	cfg = cfg ||Model__.defaultDBConf;
 	this.usecache = false;
@@ -217,19 +172,12 @@ function __Model__(tablename,pk,cfg,tablePrex){
 	this.data = {};
 	this.pk = pk || Model__.defaultPK;
 	this.pagekey = this.pk;
-	this.pagestr = "";
 	this.rc = 0;
-	this.withpage = false,
-	this.pageurl_ = "";
-	this.id = "#" + Model__.list.length;
 	this.rs__ = null;
 	this.object_cache = null;
-	this.connectionIndex = -1;
-	this.dbConf = null;
 	this.isonlypkorder = false;
 	this.onlypkorder = "asc";
 	this.ballowOnlyPKOrder = true;
-	this.dbUsed = false;
 	Model__.connect(cfg);
 	this.base = Model__.connections[cfg];
 	if(this.base.cfg["DB_Type"] == "MYSQL" && !this.base.mysqlUsed){
@@ -254,40 +202,17 @@ __Model__.prototype.allowOnlyPKOrder = function(allowOnlyPKOrder){
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	forget it
-'****************************************************/
-__Model__.prototype.pageurl = function(url){
-	this.pageurl_ = url || "";
-	return this;
-};
-
-/****************************************************
-'@DESCRIPTION:	set cache name.
-'@PARAM:	name [String] : cache name
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.cache = function(name){
 	this.usecache = true;
 	this.cachename = name || "";
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	'select' operater
-'@PARAM:	fields [String] : fields need to be selected.
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.select = function(fields){
 	this.fields = fields || "*";
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	set condition of the sql query
-'@PARAM:	where [String] : condition
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.where = function(where){
 	if(where == undefined)return this;
 	if(arguments.length <= 0)return this;
@@ -302,11 +227,6 @@ __Model__.prototype.where = function(where){
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	set orderby rules
-'@PARAM:	orderby [String] : orderby rules
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.orderby = function(orderby){
 	if(typeof orderby == "object"){
 		this.strorderby = "";
@@ -328,24 +248,11 @@ __Model__.prototype.orderby = function(orderby){
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	set groupby fields
-'@PARAM:	groupby [String] : groupby fields
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.groupby = function(groupby){
 	this.strgroupby = groupby || "";
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	set limit condition
-'@PARAM:	page [Int] : curent page index
-'@PARAM:	limit [Int] : record count per page
-'@PARAM:	pagekey [String] : the primary key . you will use it to get page records. Default value is 'id'.
-'@PARAM:	pagekeyorder [String] : forget it
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.limit = function(page,limit,pagekey,pagekeyorder){
 	this.strlimit = limit || - 1;
 	this.strpage = page || 1;
@@ -358,11 +265,6 @@ __Model__.prototype.limit = function(page,limit,pagekey,pagekeyorder){
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	get max value of specific field
-'@PARAM:	filed [Sring] : field name
-'@RETURN:	[Variant] max value
-'****************************************************/
 __Model__.prototype.max = function(filed){
 	var k = filed || this.pk;
 	k = this.base.splitChars[0] + k + this.base.splitChars[1];
@@ -374,11 +276,6 @@ __Model__.prototype.max = function(filed){
 	return this.query("select iif(isnull(max(" + k + ")),0,max(" + k + ")) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
 };
 
-/****************************************************
-'@DESCRIPTION:	get min value of specific field
-'@PARAM:	filed [Sring] : field name
-'@RETURN:	[Variant] min value
-'****************************************************/
 __Model__.prototype.min = function(filed){
 	var k = filed || this.pk;
 	k = this.base.splitChars[0] + k + this.base.splitChars[1];
@@ -390,22 +287,12 @@ __Model__.prototype.min = function(filed){
 	return this.query("select iif(isnull(min(" + k + ")),0,min(" + k + ")) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
 };
 
-/****************************************************
-'@DESCRIPTION:	get records count of the query
-'@PARAM:	filed [String] : specific field or *
-'@RETURN:	[Int] records count
-'****************************************************/
 __Model__.prototype.count = function(filed){
 	var k = filed || this.pk;
 	if(k != "*")k = this.base.splitChars[0] + k + this.base.splitChars[1];
 	return this.query("select count(" + k + ") from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
 };
 
-/****************************************************
-'@DESCRIPTION:	get sum value of specific field in the query
-'@PARAM:	filed [String] : specific field
-'@RETURN:	[Number] value
-'****************************************************/
 __Model__.prototype.sum = function(filed){
 	var k = filed || this.pk;
 	k = this.base.splitChars[0] + k + this.base.splitChars[1];
@@ -417,12 +304,6 @@ __Model__.prototype.sum = function(filed){
 	return this.query("select iif(isnull(sum(" + k + ")),0,sum(" + k + ")) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
 };
 
-/****************************************************
-'@DESCRIPTION:	increase a specific field by n
-'@PARAM:	name [String] : field name
-'@PARAM:	n [Int] : increase value
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.increase = function(name,n){
 	name = this.base.splitChars[0] + name + this.base.splitChars[1];
 	n = n || 1;
@@ -431,12 +312,6 @@ __Model__.prototype.increase = function(name,n){
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	toogle a specific field
-'@PARAM:	name [String] : field name
-'@PARAM:	n [Int] : toogle value. Default value is 1.
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.toogle = function(name,n){
 	name = this.base.splitChars[0] + name + this.base.splitChars[1];
 	n = n || 1;
@@ -445,12 +320,6 @@ __Model__.prototype.toogle = function(name,n){
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	set join expression
-'@PARAM:	table [String] : table name need to join.
-'@PARAM:	jointype [String] : join type. Default value is 'inner'.
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.join = function(table,jointype){
 	jointype = jointype ||"inner";
 	jointype = jointype.replace(" join","");
@@ -463,24 +332,13 @@ __Model__.prototype.join = function(table,jointype){
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	follow with join method
-'@PARAM:	str [String] : 'on' expression.
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.on = function(str){
 	str = str || "";
-	//this.stron = str;
 	this.strjoin += " on " + str +")";
 	this.strjoin = F.string.trim(this.strjoin);
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	set cname of the Model table
-'@PARAM:	str [String] : canme
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.cname = function(str){
 	str = str || "";
 	this.strcname = str;
@@ -511,10 +369,7 @@ __Model__.prototype.exec = function(manager){
 	}
 	return this;
 }
-/****************************************************
-'@DESCRIPTION:	execute the query. if arguments length is 1,just execute the sql and return, or set lastRows with RecordsAffected.
-'@RETURN:	[Object] return self.
-'****************************************************/
+
 __Model__.prototype.query = function(){
 	var fp = 0;
 	this.sql = "";
@@ -579,10 +434,6 @@ __Model__.prototype.query = function(){
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	fetch a list object from query result.
-'@RETURN:	[Object(list)]
-'****************************************************/
 __Model__.prototype.fetch = function(){
 	if(this.object_cache != null){
 		this.object_cache.reset();
@@ -606,11 +457,6 @@ __Model__.prototype.fetch = function(){
 	return this.object_cache;
 };
 
-/****************************************************
-'@DESCRIPTION:	read the specific field value of the first record
-'@PARAM:	name [String] : field name
-'@RETURN:	[Variant] field value.
-'****************************************************/
 __Model__.prototype.read = function(name){
 	var obj = this.fetch();
 	if(!obj.eof()){
@@ -621,18 +467,8 @@ __Model__.prototype.read = function(name){
 	return "";
 };
 
-/****************************************************
-'@DESCRIPTION:	parse list as json string.
-'@RETURN:	[String] json string
-'****************************************************/
 __Model__.prototype.getjson = function(dateFormat){return this.fetch().getjson(dateFormat);};
 
-/****************************************************
-'@DESCRIPTION:	assign data to system.
-'@PARAM:	name [String] : variable name
-'@PARAM:	asobject [Boolean] : if assign the variable as the list object
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.assign = function(name,asobject){
 	if (asobject !== true)asobject = false;
 	if(name && !asobject){
@@ -654,10 +490,6 @@ __Model__.prototype.assign = function(name,asobject){
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	insert a record into table.
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.Insert = __Model__.prototype.insert = function(){
 	var data = null;
 	if(arguments.length == 1){
@@ -686,10 +518,6 @@ __Model__.prototype.Insert = __Model__.prototype.insert = function(){
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	update a record
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.Update = __Model__.prototype.update = function(){
 	var data = null;
 	if(arguments.length == 1){
@@ -725,10 +553,6 @@ __Model__.prototype.Update = __Model__.prototype.update = function(){
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	Delete a record
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.del = __Model__.prototype.Delete = function(force){
 	force = force === true;
 	if(this.strwhere == "" && !force)return this;
@@ -736,10 +560,6 @@ __Model__.prototype.del = __Model__.prototype.Delete = function(force){
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	dispose current Model
-'@RETURN:	[Object] return self.
-'****************************************************/
 __Model__.prototype.dispose = function(){
 	if(this.rs__ != null){
 		try{this.rs__.close();}catch(ex){}
@@ -752,11 +572,6 @@ __Model__.prototype.dispose = function(){
 	return this;
 };
 
-/****************************************************
-'@DESCRIPTION:	parse Data as sql format
-'@PARAM:	table [Object] : data table
-'@RETURN:	[Array] [0] = fields string,[1] = values string,[2] = specific sql string when update table
-'****************************************************/
 __Model__.prototype.parseData = function(table){
 	var fields = [],values = [],update = [];
 	var cmd = null;
