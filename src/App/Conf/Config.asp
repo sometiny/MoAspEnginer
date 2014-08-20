@@ -24,6 +24,6 @@ return {
 	MO_IMPORT_COMMON_FILES : "",
 	MO_SESSION_WITH_SINGLE_TAG : false,
 	MO_LANGUAGE : "CN",
-	DISABLED_MODELS : ""
+	MO_DISABLED_MODELS : ""
 };
 </script>
