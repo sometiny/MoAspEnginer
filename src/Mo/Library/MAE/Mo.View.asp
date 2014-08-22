@@ -365,7 +365,6 @@ MoAspEnginerView.prototype.parseExpressionComponent=function(compare){
 				quto="\"";
 				vv_ = varmatches[10];
 				if(expression!="")expression += " " + (n_[1]=="and"?"&&":"||") + " "
-				if(F.string.startWith(varmatches[8],"n"))expression += " !";
 				if(F.string.endWith(varmatches[8],"t"))quto="";
 				if(vv_=="Empty"){
 					expression += " is_empty("
@@ -377,10 +376,10 @@ MoAspEnginerView.prototype.parseExpressionComponent=function(compare){
 					if(varmatches[2]!="")expression += varmatches[2];
 					if(varmatches[8]=="gt")expression += " > ";
 					if(varmatches[8]=="lt")expression += " < ";
-					if(varmatches[8]=="ngt")expression += " > ";
-					if(varmatches[8]=="nlt")expression += " < ";
+					if(varmatches[8]=="ngt")expression += " <= ";
+					if(varmatches[8]=="nlt")expression += " >= ";
 					if(varmatches[8]=="eq")expression += " == ";
-					if(varmatches[8]=="neq")expression += " == ";
+					if(varmatches[8]=="neq")expression += " != ";
 					if(varmatches[11]!=""){
 						quto="";
 						if(varmatches[14]=="assign")vv_ = this.parseAssign(vv_);
@@ -552,10 +551,15 @@ MoAspEnginerView.prototype.parseAssign=function(key){
 				rv = "F.server(\"" + l.substr(10) + "\")";
 			}else if(F.string.startWith(l.toLowerCase(),"mo.l.")){
 				rv = "Mo.L(\"" + l.substr(5) + "\")";
-			}else if(F.string.startWith(l.toLowerCase(),"mo.c.")){
+			}else if(F.string.startWith(l.toLowerCase(),"mo.lang.")){
+				rv = "Mo.L(\"" + l.substr(8) + "\")";
+			}else if(F.string.startWith(l.toLowerCase(),"mo.c.")||F.string.startWith(l.toLowerCase(),"mo.config.")){
 				cf = l.substr(5);
+				if(F.string.startWith(l.toLowerCase(),"mo.config."))cf = l.substr(10);
 				if(cf.indexOf(".")>0){
 					rv = "Mo.C(\"" + cf.substr(0,cf.indexOf(".")) + "." + cf.substr(cf.indexOf(".")+1) + "\")";
+				}else{
+					rv = "Mo.C(\"Global." + cf.substr(cf.indexOf(".")+1) + "\")";
 				}
 			}else if(F.string.startWith(l.toLowerCase(),"mo.a.")){
 				cf = l.substr(5);
@@ -613,6 +617,8 @@ MoAspEnginerView.prototype.parseAssign=function(key){
 				cf = l.substr(5);
 				if(cf.indexOf(".")>0){
 					return parsed.replace("{{k}}","Mo.C(\"" + cf.substr(0,cf.indexOf(".")) + "\")." + cf.substr(cf.indexOf(".")+1));
+				}else{
+					return parsed.replace("{{k}}","Mo.C(\"Global." + cf.substr(cf.indexOf(".")+1));
 				}
 			}else if(F.string.startWith(l.toLowerCase(),"mo.a.")){
 				cf = l.substr(5);
