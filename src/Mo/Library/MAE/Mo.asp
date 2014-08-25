@@ -379,7 +379,7 @@ var Mo = Mo || (function(){
 	M.fetch = function(template){
 		var html,cachename,OldHash,usecache = false,vbscript,cachepath
 		if(G.MO_COMPILE_CACHE){
-			cachename = this.RealMethod + "^" + this.RealAction + "^" + F.string.replace(template,/\:/igm,"^");
+			cachename = M.Method + "^" + M.Action + "^" + F.string.replace(template,/\:/igm,"^");
 			cachepath = F.mappath(G.MO_APP + "Cache/Compiled/" + cachename + ".asp");
 			if(F.exists(cachepath)){
 				usecache = true;

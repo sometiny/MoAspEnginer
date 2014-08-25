@@ -144,7 +144,7 @@ var GLOBAL = this,
 		};
 		$f.post = function(key, value) {
 			postinit__();
-			if (key === undefined) return "";
+			if (key === undefined) return post__;
 			if (value === null) {
 				$f.post.remove(key);
 				return;
@@ -155,7 +155,7 @@ var GLOBAL = this,
 			return;
 		};
 		$f.session = function(key, value) {
-			if (key == undefined) return "";
+			if (key === undefined) return "";
 			if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
 			if (value === null) {
 				Session.Contents.Remove(key);
@@ -168,7 +168,7 @@ var GLOBAL = this,
 			Session(key) = value;
 		};
 		$f.get = function(key, value) {
-			if (key == undefined) return "";
+			if (key === undefined) return get__;
 			if (value === null) {
 				$f.get.remove(key);
 				return;
@@ -184,7 +184,7 @@ var GLOBAL = this,
 			return "";
 		};
 		$f.server = function(key, value) {
-			if (key == undefined) return "";
+			if (key === undefined) return server__;
 			if (value === null) {
 				delete server__[key];
 				return;

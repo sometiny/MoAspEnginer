@@ -493,18 +493,16 @@ __Model__.prototype.assign = function(name,asobject){
 __Model__.prototype.Insert = __Model__.prototype.insert = function(){
 	var data = null;
 	if(arguments.length == 1){
-		 if((typeof arguments[0] == "object") && arguments[0]["table"] != undefined) data = arguments[0];
-	}
-	if(arguments.length > 0 && arguments.length % 2 == 0){
-		data = new DataTableRow();
-		for(var i = 0;i < arguments.length - 1;i += 2){
-			data.set(arguments[i],arguments[i+1],typeof arguments[i+1]);
+		if((typeof arguments[0] == "object")){
+			if(arguments[0].constructor == DataTableRow){
+				data = arguments[0];
+			}else{
+				data = (new DataTableRow()).fromObject(arguments[0], this.pk);
+			}
 		}
 	}
-	if(data == null){
-		data = new DataTableRow();
-		data.frompost(this.pk);
-	}	
+	if(arguments.length > 0 && arguments.length % 2 == 0) data = new DataTableRow(arguments);
+	if(data == null) data = (new DataTableRow()).fromPost(this.pk);
 	var d_ = this.parseData(data["table"]);
 	if(d_[0] != "" && d_[1] != ""){
 		if(d_[3] != null){
@@ -521,21 +519,20 @@ __Model__.prototype.Insert = __Model__.prototype.insert = function(){
 __Model__.prototype.Update = __Model__.prototype.update = function(){
 	var data = null;
 	if(arguments.length == 1){
-		if((typeof arguments[0] == "object") && arguments[0]["table"] != undefined) data = arguments[0];
-		if((typeof arguments[0] == "string") && arguments[0] != ""){
+		if((typeof arguments[0] == "object")){
+			if(arguments[0].constructor == DataTableRow){
+				data = arguments[0];
+			}else{
+				data = (new DataTableRow()).fromObject(arguments[0], this.pk);
+			}
+		}else if((typeof arguments[0] == "string") && arguments[0] != ""){
 			this.query("update " + this.table + " set " + arguments[0] + (this.strwhere != ""?(" where " + this.strwhere):""));
 			return this;
 		}
 	}
-	if(arguments.length > 0 && arguments.length % 2 == 0){
-		data = new DataTableRow();
-		for(var i = 0;i < arguments.length - 1;i += 2){
-			data.set(arguments[i],arguments[i+1],typeof arguments[i+1]);
-		}
-	}
+	if(arguments.length > 0 && arguments.length % 2 == 0) data = new DataTableRow(arguments);
 	if(data == null){
-		data = new DataTableRow();
-		data.frompost(this.pk);
+		data = (new DataTableRow()).fromPost(this.pk);
 		if(this.strwhere == "" && data.pk != ""){
 			this.strwhere = this.base.splitChars[0] +this.pk + this.base.splitChars[1] + " = " + data.pk;
 		}

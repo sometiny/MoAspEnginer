@@ -123,10 +123,6 @@ MoAspEnginerView.prototype.doSomethingToAsp=function(){
 		+"}"
 	}
 	this.Content = this.Content.replace(/--movbcrlf--/igm,"\\r\\n")
-	if(G.MO_PREETY_HTML){
-		//this.Content = this.Content.replace(/(\s*)\" `&&` vbcrlf `&&` \"(\s*)/igm,"")
-		//this.Content = this.Content.replace(/\bT \= T `&&` \"(\s+)/igm,"T = T `&&` \"")
-	}
 	if(G.MO_DIRECT_OUTPUT){
 		this.Content = this.Content.replace(/T \= T `&&` \(/igm,"Response.Write(")
 		this.Content = this.Content.replace(/`&&`/igm,"\r\nResponse.Write(")
@@ -135,6 +131,10 @@ MoAspEnginerView.prototype.doSomethingToAsp=function(){
 	}
 	this.Content = this.Content.replace(/WriteStreamText\(TplStream\,\"\\r\\n\"\);\n/igm,"");
 	this.Content = this.Content.replace(/Response\.Write\(\"\\r\\n\"\);\n/igm,"");
+	if(G.MO_PREETY_HTML){
+		this.Content = this.Content.replace(/>(\s*)\\r\\n\"\)\;(\r\n)WriteStreamText\(TplStream\,\"(\s*)\</ig,"><")
+		//this.Content = this.Content.replace(/(\s*)\\r\\n\"\)\;(\r\n)WriteStreamText\(TplStream\,\"(\s*)/ig,"")
+	}
 }
 
 //****************************************************

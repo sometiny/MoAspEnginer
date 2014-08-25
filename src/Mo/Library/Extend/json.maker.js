@@ -13,7 +13,7 @@ $maker.fn.setDataType = function(t) {
 	this.datatype = t || "object";
 	if (this.datatype == "array") this.table = [];
 };
-$maker.ParsePath = function(path){
+$maker.parsePath = function(path){
 	if(/([^\w\.\[\]]+)/.test(path)){
 		throw {"description":"path error"};
 		return;
@@ -21,22 +21,18 @@ $maker.ParsePath = function(path){
 	return path.replace(/\b([a-zA-Z]\w*)\b/igm,"[\"$1\"]").replace(/\./igm,"");
 };
 $maker.fn.push = function(path, value){
-	(new Function("value","this.table"+$maker.ParsePath(path)+"=value;")).apply(this,[value]);
+	(new Function("value","this.table"+$maker.parsePath(path)+"=value;")).apply(this,[value]);
 };
 
 $maker.fn.pushAsObject = function(path){
-	(new Function("this.table"+$maker.ParsePath(path)+"={};")).apply(this,[]);
+	(new Function("this.table"+$maker.parsePath(path)+"={};")).apply(this,[]);
 };
 
 $maker.fn.pushAsArray = function(path){
-	(new Function("this.table"+$maker.ParsePath(path)+"=[];")).apply(this,[]);
+	(new Function("this.table"+$maker.parsePath(path)+"=[];")).apply(this,[]);
 };
 
-$maker.fn.pushVBArray = function(path, value){
-	(new Function("value","this.table"+$maker.ParsePath(path)+"=(new VBArray(value)).toArray();")).apply(this,[value]);
-};
-
-$maker.fn.putnew = function(key, t) {
+$maker.fn.putNew = function(key, t) {
 	if (this.datatype == "array"){
 		t = key;
 		key=null;
@@ -44,12 +40,12 @@ $maker.fn.putnew = function(key, t) {
 	return this.put(key, new $maker(t));
 };
 
-$maker.fn.putnewarray = function(key) {
+$maker.fn.putNewArray = function(key) {
 	if (this.datatype == "array")key=null;
 	return this.put(key, new $maker("array"));
 };
 
-$maker.fn.putrows = function(key, rs, pagesize) {
+$maker.fn.putRows = function(key, rs, pagesize) {
 	if (this.datatype == "array"){
 		pagesize = rs;
 		rs = key;
@@ -58,7 +54,7 @@ $maker.fn.putrows = function(key, rs, pagesize) {
 	return this.put(key, (new $maker()).fromrows(rs, pagesize));
 };
 
-$maker.fn.putdictionary = function(key, dir) {
+$maker.fn.putDictionary = function(key, dir) {
 	if (this.datatype == "array"){
 		dir = key
 		key=null;
@@ -66,7 +62,7 @@ $maker.fn.putdictionary = function(key, dir) {
 	return this.put(key, (new $maker()).fromdictionary(dir));
 };
 
-$maker.fn.putrequest = function(key, isFromGet) {
+$maker.fn.putRequest = function(key, isFromGet) {
 	if (this.datatype == "array"){
 		isFromGet = key
 		key=null;
@@ -74,15 +70,7 @@ $maker.fn.putrequest = function(key, isFromGet) {
 	return this.put(key, (new $maker()).fromrequest(isFromGet));
 };
 
-$maker.fn.putvbarray = function(key, value) {
-	if (this.datatype == "array"){
-		value = key
-		key=null;
-	}
-	return this.put(key, (new VBArray(value)).toArray());
-};
-
-$maker.fn.putarraylist = function(key, value) {
+$maker.fn.putArrayList = function(key, value) {
 	if (this.datatype == "array"){
 		value = key
 		key=null;
@@ -114,15 +102,15 @@ $maker.fn.put = function(key, value) {
 	}
 };
 
-$maker.fn.fromrequest = function(isFromGet){
+$maker.fn.fromRequest = function(isFromGet){
 	isFromGet = isFromGet===true;
 	this.setDataType("object");
-	if(isFromGet) this.table=F.get__;
-	else this.table=F.post__;
+	if(isFromGet) this.table=F.get();
+	else this.table=F.post();
 	return this;
 }
 
-$maker.fn.fromdictionary = function(value) {
+$maker.fn.fromDictionary = function(value) {
 	this.setDataType("object");
 	var keys = (new VBArray(value.keys())).toArray();
 	if (keys.length <= 0) return this;
@@ -132,23 +120,10 @@ $maker.fn.fromdictionary = function(value) {
 	return this;
 };
 
-$maker.fn.fromrows = function(rs, pagesize) {
+$maker.fn.fromRows = function(rs, pagesize) {
 	this.setDataType("array");
 	if (pagesize == undefined) pagesize = -1;
-	var ps = rs.Bookmark;
-	var k = 0;
-	while (!rs.eof && (k < pagesize || pagesize == -1)) {
-		k++;
-		var tmp__ = new Object();
-		for (var i = 0; i < rs.fields.count; i++) {
-			tmp__[rs.fields(i).Name] = rs.fields(i).value;
-		}
-		this.put(tmp__);
-		rs.MoveNext();
-	}
-	try {
-		rs.Bookmark = ps;
-	} catch (ex) {}
+	this.table = rs.LIST__;
 	return this;
 };
 
