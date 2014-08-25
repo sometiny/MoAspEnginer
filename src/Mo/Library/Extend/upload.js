@@ -136,7 +136,7 @@ $upload.save = function(File,opt){
 				$opt.OnError.call(null,File.Exception);
 				return 0;
 			}
-			$opt.OnSucceed.call(1,[File]);
+			$opt.OnSucceed.call($upload, 1, [File]);
 			return 1;
 		}
 		else
@@ -158,7 +158,7 @@ $upload.save = function(File,opt){
 				$opt.OnError.call(null,"file '" + File + "' can not be found.");
 				return 0;
 			}else{
-				$opt.OnSucceed.call(fileCount,fileArray);
+				$opt.OnSucceed.call($upload, fileCount, fileArray);
 				return fileCount;
 			}
 		}
