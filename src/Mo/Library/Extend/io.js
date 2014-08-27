@@ -20,6 +20,40 @@ var $io = exports.io || (function(){
 		path = F.mappath(path);
 		return $Io.fso.GetBaseName (path);
 	};
+	$Io.get = function(path){
+		path = F.mappath(path);
+		var src = null;
+		if($io.file.exists(path)) src = $Io.fso.getFile(path);
+		else if($io.directory.exists(path)) src = $Io.fso.getFolder(path);
+		if(src==null){
+			ExceptionManager.put("0x2d1e","io.get","file or directory is not exists.");
+			return {};
+		}
+		return {
+			attr : src.Attributes,
+			date : {
+				created: src.DateCreated,
+				laccessed: src.DateLastAccessed,
+				modified: src.DateLastModified
+			},
+			name : src.Name,
+			path : src.Path,
+			size : src.Size,
+			type : src.Type
+		};
+	};
+	$Io.set = function(path,attr){
+		path = F.mappath(path);
+		var src = null;
+		if($io.file.exists(path)) src = $Io.fso.getFile(path);
+		else if($io.directory.exists(path)) src = $Io.fso.getFolder(path);
+		if(src==null){
+			ExceptionManager.put("0x2d0e","io.set","file or directory is not exists.");
+			return false;
+		}
+		src.Attributes = attr;
+		return true;
+	};
 	return $Io;
 })();
 $io.file = $io.file || (function(){
