@@ -11,18 +11,7 @@ var $io = exports.io || (function(){
 	$Io.stream = function(mode,type){
 		var stream = F.activex("adodb.stream");stream.mode = mode ||3;stream.type = type||1;return stream;
 	};
-	$Io.stream.writeSaveAndClose = function(stream,path,content){
-		stream.write(content);
-		stream.saveToFile(path,2);
-		stream.close();
-	};
-	$Io.stream.writeTextSaveAndClose = function(stream,path,content){
-		stream.writeText(content);
-		stream.saveToFile(path,2);
-		stream.close();
-	};
 	$Io.fps=[];
-	
 	$Io.absolute = function(path){
 		path = F.mappath(path);
 		return $Io.fso.GetAbsolutePathName(path);
@@ -66,31 +55,15 @@ $io.file = $io.file || (function(){
 		try{
 			$io.fso.MoveFile(src, dest);
 		}catch(ex){
-			ExceptionManager.put(ex,"io.file.copy");
+			ExceptionManager.put(ex,"io.file.move");
 			return false;
 		}
 	};
 	$file.readAllText = function(path, encoding){
-		if(!$file.exists(path)) return "";
-		path = F.mappath(path);
-		encoding = encoding || "utf-8";
-		var stream = $io.stream(3,2);
-		stream.charset=encoding;
-		stream.open();
-		stream.loadfromfile(path);
-		var returnValue = stream.readtext();
-		stream.close();
-		return returnValue;
+		return (function(fp){var content = $io.file.read(fp);$io.file.close(fp);return content})($io.file.open(path,{forText : true, forRead : true , encoding : encoding || "utf-8"}));
 	};
 	$file.readAllBytes = function(path){
-		if(!$file.exists(path)) return null;
-		path = F.mappath(path);
-		var stream = $io.stream(3,1);
-		stream.open();
-		stream.loadfromfile(path);
-		var returnValue = stream.read();
-		stream.close();
-		return returnValue;
+		return (function(fp){var content = $io.file.read(fp);$io.file.close(fp);return content})($io.file.open(path,{forText : false, forRead : true}));
 	};
 	$file.writeAllBytes = function(path,content){
 		$fn($file.open(path, {forText : false}), content);
@@ -109,18 +82,26 @@ $io.file = $io.file || (function(){
 		var cfg = {
 			forAppend : false,
 			forText : true,
+			forRead : false,
 			encoding : "utf-8"
 		};
-		F.extend(cfg, opt);
+		F.extend(cfg, opt||{});
 		var fp = $io.stream(3, cfg.forText ? 2 : 1);
 		if(cfg.forText) fp.charset=cfg.encoding;
 		fp.open();
-		if($file.exists(path) && cfg.forAppend){
+		if($file.exists(path) && (cfg.forAppend || cfg.forRead)){
 			fp.loadfromfile(path);
-			fp.position = fp.size;
+			if(cfg.forAppend)fp.position = fp.size;
 		}
 		$io.fps.push([fp,path,cfg]);
 		return $io.fps.length-1;
+	};
+	$file.seek = function(fp,position){
+		if(!$io.fps[fp]){
+			ExceptionManager.put("0x2d2e","io.file.seek","file resource id is invalid.");
+			return;
+		}
+		$io.fps[fp][0].position = position;
 	};
 	$file.write = function(fp,content){
 		if(!$io.fps[fp]){
@@ -133,15 +114,34 @@ $io.file = $io.file || (function(){
 			$io.fps[fp][0].write(content);
 		}
 	};
-	$file.close = function(fp){
+	$file.read = function(fp,length){
 		if(!$io.fps[fp]){
-			ExceptionManager.put("0x2d3e","io.file.write","file resource id is invalid.");
+			ExceptionManager.put("0x2d4e","io.file.read","file resource id is invalid.");
+			return null;
+		}
+		if($io.fps[fp][2].forText){
+			if(length) return $io.fps[fp][0].readText(length);
+			return $io.fps[fp][0].readText();
+		}else{
+			if(length) return $io.fps[fp][0].read(length);
+			return $io.fps[fp][0].read();
+		}
+	};
+	$file.flush = function(fp){
+		if(!$io.fps[fp]){
+			ExceptionManager.put("0x2d5e","io.file.flush","file resource id is invalid.");
 			return;
 		}
 		fp = $io.fps[fp];
 		fp[0].flush();
 		fp[0].saveToFile(fp[1],2);
-		fp[0].close();
+	};
+	$file.close = function(fp){
+		if(!$io.fps[fp]){
+			ExceptionManager.put("0x2d6e","io.file.close","file resource id is invalid.");
+			return;
+		}
+		$io.fps[fp][0].close();
 	};
 	$file.extension = function(path){return $io.fso.GetExtensionName(F.mappath(path));};
 	return $file;
@@ -175,7 +175,7 @@ $io.directory = $io.directory || (function(){
 		try{
 			$io.fso.MoveFolder(src, dest);
 		}catch(ex){
-			ExceptionManager.put(ex,"io.directory.copy");
+			ExceptionManager.put(ex,"io.directory.move");
 			return false;
 		}
 	};
