@@ -5,35 +5,71 @@
 **		support@mae.im
 */
 if(exports.io) return exports.io;
-var $io = exports.io || (function(){
+var $io = exports.io || (function()
+{
 	var $Io = {};
 	$Io.fso = F.fso || F.activex("scripting.filesystemobject");
-	$Io.stream = function(mode,type){
+	$Io.stream = function(mode,type)
+	{
 		var stream = F.activex("adodb.stream");stream.mode = mode ||3;stream.type = type||1;return stream;
 	};
 	$Io.fps=[];
-	$Io.absolute = function(path){
+	$Io.absolute = function(path)
+	{
 		path = F.mappath(path);
 		return $Io.fso.GetAbsolutePathName(path);
 	};
-	$Io.base = function(path){
+	$Io.base = function(path)
+	{
 		path = F.mappath(path);
 		return $Io.fso.GetBaseName (path);
 	};
-	$Io.get = function(path){
+	$Io.get = function(path)
+	{
 		path = F.mappath(path);
 		var src = null;
-		if($io.file.exists(path)) src = $Io.fso.getFile(path);
-		else if($io.directory.exists(path)) src = $Io.fso.getFolder(path);
-		if(src==null){
+		if($io.file.exists(path))
+		{
+			src = $Io.fso.getFile(path);
+		}
+		else if($io.directory.exists(path))
+		{
+			src = $Io.fso.getFolder(path);
+		}
+		if(src==null)
+		{
 			ExceptionManager.put("0x2d1e","io.get","file or directory is not exists.");
 			return {};
 		}
+		var attrString = "";
+		if(src.Attributes>0)
+		{
+			for(var i in $io.attrs)
+			{
+				if(!$io.attrs.hasOwnProperty(i))
+				{
+					continue;
+				}
+				if(src.Attributes & $io.attrs[i])
+				{
+					attrString += i + ", ";
+				}
+			}
+			if(attrString != "")
+			{
+				attrString = attrString.substr(0, attrString.length-2);
+			}
+		}
+		else
+		{
+			attrString = "Normal";
+		}
 		return {
 			attr : src.Attributes,
+			attrString : attrString,
 			date : {
 				created: src.DateCreated,
-				laccessed: src.DateLastAccessed,
+				accessed: src.DateLastAccessed,
 				modified: src.DateLastModified
 			},
 			name : src.Name,
@@ -42,24 +78,48 @@ var $io = exports.io || (function(){
 			type : src.Type
 		};
 	};
-	$Io.set = function(path,attr){
+	$Io.attr = function(path,attr)
+	{
 		path = F.mappath(path);
 		var src = null;
-		if($io.file.exists(path)) src = $Io.fso.getFile(path);
-		else if($io.directory.exists(path)) src = $Io.fso.getFolder(path);
-		if(src==null){
-			ExceptionManager.put("0x2d0e","io.set","file or directory is not exists.");
-			return false;
+		if($io.file.exists(path))
+		{
+			src = $Io.fso.getFile(path);
 		}
-		src.Attributes = attr;
-		return true;
+		else if($io.directory.exists(path))
+		{
+			src = $Io.fso.getFolder(path);
+		}
+		if(src==null)
+		{
+			ExceptionManager.put("0x2d0e","io.attr","file or directory is not exists.");
+			return;
+		}
+		if(attr!==undefined)
+		{
+			if(attr & 8 || attr & 16 || attr & 64 || attr & 128)
+			{
+				ExceptionManager.put("0x2d0d","io.attr","attributes value error.");
+				return;
+			}
+			src.Attributes = attr;
+		}
+		else
+		{
+			return src.Attributes;
+		}
 	};
 	return $Io;
 })();
-$io.file = $io.file || (function(){
+
+/*some methods for file*/
+$io.file = $io.file || (function()
+{
 	var $file = {};
-	var $fn = function(fp, content){
+	var $fn = function(fp, content)
+	{
 		$file.write(fp,content);
+		$file.flush(fp);
 		$file.close(fp);
 	};
 	$file.exists = function(path)
@@ -67,28 +127,39 @@ $io.file = $io.file || (function(){
 		path = F.mappath(path);
 		return $io.fso.fileexists(path);
 	};
-	$file.del = function(path){
+	$file.del = function(path)
+	{
 		if(!$file.exists(path)) return true;
-		try{
+		try
+		{
 			$io.fso.deletefile(F.mappath(path));
 			return true;
-		}catch(ex){
+		}
+		catch(ex)
+		{
 			ExceptionManager.put(ex,"io.file.del");
 			return false;
 		}
 	};
-	$file.copy = function(src, dest){
-		try{
+	$file.copy = function(src, dest)
+	{
+		try
+		{
 			$io.fso.CopyFile(src, dest);
-		}catch(ex){
+		}
+		catch(ex)
+		{
 			ExceptionManager.put(ex,"io.file.copy");
 			return false;
 		}
 	};
 	$file.move = function(src, dest){
-		try{
+		try
+		{
 			$io.fso.MoveFile(src, dest);
-		}catch(ex){
+		}
+		catch(ex)
+		{
 			ExceptionManager.put(ex,"io.file.move");
 			return false;
 		}
@@ -111,9 +182,11 @@ $io.file = $io.file || (function(){
 	$file.appendAllText = function(path,content,encoding){
 		$fn($file.open(path, {encoding : encoding || "utf-8", forAppend : true}), content);
 	};
-	$file.open = function(path,opt){
+	$file.open = function(path,opt)
+	{
 		path = F.mappath(path);
-		var cfg = {
+		var cfg = 
+		{
 			forAppend : false,
 			forText : true,
 			forRead : false,
@@ -121,48 +194,68 @@ $io.file = $io.file || (function(){
 		};
 		F.extend(cfg, opt||{});
 		var fp = $io.stream(3, cfg.forText ? 2 : 1);
-		if(cfg.forText) fp.charset=cfg.encoding;
+		if(cfg.forText)
+		{
+			fp.charset=cfg.encoding;
+		}
 		fp.open();
-		if($file.exists(path) && (cfg.forAppend || cfg.forRead)){
+		if($file.exists(path) && (cfg.forAppend || cfg.forRead))
+		{
 			fp.loadfromfile(path);
-			if(cfg.forAppend)fp.position = fp.size;
+			if(cfg.forAppend)
+			{
+				fp.position = fp.size;
+			}
 		}
 		$io.fps.push([fp,path,cfg]);
 		return $io.fps.length-1;
 	};
-	$file.seek = function(fp,position){
-		if(!$io.fps[fp]){
+	$file.seek = function(fp,position)
+	{
+		if(!$io.fps[fp])
+		{
 			ExceptionManager.put("0x2d2e","io.file.seek","file resource id is invalid.");
 			return;
 		}
 		$io.fps[fp][0].position = position;
 	};
-	$file.write = function(fp,content){
-		if(!$io.fps[fp]){
+	$file.write = function(fp,content)
+	{
+		if(!$io.fps[fp])
+		{
 			ExceptionManager.put("0x2d3e","io.file.write","file resource id is invalid.");
 			return;
 		}
-		if($io.fps[fp][2].forText){
+		if($io.fps[fp][2].forText)
+		{
 			$io.fps[fp][0].writeText(content);
-		}else{
+		}
+		else
+		{
 			$io.fps[fp][0].write(content);
 		}
 	};
 	$file.read = function(fp,length){
-		if(!$io.fps[fp]){
+		if(!$io.fps[fp])
+		{
 			ExceptionManager.put("0x2d4e","io.file.read","file resource id is invalid.");
 			return null;
 		}
-		if($io.fps[fp][2].forText){
+		if($io.fps[fp][2].forText)
+		{
 			if(length) return $io.fps[fp][0].readText(length);
 			return $io.fps[fp][0].readText();
-		}else{
+		}
+		else
+		{
 			if(length) return $io.fps[fp][0].read(length);
 			return $io.fps[fp][0].read();
 		}
 	};
-	$file.flush = function(fp){
-		if(!$io.fps[fp]){
+	$file.flush = function(fp)
+	{
+		if(!$io.fps[fp])
+		{
 			ExceptionManager.put("0x2d5e","io.file.flush","file resource id is invalid.");
 			return;
 		}
@@ -171,105 +264,157 @@ $io.file = $io.file || (function(){
 		fp[0].saveToFile(fp[1],2);
 	};
 	$file.close = function(fp){
-		if(!$io.fps[fp]){
+		if(!$io.fps[fp])
+		{
 			ExceptionManager.put("0x2d6e","io.file.close","file resource id is invalid.");
 			return;
 		}
 		$io.fps[fp][0].close();
 	};
-	$file.extension = function(path){return $io.fso.GetExtensionName(F.mappath(path));};
+	$file.extension = function(path)
+	{
+		return $io.fso.GetExtensionName(F.mappath(path));
+	};
 	return $file;
 })();
-$io.directory = $io.directory || (function(){
+
+/*some methods for directory*/
+$io.directory = $io.directory || (function()
+{
 	var $dir = {};
 	$dir.exists = function(path)
 	{
 		path = F.mappath(path);
 		return $io.fso.folderexists(path);
 	};
-	$dir.del = function(path){
+	$dir.del = function(path)
+	{
 		if(!$dir.exists(path)) return true;
-		try{
+		try
+		{
 			$io.fso.deletefolder(F.mappath(path));
 			return true;
-		}catch(ex){
+		}
+		catch(ex)
+		{
 			ExceptionManager.put(ex,"io.directory.del");
 			return false;
 		}
 	};
-	$dir.copy = function(src, dest){
-		try{
+	$dir.copy = function(src, dest)
+	{
+		try
+		{
 			$io.fso.CopyFolder(src, dest);
-		}catch(ex){
+		}
+		catch(ex)
+		{
 			ExceptionManager.put(ex,"io.directory.copy");
 			return false;
 		}
 	};
-	$dir.move = function(src, dest){
-		try{
+	$dir.move = function(src, dest)
+	{
+		try
+		{
 			$io.fso.MoveFolder(src, dest);
-		}catch(ex){
+		}
+		catch(ex)
+		{
 			ExceptionManager.put(ex,"io.directory.move");
 			return false;
 		}
 	};
-	$dir.create = function(path){
+	$dir.create = function(path)
+	{
 		path = F.mappath(path);
-		if($dir.exists(path))return true;
+		if($dir.exists(path))
+		{
+			return true;
+		}
 		var parent = $io.fso.GetParentFolderName(path);
-		if(!$dir.exists(parent))$dir.create(parent);
-		try{
+		if(!$dir.exists(parent))
+		{
+			$dir.create(parent);
+		}
+		try
+		{
 			$io.fso.CreateFolder(path);
 			return true;
-		}catch(ex){
+		}
+		catch(ex)
+		{
 			ExceptionManager.put(ex,"io.directory.create");
 			return false;
 		}
 	};
-	$dir.parent = function(path){
+	$dir.parent = function(path)
+	{
 		path = F.mappath(path);
-		if(!$dir.exists(path))return "";
+		if(!$dir.exists(path))
+		{
+			return "";
+		}
 		return $io.fso.GetParentFolderName(path);
 	};
-	$dir.clear = function(path, includeSelf){
+	$dir.clear = function(path, includeSelf)
+	{
 		path = F.mappath(path);
 		includeSelf = includeSelf===true;
-		if(!$dir.exists(path)) return false;
-		try{
+		if(!$dir.exists(path))
+		{
+			return false;
+		}
+		try
+		{
 			var folder = $io.fso.getFolder(path);
 			var files = folder.files;
 			var fc = new Enumerator(files);
-			for (;!fc.atEnd(); fc.moveNext()){
-				if(fc.item().name!=".mae")fc.item().Delete();
+			for (;!fc.atEnd(); fc.moveNext())
+			{
+				if(fc.item().name!=".mae")
+				{
+					fc.item().Delete();
+				}
 			}
 			files = folder.subfolders;
 			fc = new Enumerator(files);
-			for (;!fc.atEnd(); fc.moveNext()){
+			for (;!fc.atEnd(); fc.moveNext())
+			{
 				fc.item().Delete();
 			}
 			if(includeSelf)folder.Delete();
 			return true;	
-		}catch(ex){
+		}
+		catch(ex)
+		{
 			ExceptionManager.put(ex,"io.directory.clear");
 			return false;	
 		}
 	};
-	$dir.files = function(path) {
-		if(!$dir.exists(path)) return [];
+	$dir.files = function(path)
+	{
+		if(!$dir.exists(path))
+		{
+			return [];
+		}
 		var files=[];
 		path = F.mappath(path);
 		var fc = new Enumerator($io.fso.getFolder(path).files);
-		for (;!fc.atEnd(); fc.moveNext()){
+		for (;!fc.atEnd(); fc.moveNext())
+		{
 			files.push(fc.item().path);
 		}
 		return files;
 	};
-	$dir.directories = function(path) {
+	$dir.directories = function(path)
+	{
 		if(!$dir.exists(path)) return [];
 		var files=[];
 		path = F.mappath(path);
 		var fc = new Enumerator($io.fso.getFolder(path).subfolders);
-		for (;!fc.atEnd(); fc.moveNext()){
+		for (;!fc.atEnd(); fc.moveNext())
+		{
 			files.push(fc.item().path);
 		}
 		return files;
@@ -279,4 +424,48 @@ $io.directory = $io.directory || (function(){
 	$dir.temp = $io.fso.GetSpecialFolder(2);
 	return $dir;
 })();
+
+/*some methods for drive*/
+$io.drive = $io.drive || function(path)
+{
+	path = F.mappath(path);
+	var dr = $io.fso.GetDrive($io.fso.GetDriveName(path));
+	return {
+		space : {
+			available : dr.AvailableSpace,
+			free : dr.FreeSpace,
+			total : dr.TotalSize
+		},
+		letter : dr.DriveLetter,
+		type : dr.DriveType,
+		typeString : $io.drive.types[dr.DriveType] || "Unknown",
+		fileSystem : dr.FileSystem,
+		isReady : dr.IsReady,
+		path : dr.Path,
+		sn : (dr.SerialNumber < 0 ? (dr.SerialNumber+0x100000000) : dr.SerialNumber).toString(16)
+	};
+};
+$io.drive.types = [
+	"Unknown", 
+	"Removable", 
+	"Fixed", 
+	"Network", 
+	"CDROM", 
+	"RAM"
+];
+$io.attrs = {
+	Normal : 0, 
+	ReadOnly : 1, 
+	Hidden : 2, 
+	System : 4, 
+	Volume : 8, 
+	Directory : 16, 
+	Archive : 32, 
+	Alias : 64, 
+	Compressed : 128
+};
+$io.directory.get = $io.file.get = $io.get;
+$io.directory.attr = $io.file.attr = $io.attr;
+$io.directory.base = $io.file.base = $io.base;
+$io.directory.absolute = $io.file.absolute = $io.absolute;
 return exports.io = $io;

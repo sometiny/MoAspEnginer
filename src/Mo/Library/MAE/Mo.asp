@@ -6,7 +6,7 @@
 ** About: 
 **		support@mae.im
 */
-var Mo = Mo || (function(){
+var IO, JSON, Mo = Mo || (function(){
 	var M = function(opt){
 		M.Run(opt);
 	};
@@ -221,6 +221,8 @@ var Mo = Mo || (function(){
 		M.Config.Global = cfg;
 		this.Status = "200 OK";
 		_InitializePath(cfg);
+		IO = Require("io");
+		JSON = Require("json");
 		if(F.exists(cfg.MO_CORE + "Conf/Config.asp")) G = M.Config.Global = F.require(F.mappath(cfg.MO_CORE + "Conf/Config.asp"));
 		_extend(G,cfg);
 		if(!G.MO_METHOD_CHAR) G.MO_METHOD_CHAR = "m";
@@ -350,23 +352,21 @@ var Mo = Mo || (function(){
 	};
 	M.ModelCacheSave = function(name,content){
 		if(name == "") return false;
-		return F.string.saveToFile(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"),content,G.MO_CHARSET);
+		return IO.file.saveAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"),content,G.MO_CHARSET);
 	};
 	M.ModelCacheLoad = function(name){
 		if(name == "") return "";
-		return F.string.fromFile(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"),G.MO_CHARSET);
+		return IO.file.readAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"),G.MO_CHARSET);
 	};
 	M.ModelCacheDelete = function(name){
 		if(name == "") return false;
-		return F.fso.deletefile(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"));
+		return IO.file.del(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"));
 	};
 	M.ModelCacheClear = function(){
-		F.require("io.folder");
-		return Exports.io.folder.clear(F.mappath(G.MO_APP + "Cache/Model"));
+		return IO.directory.clear(F.mappath(G.MO_APP + "Cache/Model"));
 	};
 	M.ClearCompiledCache = function(){
-		F.require("io.folder");
-		return Exports.io.folder.clear(F.mappath(G.MO_APP + "Cache/Compiled"));
+		return IO.directory.clear(F.mappath(G.MO_APP + "Cache/Compiled"));
 	}
 	M.ClearLibraryCache = function(){
 		return F.cache.clear(G.MO_APP_NAME + ".lib.");
@@ -388,7 +388,7 @@ var Mo = Mo || (function(){
 					if(F.date.datediff("s",OldHash,new Date()) >= G.MO_COMPILE_CACHE_EXPIRED)usecache = false;
 				}
 				if(usecache){
-					vbscript = F.string.fromFile(cachepath,G.MO_CHARSET);
+					vbscript = IO.file.readAllText(cachepath,G.MO_CHARSET);
 					vbscript = vbscript.replace(/^<s(.+?)>\r\n/ig,"").replace(/\r\n<\/script>$/ig,"");
 				}
 			}
@@ -399,7 +399,7 @@ var Mo = Mo || (function(){
 			if(typeof MoAspEnginerView == "undefined")F.include(G.MO_CORE + "Library/MAE/Mo.View.asp","utf-8");
 			var view_ = new MoAspEnginerView(html);
 			vbscript = view_.Content;
-			if(G.MO_COMPILE_CACHE)F.string.saveToFile(cachepath,"<s" + "cript language=\"jscript\" runat=\"server\">\r\n" + vbscript + "\r\n</s"+"cript>",G.MO_CHARSET);
+			if(G.MO_COMPILE_CACHE)IO.file.writeAllText(cachepath,"<s" + "cript language=\"jscript\" runat=\"server\">\r\n" + vbscript + "\r\n</s"+"cript>",G.MO_CHARSET);
 		}
 		
 		if(!G.MO_DIRECT_OUTPUT) F.execute(vbscript,"Temp___");
@@ -408,7 +408,7 @@ var Mo = Mo || (function(){
 		try{
 			if(!G.MO_DIRECT_OUTPUT)content = Temp___();
 			if(G.MO_CACHE && G.MO_CACHE_DIR != "" && !G.MO_DIRECT_OUTPUT){
-				if(F.exists(G.MO_CACHE_DIR,true)) F.string.saveToFile(F.mappath(G.MO_CACHE_DIR + this.CacheFileName + ".cache"),fetch,G.MO_CHARSET);
+				if(F.exists(G.MO_CACHE_DIR,true)) IO.file.writeAllText(F.mappath(G.MO_CACHE_DIR + this.CacheFileName + ".cache"),fetch,G.MO_CHARSET);
 			}
 		}catch(ex){
 			ExceptionManager.put(ex,"Mo.fetch()->Temp___()");
@@ -502,8 +502,7 @@ var Mo = Mo || (function(){
 		var filepath = F.mappath(G.MO_APP + "Conf/" + conf + ".asp");
 		if(!F.exists(filepath)) filepath = F.mappath(G.MO_CORE + "Conf/" + conf + ".asp");
 		if(F.exists(filepath)){
-			F.require("json.parser");
-			F.string.saveToFile(filepath,"<scrip" + "t language=\"jscript\" runat=\"server\">return " + Exports.json.parser.unParse(data,"\t") + ";</scrip" + "t>","utf-8");
+			IO.file.writeAllText(filepath,"<scrip" + "t language=\"jscript\" runat=\"server\">return " + JSON.unParse(data,"\t") + ";</scrip" + "t>","utf-8");
 		}else{
 			ExceptionManager.put(4,"Mo.C.Save(conf)","配置[" + conf + "]不存在。");
 		}
@@ -669,7 +668,7 @@ var Mo = Mo || (function(){
 							ExceptionManager.put(0x00002CD, "F.vbs.include(lib)","待加载的类库'" + lib + "'不存在。");
 						    return false;
 					    }else{
-						    var ret = F.string.fromFile(F.mappath(pathinfo));
+						    var ret = IO.file.readAllText(F.mappath(pathinfo));
 							F.vbs.ctrl.error.clear();
 							F.vbs.execute(ret);
 							if(F.vbs.ctrl.error.number != 0){ 
