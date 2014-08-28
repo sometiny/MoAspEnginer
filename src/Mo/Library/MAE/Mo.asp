@@ -221,8 +221,8 @@ var IO, JSON, Mo = Mo || (function(){
 		M.Config.Global = cfg;
 		this.Status = "200 OK";
 		_InitializePath(cfg);
-		IO = Require("io");
-		JSON = Require("json");
+		IO = F.require("io");
+		JSON = F.require("json");
 		if(F.exists(cfg.MO_CORE + "Conf/Config.asp")) G = M.Config.Global = F.require(F.mappath(cfg.MO_CORE + "Conf/Config.asp"));
 		_extend(G,cfg);
 		if(!G.MO_METHOD_CHAR) G.MO_METHOD_CHAR = "m";
@@ -656,7 +656,7 @@ var IO, JSON, Mo = Mo || (function(){
 				    return ScrCtl.eval("new " + name);
 			    };
 			    F.vbs.include = function(lib){
-				    if(!/^([\w\.]+)$/.test(lib)){
+				    if(!/^([\w\.\/]+)$/.test(lib)){
 						ExceptionManager.put(0x00003CD,"F.vbs.include(lib)","Parameter 'lib' is invalid.");
 					    return false;
 				    }

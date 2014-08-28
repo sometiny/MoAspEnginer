@@ -1,9 +1,11 @@
 ﻿/*
-** File: jmail.js
+** File: net/mail.js
 ** Usage: a package for jmail.
 ** About: 
 **		support@mae.im
 */
+if(!exports.net)exports.net={};
+if(exports.net.mail) return exports.net.mail;
 function $jmail(){
 	this.Exception="";
 	this.jmail=null;
@@ -81,4 +83,4 @@ function $jmail(){
 		}catch(ex){this.Exception = ex.description;return false}
 	}
 }
-return exports.jmail = $jmail;
+return exports.net.mail = $jmail;

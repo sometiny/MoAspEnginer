@@ -9,8 +9,8 @@ FormController.extend("Index",true,function(){
 	this.display("Home:Form");
 });
 FormController.extend("Upload",function(){
-	F.require("upload");
-	F.exports.upload({
+	F.require("net/upload");
+	F.exports.net.upload({
 		AllowFileTypes : "*.jpg;*.png;*.gif;*.bmp", /*only these extensions can be uploaded.*/
 		AllowMaxSize : "1Mb", /*max upload-data size*/
 		Charset : "utf-8", /*client text charset*/

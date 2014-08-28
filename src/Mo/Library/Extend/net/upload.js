@@ -22,6 +22,8 @@
 ** About: 
 **		support@mae.im
 */
+if(!exports.net)exports.net={};
+if(exports.net.upload) return exports.net.upload;
 var cfg = {
 	AllowFileTypes : "",
 	AllowMaxSize : -1,
@@ -88,7 +90,7 @@ function $upload(cfg_){
 	var $g={};
 	F.extend($g, cfg, cfg_);
 	$upload.$cfg = $g;
-	if(!F.vbs.include("upload")) return;
+	if(!F.vbs.include("net/upload")) return;
 	F.vbs.ns("UploadManager",new $fileManager());
 	var $base = F.vbs.require("upload");
 	$upload.$base = $base;
@@ -167,4 +169,4 @@ $upload.save = function(File,opt){
 		return 0;
 	}
 };
-return exports.upload = $upload;
+return exports.net.upload = $upload;

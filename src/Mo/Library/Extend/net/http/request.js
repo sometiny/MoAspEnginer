@@ -1,20 +1,20 @@
 ﻿/*
-** File: http.request.js
+** File: net/http/request.js
 ** Usage: a library for http request
 ** About: 
 **		support@mae.im
 */
-
+if(!exports.net)exports.net={};
+if(!exports.net.http)exports.net.http={};
+if(exports.net.http.request) return exports.net.http.request;
 var cfg={
 	method : "GET",
 	data : "",
 	autoClearBuffer : false,
-	url : "",
 	timeout : [10000, 10000, 10000, 30000],
 	charset : "utf-8",
 	headers : []
 };
-
 
 var getXmlHttpRequestObject = function() {
 	var b = null;
@@ -52,10 +52,9 @@ var bytesToString = function(bytSource, Cset) { //ef bb bf,c0 fd
 function $httprequest(url, method, data, autoClearBuffer) {
 	var $g={};
 	F.extend($g,cfg);
-	if(typeof url == "object") F.extend($g,url);
+	if(typeof method == "object") F.extend($g,method);
 	else{
 		F.extend($g,{
-			url : url,
 			method : method,
 			data : data,
 			autoClearBuffer : autoClearBuffer
@@ -71,7 +70,7 @@ function $httprequest(url, method, data, autoClearBuffer) {
 	this.istimeout = false;
 	this.sended = false;
 	this.method = $g.method;
-	this.url = $g.url;
+	this.url = url;
 	this.data = $g.data;
 	this.charset = $g.charset;
 	this.base = null;
@@ -130,14 +129,122 @@ function $httprequest(url, method, data, autoClearBuffer) {
 			this.dataset.data = [];
 		}
 	};
-	if(typeof this.data == "object"){
-		for(var k in this.data){
+	if(typeof this.data == "object")
+	{
+		for(var k in this.data)
+		{
 			if(!this.data.hasOwnProperty(k))continue;
 			this.dataset.append(k,this.data[k]);
 		}
 		this.data="";
 	}
 }
+$httprequest.create = function(url, method, data, autoClearBuffer)
+{
+	return new $httprequest(url, method, data, autoClearBuffer);
+};
+
+$httprequest.save = function(url, localpath, opt)
+{
+	localpath = F.mappath(localpath);
+	return (new $httprequest(url, opt || {})).save(localpath);
+};
+$httprequest.saveResources = function(resources, localpath, opt)
+{
+	if(typeof resources == "string")
+	{
+		return $httprequest.saveResources($httprequest.getResources(resources, opt), localpath, opt);
+	}
+	if(!resources)return 0;
+	localpath = IO.directory.absolute(localpath);
+	var get_file_name = function(url)
+	{
+		return url.substr(url.lastIndexOf("/")+1) || "";
+	};
+	localpath = F.mappath(localpath);
+	var count = 0;
+	for(var item in resources)
+	{
+		if(!resources.hasOwnProperty(item))continue;
+		IO.directory.create(localpath + "\\" + item);
+		for(var i=0; i<resources[item].length; i++)
+		{
+			var file_name = get_file_name(resources[item][i]);
+			if(file_name=="")
+			{
+				file_name = F.random.word(10) + "." + item;
+			}
+			$httprequest.save(resources[item][i], localpath + "\\" + item + "\\" + file_name, opt);
+			count++;
+		}
+	}
+	delete get_file_name;
+	return count;
+	//(new $httprequest(url, opt || {})).save(localpath);
+};
+
+$httprequest.getResources = function(url, opt )
+{
+	var pushOnce = function(src,item){
+		if(item.substr(0,1)=="/")
+		{
+			item = root + item;
+		}
+		else if(item.indexOf("://")<0)
+		{
+			item = base + item;
+		}
+		for(var i=0;i<src.length;i++)
+		{
+			if(src[i] == item) return;
+		}
+		src.push(item);
+	};
+	var match = /^(.+?)\:\/\/(.+?)(\/(.*?))?(\?(.*?))?$/i.exec(url);
+	if(!match) return {};
+	var domain = match[2],
+		url = "/" + match[4],
+		root = match[1] + "://" + match[2],
+		base = root + url;
+	if(base.substr(base.length-1)!="/")
+	{
+		base = base.substr(0,base.lastIndexOf("/")+1);
+	}
+	var html = (new $httprequest(match[0], opt || {})).gettext(),
+		path = "",
+		resources = {
+			scripts : [],
+			links : [],
+			images : []
+		};
+	match = /<base([\s\S]+?)href\="(.+?)"/i.exec(html);
+	if(match){
+		var base2 = match[2];
+		if(base2.substr(base2.length-1)!="/") base2 += "/";
+		if(base2.substr(0,1)=="/")
+		{
+			base = root + "/";
+		}
+		else if(base2.indexOf("://")>0)
+		{
+			base = base2;
+		}
+		else
+		{
+			base = base + base2;
+		}	
+	}
+	var reg = /<(script|link|img)([^><]+?)(src|href)=("|')(.+?)("|')/ig;
+	while(match = reg.exec(html))
+	{
+		var type = match[1].toLowerCase();
+		pushOnce(resources[type == "script" ? "scripts" : (type == "link" ? "links" : "images")],match[5]);
+	}
+	delete pushOnce;
+	
+	return resources;
+};
+
 $httprequest.fn = $httprequest.prototype;
 
 $httprequest.fn.init = function() {
@@ -156,12 +263,12 @@ $httprequest.fn.init = function() {
 	}
 	if (this.data == "") this.data = null;
 	var sChar = ((this.url.indexOf("?") < 0) ? "?" : "&");
-	if (this.data != null) this.url += sChar + this.data;
+	if (this.data != null && this.method == "GET") this.url += sChar + this.data;
 	if (this.method == "GET" && this.autoClearBuffer) {
 		this.headers.push("If-Modified-Since:0");
 		this.headers.push("Cache-Control:no-cache");
 	}
-	if (this.method == "POST") this.headers.push("Content-Type:application/x-www-form-urlencoded");
+	if (this.method == "POST") this.headers.push("Content-Type:application/x-www-form-urlencoded; charset=" + (this.charset || "utf-8"));
 	if (!this.charset || this.charset == "") this.charset = "utf-8";
 };
 
@@ -219,6 +326,7 @@ $httprequest.fn.send = function(fn) {
 }
 $httprequest.fn.save = function(filepath) {
 	if (!this.sended) this.send();
+	if(this.content==null)return this;
 	var stream = new ActiveXObject("Adodb.Stream");
 	stream.Type = 1;
 	stream.Mode = 3;
@@ -239,7 +347,7 @@ $httprequest.fn.gettext = function(charset) {
 	if (!this.sended) this.send();
 	if (this.readyState == -1) return "";
 	try {
-		return bytesToString(this.content, charset ? charset : this.charset);
+		return bytesToString(this.content, charset || this.charset);
 	} catch (ex) {
 		this.msg = ex.description;
 		return "";
@@ -250,7 +358,7 @@ $httprequest.fn.getjson = function(charset) {
 	if (!this.sended) this.send();
 	if (this.readyState == -1) return null;
 	try {
-		return (new Function("return " + this.gettext(charset) + ";"))();
+		return (new Function("return " + this.gettext(charset || this.charset) + ";"))();
 	} catch (ex) {
 		this.msg = ex.description;
 		return null;
@@ -293,5 +401,4 @@ $httprequest.fn.getxml = function(charset) {
 		return null;
 	}
 };
-if (!exports.http) exports.http = {};
-return exports.http.request = $httprequest;
+return exports.net.http.request = $httprequest;

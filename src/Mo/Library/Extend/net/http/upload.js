@@ -1,5 +1,5 @@
 ﻿/*
-** File: http.upload.js
+** File: net/http/upload.js
 ** Usage: a library for upload files and form data to remote host.
 ** 		inherit form 'http.request'.
 ** New Methods:
@@ -16,9 +16,11 @@
 **		support@mae.im
 */
 
-if(!exports.http)exports.http={};
-F.require("http.request");
-if(!F.exports.http.request) return;
+if(!exports.net)exports.net={};
+if(!exports.net.http)exports.net.http={};
+if(exports.net.http.upload) return exports.net.http.upload;
+if(!exports.net.http.request) F.require("net/http/request");
+if(!F.exports.net.http.request) return;
 var $string2bytes = function(string){
 	return F.base64.toBinary(F.base64.encode(string))
 };
@@ -35,16 +37,42 @@ var $writefileto = function(path,destStream){
 	stream = null;
 };
 
-function $httpupload(url){
-	if(typeof url=="object"){
-		url.method="POST";
-		url.data="";
-	}
-	F.exports.http.request.apply(this,[url,"POST","",false]);
+function $httpupload(url, opt){
+	F.exports.net.http.request.apply(this,[url,"POST","",false]);
 	this.boundary = F.random.letter(22);
 	this.forms=[];
+	if(opt)
+	{
+		if(opt.files)
+		{
+			for(var i in opt.files)
+			{
+				if(!opt.files.hasOwnProperty(i))continue;
+				var value = opt.files[i];
+				if(typeof value == "string")
+				{
+					this.appendFile(i, value);
+				}else{
+					this.appendFile(i, value["path"], value["contentType"]);
+				}
+			}
+		}
+		
+		if(opt.forms)
+		{
+			for(var i in opt.forms)
+			{
+				if(!opt.forms.hasOwnProperty(i))continue;
+				this.appendForm(i, opt.forms[i]);
+			}
+		}
+	}
 }
-$httpupload.prototype = new F.exports.http.request();
+$httpupload.create = function(url, opt)
+{
+	return new $httpupload(url, opt);
+};
+$httpupload.prototype = new F.exports.net.http.request();
 $httpupload.fn = $httpupload.prototype;
 $httpupload.fn.appendFile = function(key,value,contenttype){
 	contenttype = contenttype ||"application/octet-stream";
@@ -80,7 +108,7 @@ $httpupload.fn.send = function(url){
 	stream.position=0;
 	this.data = stream;
 	this.header("Content-Length:" + stream.size);
-	F.exports.http.request.prototype.send.call(this);
+	F.exports.net.http.request.prototype.send.call(this);
 	stream.close();
 	stream = null;
 	return this;
@@ -115,4 +143,4 @@ $httpupload.fn.uploadFromClient = function(){
 	stream = null;
 	return this;
 };
-return exports.http.upload = $httpupload;
+return exports.net.http.upload = $httpupload;
