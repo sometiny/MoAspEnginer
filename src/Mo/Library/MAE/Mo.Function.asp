@@ -1044,9 +1044,6 @@ var GLOBAL = this,
 					var chr1, chr2, chr3 = "";
 					var enc1, enc2, enc3, enc4 = "";
 					var i = 0;
-					var base64test = /[^A-Za-z0-9\+\/\=]/g;
-					if (base64test.exec(Str)) {}
-					Str = Str.replace(/[^A-Za-z0-9\+\/\=]/g, "");
 					do {
 						enc1 = base64keyStr_.indexOf(Str.charAt(i++));
 						enc2 = base64keyStr_.indexOf(Str.charAt(i++));
