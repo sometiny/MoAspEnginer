@@ -4,6 +4,36 @@
 ** About: 
 **		support@mae.im
 */
+if(!exports.net)exports.net={};
+if(!exports.net.http)exports.net.http={};
+if(exports.net.http.soap) return exports.net.http.soap;
+
+var $b2s = function(bytSource, Cset){ //ef bb bf,c0 fd
+  var Objstream,c1,c2,c3;
+  var byts;
+  Objstream =Server.CreateObject("ADODB.Stream");
+  Objstream.Type = 1;
+  Objstream.Mode = 3;
+  Objstream.Open();
+  Objstream.Write(bytSource);
+  Objstream.Position = 0;
+  Objstream.Type = 2;
+  Objstream.CharSet = Cset;
+  byts = Objstream.ReadText();
+  Objstream.Close();
+  Objstream = null;
+  return byts;
+};
+
+var $getHttpResponse = function(WS,content){
+	this.Request+=content;
+	WS.send((content===undefined?null:content));
+	this.Response = WS.responseBody;
+	var result="";
+	if(WS.readyState==4) result = $b2s(this.Response,this.Charset);
+	WS = null;
+	return result;
+};
 function $soap(url,namespace){
 	function def(v){
 		if(v==undefined)return "";
@@ -20,7 +50,6 @@ function $soap(url,namespace){
 	this.Parms={};
 	delete def;
 }
-$soap.fn = $soap.prototype;
 $soap.ParmsManager = function(Src){
 	if(Src!=undefined) this.Parms = Src.Parms;
 	else this.Parms={};
@@ -81,7 +110,7 @@ $soap.ParseArgumentsForHttp = function(arg){
 	}
 	return arg;
 };
-$soap.prototype = new $soap.ParmsManager();
+$soap.fn = $soap.prototype = new $soap.ParmsManager();
 $soap.fn.CreateParmsManager=function(){
 	return new $soap.ParmsManager(this);
 };
@@ -126,7 +155,7 @@ $soap.fn.InvokeSOAP12=function(func){
 	WS.open("POST",this.Url,false);
 	WS.setRequestHeader("Content-Length",Envelope.length);
 	WS.setRequestHeader("Content-Type","application/soap+xml; charset=utf-8");
-	return this.GetHttpResponse(WS,Envelope);
+	return $getHttpResponse.call(this,WS,Envelope);
 };
 
 $soap.fn.InvokeSOAP=function(func){
@@ -143,7 +172,7 @@ $soap.fn.InvokeSOAP=function(func){
 	WS.setRequestHeader("Content-Length",Envelope.length);
 	WS.setRequestHeader("Content-Type","text/xml; charset=utf-8");
 	WS.setRequestHeader("SOAPAction","\""+soapAction+"\"");
-	return this.GetHttpResponse(WS,Envelope);
+	return $getHttpResponse.call(this,WS,Envelope);
 };
 
 $soap.fn.InvokeHttpGet=function(){
@@ -158,7 +187,7 @@ $soap.fn.InvokeHttpGet=function(){
 	MyUrl += QString;
 	if(QString=="")MyUrl = MyUrl.substr(0,MyUrl.length-1);
 	WS.open("GET",MyUrl,false);
-	return this.GetHttpResponse(WS,null);
+	return $getHttpResponse.call(this,WS,null);
 };
 
 $soap.fn.InvokeHttpPost=function(){
@@ -172,32 +201,6 @@ $soap.fn.InvokeHttpPost=function(){
 	WS.open("POST",MyUrl,false);
 	WS.setRequestHeader("Content-Length",QString.length);
 	WS.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-	return this.GetHttpResponse(WS,QString);
+	return $getHttpResponse.call(this,WS,QString);
 };
-
-$soap.fn.GetHttpResponse = function(WS,content){
-	this.Request+=content;
-	WS.send((content===undefined?null:content));
-	this.Response = WS.responseBody;
-	var result="";
-	if(WS.readyState==4) result = this.b2s(this.Response,this.Charset);
-	WS = null;
-	return result;
-};
-$soap.fn.b2s = function(bytSource, Cset){ //ef bb bf,c0 fd
-  var Objstream,c1,c2,c3;
-  var byts;
-  Objstream =Server.CreateObject("ADODB.Stream");
-  Objstream.Type = 1;
-  Objstream.Mode = 3;
-  Objstream.Open();
-  Objstream.Write(bytSource);
-  Objstream.Position = 0;
-  Objstream.Type = 2;
-  Objstream.CharSet = Cset;
-  byts = Objstream.ReadText();
-  Objstream.Close();
-  Objstream = null;
-  return byts;
-};
-return exports.soap = $soap;
+return exports.net.http.soap = $soap;

@@ -77,4 +77,22 @@ HomeController.extend("clearcache", function(){
 	Mo.ClearLibraryCache();
 	if(F.server("HTTP_REFERER")!="")F.goto(F.server("HTTP_REFERER")); else F.goto("/");
 });
+
+HomeController.extend("Qrcode",function(){
+	/*todo*/
+	F.require("qrcode");
+	var qr = Exports.qrcode(0,"Q");
+	qr.useBestMaskPattern = true;
+	qr.flush("为新Controller对象扩展一个新方法，对应相应的动作",2);
+});
+HomeController.extend("Soap",function(){
+	/*todo*/
+	F.require("net/http/soap");
+	var soap = new Exports.net.http.soap("http://webservice.webxml.com.cn/WebServices/IpAddressSearchWebService.asmx","http://WebXml.com.cn/")
+	Mo.assign("url",soap.Url);
+	Mo.assign("result",F.encodeHtml(soap.Invoke("getCountryCityByIp","theIpAddress","222.195.158.135")));
+	Mo.assign("request",F.encodeHtml(soap.Request));
+	Mo.assign("comment","直接指定参数请求WebServices");
+	Mo.display("Soap");
+});
 </script>
