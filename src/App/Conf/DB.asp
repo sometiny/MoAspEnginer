@@ -1,6 +1,6 @@
 ﻿<script language="jscript" runat="server">return {
 	"DB_Type": "ACCESS",
-	"DB_Path": "data/GBqcBsFizy.mdb",
+	"DB_Path": "Public/data/GBqcBsFizy.mdb",
 	"DB_Schema": {
 		"Mo_Grade": {
 			"id": {
