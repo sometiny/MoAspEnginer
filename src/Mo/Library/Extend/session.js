@@ -23,21 +23,20 @@ return exports.session = (function(driver){
 	{
 		var timeout = driver.readSession($session.id + ".timeout");
 		if(typeof timeout=="number") $session.timeout = timeout;
-	}
-	var time_start = driver.getStartTimeSpan($session.id);
-	if(typeof time_start == "number")
-	{
-		if(F.timespan() - time_start >$session.timeout){
-			driver.clearSession($session.id);
+		var time_start = driver.getStartTimeSpan($session.id);
+		if(typeof time_start == "number")
+		{
+			if(F.timespan() - time_start >$session.timeout){
+				driver.clearSession($session.id);
+				$session.id = F.random.word(20);
+			}
+		}
+		else
+		{
 			$session.id = F.random.word(20);
 		}
-		driver.writeSession($session.id, F.timespan());
 	}
-	else
-	{
-		$session.id = F.random.word(20);
-		driver.writeSession($session.id, F.timespan());
-	}
+	driver.writeSession($session.id, F.timespan());
 	return $session;
 })((function(){
 	/*session driver, you can use your own driver, such as IO, Database and so on...*/
