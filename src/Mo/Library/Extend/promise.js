@@ -13,7 +13,7 @@ function $promise()
 	this.next = null;
 	this._returnValue = null;
 }
-$promise.doResolve = function(){
+var _doResolve = function(){
 	if(typeof this._resolve == 'function'){
 		var ret = this._resolve.call(this,this._returnValue);
 		if(ret!==undefined)
@@ -28,7 +28,7 @@ $promise.doResolve = function(){
 		}
 	}
 };
-$promise.doReject = function(){
+var _doReject = function(){
 	if(typeof this._reject == 'function'){
 		var ret = this._reject.call(this,this._returnValue);
 		if(ret!==undefined)
@@ -50,7 +50,7 @@ $promise.prototype.resolve = function(data)
 		this.next = this.next || new $promise();
 		this._returnValue = data;
 		this.status = "resolved";
-		$promise.doResolve.call(this);
+		_doResolve.call(this);
 	}
 };
 $promise.prototype.reject = function(data)
@@ -60,7 +60,7 @@ $promise.prototype.reject = function(data)
 		this.next = this.next || new $promise();
 		this._returnValue = data;
 		this.status = "rejected";
-		$promise.doReject.call(this);
+		_doReject.call(this);
 	}
 };
 $promise.prototype.then = function(resolve, reject)
@@ -70,11 +70,11 @@ $promise.prototype.then = function(resolve, reject)
 	this._reject = reject;
 	if(this.status=="resolved")
 	{
-		$promise.doResolve.call(this);
+		_doResolve.call(this);
 	}
 	else if(this.status=="rejected")
 	{
-		$promise.doReject.call(this);
+		_doReject.call(this);
 	}
 	return this.next;
 };
