@@ -1,4 +1,10 @@
-﻿if(exports.promise) return exports.promise;
+﻿/*
+** File: promise.js
+** Usage: promise for JScript
+** About: 
+**		support@mae.im
+*/
+if(exports.promise) return exports.promise;
 function $promise()
 {
 	this.status="pending";

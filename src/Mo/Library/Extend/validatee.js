@@ -96,12 +96,12 @@ $$.fn.between = function(min, max) {
 	return this;
 };
 /****************************************************
-'@DESCRIPTION:	AddRule
+'@DESCRIPTION:	addRule
 '@PARAM:	name [String] : rule name(for form input name). eg: 'name','name,title'
 '@PARAM:	rule [String] : rule value.
 '@PARAM:	msg [String] : error msg.
 '****************************************************/
-$$.fn.AddRule = function(name, rule, msg) {
+$$.fn.addRule = function(name, rule, msg) {
 	if (name === undefined || name == "") return;
 	if (msg === undefined) msg = "";
 	if (rule == "") return;
@@ -175,10 +175,10 @@ $$.fn.rules = function() {
 };
 
 /****************************************************
-'@DESCRIPTION:	Validate post data
-'@RETURN:	[Boolean] if Validate passed, return true, or return false and you can read exception property to see details
+'@DESCRIPTION:	validate post data
+'@RETURN:	[Boolean] if validate passed, return true, or return false and you can read exception property to see details
 '****************************************************/
-$$.fn.Validate = function() {
+$$.fn.validate = function() {
 	this.exception = "";
 	var succeed = true;
 	for (var name in this.settings) {

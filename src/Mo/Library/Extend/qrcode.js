@@ -1,4 +1,3 @@
-<script language="jscript" runat="server">
 //
 //by anlige at www.9fn.net
 //
