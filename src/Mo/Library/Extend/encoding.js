@@ -35,10 +35,10 @@
 **		support@mae.im
 */
 exports.encoding=exports.encoding||(function(){
+	var _SPEC={};
+	_SPEC.S1 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'()";/*for URIComponent*/
+	_SPEC.S2 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'();/?:@&=+$,#";/*for URI*/
 	var $enc={};
-	$enc.SPEC={};
-	$enc.SPEC.S1 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'()";/*for URIComponent*/
-	$enc.SPEC.S2 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'();/?:@&=+$,#";/*for URI*/
 	$enc.wordtobytes = function(u){
 		if(u>0xffffffff)return [];
 		else if(u>0xffffff) {
@@ -84,7 +84,7 @@ exports.encoding=exports.encoding||(function(){
 			c = bytes[i++];
 			if(c<=0x7f){
 				chr = String.fromCharCode(c);
-				if($enc.SPEC[t].indexOf(chr)>=0) ret += chr;
+				if(_SPEC[t].indexOf(chr)>=0) ret += chr;
 				else ret += "%" + exports.encoding.hex.stringify([c]);
 			}else{
 				var hex = c.toString(16);
@@ -94,6 +94,7 @@ exports.encoding=exports.encoding||(function(){
 		}
 		return ret;
 	};
+	$enc.decodeURI = $enc.decodeURIComponent = $enc.decode;
 	return $enc;
 })();
 exports.encoding.hex = exports.encoding.hex || (function(){
