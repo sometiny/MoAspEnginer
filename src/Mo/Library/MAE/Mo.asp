@@ -205,6 +205,14 @@ var IO, JSON, Mo = Mo || (function(){
 		if(G.MO_SHOW_SERVER_ERROR)F.echo(ExceptionManager.debug());
 		Model__.debug();
 	};
+	var _getfunctionParms=function(fn){
+		var _parms = fn.toString().replace(/^function(.*?)\((.*?)\)([\s\S]+)$/,"$2").split(",");
+		for(var i=0;i<_parms.length;i++)
+		{
+			_parms[i] = F.get(_parms[i]);
+		}
+		return _parms;
+	};
 	var G = {};
 
 	M.Initialize = function(cfg){
@@ -571,9 +579,23 @@ var IO, JSON, Mo = Mo || (function(){
 				var MC = F.initialize(this.RealMethod + "Controller");
 				if(MC.__STATUS__===true){
 					if(F.server("REQUEST_METHOD")=="POST" && MC[this.Action+"_Post_"]){
-						MC[this.Action+"_Post_"]();
+						if(G.MO_PARSEACTIONPARMS === true)
+						{
+							MC[this.Action+"_Post_"].apply(MC,_getfunctionParms(MC[this.Action+"_Post_"]));
+						}
+						else
+						{
+							MC[this.Action+"_Post_"]();
+						}
 					}else if(MC[this.Action]){
-						MC[this.Action]();
+						if(G.MO_PARSEACTIONPARMS === true)
+						{
+							MC[this.Action].apply(MC,_getfunctionParms(MC[this.Action]));
+						}
+						else
+						{
+							MC[this.Action]();
+						}
 					}else if(M.templateIsInApp(this.Action) || M.templateIsInCore(this.Action)){
 						M.display(this.Action);
 					}else{
