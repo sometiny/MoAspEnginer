@@ -216,6 +216,7 @@ var IO, JSON, Mo = Mo || (function(){
 	var G = {};
 
 	M.Initialize = function(cfg){
+		if(!cfg || typeof cfg != "object")F.exit("请设置初始配置参数。")
 		cfg = _extend({
 			MO_APP_NAME : "App",
 			MO_APP : "App",
@@ -225,7 +226,6 @@ var IO, JSON, Mo = Mo || (function(){
 		},cfg);
 		this.runtime.start = new Date();
 		Response.Charset = "utf-8";
-		if(!cfg || typeof cfg != "object")F.exit("请设置初始配置参数。")
 		M.Config.Global = cfg;
 		this.Status = "200 OK";
 		_InitializePath(cfg);
@@ -279,12 +279,11 @@ var IO, JSON, Mo = Mo || (function(){
 					}
 				}
 			}
+			M.assign("VERSION",Mo.Version);
+			_start();
 		}catch(ex){
 			ExceptionManager.put(ex,"Mo.Initialize");
 		}
-		M.assign("VERSION",Mo.Version);
-		_start();
-		return;
 	};
 	M.Terminate = function(){
 		_end();
