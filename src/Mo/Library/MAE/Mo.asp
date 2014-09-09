@@ -216,7 +216,7 @@ var IO, JSON, Mo = Mo || (function(){
 	var G = {};
 
 	M.Initialize = function(cfg){
-		if(!cfg || typeof cfg != "object")F.exit("请设置初始配置参数。")
+		if(!cfg || typeof cfg != "object") cfg = {MO_AUTO_CREATE_APP : false}
 		cfg = _extend({
 			MO_APP_NAME : "App",
 			MO_APP : "App",
@@ -252,7 +252,7 @@ var IO, JSON, Mo = Mo || (function(){
 				if(F.string.endWith(file.name,".asp"))F.include(file.path);
 				em.moveNext();
 			}
-			if(!F.exists(G.MO_APP,true)){
+			if(G.MO_AUTO_CREATE_APP!==false && !F.exists(G.MO_APP,true)){
 				F.foreach([
 					"","Controllers","Cache","Cache/Compiled","Cache/Model","Views","Conf","Lang",
 					"Library","Library/Extend","Library/TagLib","Library/PreLib","Library/EndLib","Common"
@@ -284,6 +284,7 @@ var IO, JSON, Mo = Mo || (function(){
 		}catch(ex){
 			ExceptionManager.put(ex,"Mo.Initialize");
 		}
+		return this;
 	};
 	M.Terminate = function(){
 		_end();

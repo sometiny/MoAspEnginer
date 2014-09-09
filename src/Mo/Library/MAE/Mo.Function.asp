@@ -5,6 +5,21 @@
 ** About: 
 **		support@mae.im
 */
+/*
+if(!MO)
+{
+	var MO = {
+		Config:{
+			Global : {
+				MO_SESSION_WITH_SINGLE_TAG :false,
+				MO_APP_NAME : "App",
+				MO_APP : "App/",
+				MO_CORE : "Mo/"
+			}
+		}	
+	};
+}
+*/
 var GLOBAL = this,
 	F = F || (function() {
 		var ws = [
