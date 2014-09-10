@@ -332,7 +332,7 @@ var IO, JSON, Mo = Mo || (function(){
 	};
 	M.ModelCacheSave = function(name,content){
 		if(name == "") return false;
-		return IO.file.saveAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"),content,G.MO_CHARSET);
+		return IO.file.writeAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"),content,G.MO_CHARSET);
 	};
 	M.ModelCacheLoad = function(name){
 		if(name == "") return "";
