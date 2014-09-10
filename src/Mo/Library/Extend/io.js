@@ -367,22 +367,15 @@ $io.directory = $io.directory || (function()
 		}
 		try
 		{
-			var folder = $io.fso.getFolder(path);
-			var files = folder.files;
-			var fc = new Enumerator(files);
-			for (;!fc.atEnd(); fc.moveNext())
-			{
-				if(fc.item().name!=".mae")
+			$dir.files(path, function(f){
+				if(f.name!=".mae")
 				{
-					fc.item().Delete();
+					f.Delete();
 				}
-			}
-			files = folder.subfolders;
-			fc = new Enumerator(files);
-			for (;!fc.atEnd(); fc.moveNext())
-			{
-				fc.item().Delete();
-			}
+			});
+			$dir.directories(path, function(f){
+				f.Delete();
+			});
 			if(includeSelf)folder.Delete();
 			return true;	
 		}
@@ -392,7 +385,7 @@ $io.directory = $io.directory || (function()
 			return false;	
 		}
 	};
-	$dir.files = function(path)
+	$dir.files = function(path,callback)
 	{
 		if(!$dir.exists(path))
 		{
@@ -401,21 +394,25 @@ $io.directory = $io.directory || (function()
 		var files=[];
 		path = F.mappath(path);
 		var fc = new Enumerator($io.fso.getFolder(path).files);
+		var isFunc = (typeof callback == "function");
 		for (;!fc.atEnd(); fc.moveNext())
 		{
-			files.push(fc.item().path);
+			if(isFunc) callback(fc.item());
+			else files.push(fc.item().path);
 		}
 		return files;
 	};
-	$dir.directories = function(path)
+	$dir.directories = function(path,callback)
 	{
 		if(!$dir.exists(path)) return [];
 		var files=[];
 		path = F.mappath(path);
 		var fc = new Enumerator($io.fso.getFolder(path).subfolders);
+		var isFunc = (typeof callback == "function");
 		for (;!fc.atEnd(); fc.moveNext())
 		{
-			files.push(fc.item().path);
+			if(isFunc) callback(fc.item());
+			else files.push(fc.item().path);
 		}
 		return files;
 	};

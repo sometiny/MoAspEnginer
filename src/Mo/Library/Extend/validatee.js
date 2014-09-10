@@ -4,7 +4,7 @@
 ** About: 
 **		support@mae.im
 */
-function $$() {
+function $validatee() {
 	this.settings = {};
 	this.exception = "";
 	this.quick = {
@@ -17,14 +17,14 @@ function $$() {
 	};
 	this.currentnames = [];
 }
-$$.fn = $$.prototype;
-$$.fn.set = function(key, value) {
+$validatee.fn = $validatee.prototype;
+$validatee.fn.set = function(key, value) {
 	F.foreach(this.currentnames, function(i, v, _this) {
 		_this.settings[v][key] = value;
 		_this.settings[v]["___rules"] += key + ":" + value + ";";
 	}, this);
 }
-$$.fn.name = function(name) {
+$validatee.fn.name = function(name) {
 	this.currentnames = name.split(",");
 	for (var i = 0; i < this.currentnames.length; i++) {
 		if (!this.settings.hasOwnProperty(this.currentnames[i])) this.settings[this.currentnames[i]] = {
@@ -35,61 +35,61 @@ $$.fn.name = function(name) {
 	}
 	return this;
 };
-$$.fn["default"] = function(value) {
+$validatee.fn["default"] = function(value) {
 	this.set("default", value);
 	return this;
 };
-$$.fn.required = function(value) {
+$validatee.fn.required = function(value) {
 	this.set("required", value !== false ? "true" : "false");
 	return this;
 };
-$$.fn.minLength = function(value) {
+$validatee.fn.minLength = function(value) {
 	if (isNaN(value)) return this;
 	this.set("min-length", value);
 	return this;
 };
-$$.fn.maxLength = function(value) {
+$validatee.fn.maxLength = function(value) {
 	if (isNaN(value)) return this;
 	this.set("max-length", value);
 	return this;
 };
-$$.fn.min = function(value) {
+$validatee.fn.min = function(value) {
 	if (isNaN(value)) return this;
 	this.set("min", value);
 	return this;
 };
-$$.fn.max = function(value) {
+$validatee.fn.max = function(value) {
 	if (isNaN(value)) return this;
 	this.set("max", value);
 	return this;
 };
-$$.fn.exp = function(value) {
+$validatee.fn.exp = function(value) {
 	if (value === undefined) return this;
 	this.set("___exp", value);
 	return this;
 };
-$$.fn.msg = function(value) {
+$validatee.fn.msg = function(value) {
 	if (value === undefined) return this;
 	this.set("___msg", value);
 	return this;
 };
-$$.fn.equal = function(value) {
+$validatee.fn.equal = function(value) {
 	if (value === undefined) return this;
 	this.set("equal", value);
 	return this;
 };
-$$.fn.numeric = function(value) {
+$validatee.fn.numeric = function(value) {
 	if (value === undefined) return this;
 	this.set("numeric", value !== false);
 	return this;
 };
-$$.fn.length = function(value) {
+$validatee.fn.length = function(value) {
 	if (value === undefined) return this;
 	if (isNaN(value)) return this;
 	this.set("length", value);
 	return this;
 };
-$$.fn.between = function(min, max) {
+$validatee.fn.between = function(min, max) {
 	if (min == undefined || max == undefined || isNaN(min) || isNaN(max) || min > max) return this;
 	this.set("min", min);
 	this.set("max", max);
@@ -101,7 +101,7 @@ $$.fn.between = function(min, max) {
 '@PARAM:	rule [String] : rule value.
 '@PARAM:	msg [String] : error msg.
 '****************************************************/
-$$.fn.addRule = function(name, rule, msg) {
+$validatee.fn.addRule = function(name, rule, msg) {
 	if (name === undefined || name == "") return;
 	if (msg === undefined) msg = "";
 	if (rule == "") return;
@@ -161,7 +161,7 @@ $$.fn.addRule = function(name, rule, msg) {
 '@DESCRIPTION:	display all rules
 '@RETURN:	[String] rules string
 '****************************************************/
-$$.fn.rules = function() {
+$validatee.fn.rules = function() {
 	var returnValue = "<pre>";
 	for (var i in this.settings) {
 		if (!this.settings.hasOwnProperty(i)) continue;
@@ -178,7 +178,7 @@ $$.fn.rules = function() {
 '@DESCRIPTION:	validate post data
 '@RETURN:	[Boolean] if validate passed, return true, or return false and you can read exception property to see details
 '****************************************************/
-$$.fn.validate = function() {
+$validatee.fn.validate = function() {
 	this.exception = "";
 	var succeed = true;
 	for (var name in this.settings) {
@@ -277,4 +277,4 @@ $$.fn.validate = function() {
 	}
 	return succeed;
 };
-return exports.validatee = $$;
+return exports.validatee = $validatee;
