@@ -37,20 +37,6 @@ var IO, JSON, Mo = Mo || (function(){
 		}
 		return src;
 	};
-
-	var _LoadLibrary = function( path, library, cls){
-		try{
-			path = F.mappath(path);
-			var ret = F.string.fromFile(path);
-			ret = F.string.replace(ret,/^(\s*)<s(.+?)>(\s*)/i,"");
-			ret = F.string.replace(ret,/(\s*)<\/script>(\s*)$/igm,"");
-			if(!F.execute.call(path,ret,"Mo" + library + cls))return false;
-			return true;
-		}catch(ex){
-			ExceptionManager.put(ex, "_LoadLibrary([path], \"" + library + "\", \"" + cls + "\")");
-			return false;
-		}
-	};
 	
 	var _RightCopy = function(src,target){
 		var i = 0;
@@ -246,12 +232,9 @@ var IO, JSON, Mo = Mo || (function(){
 		}
 		if(G.MO_LOAD_VBSHELPER)M.loadVBSHelper();
 		try{
-			var em = new Enumerator(F.fso.getfolder(F.mappath(G.MO_CORE + "Common")).files);
-			while(!em.atEnd()){
-				var file = em.item();
-				if(F.string.endWith(file.name,".asp"))F.include(file.path);
-				em.moveNext();
-			}
+			IO.directory.files(G.MO_CORE + "Common",function(file){
+				if(F.string.endWith(file.name,".asp")) F.include(file.path);
+			});
 			if(G.MO_AUTO_CREATE_APP!==false && !F.exists(G.MO_APP,true)){
 				F.foreach([
 					"","Controllers","Cache","Cache/Compiled","Cache/Model","Views","Conf","Lang",
@@ -342,17 +325,6 @@ var IO, JSON, Mo = Mo || (function(){
 			}
 		})(G,M);
 		return M;
-	};
-	M.use = function(lib){
-		var libinfo=_parseLibraryPath(lib);
-		if(!this.Librarys.hasOwnProperty(lib)){
-			if(libinfo[0]!=""){
-				if(_LoadLibrary(libinfo[0],libinfo[2],libinfo[3]))this.Librarys[lib]="jscript";
-			}else{
-				ExceptionManager.put(1,"Mo.use(lib)","类库'" + lib + "'不存在。");
-			}
-		}
-		return [libinfo[2],libinfo[3],libinfo[1]];
 	};
 	M.ModelCacheExists = function(name){
 		if(name == "") return false;
