@@ -200,7 +200,7 @@ var IO, JSON, Mo = Mo || (function(){
 		return _parms;
 	};
 	var G = {};
-
+	M.parseLibraryPath = _parseLibraryPath;
 	M.Initialize = function(cfg){
 		if(!cfg || typeof cfg != "object") cfg = {MO_AUTO_CREATE_APP : false}
 		cfg = _extend({
@@ -343,10 +343,10 @@ var IO, JSON, Mo = Mo || (function(){
 		return IO.file.del(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"));
 	};
 	M.ModelCacheClear = function(){
-		return IO.directory.clear(F.mappath(G.MO_APP + "Cache/Model"));
+		return IO.directory.clear(F.mappath(G.MO_APP + "Cache/Model"),function(f,isfile){if(isfile && f.name==".mae")return false;});
 	};
 	M.ClearCompiledCache = function(){
-		return IO.directory.clear(F.mappath(G.MO_APP + "Cache/Compiled"));
+		return IO.directory.clear(F.mappath(G.MO_APP + "Cache/Compiled"),function(f,isfile){if(isfile && f.name==".mae")return false;});
 	}
 	M.ClearLibraryCache = function(){
 		return F.cache.clear(G.MO_APP_NAME + ".lib.");

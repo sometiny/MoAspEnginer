@@ -357,10 +357,10 @@ $io.directory = $io.directory || (function()
 		}
 		return $io.fso.GetParentFolderName(path);
 	};
-	$dir.clear = function(path, includeSelf)
+	$dir.clear = function(path, filter)
 	{
 		path = F.mappath(path);
-		includeSelf = includeSelf===true;
+		var isFunc = (typeof filter == "function");
 		if(!$dir.exists(path))
 		{
 			return false;
@@ -368,15 +368,19 @@ $io.directory = $io.directory || (function()
 		try
 		{
 			$dir.files(path, function(f){
-				if(f.name!=".mae")
-				{
+				if(isFunc){
+					if(filter(f,true)!==false)f.Delete();
+				}else{
 					f.Delete();
 				}
 			});
 			$dir.directories(path, function(f){
-				f.Delete();
+				if(isFunc){
+					if(filter(f,false)!==false)f.Delete();
+				}else{
+					f.Delete();
+				}
 			});
-			if(includeSelf)folder.Delete();
 			return true;	
 		}
 		catch(ex)
