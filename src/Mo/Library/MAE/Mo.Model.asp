@@ -208,8 +208,14 @@ __Model__.prototype.cache = function(name){
 	return this;
 };
 
-__Model__.prototype.select = function(fields){
-	this.fields = fields || "*";
+__Model__.prototype.field = function(){
+	var _fields="";
+	for(var i=0;i<arguments.length;i++){
+		_fields += arguments[i] + ",";
+	}
+	if(_fields!="")_fields=_fields.substr(0,_fields.length-1);
+	if(_fields=="")_fields="*";
+	this.fields = _fields;
 	return this;
 };
 
@@ -370,6 +376,15 @@ __Model__.prototype.exec = function(manager){
 	return this;
 }
 
+__Model__.prototype.select = function(callback,enablePromise){
+	if(F.exports.promise && (enablePromise===true || callback===true)){
+		var p= new F.exports.promise();
+		p.resolve(this.query().fetch());
+		return p;
+	}
+	if(typeof callback == "function") return this.query().fetch().each(callback);
+	return this.query().fetch();
+};
 __Model__.prototype.query = function(){
 	var fp = 0;
 	this.sql = "";
@@ -570,30 +585,32 @@ __Model__.prototype.dispose = function(){
 };
 
 __Model__.prototype.parseData = function(table){
-	var fields = [],values = [],update = [];
+	var fields = [],values = [],update = [], schema = null, fieldsList = ((this.fields == "" || this.fields == "*") ? "" : ("," + this.fields + ","));
 	var cmd = null;
-	if(this.base.useCommandForUpdateOrInsert){
+	if(this.base.useCommandForUpdateOrInsert && this.base.cfg["DB_Schema"] && this.base.cfg["DB_Schema"][this.tableWithNoSplitChar]) 
+	{
 		cmd = this.createCommandManager("",ModelHelper.Enums.CommandType.TEXT);
+		schema = this.base.cfg["DB_Schema"][this.tableWithNoSplitChar];
 	}
 	for(var i in table){
 		if(!table.hasOwnProperty(i))continue;
-		if(table[i]["value"] != undefined){
-			fields.push(this.base.splitChars[0]+i+this.base.splitChars[1]);
-			var v = table[i]["value"];
-			if(this.base.useCommandForUpdateOrInsert && this.base.cfg["DB_Schema"]){
-				values.push("?");
-				update.push(this.base.splitChars[0]+i+this.base.splitChars[1] + "=?");
-				var parm = cmd.addParm("@"+i,v);
-				var tableschema = this.base.cfg["DB_Schema"][this.tableWithNoSplitChar][i];
-				parm.Type = tableschema["DATA_TYPE"];
-				if(tableschema["NUMERIC_PRECISION"] != null)parm.Precision = tableschema["NUMERIC_PRECISION"];
-				if(tableschema["CHARACTER_MAXIMUM_LENGTH"] != null)parm.Size = tableschema["CHARACTER_MAXIMUM_LENGTH"];
-				if(tableschema["NUMERIC_SCALE"] != null)parm.Scale = tableschema["NUMERIC_SCALE"];
-			}else{
-				if(table[i]["type"] != "exp" && (typeof table[i]["value"] == "string")) v = ("'" + table[i]["value"].replace(/\'/igm,"''") + "'").replace(/\0/ig,"");
-				values.push(v);
-				update.push(this.base.splitChars[0]+i+this.base.splitChars[1]+"=" + v);
-			}
+		if(table[i]["value"] === undefined)continue;
+		if(fieldsList!="" && fieldsList.indexOf("," + i + ",")<0) continue;
+		fields.push(this.base.splitChars[0]+i+this.base.splitChars[1]);
+		var v = table[i]["value"];
+		if(cmd != null){
+			values.push("?");
+			update.push(this.base.splitChars[0]+i+this.base.splitChars[1] + "=?");
+			var parm = cmd.addParm("@"+i,v);
+			var tableschema = schema[i];
+			parm.Type = tableschema["DATA_TYPE"];
+			if(tableschema["NUMERIC_PRECISION"] != null)parm.Precision = tableschema["NUMERIC_PRECISION"];
+			if(tableschema["CHARACTER_MAXIMUM_LENGTH"] != null)parm.Size = tableschema["CHARACTER_MAXIMUM_LENGTH"];
+			if(tableschema["NUMERIC_SCALE"] != null)parm.Scale = tableschema["NUMERIC_SCALE"];
+		}else{
+			if(table[i]["type"] != "exp" && (typeof table[i]["value"] == "string")) v = ("'" + table[i]["value"].replace(/\'/igm,"''") + "'").replace(/\0/ig,"");
+			values.push(v);
+			update.push(this.base.splitChars[0]+i+this.base.splitChars[1]+"=" + v);
 		}
 	}
 	return [fields.join(","),values.join(","),update.join(","),cmd];
