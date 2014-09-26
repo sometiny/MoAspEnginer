@@ -133,7 +133,16 @@ Model__.connect = function(cfg){
 	}
 	return false;
 };
-
+Model__.execute = function(sql,cfg){
+	cfg = cfg || Model__.defaultDBConf;
+	if(!Model__.connect(cfg)) return -1;
+	return Model__.RecordsAffected(Model__.getConnection(cfg),sql);
+};
+Model__.executeQuery = function(sql,cfg){
+	cfg = cfg || Model__.defaultDBConf;
+	if(!Model__.connect(cfg)) return;
+	return new DataTable(Model__.getConnection(cfg).execute(sql));
+};
 Model__.RecordsAffected = function(conn,sqlstring){
 	conn.execute(sqlstring);
 	return -1;
@@ -376,6 +385,17 @@ __Model__.prototype.exec = function(manager){
 	return this;
 }
 
+__Model__.prototype.find = function(Id){
+	if(!isNaN(Id))
+	{
+		return this.where(this.pk + " = " + Id).select().read();
+	}
+	else if(arguments.length>0)
+	{
+		return __Model__.prototype.where.apply(this,arguments).select().read();
+	}
+	return null;
+};
 __Model__.prototype.select = function(callback,enablePromise){
 	if(F.exports.promise && (enablePromise===true || callback===true)){
 		var p= new F.exports.promise();
