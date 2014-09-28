@@ -1367,6 +1367,7 @@ var GLOBAL = this,
 		$f.foreach(["int", "dbl", "bool"], function(i, v) {
 			$f.all[v] = function(key, default_, islist) {
 				if ($f.get.exists(key)) return $f.get[v](key, default_, islist);
+				postinit__();
 				if ($f.post.exists(key)) return $f.post[v](key, default_, islist);
 				return default_ || (v == "bool" ? false : 0);
 			};
@@ -1400,6 +1401,7 @@ var GLOBAL = this,
 			return get__[key] != undefined
 		};
 		$f.all.exists = function(key) {
+			postinit__();
 			return $f.get.exists(key) || $f.post.exists(key);
 		};
 		$f.session.exists = function(key) {
@@ -1476,12 +1478,14 @@ var GLOBAL = this,
 			return $f.object.keys(get__);
 		};
 		$f.post.keys = function() {
+			postinit__();
 			return $f.object.keys(post__);
 		};
 		$f.get.values = function() {
 			return $f.object.values(get__);
 		};
 		$f.post.values = function() {
+			postinit__();
 			return $f.object.values(post__);
 		};
 		$f.get.fromURIString = function(src) {
@@ -1505,6 +1509,7 @@ var GLOBAL = this,
 			return $f.object.toURIString(get__, charset || "utf-8");
 		};
 		$f.post.toURIString = function(charset) {
+			postinit__();
 			return $f.object.toURIString(post__, charset || "utf-8");
 		};
 		$f.server.toURIString = function(charset) {
@@ -1526,6 +1531,7 @@ var GLOBAL = this,
 			get__ = $f.object.sort(get__, asc);
 		};
 		$f.post.sort = function(asc) {
+			postinit__();
 			post__ = $f.object.sort(post__, asc);
 		};
 		$f.activex.connection = function() {
