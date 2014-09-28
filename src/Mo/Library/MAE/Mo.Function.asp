@@ -865,14 +865,14 @@ var GLOBAL = this,
 			}
 			return src;
 		};
-		$f.string.startWith = function(src, opt) {
+		$f.string.startWith = $f.string.startsWith = function(src, opt) {
 			if (src == "") return false;
 			if (opt === undefined) return false;
 			if (opt.length > src) return false;
 			if (src.substr(0, opt.length) == opt) return true;
 			return false;
 		};
-		$f.string.endWith = function(src, opt) {
+		$f.string.endWith = $f.string.endsWith = function(src, opt) {
 			if (src == "") return false;
 			if (opt === undefined) return false;
 			if (opt.length > src) return false;
@@ -926,14 +926,26 @@ var GLOBAL = this,
 			}
 			return src.replace(exp, replacement);
 		};
-		$f.string.matches = function(src, exp, option) {
+		$f.string.matches = function(src, exp, option,fn) {
+			if(typeof option=="function")
+			{
+				fn = option;
+				option = ""; 
+			}
 			exp = $f.string.exp_(exp, option);
 			if (exp == null) return null;
 			if (!exp.global) return exp.exec(src);
 			var ret = [],
 				result = exp.exec(src);
 			while (result) {
-				ret.push(result);
+				if(typeof fn=="function")
+				{
+					fn(result);
+				}
+				else
+				{
+					ret.push(result);
+				}
 				result = exp.exec(src);
 			}
 			return ret;

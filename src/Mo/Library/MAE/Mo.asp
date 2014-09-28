@@ -66,14 +66,12 @@ var IO, JSON, Mo = Mo || (function(){
 		if(!F.exists(path)) path = G.MO_CORE + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
 		path = F.mappath(path);
 		if(!F.exists(path))return;
-		var tempStr = F.string.fromFile(path,G.MO_CHARSET);
+		var tempStr = IO.file.readAllText(path,G.MO_CHARSET);
 		var regexp = new RegExp("<include file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />","igm");
-		var Matches = F.string.matches(tempStr,regexp);
-		while(Matches.length > 0){
-			var Match = Matches.pop();
+		var Matches = F.string.matches(tempStr,regexp, function(Match){
 			templatelist2 = _RightCopy(templatelist,Match[1].split(":"));
 			tempStr = F.replace(tempStr,Match[0], _LoadTemplate(templatelist2.join(":")));
-		}
+		});
 		return tempStr;
 	};
 
@@ -109,7 +107,7 @@ var IO, JSON, Mo = Mo || (function(){
 		if(M.Librarys["Controller_" + controller] == "jscript")return true;
 		try{
 			path = F.mappath(path);
-			var ret = F.string.fromFile(path,G.MO_CHARSET);
+			var ret = IO.file.readAllText(path,G.MO_CHARSET);
 			ret = F.string.replace(ret,/(^(\s+)|(\s+)$)/ig,"");
 			ret = F.string.replace(ret,"^<s" + "cript(.+?)>(\s*)","ig","");
 			ret = F.string.replace(ret,/(\s*)<\/script>(\s*)$/ig,"");
@@ -519,7 +517,7 @@ var IO, JSON, Mo = Mo || (function(){
 		if(G.MO_CACHE){
 			this.CacheFileName = F.md5(F.server("URL") + F.get.toURIString() + "");
 			if(F.exists(G.MO_CACHE_DIR + this.CacheFileName + ".cache")){
-				Response.Write(F.string.fromFile(F.mappath(G.MO_CACHE_DIR + this.CacheFileName + ".cache"),G.MO_CHARSET));
+				Response.Write(IO.file.readAllText(F.mappath(G.MO_CACHE_DIR + this.CacheFileName + ".cache"),G.MO_CHARSET));
 				return;
 			}
 		}
