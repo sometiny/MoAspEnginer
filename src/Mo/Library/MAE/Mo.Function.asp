@@ -940,7 +940,7 @@ var GLOBAL = this,
 			while (result) {
 				if(typeof fn=="function")
 				{
-					fn(result);
+					fn.apply(result,result);
 				}
 				else
 				{
