@@ -904,10 +904,10 @@ var GLOBAL = this,
 			return $f.format.apply(F, arguments);
 		};
 		$f.string.email = function(str) {
-			return $f.string.exp(str, "/^([\\w\\.\\-]+)@([\\w\\.\\-]+)$/");
+			return $f.string.exp(str, /^([\w\.\-]+)@([\w\.\-]+)$/);
 		};
 		$f.string.url = function(str) {
-			return $f.string.exp(str, "/^http(s)?\\:\\/\\/(.+?)$/i");
+			return $f.string.exp(str, /^http(s)?\:\/\/(.+?)$/i);
 		};
 		$f.string.test = function(str, exp, option) {
 			exp = $f.string.exp_(exp, option);
