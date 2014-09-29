@@ -68,9 +68,9 @@ var IO, JSON, Mo = Mo || (function(){
 		if(!F.exists(path))return;
 		var tempStr = IO.file.readAllText(path,G.MO_CHARSET);
 		var regexp = new RegExp("<include file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />","igm");
-		var Matches = F.string.matches(tempStr,regexp, function(Match){
-			templatelist2 = _RightCopy(templatelist,Match[1].split(":"));
-			tempStr = F.replace(tempStr,Match[0], _LoadTemplate(templatelist2.join(":")));
+		var Matches = F.string.matches(tempStr,regexp, function($0,$1){
+			templatelist2 = _RightCopy(templatelist,$1.split(":"));
+			tempStr = F.replace(tempStr,$0, _LoadTemplate(templatelist2.join(":")));
 		});
 		return tempStr;
 	};
