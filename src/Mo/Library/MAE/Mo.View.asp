@@ -5,7 +5,6 @@
 ** About: 
 **		support@mae.im
 */
-
 var readAttrs__ = function(src) {
 		if (typeof src != "string") return {};
 		if (!src) return {};
@@ -29,17 +28,12 @@ function MoAspEnginerView(content) {
 	this.setContent(content).parse();
 }
 MoAspEnginerView.prototype.setContent = function(content) {
-	var matches = F.string.matches(content, /<literal>([\s\S]*)<\/literal>/ig);
-	if (matches) {
-		var match = null,
-			id;
-		while (matches.length > 0) {
-			match = matches.pop();
-			id = this.getRndid();
-			this.mvarDicts[id] = match[1];
-			content = content.replace(match[0], "<literal id=\"" + id + "\"/>");
-		}
-	}
+	var this_= this;
+	F.string.matches(content, /<literal>([\s\S]*)<\/literal>/ig,function($0,$1){
+		var id = this_.getRndid();
+		this_.mvarDicts[id] = $1;
+		content = content.replace($0, "<literal id=\"" + id + "\"/>");
+	});
 	content = content.replace(/(\s*)\<\!\-\-\/\/(.*?)\-\-\>(\s*)/ig, "");
 	content = content.replace(/(\s*)\<\!\-\-\/\*([\s\S]*?)\*\/\-\-\>(\s*)/ig, "");
 	content = F.string.replace(content, /<switch(.+?)>(\s*)<case/igm, "<switch$1><case");
@@ -107,15 +101,12 @@ MoAspEnginerView.prototype.parse = function() {
 
 
 MoAspEnginerView.prototype.parseMoAsAsp = function() {
-	var m_, ms_, id;
-	var regexp = /\{\?MoAsp([\s\S]*?)MoAsp\?\}/igm;
-	var ms_ = F.string.matches(this.Content, regexp);
-	while (ms_.length > 0) {
-		m_ = ms_.pop();
-		id = this.getRndid();
-		this.mvarDicts[id] = m_[0];
-		this.Content = F.replace(this.Content, m_[0], "\r\n{?MoAsp" + id + "MoAsp?}\r\n");
-	}
+	var this_ = this;
+	F.string.matches(this.Content, /\{\?MoAsp([\s\S]*?)MoAsp\?\}/igm, function($0){
+		var id = this_.getRndid();
+		this_.mvarDicts[id] = $0;
+		this_.Content = F.replace(this_.Content, $0, "\r\n{?MoAsp" + id + "MoAsp?}\r\n");
+	});
 	this.Content = this.Content.replace(/^--movbcrlf--$/igm, "");
 	this.Content = this.Content.replace(/(\r\n){2,}/igm, "\r\n");
 	//F.echo(this.Content,true);
@@ -124,25 +115,15 @@ MoAspEnginerView.prototype.parseMoAsAsp = function() {
 	}
 	this.Content = this.Content.replace(/(^(\s+)|(\s+)$)/ig, "");
 	this.Content = this.Content.replace(/\\/igm, "\\\\");
-	var matches = F.string.matches(this.Content, /(\s*)<literal id\=\"(\w+?)\"\/>(\s*)/ig);
-	if (matches) {
-		var match = null,
-			id;
-		while (matches.length > 0) {
-			match = matches.pop();
-			this.Content = this.Content.replace(match[0], this.mvarDicts[match[2]].replace(/\r/ig, "\\r").replace(/\n/ig, "\\n"));
-		}
-	}
+	F.string.matches(this.Content, /(\s*)<literal id\=\"(\w+?)\"\/>(\s*)/ig,function($0,$1,$2){
+		this_.Content = this_.Content.replace($0, this_.mvarDicts[$2].replace(/\r/ig, "\\r").replace(/\n/ig, "\\n"));
+	});
 	this.Content = this.Content.replace(/\"/igm, "\\\"");
 	this.Content = this.Content.replace(/\t/igm, "\\t");
 	this.Content = this.Content.replace(/^(.+?)$/igm, "__Mo__.Echo(\"$1\");");
-	regexp = /__Mo__\.Echo\(\"\{\?MoAsp([\w]+?)MoAsp\?\}\"\);/igm;
-	ms_ = F.string.matches(this.Content, regexp);
-	while (ms_.length > 0) {
-		m_ = ms_.pop();
-		id = m_[1];
-		this.Content = F.replace(this.Content, m_[0], this.mvarDicts[id]);
-	}
+	F.string.matches(this.Content, /__Mo__\.Echo\(\"\{\?MoAsp([\w]+?)MoAsp\?\}\"\);/igm,function($0,$1){
+		this_.Content = F.replace(this_.Content, $0, this_.mvarDicts[$1]);
+	});
 	this.Content = F.string.replace(this.Content, /\{\?MoAsp /igm, "");
 	this.Content = F.string.replace(this.Content, /(\s*)MoAsp\?\}/igm, "");
 };
@@ -177,50 +158,40 @@ MoAspEnginerView.prototype.doSomethingToAsp = function() {
 //@DESCRIPTION:	PreCombine the template with global values,such as "{$$MO_CORE}"
 //****************************************************
 MoAspEnginerView.prototype.parsePreCombine = function() {
-	var match, matches, value;
-	var regexp = /\{\$\$(\w+)\}/igm;
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		match = matches.pop();
-		eval("value=Mo.Config.Global[\"" + match[1] + "\"]");
-		this.Content = F.replace(this.Content, match[0], value)
-	}
+	var this_ = this;
+	F.string.matches(this.Content, /\{\$\$(\w+)\}/igm, function(){
+		this_.Content = F.replace(this_.Content, this[0], Mo.Config.Global[this[1]])
+	});
 }
 
 //****************************************************
 //@DESCRIPTION:	parse page tag. i will call function 'CreatePageList' to create page string,if you do not define function property
 //****************************************************
 MoAspEnginerView.prototype.parsePage = function() {
-	var matches, match, loopname, vbscript, pageurl, func, attrs, nloopname
-	var regexp = /\<page ([\s\S]+?)>([\s\S]*?)\<\/page>/igm;
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		match = matches.pop();
-		attrs = readAttrs__(match[1]);
+	var this_ = this;
+	F.string.matches(this.Content, /\<page ([\s\S]+?)>([\s\S]*?)\<\/page>/igm,function($0,$1,$2){
+		var attrs = readAttrs__($1);
 		if (attrs.getter__("for") != "") {
-			this.mvarDicts["EOF_OF_" + attrs.getter__("for")] = match[2];
-			this.Content = F.replace(this.Content, match.value, "<page " + match[1] + "/>")
+			this.mvarDicts["EOF_OF_" + attrs.getter__("for")] = $2;
+			this.Content = F.replace(this.Content, $0, "<page " + $1 + "/>")
 		}
-	}
-	regexp = /\<page ([\s\S]+?)\/>/igm;
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		match = matches.pop();
-		attrs = readAttrs__(match[1]);
+	},this);
+	F.string.matches(this.Content, /\<page ([\s\S]+?)\/>/igm,function($0,$1,$2){
+		var attrs = readAttrs__($1);
 		if (attrs.getter__("for") != "") {
-			loopname = attrs.getter__("for");
-			nloopname = loopname;
-			pageurl = attrs.getter__("url");
-			func = attrs.getter__("function");
+			var loopname = attrs.getter__("for"),
+				nloopname = loopname,
+				pageurl = attrs.getter__("url"),
+				func = attrs.getter__("function");
 			if (func == "") func = "CreatePageList";
 			if (this.loops.indexOf(";" + loopname + ";") >= 0) {
 				if (!G.MO_COMPILE_STRICT) nloopname = "D__" + loopname;
-				this.Content = F.replace(this.Content, match[0], "{?MoAsp if(Mo.Assigns.hasOwnProperty(\"" + loopname + "\")){ MoAsp?}{?MoAsp __Mo__.Echo(" + func + "(\"" + pageurl + "\"," + nloopname + ".recordcount," + nloopname + ".pagesize," + nloopname + ".currentpage)); MoAsp?}{?MoAsp } MoAsp?}");
+				this.Content = F.replace(this.Content, $0, "{?MoAsp if(Mo.Assigns.hasOwnProperty(\"" + loopname + "\")){ MoAsp?}{?MoAsp __Mo__.Echo(" + func + "(\"" + pageurl + "\"," + nloopname + ".recordcount," + nloopname + ".pagesize," + nloopname + ".currentpage)); MoAsp?}{?MoAsp } MoAsp?}");
 			} else {
-				this.Content = F.replace(this.Content, match[0], "");
+				this.Content = F.replace(this.Content, $0, "");
 			}
 		}
-	}
+	},this);
 }
 //****************************************************
 //@DESCRIPTION:	get all loop tags.
@@ -232,31 +203,23 @@ MoAspEnginerView.prototype.getLoops = function(name) {
 		}
 		return;
 	}
-	var matches, match, loopname, attrs
-	var regexp = new RegExp("\\<" + name + " ([\\s\\S]+?)\\>", "igm");
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		match = matches.pop();
-		attrs = readAttrs__(match[1]);
+	F.string.matches(this.Content, new RegExp("\\<" + name + " ([\\s\\S]+?)\\>", "igm"),function($0,$1){
+		var attrs = readAttrs__($1);
 		if (attrs.getter__("name") != "") this.loops += attrs.getter__("name") + ";"
-	}
+	},this);
 }
 
 //****************************************************
 //@DESCRIPTION:	parse loop tag. All looped data is an instance of list(DataTable) which is defined in 'Mo.Extend.asp'
 //****************************************************
 MoAspEnginerView.prototype.parseLoop = function() {
-	var matches, match, loopname, vbscript, attrs, varname;
-	var regexp = /\<loop ([\s\S]+?)\>/igm;
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		match = matches.pop();
-		attrs = readAttrs__(match[1]);
+	F.string.matches(this.Content, /\<loop ([\s\S]+?)\>/igm,function($0,$1){
+		var attrs = readAttrs__($1);
 		if (attrs.getter__("name") != "") {
-			loopname = attrs.getter__("name");
-			varname = loopname;
+			var loopname = attrs.getter__("name");
+			var varname = loopname;
 			if (!G.MO_COMPILE_STRICT) varname = "D__" + loopname;
-			vbscript = "{?MoAsp ";
+			var vbscript = "{?MoAsp ";
 			if (!G.MO_COMPILE_STRICT) {
 				vbscript += "if(Mo.Assigns.hasOwnProperty(\"" + loopname + "\")){\r\n"
 				vbscript += varname + " = Mo.Assigns[\"" + loopname + "\"];\r\n";
@@ -270,94 +233,69 @@ MoAspEnginerView.prototype.parseLoop = function() {
 			vbscript += "K__" + loopname + "=" + varname + ".pagesize *(" + varname + ".currentpage-1);\r\n";
 			//vbscript += "while(!" + varname + ".eof()){\r\nK__" + loopname + "=K__" + loopname + "+1;\r\nC__" + loopname + " =  " + varname + ".read(); MoAsp?}"
 			vbscript += varname + ".each(function(C__" + loopname + "){\r\nK__" + loopname + "=K__" + loopname + "+1;\r\n MoAsp?}"
-			this.Content = F.replace(this.Content, match[0], vbscript);
+			this.Content = F.replace(this.Content, $0, vbscript);
 			this.Content = F.replace(this.Content, "{$" + loopname + ".Key__}", "{?MoAsp __Mo__.Echo(K__" + loopname + "); MoAsp?}");
-			var m_, ms_;
-			var nregexp = new RegExp("\\{\\$" + loopname + "\\.(.+?)\\}", "igm");
-			ms_ = F.string.matches(this.Content, nregexp);
-			while (ms_.length > 0) {
-				m_ = ms_.pop();
-				var k = m_[1],
+			F.string.matches(this.Content, new RegExp("\\{\\$" + loopname + "\\.(.+?)\\}", "igm"),function($0,$1){
+				var k = $1,
 					v;
 				if (k.indexOf(":") < 0) {
 					if (G.MO_COMPILE_STRICT) {
-						this.Content = F.replace(this.Content, m_[0], "{?MoAsp __Mo__.Echo(C__" + loopname + "." + k + "); MoAsp?}")
+						this.Content = F.replace(this.Content, $0, "{?MoAsp __Mo__.Echo(C__" + loopname + "." + k + "); MoAsp?}")
 					} else {
-						this.Content = F.replace(this.Content, m_[0], "{?MoAsp __Mo__.Echo(C__" + loopname + ".getter__(\"" + k + "\")); MoAsp?}")
+						this.Content = F.replace(this.Content, $0, "{?MoAsp __Mo__.Echo(C__" + loopname + ".getter__(\"" + k + "\")); MoAsp?}")
 					}
 				} else {
 					var c = k.substr(k.indexOf(":") + 1);
 					k = k.substr(0, k.indexOf(":"));
 					if (G.MO_COMPILE_STRICT) {
-						this.Content = F.replace(this.Content, m_[0], "{?MoAsp __Mo__.Echo(" + F.replace(this.parseFormatVari(c), "{{k}}", "C__" + loopname + "." + k) + "); MoAsp?}")
+						this.Content = F.replace(this.Content, $0, "{?MoAsp __Mo__.Echo(" + F.replace(this.parseFormatVari(c), "{{k}}", "C__" + loopname + "." + k) + "); MoAsp?}")
 					} else {
-						this.Content = F.replace(this.Content, m_[0], "{?MoAsp __Mo__.Echo(" + F.replace(this.parseFormatVari(c), "{{k}}", "C__" + loopname + ".getter__(\"" + k + "\")") + "); MoAsp?}")
+						this.Content = F.replace(this.Content, $0, "{?MoAsp __Mo__.Echo(" + F.replace(this.parseFormatVari(c), "{{k}}", "C__" + loopname + ".getter__(\"" + k + "\")") + "); MoAsp?}")
 					}
 				}
-			}
+			},this);
 		}
-	}
-	if (!G.MO_COMPILE_STRICT) {
-		this.Content = F.replace(this.Content, "</loop>", "{?MoAsp });} MoAsp?}")
-	} else {
-		this.Content = F.replace(this.Content, "</loop>", "{?MoAsp }); MoAsp?}")
-	}
+	},this);
+	this.Content = F.replace(this.Content, "</loop>", "{?MoAsp });" + (G.MO_COMPILE_STRICT ? "" : "}") + " MoAsp?}")
 }
 
 //****************************************************
 //@DESCRIPTION:	parse foreach tag.
 //****************************************************
 MoAspEnginerView.prototype.parseForeach = function() {
-	var matches, match, loopname, vbscript, basezero, attrs;
-	var regexp = /\<foreach ([\s\S]+?)\>/igm;
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		match = matches.pop();
-		var m_, ms_, k, v, c;
-		attrs = readAttrs__(match[1]);
+	F.string.matches(this.Content, /\<foreach ([\s\S]+?)\>/igm ,function($0,$1){
+		var attrs = readAttrs__($1);
 		if (attrs.getter__("name") != "") {
-			loopname = attrs.getter__("name");
-			vbscript = "{?MoAsp ";
+			var loopname = attrs.getter__("name"),
+				vbscript = "{?MoAsp ";
 			if (!G.MO_COMPILE_STRICT) vbscript += "if(Mo.Assigns.hasOwnProperty(\"" + loopname + "\")){\r\n";
 			if (!G.MO_COMPILE_STRICT) {
 				vbscript += "var D__" + loopname + "=Mo.Assigns[\"" + loopname + "\"];\r\nfor(var C__" + loopname + " in D__" + loopname + "){\r\nif(!D__" + loopname + ".hasOwnProperty(C__" + loopname + "))continue;\r\n MoAsp?}\r\n"
 			} else {
 				vbscript += "for(var C__" + loopname + " in " + loopname + "){\r\nif(!" + loopname + ".hasOwnProperty(C__" + loopname + "))continue;\r\n MoAsp?}\r\n"
 			}
-			this.Content = F.replace(this.Content, match[0], vbscript);
+			this.Content = F.replace(this.Content, $0, vbscript);
 			this.Content = F.replace(this.Content, "{$" + loopname + ".Key__}", "{?MoAsp __Mo__.Echo(C__" + loopname + "); MoAsp?}");
-			var nregexp = new RegExp("\\{\\$" + loopname + "(\\:(.+?))?\\}", "igm");
-			ms_ = F.string.matches(this.Content, nregexp);
-			while (ms_.length > 0) {
-				m_ = ms_.pop();
-				k = m_[2];
-				if (k == "") {
-					this.Content = F.replace(this.Content, m_[0], "{?MoAsp __Mo__.Echo(D__" + loopname + "[C__" + loopname + "]); MoAsp?}");
+			F.string.matches(this.Content, new RegExp("\\{\\$" + loopname + "(\\:(.+?))?\\}", "igm"),function($0,$1,$2){
+				if ($2 == "") {
+					this.Content = F.replace(this.Content, $0, "{?MoAsp __Mo__.Echo(D__" + loopname + "[C__" + loopname + "]); MoAsp?}");
 				} else {
-					this.Content = F.replace(this.Content, m_[0], "{?MoAsp __Mo__.Echo(" + F.replace(this.parseFormatVari(k), "{{k}}", "D__" + loopname + "[C__" + loopname + "]") + "); MoAsp?}");
+					this.Content = F.replace(this.Content, $0, "{?MoAsp __Mo__.Echo(" + F.replace(this.parseFormatVari($2), "{{k}}", "D__" + loopname + "[C__" + loopname + "]") + "); MoAsp?}");
 				}
-			}
+			},this);
 		}
-	}
-	if (!G.MO_COMPILE_STRICT) {
-		this.Content = F.replace(this.Content, "</foreach>", "{?MoAsp }} MoAsp?}")
-	} else {
-		this.Content = F.replace(this.Content, "</foreach>", "{?MoAsp } MoAsp?}")
-	}
+	},this);
+	this.Content = F.replace(this.Content, "</foreach>", "{?MoAsp }" + (G.MO_COMPILE_STRICT ? "" : "}") + " MoAsp?}")
 }
 
 //****************************************************
 //@DESCRIPTION:	parse switch tag
 //****************************************************
 MoAspEnginerView.prototype.parseSwitch = function() {
-	var matches, m_, attrs;
-	var regexp = /<switch ([\s\S]+?)>/igm;
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		m_ = matches.pop();
-		attrs = readAttrs__(m_[1]);
-		if (attrs.getter__("name") != "") this.Content = F.replace(this.Content, m_[0], "{?MoAsp switch(" + this.parseAssign(attrs.getter__("name")) + "){ MoAsp?}");
-	}
+	F.string.matches(this.Content, /<switch ([\s\S]+?)>/igm ,function($0,$1){
+		var attrs = readAttrs__($1);
+		if (attrs.getter__("name") != "") this.Content = F.replace(this.Content, $0, "{?MoAsp switch(" + this.parseAssign(attrs.getter__("name")) + "){ MoAsp?}");
+	},this);
 	this.parseCase();
 };
 
@@ -365,58 +303,42 @@ MoAspEnginerView.prototype.parseSwitch = function() {
 //@DESCRIPTION:	parse case tag
 //****************************************************
 MoAspEnginerView.prototype.parseCase = function() {
-	var matches, m_, t, quto, attrs;
-	var regexp = /<case ([\s\S]+?)\/>/igm;
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		m_ = matches.pop();
-		attrs = readAttrs__(m_[1]);
-		quto = "\"";
+	F.string.matches(this.Content, /<case ([\s\S]+?)\/>/igm ,function($0,$1){
+		var attrs = readAttrs__($1),
+			quto = "\"";
 		if ("|bool|number|money|date|assign|".indexOf("|" + attrs.getter__("type") + "|") > 0) quto = "";
-		this.Content = F.replace(this.Content, m_[0], "{?MoAsp case " + quto + attrs.getter__("value") + quto + ": MoAsp?}");
-	}
+		this.Content = F.replace(this.Content, $0, "{?MoAsp case " + quto + attrs.getter__("value") + quto + ": MoAsp?}");
+	},this);
 };
 
 //****************************************************
 //@DESCRIPTION:	parse expression
 //****************************************************
 MoAspEnginerView.prototype.parseExpression = function() {
-	var matches, m_, expression;
-	var regexp = /<expression ([\s\S]+?)>/igm;
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		m_ = matches.pop();
-		expression = this.parseExpressionComponent(m_[1]);
+	F.string.matches(this.Content, /<expression ([\s\S]+?)>/igm ,function($0,$1){
+		var expression = this.parseExpressionComponent($1);
 		if (expression == "") F.exit("template parse error,please check 'expression' tag。");
-		this.Content = F.replace(this.Content, m_[0], "{?MoAsp if(" + expression + "){\r\n MoAsp?}");
-	}
+		this.Content = F.replace(this.Content, $0, "{?MoAsp if(" + expression + "){\r\n MoAsp?}");
+	},this);
 	this.Content = F.string.replace(this.Content, /<(and|or)(.+?)\/>/igm, "")
 };
 MoAspEnginerView.prototype.parseExpressionElse = function() {
-	var matches, m_, expression;
-	var regexp = /<else ([\s\S]+?) \/>/igm;
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		m_ = matches.pop();
-		expression = this.parseExpressionComponent(m_[1])
-		if (expression == "") F.exit("template parse error,please check 'expression' tag。");
-		this.Content = F.replace(this.Content, m_[0], "{?MoAsp }else if(" + expression + "){ MoAsp?}");
-	}
+	F.string.matches(this.Content, /<else ([\s\S]+?) \/>/igm ,function($0,$1){
+		var expression = this.parseExpressionComponent($1)
+		if (expression == "") F.exit("template parse error,please check 'expression else' tag。");
+		this.Content = F.replace(this.Content, $0, "{?MoAsp }else if(" + expression + "){ MoAsp?}");
+	},this);
 };
 MoAspEnginerView.prototype.parseExpressionComponent = function(compare) {
-	var expression = "",
-		n_, v_, varmatches, j_, quto, vv_, matches;
-	var regexp = new RegExp("\\b(and|or|group)\\=\\\"(.+?)\\\"", "igm");
-	matches = F.string.matches(compare, regexp);
-	while (matches.length > 0) {
-		n_ = matches.pop();
-		if (n_[1] == "and" || n_[1] == "or") {
-			v_ = n_[2];
-			varmatches = /^(.+?)((\s)(\+|\-|\*|\/|%)(\s)([\d\.e\+]+))?(\s)(gt|lt|ngt|nlt|eq|neq)(\s)(.+?)((\s)as(\s)(bool|number|money|date|assign))?$/i.exec(v_);
+	var expression="";
+	F.string.matches(compare, new RegExp("\\b(and|or|group)\\=\\\"(.+?)\\\"", "igm") ,function($0,$1,$2){
+		if ($1 == "and" || $1 == "or") {
+			var v_ = $2,
+				varmatches = /^(.+?)((\s)(\+|\-|\*|\/|%)(\s)([\d\.e\+]+))?(\s)(gt|lt|ngt|nlt|eq|neq)(\s)(.+?)((\s)as(\s)(bool|number|money|date|assign))?$/i.exec(v_);
 			if (varmatches) {
-				quto = "\"";
-				vv_ = varmatches[10];
-				if (expression != "") expression += " " + (n_[1] == "and" ? "&&" : "||") + " "
+				var quto = "\"",
+					vv_ = varmatches[10];
+				if (expression != "") expression += " " + ($1 == "and" ? "&&" : "||") + " ";
 				if (F.string.endWith(varmatches[8], "t")) quto = "";
 				if (vv_ == "Empty") {
 					expression += " is_empty("
@@ -444,21 +366,19 @@ MoAspEnginerView.prototype.parseExpressionComponent = function(compare) {
 				}
 			}
 		} else {
-			var group = n_[2];
+			var group = $2;
 			var groupmatches = (new RegExp("<(and|or) name\\=\\\"" + group + "\\\"(.+?) \\/>", "igm")).exec(this.Content);
 			if (groupmatches) {
 				expression += " " + groupmatches[1] + " (" + this.parseExpressionComponent(groupmatches[2]) + ") "
 			}
 		}
-	}
+	},this);
 	return expression;
 }
 
 //****************************************************
 //@DESCRIPTION:	parse compare tag(gt,lt,ngt,nlt,eq,neq)
 //@PARAM:	tag [String] : gt/lt/ngt/nlt/eq/neq
-//@PARAM:	comp [String] : >/</= . The symbol which i will compare with
-//@PARAM:	no [String] : not/[blank]. The value 'not' follows the type of the tag.
 //****************************************************
 MoAspEnginerView.prototype.parseCompare = function(tag) {
 	if (tag.constructor == Array) {
@@ -467,79 +387,62 @@ MoAspEnginerView.prototype.parseCompare = function(tag) {
 		}
 		return;
 	}
-	var matches, m_, attrs;
-	var regexp = new RegExp("<" + tag + " ([\\s\\S]+?)>", "igm");
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		m_ = matches.pop();
-		attrs = readAttrs__(m_[1]);
+	F.string.matches(this.Content, new RegExp("<" + tag + " ([\\s\\S]+?)>", "igm") ,function($0,$1){
+		var attrs = readAttrs__($1);
 		if (attrs.getter__("name") != "") {
 			var newexpression = attrs.getter__("name") + " " + tag + " " + attrs.getter__("value");
 			if (attrs.getter__("type") != "") newexpression += " as " + attrs.getter__("type");
-			this.Content = F.replace(this.Content, m_[0], "<expression and=\"" + newexpression + "\">");
+			this.Content = F.replace(this.Content, $0, "<expression and=\"" + newexpression + "\">");
 		}
-	}
+	},this);
 };
 
 //****************************************************
 //@DESCRIPTION:	parse empty tag
 //****************************************************
 MoAspEnginerView.prototype.parseEmpty = function() {
-	var matches, m_, l, k, v, s, attrs;
-	var regexp = /<(n)?empty ([\s\S]+?)>/igm;
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		m_ = matches.pop();
-		attrs = readAttrs__(m_[2]);
+	F.string.matches(this.Content, /<(n)?empty ([\s\S]+?)>/igm ,function($0,$1,$2){
+		var attrs = readAttrs__($2);
 		if (attrs.getter__("name") != "") {
-			s = "";
-			if (m_[1] == "n") s = " !";
-			this.Content = F.replace(this.Content, m_[0], "{?MoAsp if(" + s + "is_empty(" + this.parseAssign(attrs.getter__("name")) + ")){\r\n MoAsp?}")
+			this.Content = F.replace(this.Content, $0, "{?MoAsp if(" + ($1 == "n" ? " !" : "") + "is_empty(" + this.parseAssign(attrs.getter__("name")) + ")){\r\n MoAsp?}")
 		}
-	}
+	},this);
 };
 
 //****************************************************
 //@DESCRIPTION:	parse assign tag
 //****************************************************
 MoAspEnginerView.prototype.parseAssignName = function() {
-	var matches, m_, attrs;
-	var regexp = /<assign ([\s\S]+?)\/>/igm;
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		m_ = matches.pop();
-		attrs = readAttrs__(m_[1]);
-		if (attrs.getter__("name") != "") this.Content = F.replace(this.Content, m_[0], "{?MoAsp Mo.assign(\"" + attrs.getter__("name") + "\",\"" + F.string.replace(attrs.getter__("value"), /\"/igm, "\\\"") + "\"); MoAsp?}");
-	}
+	F.string.matches(this.Content, /<assign ([\s\S]+?)\/>/igm ,function($0,$1){
+		var attrs = readAttrs__($1);
+		if (attrs.getter__("name") != "") this.Content = F.replace(this.Content, $0, "{?MoAsp Mo.assign(\"" + attrs.getter__("name") + "\",\"" + F.string.replace(attrs.getter__("value"), /\"/igm, "\\\"") + "\"); MoAsp?}");
+	},this);
 };
 
 //****************************************************
 //@DESCRIPTION:	parse source include tag(css/js/load)
 //****************************************************
 MoAspEnginerView.prototype.parseSource = function() {
-	var matches, m_, id, cs, ext, attrs, filepath;
-	var regexp = /<(js|css|load) ([\s\S]+?) \/>/igm;
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		m_ = matches.pop();
-		attrs = readAttrs__(m_[2]);
-		filepath = "";
+	F.string.matches(this.Content, /<(js|css|load) ([\s\S]+?) \/>/igm ,function($0,$1,$2){
+		var attrs = readAttrs__($2),
+			filepath = "";
 		if (attrs.getter__("file") != "") filepath = attrs.getter__("file");
 		if (attrs.getter__("href") != "") filepath = attrs.getter__("href");
 		if (attrs.getter__("src") != "") filepath = attrs.getter__("src");
 		if (filepath != "") {
-			id = "";
-			cs = "";
-			if (filepath.indexOf(".") > 0) ext = filepath.substr(filepath.lastindexOf("."));
+			var id = "",
+				cs = "",
+				ext = "";
+			if (filepath.indexOf(".") > 0) ext = filepath.substr(filepath.lastIndexOf("."));
 			if (attrs.getter__("id") != "") id = " id=\"" + attrs.getter__("id") + "\"";
 			if (attrs.getter__("charset") != "") cs = " charset=\"" + attrs.getter__("charset") + "\"";
-			if (m_[1] == "js" || ext == ".js") {
-				this.Content = F.replace(this.Content, m_[0], "<s" + "cript type=\"text/javascript\" src=\"" + filepath + "\"" + id + cs + "></scrip" + "t>");
+			if ($1 == "js" || ext == ".js") {
+				this.Content = F.replace(this.Content, $0, "<s" + "cript type=\"text/javascript\" src=\"" + filepath + "\"" + id + cs + "></scrip" + "t>");
 			} else {
-				this.Content = F.replace(this.Content, m_[0], "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + filepath + "\"" + id + cs + " />");
+				this.Content = F.replace(this.Content, $0, "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + filepath + "\"" + id + cs + " />");
 			}
 		}
-	}
+	},this);
 };
 
 //****************************************************
@@ -553,19 +456,15 @@ MoAspEnginerView.prototype.parseVari = function(chars) {
 		}
 		return;
 	}
-	var matches, m_;
-	var regexp = new RegExp("\\{\\$" + chars + "(.+?)\\}", "igm");
-	matches = F.string.matches(this.Content, regexp);
-	while (matches.length > 0) {
-		m_ = matches.pop();
+	F.string.matches(this.Content, new RegExp("\\{\\$" + chars + "(.+?)\\}", "igm") ,function($0,$1){
 		if (chars == "#") {
-			this.Content = F.replace(this.Content, m_[0], "\" + " + this.parseAssign(m_[1]) + " + \"")
+			this.Content = F.replace(this.Content, $0, "\" + " + this.parseAssign($1) + " + \"")
 		} else if (chars == "@") {
-			this.Content = F.replace(this.Content, m_[0], this.parseAssign(m_[1]))
+			this.Content = F.replace(this.Content, $0, this.parseAssign($1))
 		} else {
-			this.Content = F.replace(this.Content, m_[0], "{?MoAsp __Mo__.Echo(" + this.parseAssign(m_[1]) + ");MoAsp?}")
+			this.Content = F.replace(this.Content, $0, "{?MoAsp __Mo__.Echo(" + this.parseAssign($1) + ");MoAsp?}")
 		}
-	}
+	},this);
 };
 
 //****************************************************

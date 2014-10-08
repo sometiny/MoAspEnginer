@@ -927,8 +927,10 @@ var GLOBAL = this,
 			return src.replace(exp, replacement);
 		};
 		$f.string.matches = function(src, exp, option,fn) {
+			var ref=null;
 			if(typeof option=="function")
 			{
+				if(fn) ref = fn;
 				fn = option;
 				option = ""; 
 			}
@@ -940,7 +942,7 @@ var GLOBAL = this,
 			while (result) {
 				if(typeof fn=="function")
 				{
-					fn.apply(result,result);
+					fn.apply(ref || result,result);
 				}
 				else
 				{

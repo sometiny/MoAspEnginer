@@ -155,7 +155,7 @@ var IO, JSON, Mo = Mo || (function(){
 
 	var _start = function(){
 		if(G.MO_PRE_LIB != ""){
-			var libs = G.MO_PRE_LIB.split(","),lib,T__;
+			var libs = G.MO_PRE_LIB.split(",");
 			for(var i = 0;i < libs.length;i++){
 				var result = _parseLibraryPath("PreLib:Pre." + libs[i]);
 				if(result[0]!=""){
@@ -171,7 +171,7 @@ var IO, JSON, Mo = Mo || (function(){
  	
 	var _end = function(){
 		if(G.MO_END_LIB != ""){
-			var libs = G.MO_END_LIB.split(","),lib,T__;
+			var libs = G.MO_END_LIB.split(",");
 			for(var i = 0;i < libs.length;i++){
 				var result = _parseLibraryPath("EndLib:End." + libs[i]);
 				if(result[0]!=""){
@@ -355,7 +355,7 @@ var IO, JSON, Mo = Mo || (function(){
 		Response.Write(M.fetch(template));
 	};
 	M.fetch = function(template){
-		var html,cachename,OldHash,usecache = false,vbscript,cachepath
+		var html,cachename,OldHash,usecache = false,scripts,cachepath
 		if(G.MO_COMPILE_CACHE){
 			cachename = M.Method + "^" + M.Action + "^" + F.string.replace(template,/\:/igm,"^");
 			cachepath = F.mappath(G.MO_APP + "Cache/Compiled/" + cachename + ".asp");
@@ -366,8 +366,8 @@ var IO, JSON, Mo = Mo || (function(){
 					if(F.date.datediff("s",OldHash,new Date()) >= G.MO_COMPILE_CACHE_EXPIRED)usecache = false;
 				}
 				if(usecache){
-					vbscript = IO.file.readAllText(cachepath,G.MO_CHARSET);
-					vbscript = vbscript.replace(/^<s(.+?)>\r\n/ig,"").replace(/\r\n<\/script>$/ig,"");
+					scripts = IO.file.readAllText(cachepath,G.MO_CHARSET);
+					scripts = scripts.replace(/^<s(.+?)>\r\n/ig,"").replace(/\r\n<\/script>$/ig,"");
 				}
 			}
 		}
@@ -376,17 +376,17 @@ var IO, JSON, Mo = Mo || (function(){
 			if(html == "")return "";
 			if(typeof MoAspEnginerView == "undefined")F.include(G.MO_CORE + "Library/MAE/Mo.View.asp","utf-8");
 			var view_ = new MoAspEnginerView(html);
-			vbscript = view_.Content;
-			if(G.MO_COMPILE_CACHE)IO.file.writeAllText(cachepath,"<s" + "cript language=\"jscript\" runat=\"server\">\r\n" + vbscript + "\r\n</s"+"cript>",G.MO_CHARSET);
+			scripts = view_.Content;
+			if(G.MO_COMPILE_CACHE)IO.file.writeAllText(cachepath,"<s" + "cript language=\"jscript\" runat=\"server\">\r\n" + scripts + "\r\n</s"+"cript>",G.MO_CHARSET);
 		}
 		
-		if(!G.MO_DIRECT_OUTPUT) F.execute(vbscript,"Temp___");
-		else F.execute(vbscript);
+		if(!G.MO_DIRECT_OUTPUT) F.execute(scripts,"Temp___");
+		else F.execute(scripts);
 		var content="";
 		try{
 			if(!G.MO_DIRECT_OUTPUT)content = Temp___();
 			if(G.MO_CACHE && G.MO_CACHE_DIR != "" && !G.MO_DIRECT_OUTPUT){
-				if(F.exists(G.MO_CACHE_DIR,true)) IO.file.writeAllText(F.mappath(G.MO_CACHE_DIR + this.CacheFileName + ".cache"),fetch,G.MO_CHARSET);
+				if(F.exists(G.MO_CACHE_DIR,true)) IO.file.writeAllText(F.mappath(G.MO_CACHE_DIR + this.CacheFileName + ".cache"),content,G.MO_CHARSET);
 			}
 		}catch(ex){
 			ExceptionManager.put(ex,"Mo.fetch()->Temp___()");
