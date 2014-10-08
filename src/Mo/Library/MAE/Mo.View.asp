@@ -28,12 +28,11 @@ function MoAspEnginerView(content) {
 	this.setContent(content).parse();
 }
 MoAspEnginerView.prototype.setContent = function(content) {
-	var this_= this;
 	F.string.matches(content, /<literal>([\s\S]*)<\/literal>/ig,function($0,$1){
-		var id = this_.getRndid();
-		this_.mvarDicts[id] = $1;
+		var id = this.getRndid();
+		this.mvarDicts[id] = $1;
 		content = content.replace($0, "<literal id=\"" + id + "\"/>");
-	});
+	},this);
 	content = content.replace(/(\s*)\<\!\-\-\/\/(.*?)\-\-\>(\s*)/ig, "");
 	content = content.replace(/(\s*)\<\!\-\-\/\*([\s\S]*?)\*\/\-\-\>(\s*)/ig, "");
 	content = F.string.replace(content, /<switch(.+?)>(\s*)<case/igm, "<switch$1><case");
@@ -101,12 +100,11 @@ MoAspEnginerView.prototype.parse = function() {
 
 
 MoAspEnginerView.prototype.parseMoAsAsp = function() {
-	var this_ = this;
 	F.string.matches(this.Content, /\{\?MoAsp([\s\S]*?)MoAsp\?\}/igm, function($0){
-		var id = this_.getRndid();
-		this_.mvarDicts[id] = $0;
-		this_.Content = F.replace(this_.Content, $0, "\r\n{?MoAsp" + id + "MoAsp?}\r\n");
-	});
+		var id = this.getRndid();
+		this.mvarDicts[id] = $0;
+		this.Content = F.replace(this.Content, $0, "\r\n{?MoAsp" + id + "MoAsp?}\r\n");
+	},this);
 	this.Content = this.Content.replace(/^--movbcrlf--$/igm, "");
 	this.Content = this.Content.replace(/(\r\n){2,}/igm, "\r\n");
 	//F.echo(this.Content,true);
@@ -116,14 +114,14 @@ MoAspEnginerView.prototype.parseMoAsAsp = function() {
 	this.Content = this.Content.replace(/(^(\s+)|(\s+)$)/ig, "");
 	this.Content = this.Content.replace(/\\/igm, "\\\\");
 	F.string.matches(this.Content, /(\s*)<literal id\=\"(\w+?)\"\/>(\s*)/ig,function($0,$1,$2){
-		this_.Content = this_.Content.replace($0, this_.mvarDicts[$2].replace(/\r/ig, "\\r").replace(/\n/ig, "\\n"));
-	});
+		this.Content = this.Content.replace($0, this.mvarDicts[$2].replace(/\r/ig, "\\r").replace(/\n/ig, "\\n"));
+	},this);
 	this.Content = this.Content.replace(/\"/igm, "\\\"");
 	this.Content = this.Content.replace(/\t/igm, "\\t");
 	this.Content = this.Content.replace(/^(.+?)$/igm, "__Mo__.Echo(\"$1\");");
 	F.string.matches(this.Content, /__Mo__\.Echo\(\"\{\?MoAsp([\w]+?)MoAsp\?\}\"\);/igm,function($0,$1){
-		this_.Content = F.replace(this_.Content, $0, this_.mvarDicts[$1]);
-	});
+		this.Content = F.replace(this.Content, $0, this.mvarDicts[$1]);
+	},this);
 	this.Content = F.string.replace(this.Content, /\{\?MoAsp /igm, "");
 	this.Content = F.string.replace(this.Content, /(\s*)MoAsp\?\}/igm, "");
 };
@@ -158,17 +156,15 @@ MoAspEnginerView.prototype.doSomethingToAsp = function() {
 //@DESCRIPTION:	PreCombine the template with global values,such as "{$$MO_CORE}"
 //****************************************************
 MoAspEnginerView.prototype.parsePreCombine = function() {
-	var this_ = this;
-	F.string.matches(this.Content, /\{\$\$(\w+)\}/igm, function(){
-		this_.Content = F.replace(this_.Content, this[0], Mo.Config.Global[this[1]])
-	});
+	F.string.matches(this.Content, /\{\$\$(\w+)\}/igm, function($0,$1){
+		this.Content = F.replace(this.Content, $0, Mo.Config.Global[$1])
+	},this);
 }
 
 //****************************************************
 //@DESCRIPTION:	parse page tag. i will call function 'CreatePageList' to create page string,if you do not define function property
 //****************************************************
 MoAspEnginerView.prototype.parsePage = function() {
-	var this_ = this;
 	F.string.matches(this.Content, /\<page ([\s\S]+?)>([\s\S]*?)\<\/page>/igm,function($0,$1,$2){
 		var attrs = readAttrs__($1);
 		if (attrs.getter__("for") != "") {
