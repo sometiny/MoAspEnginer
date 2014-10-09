@@ -23,7 +23,7 @@ return exports.session = (function(driver){
 	$session.id = driver.getSessionid();
 	if($session.id == "")
 	{
-		$session.id = F.random.word(20);
+		$session.id = driver.newID();
 	}
 	else
 	{
@@ -34,12 +34,12 @@ return exports.session = (function(driver){
 		{
 			if(F.timespan() - time_start >$session.timeout){
 				driver.clearSession($session.id);
-				$session.id = F.random.word(20);
+				$session.id = driver.newID();
 			}
 		}
 		else
 		{
-			$session.id = F.random.word(20);
+			$session.id = driver.newID();
 		}
 	}
 	driver.setStartTimeSpan($session.id, F.timespan());
@@ -47,6 +47,10 @@ return exports.session = (function(driver){
 })((function(){
 	/*session driver, you can use your own driver, such as IO, Database and so on...*/
 	var driver = {};
+	driver.newID = function()
+	{
+		return F.random.word(20);
+	};
 	driver.writeSession = function(sessionid, key, value)
 	{
 		Application.Lock();

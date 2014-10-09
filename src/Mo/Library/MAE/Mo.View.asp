@@ -86,6 +86,7 @@ MoAspEnginerView.prototype.parse = function() {
 	this.parseCompare(["lt", "gt", "nlt", "ngt", "eq", "neq"]);
 	this.parseExpression();
 	this.parseExpressionElse();
+	this.Content = F.string.replace(this.Content, /<(and|or)(.+?)\/>/igm, "")
 	this.Content = F.string.replace(this.Content, /<\/else>/igm, "{?MoAsp }else{ MoAsp?}");
 	this.Content = F.string.replace(this.Content, /<else \/>/igm, "{?MoAsp }else{ MoAsp?}");
 	this.Content = F.string.replace(this.Content, /<break \/>/igm, "{?MoAsp break; MoAsp?}");
@@ -316,7 +317,6 @@ MoAspEnginerView.prototype.parseExpression = function() {
 		if (expression == "") F.exit("template parse error,please check 'expression' tag。");
 		this.Content = F.replace(this.Content, $0, "{?MoAsp if(" + expression + "){\r\n MoAsp?}");
 	},this);
-	this.Content = F.string.replace(this.Content, /<(and|or)(.+?)\/>/igm, "")
 };
 MoAspEnginerView.prototype.parseExpressionElse = function() {
 	F.string.matches(this.Content, /<else ([\s\S]+?) \/>/igm ,function($0,$1){
@@ -365,7 +365,7 @@ MoAspEnginerView.prototype.parseExpressionComponent = function(compare) {
 			var group = $2;
 			var groupmatches = (new RegExp("<(and|or) name\\=\\\"" + group + "\\\"(.+?) \\/>", "igm")).exec(this.Content);
 			if (groupmatches) {
-				expression += " " + groupmatches[1] + " (" + this.parseExpressionComponent(groupmatches[2]) + ") "
+				expression += " " + (groupmatches[1] == "and" ? "&&" : "||") + " (" + this.parseExpressionComponent(groupmatches[2]) + ") "
 			}
 		}
 	},this);
@@ -411,7 +411,11 @@ MoAspEnginerView.prototype.parseEmpty = function() {
 MoAspEnginerView.prototype.parseAssignName = function() {
 	F.string.matches(this.Content, /<assign ([\s\S]+?)\/>/igm ,function($0,$1){
 		var attrs = readAttrs__($1);
-		if (attrs.getter__("name") != "") this.Content = F.replace(this.Content, $0, "{?MoAsp Mo.assign(\"" + attrs.getter__("name") + "\",\"" + F.string.replace(attrs.getter__("value"), /\"/igm, "\\\"") + "\"); MoAsp?}");
+		if (attrs.getter__("name") != ""){
+			var quto="\"";
+			if(attrs.getter__("notstring")=="true") quto = "";
+			this.Content = F.replace(this.Content, $0, "{?MoAsp Mo.assign(\"" + attrs.getter__("name") + "\"," + quto + F.string.replace(attrs.getter__("value"), /\"/igm, "\\\"") + quto + "); MoAsp?}");
+		}
 	},this);
 };
 

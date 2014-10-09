@@ -245,6 +245,9 @@ var IO, JSON, Mo = Mo || (function(){
 				cfg = F.require(F.mappath(G.MO_APP + "Conf/Config.asp"));
 				_extend(G,cfg || {});
 			}
+			for(var c in G){
+				if(G.hasOwnProperty(c)) eval(c + " = G[\"" + c + "\"];");
+			}
 			if(G.MO_CHARSET != "utf-8")Response.Charset = G.MO_CHARSET;
 			if(F.exists((G.MO_APP + "Common/Function.asp"))) F.include(G.MO_APP + "Common/Function.asp");
 			if(G.MO_IMPORT_COMMON_FILES != ""){
@@ -355,6 +358,7 @@ var IO, JSON, Mo = Mo || (function(){
 		Response.Write(M.fetch(template));
 	};
 	M.fetch = function(template){
+		if(!template || template=="") template = M.Action;
 		var html,cachename,OldHash,usecache = false,scripts,cachepath
 		if(G.MO_COMPILE_CACHE){
 			cachename = M.Method + "^" + M.Action + "^" + F.string.replace(template,/\:/igm,"^");
