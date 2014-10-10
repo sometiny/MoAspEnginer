@@ -115,7 +115,7 @@ MoAspEnginerView.prototype.parseMoAsAsp = function() {
 	this.Content = this.Content.replace(/(^(\s+)|(\s+)$)/ig, "");
 	this.Content = this.Content.replace(/\\/igm, "\\\\");
 	F.string.matches(this.Content, /(\s*)<literal id\=\"(\w+?)\"\/>(\s*)/ig,function($0,$1,$2){
-		this.Content = this.Content.replace($0, this.mvarDicts[$2].replace(/\r/ig, "\\r").replace(/\n/ig, "\\n"));
+		this.Content = this.Content.replace($0, this.mvarDicts[$2].replace(/\\/ig, "\\\\").replace(/\r/ig, "\\r").replace(/\n/ig, "\\n"));
 	},this);
 	this.Content = this.Content.replace(/\"/igm, "\\\"");
 	this.Content = this.Content.replace(/\t/igm, "\\t");
