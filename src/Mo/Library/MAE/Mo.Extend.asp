@@ -268,11 +268,14 @@ exports.push("IAction","IController","IClass");
 
 /*IClass*/
 function IClass(){}
-IClass.extend = function(name,fn){
+IClass.extend = function(name,fn,ia){
+	ia=!!ia;
+	var lowercase = (ia===true) && (Mo.Config.Global.MO_ACTION_CASE_SENSITIVITY===false);
 	if(name && typeof name=="object"){
+		lowercase = fn===true && Mo.Config.Global.MO_ACTION_CASE_SENSITIVITY===false;
 		for(var n in name){
 			if(!name.hasOwnProperty(n)) continue;
-			if(typeof name[n]=="function") this.prototype[n] = name[n];
+			if(typeof name[n]=="function") this.prototype[(lowercase?n.toLowerCase():n)] = name[n];
 		}
 		return;
 	}
@@ -280,7 +283,7 @@ IClass.extend = function(name,fn){
 		ExceptionManager.put("0x5ca","IClass.extend(...)","argument 'fn' must be a function.");
 		return;
 	}
-	this.prototype[name] = fn;
+	this.prototype[(lowercase?name.toLowerCase():name)] = fn;
 };
 IClass.extend("__destruct", function(){});
 IClass.create = function(__construct,__destruct){
@@ -307,7 +310,7 @@ function IAction(){
 IAction.prototype = new IClass();
 IAction.extend = function(name,isPost,fn){
 	if(name && typeof name=="object"){
-		IClass.extend.call(this,name);
+		IClass.extend.call(this,name,true);
 		return;
 	}
 	if(isPost===true){
@@ -315,7 +318,7 @@ IAction.extend = function(name,isPost,fn){
 	}else{
 		fn = isPost;
 	}
-	IClass.extend.call(this,name,fn);
+	IClass.extend.call(this,name,fn,true);
 };
 IAction.extend("assign",function(key,value){Mo.assign(key,value);});
 IAction.extend("display",function(tpl){Mo.display(tpl);});

@@ -40,8 +40,9 @@ return {
 	MO_SESSION_WITH_SINGLE_TAG : false,
 	MO_DISABLED_FUNCTIONS : "F.execute,F.include,F.initialize,F.globalize,F.require,executeglobal,execute,include,eval,IncludeFile,LoadVBScript,LoadScript,LoadFile,SaveFile,VBSExecute",
 	MO_DISABLED_CONTROLLERS : "",
-	MO_LOAD_VBSHELPER:true,
-	MO_LANGUAGE:"cn",
-	MO_PARSEACTIONPARMS:true
+	MO_LOAD_VBSHELPER : true,
+	MO_LANGUAGE : "cn",
+	MO_PARSEACTIONPARMS : false,
+	MO_ACTION_CASE_SENSITIVITY : true
 };
 </script>

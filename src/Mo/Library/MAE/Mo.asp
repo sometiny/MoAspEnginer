@@ -515,6 +515,7 @@ var IO, JSON, Mo = Mo || (function(){
 		if(!F.string.test(this.Method,/^(\w+)$/i)) this.Method = "Home";
 		if(!F.string.test(this.Group,/^(\w+)$/i)) this.Group = "";
 		if(this.Group != "") this.Group += "/";
+		if(G.MO_CONTROLLER_CNAMES && G.MO_CONTROLLER_CNAMES.hasOwnProperty(this.Method.toLowerCase())) this.Method = G.MO_CONTROLLER_CNAMES[this.Method.toLowerCase()];
 		if(G.MO_DISABLED_CONTROLLERS != ""){
 			if(("," + G.MO_DISABLED_CONTROLLERS.toLowerCase() + ",").indexOf("," + this.Method.toLowerCase() + ",") >= 0)F.exit("模块[" + this.Method + "]已被禁止自动调用。");
 		}
@@ -552,23 +553,25 @@ var IO, JSON, Mo = Mo || (function(){
 			try{
 				var MC = F.initialize(this.RealMethod + "Controller");
 				if(MC.__STATUS__===true){
-					if(F.server("REQUEST_METHOD")=="POST" && MC[this.Action+"_Post_"]){
+					var action_ = this.Action;
+					if(G.MO_ACTION_CASE_SENSITIVITY===false) action_ = action_.toLowerCase();
+					if(F.server("REQUEST_METHOD")=="POST" && MC[action_+"_Post_"]){
 						if(G.MO_PARSEACTIONPARMS === true)
 						{
-							MC[this.Action+"_Post_"].apply(MC,_getfunctionParms(MC[this.Action+"_Post_"]));
+							MC[action_+"_Post_"].apply(MC,_getfunctionParms(MC[action_+"_Post_"]));
 						}
 						else
 						{
-							MC[this.Action+"_Post_"]();
+							MC[action_+"_Post_"]();
 						}
-					}else if(MC[this.Action]){
+					}else if(MC[action_]){
 						if(G.MO_PARSEACTIONPARMS === true)
 						{
-							MC[this.Action].apply(MC,_getfunctionParms(MC[this.Action]));
+							MC[action_].apply(MC,_getfunctionParms(MC[action_]));
 						}
 						else
 						{
-							MC[this.Action]();
+							MC[action_]();
 						}
 					}else if(M.templateIsInApp(this.Action) || M.templateIsInCore(this.Action)){
 						M.display(this.Action);
