@@ -303,7 +303,7 @@ var IO, JSON, Mo = Mo || (function(){
 			if(G.MO_ROOT != "/" && uri.substr(0,G.MO_ROOT.length) == G.MO_ROOT)uri = uri.substr(G.MO_ROOT.length - 1);
 			var C = M.C(G.MO_REWRITE_CONF);
 			if(C == undefined)return M;
-			for(var i in C.Rules){
+			for(var i=0;i<C.Rules.length;i++){
 				if(C.Rules[i].LookFor.test(uri)){
 					uri = uri.replace(C.Rules[i].LookFor,C.Rules[i].SendTo);
 					break;
@@ -311,19 +311,7 @@ var IO, JSON, Mo = Mo || (function(){
 			}
 			mat = /^\/\?(.+?)$/i.exec(uri);
 			if(mat && mat.length > 0) uri = mat[1];
-			var items = uri.split("&");
-			for(var i in items){
-				var stem = /^(.+?)\=(.+?)$/i.exec(items[i]);
-				if(stem && stem.length > 0){
-					try{
-						F.get(stem[1],decodeURIComponent(stem[2]));
-					}catch(ex){
-						F.get(stem[1],stem[2]);	
-					}
-				}else{
-					F.get(stem,"");	
-				}
-			}
+			F.get.fromURIString(uri);
 		})(G,M);
 		return M;
 	};
