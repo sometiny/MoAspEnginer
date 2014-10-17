@@ -108,7 +108,6 @@ MoAspEnginerView.prototype.parseMoAsAsp = function() {
 	},this);
 	this.Content = this.Content.replace(/^--movbcrlf--$/igm, "");
 	this.Content = this.Content.replace(/(\r\n){2,}/igm, "\r\n");
-	//F.echo(this.Content,true);
 	if (G.MO_PREETY_HTML) {
 		this.Content = this.Content.replace(/>(\s*)--movbcrlf--(\s*)\</ig, "><")
 	}
@@ -514,7 +513,9 @@ MoAspEnginerView.prototype.parseAssign = function(key) {
 			} else if (F.string.startWith(l.toLowerCase(), "mo.a.")) {
 				cf = l.substr(5);
 				if (cf.indexOf(".") > 0) {
-					rv = "Mo.A(\"" + cf.substr(0, cf.indexOf(".")) + "\")." + cf.substr(cf.indexOf(".") + 1);
+					var method = cf.substr(cf.indexOf(".") + 1);
+					if(Mo.Config.Global.MO_ACTION_CASE_SENSITIVITY===false) method = method.toLowerCase();
+					rv = "Mo.A(\"" + cf.substr(0, cf.indexOf(".")) + "\")." + method;
 				}
 			} else {
 				k = l.substr(l.indexOf(".") + 1);
@@ -569,7 +570,9 @@ MoAspEnginerView.prototype.parseAssign = function(key) {
 			} else if (F.string.startWith(l.toLowerCase(), "mo.a.")) {
 				cf = l.substr(5);
 				if (cf.indexOf(".") > 0) {
-					return parsed.replace("{{k}}", "Mo.A(\"" + cf.substr(0, cf.indexOf(".")) + "\")." + cf.substr(cf.indexOf(".") + 1));
+					var method = cf.substr(cf.indexOf(".") + 1);
+					if(Mo.Config.Global.MO_ACTION_CASE_SENSITIVITY===false) method = method.toLowerCase();
+					return parsed.replace("{{k}}", "Mo.A(\"" + cf.substr(0, cf.indexOf(".")) + "\")." + method);
 				}
 			} else {
 				k = l.substr(l.indexOf(".") + 1);
@@ -603,6 +606,7 @@ MoAspEnginerView.prototype.parseFormatVari = function(format) {
 	if (funcs.length == 3 && funcs[0].toLowerCase() == "mo") {
 		func = "Mo.Static(\"" + funcs[1] + "\")." + funcs[2];
 	} else if (funcs.length == 4 && funcs[0].toLowerCase() == "mo" && funcs[1].toLowerCase() == "a") {
+		if(Mo.Config.Global.MO_ACTION_CASE_SENSITIVITY===false) funcs[3] = funcs[3].toLowerCase();
 		func = "Mo.A(\"" + funcs[2] + "\")." + funcs[3];
 	} else if (func.length > 2 && F.string.startWith(func.toLowerCase(), "f.")) {
 		func = "F." + func.substr(2);

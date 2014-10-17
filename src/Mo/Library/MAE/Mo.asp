@@ -491,12 +491,14 @@ var IO, JSON, Mo = Mo || (function(){
 	};
 	M.A = function(ctrl){
 		if(this.Librarys["Controller_" + ctrl] == "jscript"){
+			if(G.MO_CONTROLLER_CNAMES && G.MO_CONTROLLER_CNAMES.hasOwnProperty(ctrl.toLowerCase())) ctrl = G.MO_CONTROLLER_CNAMES[ctrl.toLowerCase()];
 			return F.initialize(ctrl + "Controller");
 		}
 		var filepath = F.mappath(G.MO_APP + "Controllers/" + ctrl + "Controller.asp");
 		if(!F.exists(filepath)) filepath = F.mappath(G.MO_CORE + "Controllers/" + ctrl + "Controller.asp");
 		if(F.exists(filepath)){
 			if(_LoadController(filepath,ctrl)){
+				if(G.MO_CONTROLLER_CNAMES && G.MO_CONTROLLER_CNAMES.hasOwnProperty(ctrl.toLowerCase())) ctrl = G.MO_CONTROLLER_CNAMES[ctrl.toLowerCase()];
 				return F.initialize(ctrl + "Controller");
 			}else{
 				ExceptionManager.put(5,"Mo.A(ctrl)","模块[" + ctrl + "]无法加载,请检查模块文件");
