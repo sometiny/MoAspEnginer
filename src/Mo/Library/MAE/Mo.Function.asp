@@ -1515,7 +1515,10 @@ var GLOBAL = this,
 			var ucs = src.split($f.object.toURIString.split_char_2);
 			for (var i = 0; i < ucs.length; i++) {
 				if (ucs[i].indexOf($f.object.toURIString.split_char_1) > 0) {
-					post__[$f.decode(ucs[i].substr(0, ucs[i].indexOf($f.object.toURIString.split_char_1)))] = $f.decode($f.string.trimLeft(ucs[i].substr(ucs[i].indexOf($f.object.toURIString.split_char_1)), $f.object.toURIString.split_char_1));
+					var key = $f.decode(ucs[i].substr(0, ucs[i].indexOf($f.object.toURIString.split_char_1))),
+						value = $f.decode($f.string.trimLeft(ucs[i].substr(ucs[i].indexOf($f.object.toURIString.split_char_1)), $f.object.toURIString.split_char_1));
+					post__[key] = value;
+					__POST_MAPPER__[key.toUpperCase()] = key;
 				}
 			}
 		};
