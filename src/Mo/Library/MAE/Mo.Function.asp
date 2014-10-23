@@ -101,16 +101,16 @@ var GLOBAL = this,
 		$f.guid = function(format) {
 			format = format || "D"; //NDBP
 			var typelib = $f.activex("scriptlet.typelib")
-			var returnValue = typelib.Guid;
+			var returnValue = typelib.Guid.replace(/^\{(.+?)\}([\s\S]*)$/i,"$1");
 			switch (format.toUpperCase()) {
 			case "B":
-				return returnValue;
+				return "{"+returnValue+"}";
 			case "P":
-				return returnValue.replace("{", "(").replace("}", ")");
+				return "("+returnValue+")";
 			case "N":
 				return returnValue.replace(/([^0-9a-z]+)/igm, "");
 			default:
-				return returnValue.replace("{", "").replace("}", "");
+				return returnValue
 			}
 			return returnValue;
 		};
