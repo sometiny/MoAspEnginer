@@ -289,7 +289,7 @@ IClass.create = function(__construct,__destruct){
 		return function(){
 			_this.call(this);
 			this.__STATUS__=true;
-			if(typeof fn=="function")this.__STATUS__ = fn.call(this)!==false;
+			if(typeof fn=="function")this.__STATUS__ = fn.apply(this,arguments)!==false;
 		};
 	})(__construct);
 	newClass.extend = _this.extend;

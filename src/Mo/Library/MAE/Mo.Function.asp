@@ -67,12 +67,14 @@ var GLOBAL = this,
 			return "v1";
 		};
 		$f.extend = function(src) {
-			if (arguments.length < 2) return;
+			if (arguments.length < 1) return {};
+			if (arguments.length < 2) return src;
 			for (var i = 1; i < arguments.length; i++) {
 				for (var c in arguments[i]) {
 					if (arguments[i].hasOwnProperty(c)) src[c] = arguments[i][c];
 				}
 			}
+			return src;
 		};
 		$f.exists = function(path, folder) {
 			if (folder === true) {
@@ -123,7 +125,9 @@ var GLOBAL = this,
 			try {
 				var $o = Server.CreateObject(classid);
 				activex__.push($o);
-				if (typeof fn == "function") return fn.call($o) || $o;
+				if (typeof fn == "function"){
+					return fn.apply($o, [].slice.apply(arguments).slice(2)) || $o;
+				}
 				return $o;
 			} catch (ex) {
 				return null;
@@ -1273,7 +1277,16 @@ var GLOBAL = this,
 			if (returnValue != "") returnValue = returnValue.substr(0, returnValue.length - 1);
 			return returnValue;
 		};
-
+		$f.object.fromURIString = function(src) {
+			var obj={};
+			var ucs = src.split($f.object.toURIString.split_char_2);
+			for (var i = 0; i < ucs.length; i++) {
+				if (ucs[i].indexOf($f.object.toURIString.split_char_1) > 0) {
+					obj[$f.decode(ucs[i].substr(0, ucs[i].indexOf($f.object.toURIString.split_char_1)))] = $f.decode($f.string.trimLeft(ucs[i].substr(ucs[i].indexOf($f.object.toURIString.split_char_1)), $f.object.toURIString.split_char_1));
+				}
+			}
+			return obj;
+		};
 		$f.dbl = function(value, default_) {
 			if (value == "") return (default_ === undefined ? 0 : default_);
 			if (isNaN(value)) return (default_ === undefined ? 0 : default_);
@@ -1306,6 +1319,14 @@ var GLOBAL = this,
 				return "";
 			}
 			return $f.exports.md5(src);
+		};
+		$f.md5_bytes = function(src) {
+			if (!$f.exports.md5_bytes) $f.require("md5");
+			if (!$f.exports["md5"]) {
+				ExceptionManager.put(0x000003A8, "F.md5", "can not load 'md5' method.");
+				return "";
+			}
+			return $f.exports.md5_bytes(src);
 		};
 		$f.delgate = function() {
 			try {
