@@ -17,13 +17,18 @@ return {
 	MO_END_LIB : "",
 	MO_DIRECT_OUTPUT : false,
 	MO_LIB_CACHE : false,
-	MO_REWRITE_MODE : "",
-	MO_REWRITE_CONF : "",
+	MO_REWRITE_MODE : "URL",
+	MO_REWRITE_CONF : "Rewrite",
 	MO_PREETY_HTML : false,
 	MO_MODEL_CACHE : false,
 	MO_IMPORT_COMMON_FILES : "",
 	MO_SESSION_WITH_SINGLE_TAG : false,
 	MO_LANGUAGE : "CN",
-	MO_DISABLED_MODELS : ""
+	MO_DISABLED_CONTROLLERS : "",
+	MO_PARSEACTIONPARMS : true,
+	MO_CONTROLLER_CNAMES : {
+		"test" : "Test"
+	},
+	MO_ACTION_CASE_SENSITIVITY : false
 };
 </script>
