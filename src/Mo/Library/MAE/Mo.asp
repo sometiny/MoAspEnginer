@@ -190,7 +190,7 @@ var IO, JSON, Mo = Mo || (function(){
 		Model__.debug();
 	};
 	var _getfunctionParms=function(fn){
-		var _parms = fn.toString().replace(/^function(.*?)\((.*?)\)([\s\S]+)$/,"$2").split(",");
+		var _parms = fn.toString().replace(/^function(.*?)\((.*?)\)([\s\S]+)$/,"$2").replace(/\s/igm,"").split(",");
 		for(var i=0;i<_parms.length;i++)
 		{
 			_parms[i] = F.get(_parms[i]);
