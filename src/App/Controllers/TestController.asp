@@ -22,15 +22,29 @@ TestController.extend("Index", function(name){
 });
 
 TestController.extend("Show", function(mode){
-	var data={};
-	data["key2"]="value2";
-	data["key1"]="value1";
-	data["key3"]="测试";
-	data = F.object.sort(data);
-	F.object.toURIString.fn=0;
-	F.echo(F.object.toURIString(data));
+	//todo
 });
 
+TestController.extend("Attrs", function(){
+	var path = __DIR__ + "\\20140721.png", attr = -1;
+	F.echo("文件路径：" + path, true);
+	
+	F.echo("<br />设置属性：系统、只读、隐藏", true);
+	attr = IO.attr(path,IO.attrs.System | IO.attrs.ReadOnly | IO.attrs.Hidden);
+	F.echo("操作结果：" + IO.attr.toString(attr), true);
+	
+	F.echo("<br />添加属性：存档", true);
+	attr = IO.attr.add(path,IO.attrs.Archive);
+	F.echo("操作结果：" + IO.attr.toString(attr), true);
+	
+	F.echo("<br />移除属性：系统", true);
+	attr = IO.attr.remove(path,IO.attrs.System)
+	F.echo("操作结果：" + IO.attr.toString(attr), true);
+	
+	F.echo("<br />移除属性：隐藏", true);
+	attr = IO.attr.remove(path,IO.attrs.Hidden);
+	F.echo("操作结果：" + IO.attr.toString(attr), true);
+});
 TestController.extend("Session", function(){
 	var Session = F.require("session");
 	Session("name","艾恩123456789sdfsdfsdf");
@@ -50,7 +64,7 @@ TestController.extend("ShowSession", function(){
 TestController.extend("HttpRequest", function(){
 	F.require("net/http/request");
 	var text = Exports.net.http.request.create(
-		"http://" + F.server("HTTP_HOST") + "/?m=Test&a=ShowServer",
+		"http://" + F.server("HTTP_HOST") + Mo.Config.Global.MO_ROOT + "?m=Test&a=ShowServer",
 		{
 			method : "POST",
 			headers : [
@@ -80,7 +94,7 @@ TestController.extend("HttpUpload", function(){
 	F.require("net/http/upload");
 	/*Exports.net.http.upload.create(url[,opt])*/
 	var upload = Exports.net.http.upload.create(
-		"http://" + F.server("HTTP_HOST") + "/?m=Test&a=UploadFile",
+		"http://" + F.server("HTTP_HOST") + Mo.Config.Global.MO_ROOT + "?m=Test&a=UploadFile",
 		/*下面通过create方法直接添加表单数据*/
 		{
 			forms :{

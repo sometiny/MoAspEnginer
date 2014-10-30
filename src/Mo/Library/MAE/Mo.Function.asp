@@ -1144,6 +1144,17 @@ var GLOBAL = this,
 				}
 				if (parm === null) return "NULL";
 				if (typeof parm == "object") {
+					if ((parm instanceof ActiveXObject) && (typeof(parm.Count) == "number") && (typeof(parm.Keys) == "unknown") && (typeof(parm.Items) == "unknown") && (typeof(parm.Key) == "unknown") && (typeof(parm.Item) == "unknown")) {
+						var returnValue = "dictionary{\r\n";
+						$f.each(parm, function(i) {
+							returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this(i), level + 1) + "\r\n";
+						});
+						returnValue += dumpHelper__(level - 1) + "}";
+						return returnValue;
+					}
+					if (parm instanceof ActiveXObject){
+						return "[ActiveXObject]";
+					}
 					if (parm.constructor == Date) {
 						return "date(" + parm.toString() + ")";
 					}
@@ -1159,14 +1170,6 @@ var GLOBAL = this,
 						var returnValue = "object{\r\n";
 						$f.foreach(parm, function(i) {
 							returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this[i], level + 1) + "\r\n";
-						});
-						returnValue += dumpHelper__(level - 1) + "}";
-						return returnValue;
-					}
-					if ((parm instanceof ActiveXObject) && (typeof(parm.Count) == "number") && (typeof(parm.Keys) == "unknown") && (typeof(parm.Items) == "unknown") && (typeof(parm.Key) == "unknown") && (typeof(parm.Item) == "unknown")) {
-						var returnValue = "dictionary{\r\n";
-						$f.each(parm, function(i) {
-							returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this(i), level + 1) + "\r\n";
 						});
 						returnValue += dumpHelper__(level - 1) + "}";
 						return returnValue;

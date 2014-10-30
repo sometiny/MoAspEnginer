@@ -24,6 +24,10 @@ var $io = exports.io || (function()
 		path = F.mappath(path);
 		return $Io.fso.GetBaseName (path);
 	};
+	$Io.parent = function(path)
+	{
+		return $io.fso.GetParentFolderName(F.mappath(path));
+	};
 	$Io.get = function(path)
 	{
 		path = F.mappath(path);
@@ -41,8 +45,57 @@ var $io = exports.io || (function()
 			ExceptionManager.put("0x2d1e","io.get","file or directory is not exists.");
 			return {};
 		}
+		return {
+			attr : src.Attributes,
+			toString : function(){return $Io.attr.toString(src.Attributes);},
+			date : {
+				created: src.DateCreated,
+				accessed: src.DateLastAccessed,
+				modified: src.DateLastModified
+			},
+			name : src.Name,
+			path : src.Path,
+			size : src.Size,
+			type : src.Type,
+			src : src
+		};
+	};
+	$Io.attr = function(path,attr)
+	{
+		var b = $Io.get(path);
+		if(!b.hasOwnProperty("src")) return -1;
+		if(attr!==undefined)
+		{
+			if(attr & 8 || attr & 16 || attr & 64 || attr & 128)
+			{
+				ExceptionManager.put("0x2d0d","io.attr","attributes value error.");
+				return -1;
+			}
+			return b.src.Attributes = attr;
+		}
+		else
+		{
+			return b.src.Attributes;
+		}
+	};
+	$Io.attr.add = function(path, attr)
+	{
+		var b = $Io.get(path);
+		if(!b.hasOwnProperty("src")) return -1;
+		if(!(b.src.Attributes & attr)) return b.src.Attributes |= attr;
+		return -1;
+	};
+	$Io.attr.remove = function(path, attr)
+	{
+		var b = $Io.get(path);
+		if(!b.hasOwnProperty("src")) return -1;
+		if(b.src.Attributes & attr) return b.src.Attributes ^= attr;
+		return -1;
+	};
+	$Io.attr.toString = function(attr)
+	{
 		var attrString = "";
-		if(src.Attributes>0)
+		if(attr>0)
 		{
 			for(var i in $io.attrs)
 			{
@@ -50,7 +103,7 @@ var $io = exports.io || (function()
 				{
 					continue;
 				}
-				if(src.Attributes & $io.attrs[i])
+				if(attr & $io.attrs[i])
 				{
 					attrString += i + ", ";
 				}
@@ -64,50 +117,7 @@ var $io = exports.io || (function()
 		{
 			attrString = "Normal";
 		}
-		return {
-			attr : src.Attributes,
-			attrString : attrString,
-			date : {
-				created: src.DateCreated,
-				accessed: src.DateLastAccessed,
-				modified: src.DateLastModified
-			},
-			name : src.Name,
-			path : src.Path,
-			size : src.Size,
-			type : src.Type
-		};
-	};
-	$Io.attr = function(path,attr)
-	{
-		path = F.mappath(path);
-		var src = null;
-		if($io.file.exists(path))
-		{
-			src = $Io.fso.getFile(path);
-		}
-		else if($io.directory.exists(path))
-		{
-			src = $Io.fso.getFolder(path);
-		}
-		if(src==null)
-		{
-			ExceptionManager.put("0x2d0e","io.attr","file or directory is not exists.");
-			return;
-		}
-		if(attr!==undefined)
-		{
-			if(attr & 8 || attr & 16 || attr & 64 || attr & 128)
-			{
-				ExceptionManager.put("0x2d0d","io.attr","attributes value error.");
-				return;
-			}
-			src.Attributes = attr;
-		}
-		else
-		{
-			return src.Attributes;
-		}
+		return attrString;
 	};
 	return $Io;
 })();
@@ -348,15 +358,6 @@ $io.directory = $io.directory || (function()
 			return false;
 		}
 	};
-	$dir.parent = function(path)
-	{
-		path = F.mappath(path);
-		if(!$dir.exists(path))
-		{
-			return "";
-		}
-		return $io.fso.GetParentFolderName(path);
-	};
 	$dir.clear = function(path, filter)
 	{
 		path = F.mappath(path);
@@ -469,4 +470,5 @@ $io.directory.get = $io.file.get = $io.get;
 $io.directory.attr = $io.file.attr = $io.attr;
 $io.directory.base = $io.file.base = $io.base;
 $io.directory.absolute = $io.file.absolute = $io.absolute;
+$io.directory.parent = $io.file.parent = $io.parent;
 return exports.io = $io;
