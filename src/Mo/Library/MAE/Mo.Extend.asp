@@ -293,8 +293,9 @@ IClass.create = function(__construct,__destruct){
 			if(typeof fn=="function")this.__STATUS__ = fn.apply(this,arguments)!==false;
 		};
 	})(__construct);
-	newClass.extend = _this.extend;
 	newClass.prototype = new _this();
+	newClass.extend = _this.extend;
+	newClass.AsPrivate = function(){this.__PRIVATE__=true;return this;};
 	if(typeof __destruct=="function")newClass.prototype.__destruct = __destruct;
 	return newClass;
 };

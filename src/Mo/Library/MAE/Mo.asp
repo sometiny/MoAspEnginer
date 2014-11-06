@@ -506,9 +506,6 @@ var IO, JSON, Mo = Mo || (function(){
 		if(!F.string.test(this.Group,/^(\w+)$/i)) this.Group = "";
 		if(this.Group != "") this.Group += "/";
 		if(G.MO_CONTROLLER_CNAMES && G.MO_CONTROLLER_CNAMES.hasOwnProperty(this.Method.toLowerCase())) this.Method = G.MO_CONTROLLER_CNAMES[this.Method.toLowerCase()];
-		if(G.MO_DISABLED_CONTROLLERS != ""){
-			if(("," + G.MO_DISABLED_CONTROLLERS.toLowerCase() + ",").indexOf("," + this.Method.toLowerCase() + ",") >= 0)F.exit("模块[" + this.Method + "]已被禁止自动调用。");
-		}
 		if(G.MO_CACHE){
 			this.CacheFileName = F.md5(F.server("URL") + F.get.toURIString() + "");
 			if(F.exists(G.MO_CACHE_DIR + this.CacheFileName + ".cache")){
@@ -541,7 +538,9 @@ var IO, JSON, Mo = Mo || (function(){
 		}
 		if(can_LoadController && _LoadController(ModelPath,this.RealMethod)){
 			try{
-				var MC = F.initialize(this.RealMethod + "Controller");
+				eval("var __CC__ = " + this.RealMethod + "Controller;");
+				if(__CC__["__PRIVATE__"]===true) F.exit("模块[" + this.Method + "]不存在");
+				var MC = new __CC__();
 				if(MC.__STATUS__===true){
 					var action_ = this.Action;
 					if(G.MO_ACTION_CASE_SENSITIVITY===false) action_ = action_.toLowerCase();
