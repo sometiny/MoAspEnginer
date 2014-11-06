@@ -281,6 +281,7 @@ IClass.extend = function(name,fn){
 		return;
 	}
 	this.prototype[name] = fn;
+	return new IFunction(fn);
 };
 IClass.extend("__destruct", function(){});
 IClass.create = function(__construct,__destruct){
@@ -299,6 +300,10 @@ IClass.create = function(__construct,__destruct){
 };
 
 /*IAction*/
+function IFunction(fn){
+	this.fn = fn;
+}
+IFunction.prototype.AsPrivate = function(){this.fn.__PRIVATE__=true;};
 function IAction(){
 	IClass.call(this);
 	Mo.assign("MO_METHOD",Mo.RealMethod);
@@ -320,6 +325,7 @@ IAction.extend = function(name,isPost,fn){
 		fn = isPost;
 	}
 	IClass.extend.call(this,name,fn);
+	return new IFunction(fn);
 };
 IAction.extend("assign",function(key,value){Mo.assign(key,value);});
 IAction.extend("display",function(tpl){Mo.display(tpl);});

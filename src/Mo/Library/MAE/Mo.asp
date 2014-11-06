@@ -545,7 +545,7 @@ var IO, JSON, Mo = Mo || (function(){
 				if(MC.__STATUS__===true){
 					var action_ = this.Action;
 					if(G.MO_ACTION_CASE_SENSITIVITY===false) action_ = action_.toLowerCase();
-					if(F.server("REQUEST_METHOD")=="POST" && MC[action_+"_Post_"]){
+					if(F.server("REQUEST_METHOD")=="POST" && MC[action_+"_Post_"] && MC[action_+"_Post_"]["__PRIVATE__"]!==true){
 						if(G.MO_PARSEACTIONPARMS === true)
 						{
 							MC[action_+"_Post_"].apply(MC,_getfunctionParms(MC[action_+"_Post_"]));
@@ -554,7 +554,7 @@ var IO, JSON, Mo = Mo || (function(){
 						{
 							MC[action_+"_Post_"]();
 						}
-					}else if(MC[action_]){
+					}else if(MC[action_] && MC[action_]["__PRIVATE__"]!==true){
 						if(G.MO_PARSEACTIONPARMS === true)
 						{
 							MC[action_].apply(MC,_getfunctionParms(MC[action_]));
@@ -566,7 +566,7 @@ var IO, JSON, Mo = Mo || (function(){
 					}else if(M.templateIsInApp(this.Action) || M.templateIsInCore(this.Action)){
 						M.display(this.Action);
 					}else{
-						if(MC["empty"]){
+						if(MC["empty"] && MC["empty"]["__PRIVATE__"]!==true){
 							this.RealAction = "empty";
 							MC["empty"](this.Action);
 						}else{
