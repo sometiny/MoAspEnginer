@@ -1,0 +1,65 @@
+﻿<script language="jscript" runat="server">
+/*
+** File: Function.asp
+** Usage: common functions for global. 
+**		if you add some functions, you should add the names to exports.
+**		or you can not use then in your business.
+** About: 
+**		support@mae.im
+*/
+/*export the functions*/
+var exports=["CreatePageList","is_empty","IsEmpty"];
+
+
+/****************************************************
+'@description	ensure the variable is empty or not.
+'@parameter	variable [Variant] : the variable needs to ensure
+'@return	[Boolean] description
+'****************************************************/
+function is_empty(variable){
+	return variable==""||variable===null||variable===undefined;
+}
+
+
+/****************************************************
+'@description	create page string for records
+'@parameter	URL [String] : can be empty. if it is empty, i will fetch from current request.
+'@parameter	RecordCount [Int] : records count in the query result.
+'@parameter	PageSize [Int] : records count of every page
+'@parameter	CurrentPage [Int] : current page number
+'@return	[String]
+'****************************************************/
+function CreatePageList(URL, RecordCount, PageSize, CurrentPage){
+	var PageCount ,PageStr="";
+	if(URL==""){
+		F.object.toURIString.clearFilter();
+		F.object.toURIString.filter.push("!page");
+		URL=("?" + F.get.toURIString() + "&page={#page}").replace("?&","?");
+		F.object.toURIString.clearFilter();
+	}
+	CurrentPage = parseInt(CurrentPage);
+	RecordCount = parseInt(RecordCount);
+	PageSize = parseInt(PageSize);
+	var rp=RecordCount % PageSize;
+	PageCount = (RecordCount-rp) / PageSize + (rp==0?0:1);
+	PageStr = "共[" + RecordCount + "]条记录 [" + PageSize + "]条/页 当前[" + CurrentPage + "/" + PageCount + "]页&nbsp; ";
+	if(CurrentPage == 1 || PageCount == 0){
+		PageStr += "首页&nbsp;"
+		PageStr += "上页&nbsp;"
+	}else{
+		PageStr += "<a href=\"" + URL.replace("{#page}", 1) + "\">首页</a>&nbsp;";
+		PageStr += "<a href=\"" + URL.replace("{#page}", CurrentPage-1) + "\">上页</a>&nbsp;";
+	}
+	if(CurrentPage == PageCount || PageCount == 0){
+		PageStr += "下页&nbsp;"
+		PageStr += "尾页&nbsp;"
+	}else{
+		PageStr += "<a href=\"" + URL.replace("{#page}", CurrentPage + 1) + "\">下页</a>&nbsp;";
+		PageStr += "<a href=\"" + URL.replace("{#page}", PageCount) + "\">尾页</a>&nbsp;";
+	}
+	return PageStr;
+}
+
+/*create a cname of is_empty, and export it to global Env. too*/
+var IsEmpty = is_empty;
+</script>

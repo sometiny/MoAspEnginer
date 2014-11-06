@@ -1,0 +1,45 @@
+﻿<include file="top" />
+<table width="100%">
+<tr class="h"><td>ID</td><td>板块</td><td>标题</td><td>时间</td><td>IP</td><td>来源</td><td>回复状态</td><td>操作</td></tr>
+<loop name="Thread">
+<tr class="l">
+	<td>{$Thread.Id}</td><td>{$Thread.ForumName:F.encodeHtml}</td><td>{$Thread.Title:F.encodeHtml}</td><td>{$Thread.PostDate:F.untimespan}</td>
+	<td>{$Thread.PostIp}</td><td><a href="{$Thread.PostHomepage:F.encodeHtml}" target="_blank">{$Thread.PostFrom:F.encodeHtml}({$Thread.PostEmail:F.encodeHtml})</a></td>
+	<td><eq name="Thread.IsReplied" value="0"><span class="red">未回复</span></else><span class="green">已回复</span></eq></td>
+	<td><a href="?m=Thread&a=reply&Id={$Thread.Id}">回复</a>&nbsp;|&nbsp;
+	<a href="?m=Thread&Id={$Thread.Id}" onclick="ShowEditThread({$Thread.Id});return false;">快捷回复</a>&nbsp;|&nbsp;
+	<a href="?m=Thread&a=delete&Id={$Thread.Id}" onclick="return window.confirm('确定删除当前留言吗？');">删除</a></td>
+</tr>
+</loop>
+<tr class="h"><td colspan="8"><page for="Thread" /></td></tr>
+</table>
+<script type="text/javascript">
+function ShowEditThread(Id){
+	Ajax({
+		url:"?m=Thread&a=edit&Id=" + Id,
+		succeed:function(msg){
+			F("#DialogAlert").attr("title","回复留言").html(msg).dialog({
+				"width":575,"height":600,"maxHeight":600,buttons:{
+					"立即回复":function(){
+						Ajax({
+							form:document.forms['frm_saverules'],
+							succeed:function(msg){
+								ShowTips("留言回复结果",msg,
+									(function(msg,Id){
+										return function(){
+											if(msg=="已回复")ShowEditThread(Id);
+										};
+									})(msg,Id)
+								);
+							}
+						});
+						return false;
+					}
+				}
+			});
+		}
+	});
+}
+</script>
+<div id="DialogAlert"></div>
+<include file="foot" />

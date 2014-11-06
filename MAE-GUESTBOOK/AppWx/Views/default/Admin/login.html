@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>登录管理中心</title>
+<css file="/Contents/Css/reset.css" />
+<css file="/Contents/Css/css.css" />
+</head>
+<body>
+	<div id="login-wapper">
+		<div id="login-body">
+			<form action="?m=Login" method="post" style="padding:20px">
+			<div class="login-list clearfix">
+				<div class="title">用户</div>
+				<div class="content"><input type="text" name="login.name" /></div>
+			</div>
+			<div class="login-list clearfix">
+				<div class="title">密码</div>
+				<div class="content"><input type="password" name="login.pwd" /></div>
+			</div>
+			<div class="login-list clearfix">
+				<div class="title">验证码</div>
+				<div class="content code"><input type="text" name="login.code" /></div>
+				<div class="extra"><img src="?m=Login&a=code" onclick="this.src='?m=Login&a=code&_t='+Math.random();" style="cursor:pointer" /></div>
+			</div>
+			<div class="login-buttons">
+				<input type="submit" value="登录管理中心" />
+			</div>
+			<nempty name="Mo.Get.msg">
+				<div id="error_tips" class="<eq name="Mo.get.error" value="0">green information</else>red notice</eq>">{$Mo.Get.msg:F.encodeHtml}</div>
+				<script type="text/javascript">
+					window.setTimeout(function(){
+						document.getElementById("error_tips").style.display="none";
+					}, 2500)
+				</script>
+			</nempty>
+			</form>
+		</div>
+	</div>
+</body>
+</html>

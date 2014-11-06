@@ -1,0 +1,10 @@
+﻿<include file="top" />
+<loop name="Thread">
+<div class="content-box">
+	<h5>Post By '{$Thread.PostFrom}', At '{$Thread.PostIp}', On '{$Thread.PostDate:F.untimespan}' About '<a href="?Id={$Thread.ForumTag}">{$Thread.ForumName}</a>'</h5>
+	<h4><a href="?a=thread&Id={$Thread.Id}"><eq name="Thread.IsReplied" value="1" type="number">【已回复】</eq>{$Thread.Title}</a></h4>
+	<div class="content">{$Thread.Description}</div>
+	<eq name="Thread.IsReplied" value="1" type="number"><div class="reply"><quot>{$Thread.Id:Mo.A.Home.GetReply}</quot></div></eq>
+</div>
+</loop>
+<include file="foot" />

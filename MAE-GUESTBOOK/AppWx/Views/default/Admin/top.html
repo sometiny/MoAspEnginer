@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>{$subtitle}-后台管理</title>
+<css file="/Contents/Css/reset.css" />
+<css file="/Contents/Css/css.css" />
+<js file="/Contents/Scripts/f.js" />
+<js file="/Contents/Scripts/f.e.js" />
+<js file="/Contents/Scripts/f.ajax.js" />
+<js file="/Contents/Scripts/common.js" />
+<script type="text/javascript">
+var fix = function(){
+	F("#content-body").css({"height":(F.rectangle().height-60)+"px"});
+};
+window.onload=fix;
+window.onresize=fix;
+<nempty name="Mo.Get.msg">F(function(){ShowTipsTop.call({$Mo.Get.error:F.int=0},decodeURIComponent("{$Mo.Get.msg:F.encode}"),<eq name="Mo.Get.error:F.int=0" value="0" type="number">1000</else>2000</eq>);});</nempty>
+</script>
+</head>
+<body>
+<div id="wapper">
+	<div id="wapper-header">
+		<div id="header-title">Demo For MoAspEnginer</div>
+		<div id="header-information"><span class="right"><a href="?m=Modify">修改密码</a> | <a href="?m=Login&a=logout">退出系统</a></span>&nbsp; 欢迎您，{$Mo.session.wx_auth_name}</div>
+	</div>
+	<div id="wapper-body" class="clearfix">
+		<div id="slider-bar">
+			<ul class="clearfix">
+				<li class="slider-bar-title">系统管理</li>
+				<li><a href="?m=Admin"<expression and="Mo.Get.m eq Admin"> class="current"</expression>>系统配置</a></li>
+				<li><a href="?m=Forum"<expression and="Mo.Get.m eq Forum"> class="current"</expression>>版块管理</a></li>
+				<li><a href="?m=Thread"<expression and="Mo.Get.m eq Thread"> class="current"</expression>>留言管理</a></li>
+				<li><a href="?m=Home">前台首页</a></li>
+				<li><a href="?m=Cache">清理缓存</a></li>
+			</ul>
+		</div>
+		<div id="content-body">
+			<div id="content-body-content">

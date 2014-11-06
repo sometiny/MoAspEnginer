@@ -1,0 +1,18 @@
+﻿<include file="top" />
+<div class="box-forum">
+	<h4>版块：<a href="?Id={$Thread.ForumTag}">{$Thread.ForumName}</a></h4>
+	<h5>名字：{$Thread.PostFrom}</h5>
+	<h5>IP：{$Thread.PostIp}</h5>
+	<h5>日期：{$Thread.PostDate:F.untimespan}</h5>
+	<h5>标题：{$Thread.Title}</h5>
+	<h5>{$Thread.Description}</h5>
+</div>
+<loop name="Reply">
+<div class="content-box-reply clearfix">
+	<div class="reply-time">Post By '{$Reply.PostFrom}' On '{$Reply.PostDate:F.untimespan}'</div>
+	<div class="reply-content">{$Reply.Description}</div>
+</div>
+</loop>
+<div id="wapper-page"><page for="Reply" /></div>
+<div id="DialogAlert"></div>
+<include file="foot" />

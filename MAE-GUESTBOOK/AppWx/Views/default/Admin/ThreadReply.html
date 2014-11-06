@@ -1,0 +1,47 @@
+﻿<include file="top" />
+<form action="?m=Thread&a=save" method="post" name="frm_saverules" onsubmit="return false;">
+<input type="hidden" name="Id" value="{$Thread.Id}" />
+<table width="100%">
+<tr class="h"><td colspan="2">留言详细内容</td></tr>
+<tr class="l"><td width="100">Id</td><td>{$Thread.Id}</td></tr>
+<tr class="l"><td>板块</td><td>{$Thread.ForumName:F.encodeHtml}</td></tr>
+<tr class="l"><td>标题</td><td>{$Thread.Title:F.encodeHtml}</td></tr>
+<tr class="l"><td>内容</td><td>{$Thread.Description:F.encodeHtml}</td></tr>
+<tr class="l"><td>日期</td><td>{$Thread.PostDate:F.untimespan}</td></tr>
+<tr class="l"><td>用户信息</td><td><a href="{$Thread.PostHomepage:F.encodeHtml}" target="_blank">{$Thread.PostFrom:F.encodeHtml}({$Thread.PostEmail:F.encodeHtml})@{$Thread.PostIp}</a></td></tr>
+<tr class="h"><td colspan="2">回复记录</td></tr>
+<loop name="Reply">
+<tr class="l"><td colspan="2">[<a href="javascript:void(0)" onclick="ReplyDelete({$Reply.Id},this);">删除</a>][<i>{$Reply.PostDate:F.untimespan}</i>]&nbsp;{$Reply.Description:F.encodeHtml}</td></tr>
+</loop>
+<tr class="h"><td colspan="2"><page for="Reply" /></td></tr>
+<tr class="l"><td>新回复</td><td><textarea cols="60" rows="4" name="Description"></textarea>&nbsp;<input type="button" value="回复" onclick="ReplyMessage(this.form);" /></td></tr>
+</table>
+</form>
+<script type="text/javascript">
+function ReplyDelete(Id,src){
+	F("#DialogAlert").attr("title","删除回复").html("确定要删除本条回复吗？").dialog({
+		"width":300,"height":200,buttons:{
+			"立即删除":function(){
+				Ajax({
+					url:"?m=Thread&a=deletereply&Id=" + Id,
+					succeed:function(msg){
+						ShowTips("操作结果",msg,2000);
+						if(msg=="删除成功")src.parentNode.parentNode.parentNode.removeChild(src.parentNode.parentNode);
+					}
+				});
+			}
+		}
+	});
+}
+function ReplyMessage(frm){
+	Ajax({
+		form:frm,
+		succeed:function(msg){
+			ShowTips("留言回复结果",msg,1000);
+			if(msg=="已回复")window.setTimeout(function(){window.location.reload();}, 1000);
+		}
+	});
+}
+</script>
+<div id="DialogAlert"></div>
+<include file="foot" />

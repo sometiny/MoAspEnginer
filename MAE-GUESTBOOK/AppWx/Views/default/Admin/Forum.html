@@ -1,0 +1,42 @@
+﻿<include file="top" />
+<form action="?m=Forum&a=save" method="post">
+	<input type="hidden" name="Id" value="{$Mo.Get.int.Id}" />
+	<table width="100%">
+	<tr class="h"><td>ID</td><td>名称</td><td>简介</td><td>允许留言</td><td>隐藏</td><td>排序</td><td>操作</td></tr>
+	<loop name="Forum">
+	<tr class="l">
+		<td>{$Forum.Id}</td><td>{$Forum.Title:F.encodeHtml}</td><td>{$Forum.Description:F.encodeHtml}</td>
+		<td><eq name="Forum.AllowPost" value="0" type="number">不</eq>允许</td>
+		<td><eq name="Forum.Hidden" value="0" type="number">显示</else>隐藏</eq></td><td>{$Forum.OrderBy}</td>
+		<td><a href="?m=Forum&Id={$Forum.Id}">修改</a>&nbsp;|&nbsp;
+		<a href="?m=Forum&a=delete&Id={$Forum.Id}" onclick="return window.confirm('确定删除当前板块吗？');">删除</a></td>
+	</tr>
+	</loop>
+	<tr class="h"><td colspan="7"><page for="Forum" /></td></tr>
+	</table>
+	<table width="100%">
+		<tr class="h"><td colspan="2">添加/修改板块</td></tr>
+		<tr class="l">
+			<td class="h" width="100">名称</td>
+			<td><input type="text" name="Title" value="{$E.Title:F.encodeHtml}" class="width_250" /></td>
+		</tr>
+		<tr class="l">
+			<td class="h">简介</td>
+			<td><textarea name="Description" cols="60" rows="4">{$E.Description:F.encodeHtml}</textarea></td>
+		</tr>
+		<tr class="l">
+			<td class="h">属性</td>
+			<td>
+				<input type="checkbox" name="AllowPost" value="1"<eq name="E.AllowPost" value="1" type="number"> checked="checked"</eq> />&nbsp;允许留言
+				<input type="checkbox" name="Hidden" value="1"<eq name="E.Hidden" value="1" type="number"> checked="checked"</eq> />&nbsp;隐藏
+			</td>
+		</tr>
+		<tr class="l">
+			<td class="h">排序号</td>
+			<td><input type="text" name="OrderBy" value="{$E.OrderBy}" />
+				&nbsp;<input type="submit" value="<eq name="Mo.Get.int.Id" value="0" type="number">添加</else>修改</eq>" />
+				&nbsp;<input type="button" onclick="window.location='?m=Forum'" value="取消" /></td>
+		</tr>
+	</table>
+</form>
+<include file="foot" />
