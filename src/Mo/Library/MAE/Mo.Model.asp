@@ -191,7 +191,7 @@ function __Model__(tablename,pk,cfg,tablePrex){
 	}
 	this.table = (tablePrex || (this.base.cfg["DB_TABLE_PERX"] || Mo.Config.Global.MO_TABLE_PERX))+this.table;
 	this.tableWithNoSplitChar = this.table;
-	if(this.base.useCommandForUpdateOrInsert && !this.base.cfg["DB_Schema"]){
+	if(this.base.useCommandForUpdateOrInsert){
 		if(!this.base.cfg["DB_Schema"])this.base.cfg["DB_Schema"]={};
 		if(!this.base.cfg["DB_Schema"][this.table]){
 			this.base.cfg["DB_Schema"][this.table] = ModelHelper.GetColumns.call(this.base,this.table);
