@@ -115,10 +115,6 @@ Model__.connect = function(cfg){
 		if(!(cfg_["DB_Type"] == "ACCESS" || cfg_["DB_Type"] == "MSSQL" || !Mo.Config.Global.MO_LOAD_VBSHELPER)){
 			Model__.connections[cfg].useCommandForUpdateOrInsert = false;
 		}
-		if(Model__.connections[cfg].useCommandForUpdateOrInsert && !cfg_["DB_Schema"]){
-			cfg_["DB_Schema"] = ModelHelper.GetTables.call(Model__.connections[cfg]);
-			Mo.C.Save(cfg,cfg_);
-		}
 		if(cfg_["DB_Type"] == "MYSQL"){
 			Model__.connections[cfg].splitChars = ["`","`"];
 		}
@@ -195,6 +191,13 @@ function __Model__(tablename,pk,cfg,tablePrex){
 	}
 	this.table = (tablePrex || (this.base.cfg["DB_TABLE_PERX"] || Mo.Config.Global.MO_TABLE_PERX))+this.table;
 	this.tableWithNoSplitChar = this.table;
+	if(this.base.useCommandForUpdateOrInsert && !this.base.cfg["DB_Schema"]){
+		if(!this.base.cfg["DB_Schema"])this.base.cfg["DB_Schema"]={};
+		if(!this.base.cfg["DB_Schema"][this.table]){
+			this.base.cfg["DB_Schema"][this.table] = ModelHelper.GetColumns.call(this.base,this.table);
+			Mo.C.Save(cfg,this.base.cfg);
+		}
+	}
 	if(this.base.cfg["DB_Type"] == "MSSQL"){
 		this.table = this.base.splitChars[0] + this.base.cfg["DB_Name"] +this.base.splitChars[1] + "." + this.base.splitChars[0] + (this.base.cfg["DB_Owner"] || "dbo") +this.base.splitChars[1] + "." + this.base.splitChars[0] + this.table+this.base.splitChars[1];
 	}else{
