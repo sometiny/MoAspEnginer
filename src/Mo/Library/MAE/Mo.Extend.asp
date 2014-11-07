@@ -160,29 +160,60 @@ DataTable.prototype.assign = function(name){
 	return this;
 };
 
-DataTable.prototype.getjson = function(dateformat){
-	var ret = "[";
-	//dateformat = dateformat || "yyyy-MM-dd HH:mm:ss";
+DataTable.prototype.getjson = function(dateformat, callback){
+	var ret = "[",
+		isFn = false,
+		format = "";
+	if(typeof dateformat=="function"){
+		callback = dateformat;
+		dateformat = undefined;
+	}
+	if(typeof dateformat=="object"){
+		if(dateformat.hasOwnProperty("format")){
+			format = dateformat["format"];
+			if(typeof format=="object"){
+				var formatstr="";
+				for(var i in format){
+					if(!format.hasOwnProperty(i))continue;
+					formatstr+="\"" + i + "\":" + format[i]+",";
+				}
+				if(formatstr!="" && formatstr.substr(formatstr.length-1)==",") formatstr = formatstr.substr(0,formatstr.length-1);
+				format = formatstr;
+			}
+		}
+		callback = dateformat["callback"];
+		dateformat = dateformat["dateformat"];
+	}
+	isFn = (typeof callback=="function");
+	var ret = "[",
+		isFn = (typeof callback=="function");
 	while(!this.eof()){
 		var D = this.read();	
 		ret += "{"
-		for(var i in D){
-			if(!D.hasOwnProperty(i))continue;
-			var val = D.getter__(i)
-			var ty = typeof val;
-			ret += "\"" + i + "\":";
-			if(ty == "number"){
-				ret += val + ",";
-			}else if(ty == "date"){
-				if(dateformat === undefined)ret += "\"" + (new Date(val)).getTime() + "\",";
-				else ret += "\"" + F.formatdate(val,dateformat) + "\",";
-			}else if(ty == "string"){
-				ret += "\"" + F.jsEncode(val) + "\",";
-			}else{
-				if(!isNaN(val)){
+		if(format!=""){
+			ret += F.format(format,D);
+		}else{
+			for(var i in D){
+				if(i=="ROWID_" || !D.hasOwnProperty(i))continue;
+				if(isFn && callback.call(D,i)===false)continue;
+				var val = D.getter__(i)
+				var ty = typeof val;
+				ret += "\"" + i + "\":";
+				if(ty == "number"){
 					ret += val + ",";
+				}else if(ty == "date"){
+					if(dateformat === undefined)ret += "\"" + (new Date(val)).getTime() + "\",";
+					else ret += "\"" + F.formatdate(val,dateformat) + "\",";
+				}else if(ty == "string"){
+					ret += "\"" + F.jsEncode(val) + "\",";
+				}else if(ty == "unknown"){
+					ret += "\"unknown\",";
 				}else{
-					ret += "\"" + val + "\",";
+					if(!isNaN(val)){
+						ret += val + ",";
+					}else{
+						ret += "\"" + val + "\",";
+					}
 				}
 			}
 		}
