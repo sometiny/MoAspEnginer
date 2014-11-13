@@ -865,7 +865,7 @@ var GLOBAL = this,
 			}
 			if (typeof len == "string") {
 				if (src.indexOf(len) < 0) return src;
-				return src.substr(src.indexOf(len) + 1);
+				return src.substr(src.lastIndexOf(len) + len.length);
 			}
 			return src;
 		};
@@ -1079,9 +1079,13 @@ var GLOBAL = this,
 					var i = 0;
 					do {
 						enc1 = base64keyStr_.indexOf(Str.charAt(i++));
+						if(enc1<0)continue;
 						enc2 = base64keyStr_.indexOf(Str.charAt(i++));
+						if(enc2<0)continue;
 						enc3 = base64keyStr_.indexOf(Str.charAt(i++));
+						if(enc3<0)continue;
 						enc4 = base64keyStr_.indexOf(Str.charAt(i++));
+						if(enc4<0)continue;
 						chr1 = (enc1 << 2) | (enc2 >> 4);
 						chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
 						chr3 = ((enc3 & 3) << 6) | enc4;
