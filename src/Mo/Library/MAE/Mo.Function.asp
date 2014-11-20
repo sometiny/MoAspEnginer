@@ -212,7 +212,7 @@ var GLOBAL = this,
 			server__[key] = value;
 			return;
 		};
-		$f.cookie = function(key, value, expired, domain, path, Secure) {
+		$f.cookie = function(key, value, expired, domain, path, secure) {
 			if (key == undefined) return "";
 			var mkey = key,
 				skey = "";
@@ -233,6 +233,12 @@ var GLOBAL = this,
 			} else {
 				Response.Cookies(mkey)(skey) = value;
 			}
+			if(typeof expired=="object" && expired.constructor==Object){
+				domain = expired["domain"];
+				path = expired["path"];
+				secure = expired["secure"];
+				expired = expired["expired"];
+			}
 			if (expired !== undefined && !isNaN(expired)) {
 				var dt = new Date();
 				dt.setTime(dt.getTime() + parseInt(expired) * 1000);
@@ -244,8 +250,8 @@ var GLOBAL = this,
 			if (path !== undefined) {
 				Response.Cookies(mkey).Path = path;
 			}
-			if (Secure !== undefined) {
-				Response.Cookies(mkey).Secure = Secure;
+			if (secure !== undefined) {
+				Response.Cookies(mkey).Secure = secure;
 			}
 		};
 		$f.echo = function(debug, brnl, newline) {
