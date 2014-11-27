@@ -64,9 +64,11 @@ var IO, JSON, Mo = Mo || (function(){
 		path = G.MO_APP + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
 		if(vpath.indexOf("@") > 0)path = G.MO_ROOT + vpath.substr(vpath.indexOf("@") + 1) + "/Views/" + vpath.substr(0,vpath.indexOf("@")) + "." + G.MO_TEMPLATE_PERX;
 		if(!F.exists(path)) path = G.MO_CORE + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
-		path = F.mappath(path);
-		if(!F.exists(path))return;
-		var tempStr = IO.file.readAllText(path,G.MO_CHARSET);
+		if(!F.exists(path)){
+			ExceptionManager.put(0x6300,"_LoadTemplate()","模板[" + template + "]不存在");
+			return "";
+		}
+		var tempStr = IO.file.readAllText(F.mappath(path),G.MO_CHARSET);
 		var regexp = new RegExp("<include file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />","igm");
 		var Matches = F.string.matches(tempStr,regexp, function($0,$1){
 			templatelist2 = _RightCopy(templatelist,$1.split(":"));

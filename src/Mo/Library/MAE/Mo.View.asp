@@ -92,7 +92,7 @@ MoAspEnginerView.prototype.parse = function() {
 	this.Content = F.string.replace(this.Content, /<break \/>/igm, "{?MoAsp break; MoAsp?}");
 	this.Content = F.string.replace(this.Content, /<\/switch>/igm, "{?MoAsp } MoAsp?}");
 	this.Content = F.string.replace(this.Content, /<default \/>/igm, "{?MoAsp default : MoAsp?}");
-	this.Content = F.string.replace(this.Content, /<\/(n)?(eq|empty|lt|gt|expression)>/igm, "{?MoAsp } MoAsp?}");
+	this.Content = F.string.replace(this.Content, /<\/(n)?(eq|empty|lt|gt|expression|eof)>/igm, "{?MoAsp } MoAsp?}");
 	this.parseVari("");
 	this.parseAssignName();
 	this.parseMoAsAsp();
@@ -165,6 +165,16 @@ MoAspEnginerView.prototype.parsePreCombine = function() {
 //@DESCRIPTION:	parse page tag. i will call function 'CreatePageList' to create page string,if you do not define function property
 //****************************************************
 MoAspEnginerView.prototype.parsePage = function() {
+	F.string.matches(this.Content, /\<eof ([\s\S]+?)>/igm,function($0,$1){
+		var attrs = readAttrs__($1);
+		if (attrs.getter__("for") != "") {
+			this.Content = F.replace(
+				this.Content, 
+				$0, 
+				"{?MoAsp if(Mo.Assigns.hasOwnProperty(\"" + attrs.getter__("for") + "\") && Mo.Assigns[\"" + attrs.getter__("for") + "\"].eof()){ MoAsp?}"
+			);
+		}
+	},this);
 	F.string.matches(this.Content, /\<page ([\s\S]+?)>([\s\S]*?)\<\/page>/igm,function($0,$1,$2){
 		var attrs = readAttrs__($1);
 		if (attrs.getter__("for") != "") {
@@ -227,7 +237,6 @@ MoAspEnginerView.prototype.parseLoop = function() {
 			contenteof = F.replace(F.replace(contenteof, "\"", "\\\""), "\r\n", "");
 			if (contenteof != "") vbscript += "if(" + varname + ".eof()){\r\n__Mo__.Echo(\"" + contenteof + "\");\r\n}\r\n";
 			vbscript += "K__" + loopname + "=" + varname + ".pagesize *(" + varname + ".currentpage-1);\r\n";
-			//vbscript += "while(!" + varname + ".eof()){\r\nK__" + loopname + "=K__" + loopname + "+1;\r\nC__" + loopname + " =  " + varname + ".read(); MoAsp?}"
 			vbscript += varname + ".each(function(C__" + loopname + "){\r\nK__" + loopname + "=K__" + loopname + "+1;\r\n MoAsp?}"
 			this.Content = F.replace(this.Content, $0, vbscript);
 			this.Content = F.replace(this.Content, "{$" + loopname + ".Key__}", "{?MoAsp __Mo__.Echo(K__" + loopname + "); MoAsp?}");
