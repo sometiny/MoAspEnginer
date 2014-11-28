@@ -140,7 +140,7 @@ MoAspEnginerView.prototype.doSomethingToAsp = function() {
 	if (G.MO_DIRECT_OUTPUT) {
 		this.Content = "if(typeof Mo==\"undefined\"){Response.Write(\"invalid call.\");Response.End();}\r\n" + this.Content.replace(/__Mo__\.Echo\(/igm, "T = T `&&` (")
 	} else {
-		this.Content = "if(typeof Mo==\"undefined\"){Response.Write(\"invalid call.\");Response.End();}\r\nfunction Temp___(){\r\nvar WriteStreamText=function(st,txt){if(txt==null)txt=\"\";txt=txt.toString();st.WriteText(txt);};\r\n" + "var TplStream = F.activex.stream();\r\n" + "TplStream.Mode=3;\r\n" + "TplStream.Type=2;\r\n" + "TplStream.Charset=Mo.Config.Global.MO_CHARSET;\r\n" + "TplStream.Open();\r\n" + this.Content.replace(/__Mo__\.Echo\(/igm, "T = T `&&` (") + "\r\n" + "TplStream.Position=0;\r\n" + "var Temp____ = TplStream.ReadText();\r\n" + "TplStream.Close();\r\ndelete WriteStreamText;\r\nreturn Temp____;\r\n" + "}"
+		this.Content = "if(typeof Mo==\"undefined\"){Response.Write(\"invalid call.\");Response.End();}\r\nfunction Temp___(){\r\nvar WriteStreamText=function(st,txt){if(txt==null)txt=\"\";st.WriteText(String(txt));};\r\n" + "var TplStream = F.activex.stream();\r\n" + "TplStream.Mode=3;\r\n" + "TplStream.Type=2;\r\n" + "TplStream.Charset=Mo.Config.Global.MO_CHARSET;\r\n" + "TplStream.Open();\r\n" + this.Content.replace(/__Mo__\.Echo\(/igm, "T = T `&&` (") + "\r\n" + "TplStream.Position=0;\r\n" + "var Temp____ = TplStream.ReadText();\r\n" + "TplStream.Close();\r\ndelete WriteStreamText;\r\nreturn Temp____;\r\n" + "}"
 	}
 	this.Content = this.Content.replace(/--movbcrlf--/igm, "\\r\\n")
 	if (G.MO_DIRECT_OUTPUT) {
