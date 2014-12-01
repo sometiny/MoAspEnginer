@@ -193,6 +193,7 @@ function ModelCMDManager(cmd,model,ct){
     this.withQuery=true;
     this.parmsGet=false;
     this.totalRecordsParm="";
+    this.parms_count=0;
 }
 ModelCMDManager.New = function(cmd,model,ct){return new ModelCMDManager(cmd,model,ct);};
 ModelCMDManager.prototype.addParm = function(name,value,direction){
@@ -200,28 +201,58 @@ ModelCMDManager.prototype.addParm = function(name,value,direction){
 	this.parms_[name].Value = value||null;
 	this.parms_[name].Direction = direction||1;
 	return this.parms_[name];
-}
+};
 ModelCMDManager.prototype.addInput = function(name,value,t,size){
 	this.parms_[name] = this.cmdobj.CreateParameter(name, t, ModelHelper.Enums.ParameterDirection.INPUT, size, value||null);
 	return this.parms_[name];
-}
+};
+/*new method*/
+ModelCMDManager.prototype.add_parm_input = function(value,t,size){
+	return this.addInput("@PARM" + ++this.parms_count,value,t,size);
+};
+
 ModelCMDManager.prototype.addInputInt = function(name,value){
-	this.addInput(name,value,ModelHelper.Enums.DataType.DBTYPE_I4,4);
-}
+	return this.addInput(name,value,ModelHelper.Enums.DataType.DBTYPE_I4,4);
+};
+/*new method*/
+ModelCMDManager.prototype.add_parm_input_int = function(value){
+	return this.addInputInt("@PARM" + ++this.parms_count,value);
+};
+
 ModelCMDManager.prototype.addInputBigInt = function(name,value){
-	this.addInput(name,value,ModelHelper.Enums.DataType.DBTYPE_I8,8);
-}
+	return this.addInput(name,value,ModelHelper.Enums.DataType.DBTYPE_I8,8);
+};
+/*new method*/
+ModelCMDManager.prototype.add_parm_input_bigint = function(value){
+	return this.addInputBigInt("@PARM" + ++this.parms_count,value);
+};
+
 ModelCMDManager.prototype.addInputVarchar = function(name,value,size){
-	this.addInput(name,value,ModelHelper.Enums.DataType.VARCHAR,size||50);
-}
+	return this.addInput(name,value,ModelHelper.Enums.DataType.VARCHAR,size||50);
+};
+/*new method*/
+ModelCMDManager.prototype.add_parm_input_varchar = function(value,size){
+	return this.addInputVarchar("@PARM" + ++this.parms_count,value,size);
+};
+
 ModelCMDManager.prototype.addOutput = function(name,t,size){
 	this.parms_[name] = this.cmdobj.CreateParameter(name, t, ModelHelper.Enums.ParameterDirection.OUTPUT, size);
 	return this.parms_[name];
-}
+};
+/*new method*/
+ModelCMDManager.prototype.add_parm_output = function(t,size){
+	return this.addOutput("@PARM" + ++this.parms_count,t,size);
+};
+
 ModelCMDManager.prototype.addReturn = function(name,t,size){
 	this.parms_[name] = this.cmdobj.CreateParameter(name, t, ModelHelper.Enums.ParameterDirection.RETURNVALUE, size);
 	return this.parms_[name];
-}
+};
+/*new method*/
+ModelCMDManager.prototype.add_parm_return = function(t,size){
+	return this.addReturn("@RETURN",t,size);
+};
+
 ModelCMDManager.prototype.getparm = function(name){
 	if(!this.parmsGet){
 		for(var i in this.parms_){
@@ -232,9 +263,15 @@ ModelCMDManager.prototype.getparm = function(name){
 		}
 		this.parmsGet=true;
 	}
+	if(typeof name=="number") name="@PARM" + name;
 	if(!this.parms_.hasOwnProperty(name)) return null;
 	return this.parms_[name];
 }
+/*new method*/
+ModelCMDManager.prototype.get_parm_return = function(){
+	return this.getparm("@RETURN");
+};
+
 ModelCMDManager.prototype.execute = function(withQuery){
 	this.withQuery = withQuery===true;
 	this.model.exec(this);

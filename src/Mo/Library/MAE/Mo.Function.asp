@@ -286,6 +286,7 @@ var GLOBAL = this,
 					if (typeof argvalue == "object" && match[3] != "") {
 						argvalue = (new Function("return this" + "[\"" + match[3].replace(/\./igm, "\"][\"").replace(/\[\"(\d+)\"\]/igm, "[$1]") + "\"]")).call(argvalue);
 					}
+					if (argvalue==null) return "NULL";
 					var argformat = match[5];
 					var argtype = (typeof argvalue);
 					if (argformat != "") {
