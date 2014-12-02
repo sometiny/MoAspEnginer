@@ -194,16 +194,18 @@ function ModelCMDManager(cmd,model,ct){
     this.parmsGet=false;
     this.totalRecordsParm="";
     this.parms_count=0;
+    this.dataset = null;
+    this.affectedRows = -1;
 }
 ModelCMDManager.New = function(cmd,model,ct){return new ModelCMDManager(cmd,model,ct);};
 ModelCMDManager.prototype.addParm = function(name,value,direction){
 	this.parms_[name] = this.cmdobj.CreateParameter(name);
-	this.parms_[name].Value = value||null;
+	this.parms_[name].Value = value;
 	this.parms_[name].Direction = direction||1;
 	return this.parms_[name];
 };
 ModelCMDManager.prototype.addInput = function(name,value,t,size){
-	this.parms_[name] = this.cmdobj.CreateParameter(name, t, ModelHelper.Enums.ParameterDirection.INPUT, size, value||null);
+	this.parms_[name] = this.cmdobj.CreateParameter(name, t, ModelHelper.Enums.ParameterDirection.INPUT, size, value);
 	return this.parms_[name];
 };
 /*new method*/
@@ -257,7 +259,7 @@ ModelCMDManager.prototype.getparm = function(name){
 	if(!this.parmsGet){
 		for(var i in this.parms_){
 			if(!this.parms_.hasOwnProperty(i))continue;
-			if(this.parms_[i].Type>1){
+			if(this.parms_[i].Direction>1){
 				this.parms_[i].value = this.cmdobj(i).value;
 			}
 		}
@@ -286,10 +288,20 @@ ModelCMDManager.prototype.exec = function(){
 		if(!this.parms_.hasOwnProperty(i))continue;
 		this.cmdobj.Parameters.Append(this.parms_[i]);
 	}
-	if(this.withQuery){
-		return Model__.RecordsAffectedCmd(this.cmdobj,true);
-	}else{
-		Model__.RecordsAffectedCmd(this.cmdobj,false);
+	Model__.RecordsAffectedCmd_(this);
+	return this.dataset;
+}
+ModelCMDManager.prototype.next = function(ps){
+	if(this.dataset) {
+		this.dataset = this.dataset.NextRecordset();
+		if(this.dataset) return new DataTable(this.dataset,ps||-1);
+	}
+}
+ModelCMDManager.prototype.fetch = function(ps){
+	if(this.dataset) {
+		var dt = new DataTable(this.dataset,ps||-1);
+		try{this.dataset.close();}catch(ex){}
+		return dt;
 	}
 }
 </script>

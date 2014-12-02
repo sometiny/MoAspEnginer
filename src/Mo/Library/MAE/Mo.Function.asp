@@ -1214,13 +1214,17 @@ var GLOBAL = this,
 					}
 				}
 				if (typeof parm == "unknown") {
-					if (parm.constructor == VBArray) {
-						var returnValue = "array{\r\n";
-						$f.foreach((new VBArray(parm)).toArray(), function(i) {
-							returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this[i], level + 1) + "\r\n";
-						});
-						returnValue += dumpHelper__(level - 1) + "}";
-						return returnValue;
+					try{
+						if (parm.constructor == VBArray) {
+							var returnValue = "array{\r\n";
+							$f.foreach((new VBArray(parm)).toArray(), function(i) {
+								returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this[i], level + 1) + "\r\n";
+							});
+							returnValue += dumpHelper__(level - 1) + "}";
+							return returnValue;
+						}
+					}catch(ex){
+						return "unknown(" + parm + ")";
 					}
 				}
 				return "unknown(object)";

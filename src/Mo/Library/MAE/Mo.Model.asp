@@ -153,6 +153,9 @@ Model__.RecordsAffectedCmd = function(cmd,withQuery){
 		Model__.lastRows = RecordsAffectedvar;
 	}
 };
+Model__.RecordsAffectedCmd_ = function(opt){
+	return Model__.RecordsAffectedCmd(opt.cmd,opt.withQuery);
+};
 
 function __Model__(tablename,pk,cfg,tablePrex){
 	cfg = cfg ||Model__.defaultDBConf;
@@ -546,7 +549,8 @@ __Model__.prototype.Insert = __Model__.prototype.insert = function(){
 		if(d_[3] != null){
 			d_[3].withQuery = false;
 			d_[3].cmd = "insert into " + this.table + "(" + d_[0] + ") values(" + d_[1] + ")";
-			this.exec(cmd);
+			this.exec(d_[3]);
+			Model__.lastRows = d_[3].affectedRows;
 		}else{
 			this.query("insert into " + this.table + "(" + d_[0] + ") values(" + d_[1] + ")");
 		}
@@ -581,6 +585,7 @@ __Model__.prototype.Update = __Model__.prototype.update = function(){
 			d_[3].withQuery = false;
 			d_[3].cmd = "update " + this.table + " set " + d_[2] + (this.strwhere != ""?(" where " + this.strwhere):"");
 			this.exec(d_[3]);
+			Model__.lastRows = d_[3].affectedRows;1
 		}else{
 			this.query("update " + this.table + " set " + d_[2] + (this.strwhere != ""?(" where " + this.strwhere):""));
 		}

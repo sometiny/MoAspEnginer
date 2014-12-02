@@ -602,20 +602,20 @@ var IO, JSON, Mo = Mo || (function(){
 			    "function RecordsAffected(byref conn,byval sqlstring)\r\n" +
 			    "	conn.execute sqlstring,RecordsAffected\r\n" +
 			    "end function\r\n" +
-			    "set Model__.RecordsAffected=GetRef(\"RecordsAffected\")"
+			    "set Model__.RecordsAffected=GetRef(\"RecordsAffected\")\r\n"
 		    );
 		    objScrCtl.ExecuteStatement(
-		    	"function RecordsAffectedCmd(byref cmd,byval withQuery)\r\n" +
+		    	"function RecordsAffectedCmd_(byref opt)\r\n" +
 		    	"	dim RecordsAffectedvar\r\n" +
-		    	"	if withQuery then\r\n" +
-		    	"		set RecordsAffectedCmd = cmd.execute(RecordsAffectedvar)\r\n" +
-		    	"		Model__.lastRows = RecordsAffectedvar\r\n" +
+		    	"	if opt.withQuery then\r\n" +
+		    	"		set opt.dataset = opt.cmdobj.execute(RecordsAffectedvar)\r\n" +
+		    	"		opt.affectedRows = RecordsAffectedvar\r\n" +
 		    	"	else\r\n" +
-		    	"		cmd.execute RecordsAffectedvar\r\n" +
-		    	"		Model__.lastRows = RecordsAffectedvar\r\n" +
+		    	"		opt.cmdobj.execute RecordsAffectedvar\r\n" +
+		    	"		opt.affectedRows = RecordsAffectedvar\r\n" +
 		    	"	end if\r\n" +
 		    	"end function\r\n" +
-		    	"set Model__.RecordsAffectedCmd=GetRef(\"RecordsAffectedCmd\")"
+		    	"set Model__.RecordsAffectedCmd_=GetRef(\"RecordsAffectedCmd_\")"
 		    );
 		    objScrCtl.ExecuteStatement(
 		    	"function charcodeb(b)\r\n" +
