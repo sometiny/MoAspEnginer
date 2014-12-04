@@ -242,8 +242,13 @@ ModelCMDManager.prototype.addOutput = function(name,t,size){
 	return this.parms_[name];
 };
 /*new method*/
-ModelCMDManager.prototype.add_parm_output = function(t,size){
-	return this.addOutput("@PARM" + ++this.parms_count,t,size);
+ModelCMDManager.prototype.add_parm_output = function(t,size,totalp){
+	var parm_name = "@PARM" + ++this.parms_count;
+	if(size===true || totalp===true){
+		if(size===true)size=undefined;
+		this.totalRecordsParm = parm_name;
+	}
+	return this.addOutput(parm_name,t,size);
 };
 
 ModelCMDManager.prototype.addReturn = function(name,t,size){
