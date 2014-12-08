@@ -199,6 +199,7 @@ var GLOBAL = this,
 		$f.all = function(key) {
 			if (key == undefined) return "";
 			if (get__.hasOwnProperty(key)) return $f.get(key);
+			postinit__();
 			if (__POST_MAPPER__.hasOwnProperty(key.toUpperCase())) return post__[__POST_MAPPER__[key.toUpperCase()]];
 			return "";
 		};
