@@ -32,7 +32,12 @@ var ModelHelper={
 		}else if(this["DB_Type"]=="SQLITE"){
 			connectionstring = "DRIVER={SQLite3 ODBC Driver};Database=" + F.mappath(this["DB_Path"]);
 		}else if(this["DB_Type"]=="MYSQL"){
-			connectionstring = F.format("DRIVER={mysql odbc " + (this["DB_Version"]||"3.51") + " driver};SERVER={0};USER={1};PASSWORD={2}",this["DB_Server"],this["DB_Username"],this["DB_Password"],this["DB_Name"]);
+			var DB_Server = this["DB_Server"], DB_Host=DB_Server, DB_Port = 3306;
+			if(DB_Host.indexOf(",")>0){
+				DB_Host = DB_Server.substr(0,DB_Server.indexOf(","));
+				DB_Port = DB_Server.substr(DB_Server.indexOf(",")+1);
+			}
+			connectionstring = F.format("DRIVER={mysql odbc " + (this["DB_Version"]||"3.51") + " driver};SERVER={0};PORT={4};USER={1};PASSWORD={2}",DB_Host,this["DB_Username"],this["DB_Password"],this["DB_Name"],DB_Port);
 		}
 		return connectionstring;
 	},

@@ -132,12 +132,30 @@ Model__.connect = function(cfg){
 Model__.execute = function(sql,cfg){
 	cfg = cfg || Model__.defaultDBConf;
 	if(!Model__.connect(cfg)) return -1;
-	return Model__.RecordsAffected(Model__.getConnection(cfg),sql);
+	try{
+		return Model__.RecordsAffected(Model__.getConnection(cfg),sql);
+	}catch(ex){
+		if(F.vbs.ctrl.error.number != 0){
+			ExceptionManager.put(F.vbs.ctrl.error.number,"__Model__.execute(sql[,cfg])",F.vbs.ctrl.error.description);
+			F.vbs.ctrl.error.clear();
+		}else{
+			ExceptionManager.put(new Exception(ex.number,"__Model__.execute(sql[,cfg])",ex.message));
+		}
+	}
 };
 Model__.executeQuery = function(sql,cfg){
 	cfg = cfg || Model__.defaultDBConf;
 	if(!Model__.connect(cfg)) return;
-	return new DataTable(Model__.getConnection(cfg).execute(sql));
+	try{
+		return new DataTable(Model__.getConnection(cfg).execute(sql));
+	}catch(ex){
+		if(F.vbs.ctrl.error.number != 0){
+			ExceptionManager.put(F.vbs.ctrl.error.number,"__Model__.executeQuery(sql[,cfg])",F.vbs.ctrl.error.description);
+			F.vbs.ctrl.error.clear();
+		}else{
+			ExceptionManager.put(new Exception(ex.number,"__Model__.executeQuery(sql[,cfg])",ex.message));
+		}
+	}
 };
 Model__.RecordsAffected = function(conn,sqlstring){
 	conn.execute(sqlstring);
