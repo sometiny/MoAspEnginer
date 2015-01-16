@@ -726,7 +726,7 @@ var GLOBAL = this,
 			return srcDate;
 		};
 		$f.date.prototype.add = function(diff, value) {
-			$f.date.call(this, $f.date.dateadd(diff, value, this.ticks));
+			return $f.date.call(this, $f.date.dateadd(diff, value, this.ticks));
 		};
 		$f.date.prototype.diff = function(diff, srcdate) {
 			return $f.date.datediff(diff, srcdate, this.ticks);
