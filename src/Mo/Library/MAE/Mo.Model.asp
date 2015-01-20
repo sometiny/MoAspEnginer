@@ -603,7 +603,7 @@ __Model__.prototype.Update = __Model__.prototype.update = function(){
 			d_[3].withQuery = false;
 			d_[3].cmd = "update " + this.table + " set " + d_[2] + (this.strwhere != ""?(" where " + this.strwhere):"");
 			this.exec(d_[3]);
-			Model__.lastRows = d_[3].affectedRows;1
+			Model__.lastRows = d_[3].affectedRows;
 		}else{
 			this.query("update " + this.table + " set " + d_[2] + (this.strwhere != ""?(" where " + this.strwhere):""));
 		}

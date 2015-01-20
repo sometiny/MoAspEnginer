@@ -71,6 +71,22 @@ $httprequest.create = function(url, options)
 {
 	return new $httprequest(url, options);
 };
+$httprequest.get = function(url, charset)
+{
+	return new $httprequest(url, {charset:charset}).text();
+};
+$httprequest.getJSON = function(url, charset)
+{
+	return new $httprequest(url, {charset:charset}).json();
+};
+$httprequest.post = function(url, data, charset)
+{
+	return new $httprequest(url, {method:"POST",charset:charset,data:data}).text();
+};
+$httprequest.postJSON = function(url,data, charset)
+{
+	return new $httprequest(url, {method:"POST",charset:charset,data:data}).json();
+};
 
 $httprequest.save = function(url, localpath, opt)
 {
@@ -222,7 +238,7 @@ $httprequest.fn.json = function(charset) {
 	if (!this.sended) this.send();
 	if (this.readyState != 4) return null;
 	try {
-		return (new Function("return " + this.gettext(charset || this.$g.charset) + ";"))();
+		return (new Function("return " + this.text(charset || this.$g.charset) + ";"))();
 	} catch (ex) {
 		this.exception += ex.description;
 		return null;
@@ -253,7 +269,7 @@ $httprequest.fn.xml = function(charset) {
 	if (this.readyState != 4) return null;
 	try {
 		var _dom = new ActiveXObject("MSXML2.DOMDocument");
-		_dom.loadXML(this.gettext(charset||this.$g.charset));
+		_dom.loadXML(this.text(charset||this.$g.charset));
 		return _dom;
 	} catch (ex) {
 		this.exception += ex.description;
