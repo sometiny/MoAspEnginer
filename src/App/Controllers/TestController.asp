@@ -11,6 +11,27 @@ TestController = IController.create(
 	}
 );
 
+TestController.extend("U", function(){
+	C("@.MO_REWRITE_MODE","URL");
+	F.echo(Mo.U("?id=2"),true);
+	F.echo(Mo.U("Home/Save"),true);
+	F.echo(Mo.U("Home/Save?id=2"),true);
+	F.echo(Mo.U("Home/Save!"),true);
+	F.echo(Mo.U("Admin/Home/Index?id=2&name={$name}!"),true);
+	F.echo(Mo.U("Admin/Home/Index?id=2&name={$name}@dev.mo.cn"),true);
+});
+
+TestController.extend("Test2", function(){
+	F.require("net/http/winhttp");
+	F.dump(F.exports.net.http.winhttp.postJSON("http://dwz.cn/create.php",{url:"http://www.baidu.com/"}));
+});
+
+TestController.extend("Res", function(){
+	F.echo("输出：<br />");
+	F.echo(F.server("QUERY_STRING"),true);
+	F.echo(F.get("c"),true);
+	F.echo(F.get("d"));
+});
 /*
 ** 为新Controller对象扩展一个新方法，对应相应的动作；
 ** 语法：newController.extend(funcName,callback);
@@ -21,8 +42,26 @@ TestController.extend("Index", function(name){
 	return this.Name + " - " + name;
 });
 
+TestController.extend("Show2", function(mode){
+	var zip = F.activex("Zip.Manager");
+	zip.Explode(F.mappath("/Mo.zip"),F.mappath("/Mo2/"));
+	F.echo("<pre>"+zip.Exception.Message+"</pre>",true);
+});
+
 TestController.extend("Show", function(mode){
-	//todo
+	var zip = F.activex("Zip.Manager");
+	zip.OpenRead(F.mappath("/Mo.zip"),"sssss");
+	var entry=null;
+	while((entry = zip.NextEntry) != null){
+		F.echo(entry.Name+","+entry.IsDirectory,true);
+	}
+	F.echo("<pre>"+zip.Exception.Message+"</pre>",true);
+});
+
+TestController.extend("ShowZip", function(mode){
+	var zip = F.activex("Zip.Manager");
+	zip.OneDirectory(F.mappath("/Mo/"),F.mappath("/Mo.zip"));
+	F.echo("<pre>"+zip.Exception.Message+"</pre>",true);
 });
 
 TestController.extend("Attrs", function(){

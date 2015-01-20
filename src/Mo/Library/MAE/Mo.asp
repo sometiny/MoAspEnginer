@@ -208,7 +208,9 @@ var IO, JSON, Mo = Mo || (function(){
 			MO_APP : "App",
 			MO_APP_ENTRY : "",
 			MO_ROOT : "",
-			MO_CORE : "Mo"
+			MO_CORE : "Mo",
+			MO_HOST : F.server("HTTP_HOST"),
+			MO_PROTOCOL : F.server("HTTPS")=="off"?"http://":"https://"
 		},cfg);
 		this.runtime.start = new Date();
 		Response.Charset = "utf-8";
@@ -418,6 +420,41 @@ var IO, JSON, Mo = Mo || (function(){
 			if(this.Assigns[l].hasOwnProperty(k)) return this.Assigns[l][k];
 		}
 		return null;
+	};
+	M.U = function(path,_parms,ext){
+		var match = /^(.*?)(\?(.*?))?(\#(.*?))?(\@(.*?))?(\!)?$/igm.exec(path);
+		if(!match)return"";
+		F.object.toURIString.fn=0;
+		var root = G.MO_ROOT;
+		if(root=="/")root="";
+		var path = match[1],parms = F.object.fromURIString(match[3]),anchor = match[5],domain=match[7],paths = path.split("/"),url=G.MO_PROTOCOL + (domain||G.MO_HOST) + "/" + root + G.MO_APP_ENTRY;
+		if(_parms) {
+			if(typeof _parms=="string") parms = F.object.fromURIString(_parms);
+			else if (typeof _parms=="object") parms = _parms;
+		}
+		if(match[8]=="!")url="/" + root + G.MO_APP_ENTRY;
+		var format=["?{0}={1}&{2}={3}&{4}={5}","?{0}={1}&{2}={3}"];
+		if(G.MO_REWRITE_MODE == "404")format=["{0}/{1}/{2}/{3}/{4}/{5}","{0}/{1}/{2}/{3}"];
+		else if (G.MO_REWRITE_MODE == "URL")format=["?/{0}/{1}/{2}/{3}/{4}/{5}","?/{0}/{1}/{2}/{3}"];
+		
+		if(paths.length==3) url += F.format(format[0],G.MO_GROUP_CHAR,paths[0],G.MO_METHOD_CHAR,paths[1],G.MO_ACTION_CHAR,paths[2]);
+		else if (paths.length==2) url += F.format(format[1],G.MO_METHOD_CHAR,paths[0],G.MO_ACTION_CHAR,paths[1]);
+		else if (paths.length==1 && path!="") url += F.format(format[1],G.MO_METHOD_CHAR,M.Method,G.MO_ACTION_CHAR,paths[0]);
+		else url += F.format(format[1],G.MO_METHOD_CHAR,M.Method,G.MO_ACTION_CHAR,M.Action);
+		
+		if(G.MO_REWRITE_MODE == "404" || G.MO_REWRITE_MODE == "URL"){
+			F.object.toURIString.split_char_1=F.object.toURIString.split_char_2="/";
+			url += "/"+F.object.toURIString(parms);
+			F.object.toURIString.split_char_1="=";
+			F.object.toURIString.split_char_2="&";
+			if(ext) url+= "."+ext;
+		}else{
+			url += "&"+F.object.toURIString(parms);
+		}
+		if(F.string.endsWith(url,"/") ||F.string.endsWith(url,"&")) url = url.substr(0,url.length-1);
+		if(anchor!="") url+="#" + anchor;
+		F.object.toURIString.fn=1;
+		return url;
 	};
 	M.L = function(key){
 		if(!G.MO_LANGUAGE){

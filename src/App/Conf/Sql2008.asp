@@ -3,7 +3,7 @@ return {
 	DB_Type:"MSSQL", /* support ACCESS|MSSQL|MYSQL|SQLITE|OTHER,if DB_Type is OTHER,you must set 'DB_Connectionstring'*/
 	DB_Connectionstring:"", /* enabled when DB_Type is 'OTHER' */
 	DB_Path:"App/data/GBqcBsFizy.mdb", /* enabled when DB_Type is 'ACCESS' or 'SQLITE'*/
-	DB_Server:"(local)",
+	DB_Server:"127.0.0.1,1433",
 	DB_Username:"sa",
 	DB_Password:"12356",
 	DB_Name:"Public",

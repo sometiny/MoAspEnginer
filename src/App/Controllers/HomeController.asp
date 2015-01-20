@@ -25,25 +25,32 @@ HomeController.extend("Home", function(){
 });
 HomeController.extend("db2008", function(){
 	Model__.allowDebug=true;
-	var cmd = Model__("Public","Id","Sql2008").createCommandManager("getrecords");
-	cmd.addReturn("@RETURN",ModelHelper.Enums.DataType.DBTYPE_I4,4);
-	cmd.addInputInt("@start",2);
-	cmd.addOutput("@output",ModelHelper.Enums.DataType.VARCHAR,50);
+	var cmd = Model__("Test","aaa","Sql2008").createCommandManager("sp_page");
+	cmd.add_parm_return(ModelHelper.Enums.DataType.DBTYPE_I4);
+	cmd.add_parm_input_int(3);
+	cmd.add_parm_input_int(5);
+	cmd.add_parm_input_varchar("Mo_Test");
+	cmd.add_parm_input_varchar("*");
+	cmd.add_parm_input_varchar("");
+	cmd.add_parm_input_varchar("aaa");
+	cmd.add_parm_input_varchar("");
+	cmd.add_parm_output(ModelHelper.Enums.DataType.DBTYPE_I4,true);
+	cmd.add_parm_output(ModelHelper.Enums.DataType.VARCHAR,1024);
 	var rc = cmd.execute(true).fetch();
 	F.echo(F.format("数据记录：{0}条",rc.recordcount),true);
 	F.echo(F.format("查询记录：{0}条",rc.count()),true);
-	F.echo(F.format("返回值：{0}",cmd.getparm("@RETURN").value),true)
-	F.echo(F.format("输出值：{0}",cmd.getparm("@output").value),true)
-	rc.each(function(r){
-		F.echo(F.format("{0.id},{0.name},{0.age},{0.birthday:yyyy-MM-dd}",r),true);
-	});
+	F.echo(F.format("输出值：{0}",cmd.getparm(8)),true);
+	F.echo(F.format("输出值：{0}",cmd.getparm(9)),true);
+	F.echo(F.format("返回值：{0}",cmd.get_parm_return()),true);
+	F.echo(rc.getjson(),true);
 });
 HomeController.extend("db", function(){
 	Model__.allowDebug=true;
 	Model__.useCommandForUpdateOrInsert=true;
+	//M("Public","Id").insert("name","测试2","age",87,"birthday","2014-9-8");
 	M("Public","Id").where("id=1").update("name","艾恩-" + F.random.word(10));
 	this.assign("lastRows",Model__.lastRows);
-	var rc = M("Public","Id").limit(1,3).query().fetch();
+	var rc = M("Public","Id").limit(1,10).query().fetch();
 	this.assign("recordcount",rc.recordcount);
 	this.assign("count",rc.count());
 	rc.assign("data");
@@ -69,6 +76,32 @@ HomeController.extend("db", function(){
 		r.age=26;
 		r.birthday="2014-7-8";
 	rc.assign("dataself");
+	this.display("Data");
+});
+HomeController.extend("mysql", function(){
+	Model__.allowDebug=true;
+	Model__.useCommandForUpdateOrInsert=true;
+	Model__.defaultDBConf = "mysql";
+	//Model__.execute("DROP DATABASE Public");
+	//Model__.execute("CREATE DATABASE Public");
+	Model__.execute("USE Public");
+	//Model__.execute(
+	//	"create table `Mo_Public`("
+	//	+"Id int(4) not null primary key auto_increment,"
+	//	+"name varchar(50),"
+	//	+"age int(4) default '0',"
+	//	+"birthday datetime,"
+	//	+"memo TEXT,"
+	//	+"grade int(4) default '0'"
+	//	+")"
+	//);
+	Model__.execute("INSERT INTO Mo_Public values(),(),(),()");
+	M("Public","Id").where("id=1").update("name","艾恩-" + F.random.word(10));
+	this.assign("lastRows",Model__.lastRows);
+	var rc = M("Public","Id").limit(1,10).query().fetch();
+	this.assign("recordcount",rc.recordcount);
+	this.assign("count",rc.count());
+	rc.assign("data");
 	this.display("Data");
 });
 HomeController.extend("clearcache", function(){

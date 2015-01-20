@@ -17,7 +17,7 @@ return {
 	MO_END_LIB : "",
 	MO_DIRECT_OUTPUT : false,
 	MO_LIB_CACHE : false,
-	MO_REWRITE_MODE : "URL",
+	MO_REWRITE_MODE : "",
 	MO_REWRITE_CONF : "Rewrite",
 	MO_PREETY_HTML : false,
 	MO_MODEL_CACHE : false,
