@@ -7,14 +7,11 @@
 ** About: 
 **		support@mae.im
 */
-/*export the functions*/
-var exports=["CreatePageList","is_empty","IsEmpty"];
-
-function is_empty(variable){
+IsEmpty = is_empty = function(variable){
 	return variable===""||variable===null||variable===undefined;
 }
 
-function CreatePageList(URL, RecordCount, PageSize, CurrentPage){
+CreatePageList = function(URL, RecordCount, PageSize, CurrentPage){
 	var PageCount ,PageStr="";
 	if(URL==""){
 		F.object.toURIString.clearFilter();
@@ -44,7 +41,4 @@ function CreatePageList(URL, RecordCount, PageSize, CurrentPage){
 	}
 	return PageStr;
 }
-
-/*create a cname of is_empty, and export it to global Env. too*/
-var IsEmpty = is_empty;
 </script>
