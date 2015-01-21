@@ -425,14 +425,12 @@ var IO, JSON, Mo = Mo || (function(){
 		var match = /^(.*?)(\?(.*?))?(\#(.*?))?(\@(.*?))?(\!)?$/igm.exec(path);
 		if(!match)return"";
 		F.object.toURIString.fn=0;
-		var root = G.MO_ROOT;
-		if(root=="/")root="";
-		var path = match[1],parms = F.object.fromURIString(match[3]),anchor = match[5],domain=match[7],paths = path.split("/"),url=G.MO_PROTOCOL + (domain||G.MO_HOST) + "/" + root + G.MO_APP_ENTRY;
+		var path = match[1],parms = F.object.fromURIString(match[3]),anchor = match[5],domain=match[7],paths = path.split("/"),url=G.MO_PROTOCOL + (domain||G.MO_HOST) + G.MO_ROOT + G.MO_APP_ENTRY;
 		if(_parms) {
 			if(typeof _parms=="string") parms = F.object.fromURIString(_parms);
 			else if (typeof _parms=="object") parms = _parms;
 		}
-		if(match[8]=="!")url="/" + root + G.MO_APP_ENTRY;
+		if(match[8]=="!")url=G.MO_ROOT + G.MO_APP_ENTRY;
 		var format=["?{0}={1}&{2}={3}&{4}={5}","?{0}={1}&{2}={3}"];
 		if(G.MO_REWRITE_MODE == "404")format=["{0}/{1}/{2}/{3}/{4}/{5}","{0}/{1}/{2}/{3}"];
 		else if (G.MO_REWRITE_MODE == "URL")format=["?/{0}/{1}/{2}/{3}/{4}/{5}","?/{0}/{1}/{2}/{3}"];
