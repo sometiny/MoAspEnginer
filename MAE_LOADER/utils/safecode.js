@@ -90,7 +90,7 @@ function $safecode(sessionKey,opt){
 			vCode.push(cCode.indexOf(vCodes.substr(i,1)));
 		}
 	}
-	F.session(sessionKey,vCodes);
+	Session(sessionKey)=vCodes;
 	var padding = cfg.padding;
 	var output=[66,77,230,4,0,0,0,0,0,0,54,0,0,0,40,0,0,0,cfg.length * 10 + padding*2,0,0,0,10+padding*2,0,0,0,1,0,24,0,0,0,0,0,176,4,0,0,18,11,0,0,18,11,0,0,0,0,0,0,0,0,0,0];
 	for(var i=9+padding*2;i>=0;i--){

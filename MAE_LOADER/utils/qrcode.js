@@ -417,7 +417,7 @@ var $qrcode = function() {
 	// qrcode.stringToBytes
 	//---------------------------------------------------------------------
 	qrcode.stringToBytes = function(s) {
-		if(!F.encoding) F.require("encoding");
+		if(!F.exports.encoding) F.require("encoding");
 		return F.exports.encoding.utf8.getByteArray(s);
 	};
 	//---------------------------------------------------------------------

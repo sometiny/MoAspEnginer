@@ -137,7 +137,7 @@ $httpupload.fn.uploadFromClient = function(){
 			}
 		}
 		this.headers = newheaders;
-		this.header("Content-Type:" + F.server("CONTENT_TYPE"));
+		this.header("Content-Type:" + Request.ServerVariables("CONTENT_TYPE"));
 	});
 	stream.close();
 	stream = null;

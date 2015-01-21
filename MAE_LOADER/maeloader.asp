@@ -1,5 +1,5 @@
 <script language="jscript" runat="server">
-var JsLoader = JsLoader || (function(__PATH__) {
+var F = F || (function(__PATH__) {
 		var readTextFromFile = function(path, charset) {
 			if (!$f.fso.fileexists(path)) return "";
 			var byts, stream = Server.CreateObject("ADODB.STREAM");
@@ -14,7 +14,7 @@ var JsLoader = JsLoader || (function(__PATH__) {
 			stream = null;
 			return byts;
 		};
-		var $f = {PATH:[__PATH__]}, included__={},required__={};
+		var $f = {PATH:[__PATH__]}, included__={},required__={},activex__=[];
 		$f.TEXT = {
 			BR: 1,
 			NL: 2,
@@ -26,6 +26,34 @@ var JsLoader = JsLoader || (function(__PATH__) {
 		$f.vbs = {};
 		$f.toString = function() {
 			return "v1";
+		};
+		$f.activex = function(classid, fn) {
+			try {
+				var $o = Server.CreateObject(classid);
+				activex__.push($o);
+				if (typeof fn == "function"){
+					return fn.apply($o, [].slice.apply(arguments).slice(2)) || $o;
+				}
+				return $o;
+			} catch (ex) {
+				return null;
+			}
+		};
+		$f.stream = function(mode, type) {
+			var stream = $f.activex("Adodb.Stream");
+			if (mode !== undefined) stream.Mode = mode;
+			if (type !== undefined) stream.Type = type;
+			return stream;
+		};
+		$f.extend = function(src) {
+			if (arguments.length < 1) return {};
+			if (arguments.length < 2) return src;
+			for (var i = 1; i < arguments.length; i++) {
+				for (var c in arguments[i]) {
+					if (arguments[i].hasOwnProperty(c)) src[c] = arguments[i][c];
+				}
+			}
+			return src;
 		};
 		$f.echo = function(debug, brnl, newline) {
 			if ((brnl & $f.TEXT.BIN)) {
@@ -62,7 +90,7 @@ var JsLoader = JsLoader || (function(__PATH__) {
 				_path = "";
 				
 			if (path) _targetPaths = _targetPaths.concat(path);
-			else _targetPaths = _targetPaths.concat(JsLoader.PATH);
+			else _targetPaths = _targetPaths.concat(F.PATH);
 			for (var i = 0; i < _targetPaths.length; i++) {
 				_path = $f.mappath(_targetPaths[i] + library);
 				if ($f.fso.fileexists(_path)) break;
@@ -80,7 +108,7 @@ var JsLoader = JsLoader || (function(__PATH__) {
 			_statement = readTextFromFile(_path);
 			_statement = _statement.replace(/^(\s*)<sc(.+)>/ig, "").replace(/<\/script>(\s*)$/ig, "");
 			var this_ = this;
-			if (this == JsLoader) this_ = null;
+			if (this == F) this_ = null;
 			required__[library] = true;
 			return (new Function("exports", "__FILE__", "__DIR__", _statement))(
 			this_ || $f.exports, _path, _path == "" ? "" : _path.substr(0, _path.lastIndexOf("\\"))) || $f.exports;
@@ -107,7 +135,7 @@ var JsLoader = JsLoader || (function(__PATH__) {
 		$f.execute = function() {
 			if (arguments.length < 1) return false;
 			var path = this;
-			if (this == JsLoader) path = "";
+			if (this == F) path = "";
 			var dir = path == "" ? "" : path.substr(0, path.lastIndexOf("\\"));
 			var args, src = (args = [].slice.apply(arguments)).shift();
 			var __FILE__ = path,
@@ -123,11 +151,354 @@ var JsLoader = JsLoader || (function(__PATH__) {
 			}
 			return true;
 		};
+		$f.random = function(minValue, maxValue) {
+			if (minValue === undefined && maxValue === undefined) return Math.random();
+			if (maxValue === undefined) {
+				maxValue = minValue;
+				minValue = 1;
+			}
+			return parseInt(Math.random() * (maxValue - minValue + 1)) + minValue;
+		};
+		$f.random.initialize = function(seeds, length) {
+			if (seeds.length <= 0) return "";
+			if (isNaN(length)) {
+				ExceptionManager.put(0x000001A9, "F.random.initialize", "argument 'length' must be a number.");
+				return "";
+			}
+			length = parseInt(length);
+			var returnValue = "";
+			for (var i = 0; i < length; i++) {
+				returnValue += seeds.substr($f.random(0, seeds.length - 1), 1);
+			}
+			return new String(returnValue);
+		};
+		$f.foreach = function(src, fn, state) {
+			if (typeof fn != "function") return;
+			for (var i in src) {
+				if (!src.hasOwnProperty(i)) continue;
+				if (fn.apply(src, [i, src[i], state]) === false) break;
+			}
+		};
+		$f.foreach({
+			"number": "123456789012345678901234567890",
+			"letter": "abcdefghiIJKLMNOPQRSTUVWXYZjklmnopqrstuvwxyzABCDEFGH",
+			"hex": "123456789012345678901234567890ABCDEFABCDEFABCDEFABCDEFABCDEF",
+			"word": "abcdefghiIJKLMNOPQRSTUVWXYZjklmnopqrstuvwxyzABCDEFGH12345678906789012678901234534567890126789012345345",
+			"mix": "~!@#$%^&*()_+=-[]{}:'<>/?\\,.|`abcdefghiIJKLMNOPQRSTUVWXYZjklmnopqrstuvwxyzABCDEFGH6789012678901234534567890126789012345345"
+		}, function(i, v) {
+			$f.random[i] = function(length) {
+				return $f.random.initialize(v, length);
+			};
+		});
+		$f.encode = function(src) {
+			src = src || "";
+			return encodeURIComponent(src).replace(/\+/, "%2B");
+		};
+		$f.decode = function(src) {
+			src = src || "";
+			return decodeURIComponent(src);
+		};
+		$f.format = function(Str) {
+			var arg = arguments;
+			if (arg.length <= 1) {
+				return Str;
+			}
+			return Str.replace(/\{(\d+)(\.([\w\.\-]+))?(:(.+?))?\}/igm, function(ma) {
+				var match = /\{(\d+)(\.([\w\.\-]+))?(:(.+?))?\}/igm.exec(ma);
+				if (match && match.length == 6) {
+					var argvalue = arg[parseInt(match[1]) + 1];
+					if (argvalue === undefined) return "";
+					if (argvalue==null) return "NULL";
+					return argvalue;
+				}
+				return ma;
+			});
+		};
+		$f.base64 = (function() {
+			var base64keyStr_ = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+			var encode_ = function(Str) {
+					var output = "";
+					var chr1, chr2, chr3 = "";
+					var enc1, enc2, enc3, enc4 = "";
+					var i = 0;
+					do {
+						chr1 = Str[i++];
+						chr2 = Str[i++];
+						chr3 = Str[i++];
+						enc1 = chr1 >> 2;
+						enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+						enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+						enc4 = chr3 & 63;
+						if (isNaN(chr2)) {
+							enc3 = enc4 = 64;
+						} else if (isNaN(chr3)) {
+							enc4 = 64;
+						}
+						output = output + base64keyStr_.charAt(enc1) + base64keyStr_.charAt(enc2) + base64keyStr_.charAt(enc3) + base64keyStr_.charAt(enc4);
+						chr1 = chr2 = chr3 = "";
+						enc1 = enc2 = enc3 = enc4 = "";
+					} while (i < Str.length);
+					return output;
+				};
+			var decode_ = function(Str) {
+					var output = [];
+					var chr1, chr2, chr3 = "";
+					var enc1, enc2, enc3, enc4 = "";
+					var i = 0;
+					do {
+						enc1 = base64keyStr_.indexOf(Str.charAt(i++));
+						if(enc1<0)continue;
+						enc2 = base64keyStr_.indexOf(Str.charAt(i++));
+						if(enc2<0)continue;
+						enc3 = base64keyStr_.indexOf(Str.charAt(i++));
+						if(enc3<0)continue;
+						enc4 = base64keyStr_.indexOf(Str.charAt(i++));
+						if(enc4<0)continue;
+						chr1 = (enc1 << 2) | (enc2 >> 4);
+						chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+						chr3 = ((enc3 & 3) << 6) | enc4;
+						output.push(chr1);
+						if (enc3 != 64) {
+							output.push(chr2);
+						}
+						if (enc4 != 64) {
+							output.push(chr3);
+						}
+						chr1 = chr2 = chr3 = "";
+						enc1 = enc2 = enc3 = enc4 = "";
+					} while (i < Str.length);
+					return output;
+				};
+			var $node = $f.activex("Microsoft.XMLDOM", function() {
+				this.loadXML("<?xml version=\"1.0\" encoding=\"gb2312\"?><root xmlns:dt=\"urn:schemas-microsoft-com:datatypes\"><data dt:dt=\"bin.base64\"></data></root>");
+				return this.selectSingleNode("//root/data");
+			}),
+				$base64 = {};
+			$base64.e = encode_;
+			$base64.d = decode_;
+			$base64.encode = function(Str) {
+				if (typeof Str == "string") Str = $f.string.getByteArray(Str);
+				return encode_(Str);
+			};
+			$base64.decode = function(Str) {
+				return $f.string.fromByteArray(decode_(Str));
+			};
+			$base64.toBinary = function(str) {
+				$node.text = str;
+				return $node.nodeTypedValue;
+			};
+			$base64.fromBinary = function(str) {
+				$node.nodeTypedValue = str;
+				return $node.text;
+			};
+			return $base64;
+		})();
+		$f.string = {};
+		$f.string.left = function(src, len) {
+			src = src || "";
+			if (typeof len == "number") {
+				if (src.length <= len) return src;
+				return src.substr(0, len);
+			}
+			if (typeof len == "string") {
+				if (src.indexOf(len) < 0) return src;
+				return src.substr(0, src.indexOf(len));
+			}
+			return src;
+		};
+		$f.string.right = function(src, len) {
+			src = src || "";
+			if (typeof len == "number") {
+				if (src.length <= len) return src;
+				return src.substr(src.length - len);
+			}
+			if (typeof len == "string") {
+				if (src.indexOf(len) < 0) return src;
+				return src.substr(src.lastIndexOf(len) + len.length);
+			}
+			return src;
+		};
+		$f.string.startWith = $f.string.startsWith = function(src, opt) {
+			if (src == "") return false;
+			if (opt === undefined) return false;
+			if (opt.length > src) return false;
+			if (src.substr(0, opt.length) == opt) return true;
+			return false;
+		};
+		$f.string.endWith = $f.string.endsWith = function(src, opt) {
+			if (src == "") return false;
+			if (opt === undefined) return false;
+			if (opt.length > src) return false;
+			if (src.substr(src.length - opt.length) == opt) return true;
+			return false;
+		};
+		$f.string.trim = function(src, opt) {
+			return $f.string.trimLeft($f.string.trimRight(src, opt), opt);
+		};
+		$f.string.trimLeft = function(src, opt) {
+			if (src == "") return "";
+			if (opt === undefined) return src.replace(/^(\s+)/igm, "");
+			if ($f.string.startWith(src, opt)) {
+				if (src == opt) return "";
+				return $f.string.trimLeft(src.substr(opt.length), opt);
+			}
+			return src;
+		};
+		$f.string.trimRight = function(src, opt) {
+			if (src == "") return "";
+			if (opt === undefined) return src.replace(/(\s+)$/igm, "");
+			if ($f.string.endWith(src, opt)) {
+				if (src == opt) return "";
+				return $f.string.trimRight(src.substr(0, src.length - opt.length), opt);
+			}
+			return src;
+		};
+		$f.string.format = function() {
+			return $f.format.apply(F, arguments);
+		};
+		$f.string.email = function(str) {
+			return $f.string.exp(str, /^([\w\.\-]+)@([\w\.\-]+)$/);
+		};
+		$f.string.url = function(str) {
+			return $f.string.exp(str, /^http(s)?\:\/\/(.+?)$/i);
+		};
+		$f.string.test = function(str, exp, option) {
+			exp = $f.string.exp_(exp, option);
+			if (exp == null) return false;
+			return exp.test(str);
+		};
+		$f.string.replace = function(src, exp, option, replacement) {
+			if (arguments.length == 3) {
+				replacement = option;
+				option = "";
+			}
+			src = src || "";
+			if (typeof exp != "object") {
+				exp = exp + "";
+				exp = $f.string.exp_(exp, option) || exp;
+			}
+			return src.replace(exp, replacement);
+		};
+		$f.string.matches = function(src, exp, option,fn) {
+			var ref=null;
+			if(typeof option=="function")
+			{
+				if(fn) ref = fn;
+				fn = option;
+				option = ""; 
+			}
+			exp = $f.string.exp_(exp, option);
+			if (exp == null) return null;
+			if (!exp.global) return exp.exec(src);
+			var ret = [],
+				result = exp.exec(src);
+			while (result) {
+				if(typeof fn=="function")
+				{
+					fn.apply(ref || result,result);
+				}
+				else
+				{
+					ret.push(result);
+				}
+				result = exp.exec(src);
+			}
+			return ret;
+		};
+		$f.string.exp = function(str, exp, option) {
+			if (typeof exp != "object") {
+				if (typeof exp !== "string") return "";
+				exp = $f.string.exp_(exp, option);
+				if (exp == null) return "";
+			}
+			str = str || "";
+			return (exp.test(str) ? str : "");
+		};
+		$f.string.exp_ = function(exp, option) {
+			if (typeof exp == "object") return exp;
+			option = option || "";
+			if (!/^\/(.+)\/([igm]*)$/.test(exp)) exp = "/" + exp + "/" + option;
+			try {
+				return (new Function("return " + exp + ";"))()
+			} catch (ex) {
+				ExceptionManager.put(ex, "F.string.exp_");
+				return null;
+			}
+			return exp;
+		};
+		$f.string.fromBinary = function(bin, charset) {
+			var byts, stream = $f.stream(3, 1);
+			stream.Open();
+			stream.Write(bin);
+			stream.Position = 0;
+			stream.Type = 2;
+			stream.CharSet = charset || "utf-8";
+			byts = stream.ReadText();
+			stream.Close();
+			stream = null;
+			return byts;
+		};
+		$f.string.fromFile = function(path, charset) {
+			if (!$f.fso.fileexists(path)) return "";
+			var byts, stream = $f.stream(3, 2);
+			stream.CharSet = charset || "utf-8";
+			stream.Open();
+			stream.LoadFromFile(path);
+			stream.Position = 0;
+			byts = stream.ReadText();
+			stream.Close();
+			stream = null;
+			return byts;
+		};
+		$f.string.saveToFile = function(path, content, charset) {
+			var byts, stream = $f.stream(3, 2);
+			stream.CharSet = charset || "utf-8";
+			stream.Open();
+			stream.writetext(content)
+			stream.savetofile(path, 2);
+			stream.Close();
+			stream = null;
+		};
+		$f.string.appendToFile = function(path, content, charset) {
+			var byts, stream = $f.stream(3, 2);
+			stream.CharSet = charset || "utf-8";
+			stream.Open();
+			if (!$f.fso.fileexists(path)) {
+				stream.LoadFromFile(path);
+				stream.Position = stream.Size;
+			}
+			stream.writetext(content)
+			stream.savetofile(path, 2);
+			stream.Close();
+			stream = null;
+		};
+		$f.string.getByteArray = function(string) {
+			if (string == "") return [];
+			var enc = $f.encode(string);
+			var byteArray = [];
+			for (var i = 0; i < enc.length; i++) {
+				if (enc.substr(i, 1) == "%") {
+					byteArray.push(parseInt(enc.substr(i + 1, 2), 16));
+					i += 2;
+				} else {
+					byteArray.push(enc.charCodeAt(i));
+				}
+			}
+			return byteArray;
+		};
+		$f.string.fromByteArray = function(byteArray) {
+			if (byteArray.constructor != Array || byteArray.length <= 0) return "";
+			var string = "";
+			for (var i = 0; i < byteArray.length; i++) {
+				string += "%" + byteArray[i].toString(16);
+			}
+			return $f.decode(string);
+		};
 		return $f;
 	})("utils/"), 
-	exports = JsLoader.exports, 
-	require = function(){return JsLoader.require.apply(JsLoader,arguments);},
-	include = function(){return JsLoader.include.apply(JsLoader,arguments);},
-	echo = JsLoader.echo;
-	ECHO_FORMAT = JsLoader.TEXT;
+	exports = F.exports, 
+	require = function(){return F.require.apply(F,arguments);},
+	include = function(){return F.include.apply(F,arguments);},
+	echo = F.echo;
+	ECHO_FORMAT = F.TEXT;
 </script>
