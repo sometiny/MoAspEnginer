@@ -21,6 +21,9 @@
 		<tr><td>调用函数</td><td>{&#36;birthday:F.formatdate="yyyy-MM-dd"}</td><td>{$birthday:F.formatdate="yyyy-MM-dd"}</td></tr>
 		<tr><td>调用函数</td><td>{&#36;birthday:F.formatdate="yyyy-MM-dd HH:mm:ss"}</td><td>{$birthday:F.formatdate="yyyy-MM-dd HH:mm:ss"}</td></tr>
 		<tr><td>预编译标签</td><td>{&#36;&#36;MO_ROOT}</td><td>{$$MO_ROOT}</td></tr>
+		<tr><td>预编译(U方法，建议)</td><td>{&#36;&#36;U("home/test","id=2&name=anlige&version={&#36;Version}","xml")}</td><td>{$$U("home/test","id=2&name=anlige&version={$Version}","xml")}</td></tr>
+		<tr><td>U方法(普通)</td><td>{&#36;U("home/test","id=2&name=anlige&version=2.1","xml")}</td><td>{$U("home/test","id=2&name=anlige&version=2.1","xml")}</td></tr>
+		<tr><td>U方法(无域名)</td><td>{&#36;U("home/test!","id=2&name=anlige&version=2.1","xml")}</td><td>{$U("home/test!","id=2&name=anlige&version=2.1","xml")}</td></tr>
 		<tr><td>empty标签</td><td>&lt;empty name="name"&gt;name为空&lt;/empty&gt;</td><td><empty name="name">name为空</empty></td></tr>
 		<tr><td>expression标签</td><td>&lt;expression and="name eq Empty"&gt;name为空&lt;/expression&gt;</td><td><expression and="name eq Empty">name为空</expression></td></tr>
 		<tr><td>empty/else标签</td><td>&lt;empty name="address"&gt;address为空&lt;/else&gt;address不为空：{&#36;address}&lt;/empty&gt;</td><td><empty name="address">address为空</else>address不为空：{$address}</empty></td></tr>
