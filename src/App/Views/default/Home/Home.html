@@ -26,6 +26,7 @@
 		<tr><td>U方法(无域名)</td><td>{&#36;U("home/test!","id=2&name=anlige&version=2.1","xml")}</td><td>{$U("home/test!","id=2&name=anlige&version=2.1","xml")}</td></tr>
 		<tr><td>empty标签</td><td>&lt;empty name="name"&gt;name为空&lt;/empty&gt;</td><td><empty name="name">name为空</empty></td></tr>
 		<tr><td>expression标签</td><td>&lt;expression and="name eq Empty"&gt;name为空&lt;/expression&gt;</td><td><expression and="name eq Empty">name为空</expression></td></tr>
+		<tr><td>expression标签</td><td>&lt;expression and="name eq Empty" and "appname eq Empty"&gt;name和appname为空&lt;/else&gt;name和appname有一个不为空&lt;/expression&gt;</td><td><expression and="name eq Empty" and="appname eq Empty">name和appname为空</else>name和appname有一个不为空。name = {$name},appname = {$appname}</expression></td></tr>
 		<tr><td>empty/else标签</td><td>&lt;empty name="address"&gt;address为空&lt;/else&gt;address不为空：{&#36;address}&lt;/empty&gt;</td><td><empty name="address">address为空</else>address不为空：{$address}</empty></td></tr>
 		<tr><td>nempty标签</td><td>&lt;nempty name="appname"&gt;appname不为空&lt;/nempty&gt;</td><td><nempty name="appname">appname不为空</nempty></td></tr>
 		<tr><td>eq标签</td><td>&lt;eq name="appname" value="MoAspEnginer"&gt;appname为MoAspEnginer&lt;/eq&gt;</td><td><eq name="appname" value="MoAspEnginer">appname为MoAspEnginer</eq></td></tr>

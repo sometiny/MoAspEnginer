@@ -10,10 +10,10 @@ var readAttrs__ = function(src) {
 		if (!src) return {};
 		src = $f.string.trim($f.string.trim(src).replace(/^<(\w+)([\s\S]+?)(\/)?>([\s\S]*?)$/i, "$2"));
 		var returnValue = {};
-		var reg = /\b([\w\.]+)\=\"(.+?)\"( |$)/igm;
+		var reg = /\b([\w\.]+)\=(\"|\')(.+?)(\"|\')( |$)/igm;
 		var a = reg.exec(src);
 		while (a != null) {
-			returnValue[a[1]] = a[2];
+			returnValue[a[1]] = a[3];
 			a = reg.exec(src);
 		}
 		return returnValue;
@@ -165,7 +165,7 @@ MoAspEnginerView.prototype.parsePreCombine = function() {
 		this.Content = F.replace(this.Content, $0, Mo.Config.Global[$1])
 	},this);
 	F.string.matches(this.Content, /\{\$\$U\((.*?)\)\}/igm, function($0,$1){
-		this.Content = F.replace(this.Content, $0, eval("Mo.U(" + $1 + ")"))
+		this.Content = F.replace(this.Content, $0, (new Function("return Mo.U(" + $1 + ");"))())
 	},this);
 	F.string.matches(this.Content, /\{\$U\((.*?)\)\}/igm, function($0,$1){
 		this.Content = F.replace(this.Content, $0, "{?MoAsp __Mo__.Echo(Mo.U(" + $1 + ")) MoAsp?}")
@@ -346,9 +346,9 @@ MoAspEnginerView.prototype.parseExpressionElse = function() {
 };
 MoAspEnginerView.prototype.parseExpressionComponent = function(compare) {
 	var expression="";
-	F.string.matches(compare, new RegExp("\\b(and|or|group)\\=\\\"(.+?)\\\"", "igm") ,function($0,$1,$2){
+	F.string.matches(compare, /\b(and|or|group)\=(\"|\')(.+?)(\"|\')/igm ,function($0,$1,$2,$3){
 		if ($1 == "and" || $1 == "or") {
-			var v_ = $2,
+			var v_ = $3,
 				varmatches = /^(.+?)((\s)(\+|\-|\*|\/|%)(\s)([\d\.e\+]+))?(\s)(gt|lt|ngt|nlt|eq|neq)(\s)(.+?)((\s)as(\s)(bool|number|money|date|assign))?$/i.exec(v_);
 			if (varmatches) {
 				var quto = "\"",
@@ -381,10 +381,10 @@ MoAspEnginerView.prototype.parseExpressionComponent = function(compare) {
 				}
 			}
 		} else {
-			var group = $2;
-			var groupmatches = (new RegExp("<(and|or) name\\=\\\"" + group + "\\\"(.+?) \\/>", "igm")).exec(this.Content);
+			var group = $3;
+			var groupmatches = (new RegExp("<(and|or) name\\=(\\\"|\\\')" + group + "(\\\"|\\\')(.+?) \\/>", "igm")).exec(this.Content);
 			if (groupmatches) {
-				expression += " " + (groupmatches[1] == "and" ? "&&" : "||") + " (" + this.parseExpressionComponent(groupmatches[2]) + ") "
+				expression += " " + (groupmatches[1] == "and" ? "&&" : "||") + " (" + this.parseExpressionComponent(groupmatches[4]) + ") "
 			}
 		}
 	},this);
