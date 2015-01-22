@@ -24,6 +24,7 @@
 */
 if(!exports.net)exports.net={};
 if(exports.net.upload) return exports.net.upload;
+UploadSaveType={NONE:1,NEW:0,USER:-1};
 var cfg = {
 	AllowFileTypes : "",
 	AllowMaxSize : -1,
@@ -36,7 +37,7 @@ var cfg = {
 };
 var cfg_f = {
 	OverWrite : true,
-	Type : 0,
+	Type : UploadSaveType.NEW,
 	OnError : function(exception){},
 	OnSucceed : function(fileCount,fileArray){}
 };
@@ -113,6 +114,9 @@ $upload.$cfg=null;
 $upload.$exception="";
 $upload.$base=null;
 $upload.files=[];
+$upload.opt = function(name,value){
+	if(name=="SavePath")$upload.$base.SavePath = value;
+};
 $upload.save = function(File,opt){
 	if(arguments.length==1){
 		opt = File;
@@ -125,7 +129,7 @@ $upload.save = function(File,opt){
 		$opt.OnError.call(null,"base upload manager is null.");
 		return 0;
 	}
-	if($opt.Type!=0 && $opt.Type!=1 && $opt.Type!=-1){
+	if($opt.Type!=UploadSaveType.NEW && $opt.Type!=UploadSaveType.NONE && $opt.Type!=UploadSaveType.USER){
 		$opt.OnError.call(null,"argument 'Type' error.");
 		return 0;
 	}
@@ -133,6 +137,7 @@ $upload.save = function(File,opt){
 		if(File==null) $opt.OnError.call(null,"File item is null.");
 		else if(typeof File == "object")
 		{
+			if($opt.UsersetName) File.UsersetName = $opt.UsersetName;
 			$upload.$base.Save(File, $opt.Type, $opt.OverWrite);
 			if(File.Exception!="") {
 				$opt.OnError.call(null,File.Exception);
@@ -148,6 +153,7 @@ $upload.save = function(File,opt){
 			for(var i=0;i< $upload.files.length;i++){
 				if($upload.files[i].FormName.toLowerCase()==File || File == ""){
 					fileCount++;
+					if($opt.UsersetName) $upload.files[i].UsersetName = $opt.UsersetName;
 					$upload.$base.Save($upload.files[i], $opt.Type, $opt.OverWrite);
 					if($upload.files[i].Exception!=""){
 						$opt.OnError.call(null,$upload.files[i].Exception);
