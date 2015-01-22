@@ -122,16 +122,19 @@ var GLOBAL = this,
 			return Server.MapPath(path);
 		};
 		$f.activex = function(classid, fn) {
+			var $o = null;
 			try {
-				var $o = Server.CreateObject(classid);
+				$o = Server.CreateObject(classid);
 				activex__.push($o);
-				if (typeof fn == "function"){
-					return fn.apply($o, [].slice.apply(arguments).slice(2)) || $o;
-				}
-				return $o;
 			} catch (ex) {
 				return null;
 			}
+			if (typeof fn == "function"){
+				var returnValue = fn.apply($o, [].slice.apply(arguments).slice(2));
+				if(returnValue===undefined)return $o;
+				return returnValue;
+			}
+			return $o;
 		};
 		$f.activex.enabled = function(classid) {
 			try {
