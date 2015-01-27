@@ -236,13 +236,17 @@ $io.file = $io.file || (function()
 			ExceptionManager.put("0x2d3e","io.file.write","file resource id is invalid.");
 			return;
 		}
-		if($io.fps[fp][2].forText)
-		{
-			$io.fps[fp][0].writeText(content);
-		}
-		else
-		{
-			$io.fps[fp][0].write(content);
+		try{
+			if($io.fps[fp][2].forText)
+			{
+				$io.fps[fp][0].writeText(content);
+			}
+			else
+			{
+				$io.fps[fp][0].write(content);
+			}
+		}catch(ex){
+			ExceptionManager.put(ex,"io.file.write");
 		}
 	};
 	$file.read = function(fp,length){
@@ -270,8 +274,12 @@ $io.file = $io.file || (function()
 			return;
 		}
 		fp = $io.fps[fp];
-		fp[0].flush();
-		fp[0].saveToFile(fp[1],2);
+		try{
+			fp[0].flush();
+			fp[0].saveToFile(fp[1],2);
+		}catch(ex){
+			ExceptionManager.put(ex,"io.file.flush['" + F.string.right(fp[1],"\\") + "']");
+		}
 	};
 	$file.close = function(fp){
 		if(!$io.fps[fp])
