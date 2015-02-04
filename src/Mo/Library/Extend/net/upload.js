@@ -91,7 +91,7 @@ function $upload(cfg_){
 	var $g={};
 	F.extend($g, cfg, cfg_);
 	$upload.$cfg = $g;
-	if(!F.vbs.include("net/upload")) return;
+	if(!F.vbs.include("vbs/upload")) return;
 	F.vbs.ns("UploadManager",new $fileManager());
 	var $base = F.vbs.require("upload");
 	$upload.$base = $base;

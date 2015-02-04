@@ -678,7 +678,20 @@ var IO, JSON, Mo = Mo || (function(){
 				    return (new Function(args_,"return this.Run(" + args_ + ");")).apply(ScrCtl,arguments);
 			    };
 			    F.vbs.require = function(name){
-				    return ScrCtl.eval("new " + name);
+				    return (function(args){
+					    var obj = ScrCtl.eval("new " + name);
+					    if(args.length>0 && args.length % 2==0){
+						    for(var i=0;i<args.length-1;i++){
+							    obj[args[i]]=args[++i];
+						    }
+					    }else if(args.length==1 && typeof args[0]=="object"){
+						    for(var i in args[0]){
+							    if(!args[0].hasOwnProperty(i))continue;
+							    obj[i]=args[0][i];
+						    }
+					    }
+					    return obj;
+					})(Array.prototype.slice.call(arguments,1));
 			    };
 			    F.vbs.include = function(lib){
 				    if(!/^([\w\.\/]+)$/.test(lib)){
