@@ -21,10 +21,19 @@ function $qqwry(ip){
 	if(!IO.file.exists(cfg.path)) return {code:500,msg:"无法打开IP数据库。"};
 	if(!F.exports.encoding)F.require("encoding");
 	if(!F.vbs.include("vbs/qqwry")) return;
-	var $base = F.vbs.require("QQWry","UseCode",true,"QQWryFile",cfg.path);
-	$base.QQWry(ip);
-	var location = F.exports.encoding.gbk.getString(F.exports.encoding.hex.parse($base.Country)),
-		address = F.exports.encoding.gbk.getString(F.exports.encoding.hex.parse($base.LocalStr));
+	var $base = F.vbs.require("QQWry","UseCode",true,"QQWryFile",cfg.path),
+		location="",
+		address="";
+	try{
+		$base.QQWry(ip);
+		location = $base.Country;
+		address  = $base.LocalStr;
+		if(location=="") return {code:500,msg:"查找失败。"};
+	}catch(ex){
+		return {code:500,msg:ex.message};
+	}
+	if(location!="") location = F.exports.encoding.gbk.getString(F.exports.encoding.hex.parse(location));
+	if(address!="") address = F.exports.encoding.gbk.getString(F.exports.encoding.hex.parse(address));
 	location = F.string.replace(location,"^(内蒙古|宁夏|广西|西藏|新疆)","$1省");
 	
 	var	state="",city="",area="",
