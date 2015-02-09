@@ -10,18 +10,19 @@ function $safecode(sessionKey,opt){
 		length : 4,
 		odd : 0,
 		padding : 0,
-		data : ""
+		data : "",
+		size:10
 	};
 	F.extend(cfg,opt||{});
 	function getrndcolor(){
-		return [F.random(0,128),F.random(0,128),F.random(0,128)];
+		return [F.random(0,128),F.random(64,128),F.random(0,128)];
 	}
 	Response.Buffer = true;
 	Response.Expires = -1;
 	Response.AddHeader("Pragma", "no-cache");
 	Response.AddHeader("cache-ctrol", "no-cache");
 	Response.ContentType = "Image/bmp";
-	var I, ii, iii,cCode="0123456789aAcCeEmMnNrRsSuUvVwWxXzZjJbBdDfFhHkKtTgGpPqQyY",bgColor=[0xff,0xff,0xff],vNumberData=[],vCode=[], vCodes="";
+	var I, ii, iii,cCode="0123456789aAcCeEmMnNrRsSuUvVwWxXzZjJbBdDfFhHkKtTgGpPqQyY＋－×÷＝+-/= .",bgColor=[0xff,0xff,0xff],vNumberData=[],vCode=[], vCodes="";
 	vNumberData.push("1110001111110111011111011101111101110111110111011111011101111101110111110111011111100011111111111111");
 	vNumberData.push("1111011111111001111111110111111111011111111101111111110111111111011111111101111111100011111111111111");
 	vNumberData.push("1110001111110111011111011101111111110111111110111111110111111110111111110111111111000001111111111111");
@@ -78,6 +79,18 @@ function $safecode(sessionKey,opt){
 	vNumberData.push("1110011111110110111110111101111011110111101111011110111101111010010111110110111111100011111111100111");
 	vNumberData.push("1111111111100010001111011101111110101111111010111111110111111111011111111011111110001111111111111111");
 	vNumberData.push("1000100011110111011111101011111110101111111101111111110111111111011111111101111111100011111111111111");
+	vNumberData.push("1111111111111111011111111101111111110111111000000011111101111111110111111111011111111111111111111111");
+	vNumberData.push("1111111111111111111111111111111111111111111000000111111111111111111111111111111111111111111111111111");
+	vNumberData.push("1111111111111011111011110111011111101011111111011111111010111111011101111011111011111111111111111111");
+	vNumberData.push("1111111111111110011111111001111111111111110000000011111111111111100111111110011111111111111111111111");
+	vNumberData.push("1111111111111111111111111111111110000000111111111111100000001111111111111111111111111111111111111111");
+	vNumberData.push("1111111111111110111111111011111111101111110000000111111011111111101111111110111111111111111111111111");
+	vNumberData.push("1111111111111111111111111111111111111111110000001111111111111111111111111111111111111111111111111111");
+	vNumberData.push("1111110111111111011111111011111111101111111101111111110111111110111111111011111111011111111101111111");
+	vNumberData.push("1111111111111111111111111111111100000011111111111111111111111100000011111111111111111111111111111111");
+	vNumberData.push("1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111");
+	vNumberData.push("1111111111111111111111111111111111111111111111111111111111111111111111111001111111100111111111111111");
+
 	if(cfg.data==""){
 		for(var i=0;i<=cfg.length-1;i++){
 			vCode.push(F.random(0,55));
@@ -91,33 +104,129 @@ function $safecode(sessionKey,opt){
 		}
 	}
 	F.session(sessionKey,vCodes);
-	var padding = cfg.padding;
-	var output=[66,77,230,4,0,0,0,0,0,0,54,0,0,0,40,0,0,0,cfg.length * 10 + padding*2,0,0,0,10+padding*2,0,0,0,1,0,24,0,0,0,0,0,176,4,0,0,18,11,0,0,18,11,0,0,0,0,0,0,0,0,0,0];
-	for(var i=9+padding*2;i>=0;i--){
+	var padding = cfg.padding,
+		image = bmpImage(cfg.length * cfg.size + padding*2,cfg.size + padding*2),
+		header = byteArrayOutputStream(),
+		padzero = image.writeHeader(header);
+	var byt=[];
+	if(padzero>0){
+		for(var i=0;i<padzero;i++) byt.push(0);
+	}
+	var output=header.toByteArray();
+	for(var i=(cfg.size-1)+padding*2;i>=0;i--){
 		for(var ii=0;ii<=cfg.length-1;ii++){
 			if(ii==0){
 				for(var m=0;m<padding;m++){
-					output = output.concat(bgColor);
+					ArrayPush(output,bgColor);
 				}
 			}
-			for(var iii=0;iii<10;iii++){
+			for(var iii=0;iii<cfg.size;iii++){
 				if(F.random(1,100) < cfg.odd){
-					output = output.concat(getrndcolor());
+					ArrayPush(output,getrndcolor());
 				}else{
-					if(i>=padding && i<10+padding && vNumberData[vCode[ii]].substr((i-padding) * 10 + iii, 1) == "0"){
-						output = output.concat(getrndcolor());
+					if(i>=padding && i<cfg.size+padding && vNumberData[vCode[ii]].substr((i-padding) * cfg.size + iii, 1) == "0"){
+						ArrayPush(output,getrndcolor());
 					}else{
-						output = output.concat(bgColor);
+						ArrayPush(output,bgColor);
 					}
 				}
 			}
 			if(ii==cfg.length-1){
 				for(var m=0;m<padding;m++){
-					output = output.concat(bgColor);
+					ArrayPush(output,bgColor);
 				}
 			}
 		}
+		ArrayPush(output,byt);
 	}
 	F.echo(F.base64.toBinary(F.base64.e(output)),F.TEXT.BIN);
+}
+var ArrayPush = function(src,data){
+	for(var i=0;i<data.length;i++) src.push(data[i]);
+};
+//=====================================================================
+// GIF Support etc.
+//
+//---------------------------------------------------------------------
+// byteArrayOutputStream
+//---------------------------------------------------------------------
+var byteArrayOutputStream = function() {
+	var _bytes = new Array();
+	var _this = {};
+	_this.writeByte = function(b) {
+		_bytes.push(b & 0xff);
+	};
+	_this.writeShort = function(i) {
+		_this.writeByte(i);
+		_this.writeByte(i >>> 8);
+	};
+	_this.writeLong = function(i) {
+		_this.writeByte(i);
+		_this.writeByte(i >>> 8);
+		_this.writeByte(i >>> 16);
+		_this.writeByte(i >>> 24);
+	};
+	_this.writeRGB = function(i) {
+		_this.writeByte(i);
+		_this.writeByte(i >>> 8);
+		_this.writeByte(i >>> 16);
+	};
+	_this.writeBytes = function(b, off, len) {
+		off = off || 0;
+		len = len || b.length;
+		for (var i = 0; i < len; i += 1) {
+			_this.writeByte(b[i + off]);
+		}
+	};
+	_this.writeString = function(s) {
+		for (var i = 0; i < s.length; i += 1) {
+			_this.writeByte(s.charCodeAt(i) );
+		}
+	};
+	_this.toByteArray = function() {
+		return _bytes;
+	};
+	return _this;
+};
+//---------------------------------------------------------------------
+// bmpImage (B/W)
+//---------------------------------------------------------------------
+var bmpImage = function(width,height){
+	var _width = width;
+	var _height = height;
+	var _data = new Array(width * height);
+	var _this = {};
+	_this.setPixel = function(x, y, pixel) {
+		_data[y * _width + x] = pixel;
+	};
+	_this.writeHeader = function(out) {
+		out.writeString("BM");
+		var pixWidth = ((((_width * 24) + 31) & ~31) / 8);
+		var biSizeImage = pixWidth * _height;
+		out.writeLong(biSizeImage+54);
+		out.writeBytes([0,0,0,0,54,0,0,0,40,0,0,0]);
+		out.writeLong(_width);
+		out.writeLong(_height);
+		out.writeBytes([1,0,24,0,0,0,0,0]);
+		out.writeLong(biSizeImage);
+		out.writeBytes([18,11,0,0,18,11,0,0,0,0,0,0,0,0,0,0]);
+		return pixWidth - _width *3;
+	};
+	_this.write = function(out) {
+		var pixWidth = _this.writeHeader(out);
+		var byt=[];
+		for(var i=0; i< pixWidth-_width*3; i++) byt.push(0);
+		for(var i=_height-1;i>=0;i--){
+			for(var j=0;j<_width;j++){
+				if(_data[i*_width+j]==0){
+					out.writeRGB(0);
+				}else{
+					out.writeRGB(0xffffff);
+				}
+			}
+			out.writeBytes(byt);
+		}
+	};
+	return _this;
 }
 exports.safecode = $safecode;
