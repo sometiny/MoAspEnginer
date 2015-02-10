@@ -8,7 +8,7 @@
 var readAttrs__ = function(src) {
 		if (typeof src != "string") return {};
 		if (!src) return {};
-		src = $f.string.trim($f.string.trim(src).replace(/^<(\w+)([\s\S]+?)(\/)?>([\s\S]*?)$/i, "$2"));
+		src = F.string.trim(F.string.trim(src).replace(/^<(\w+)([\s\S]+?)(\/)?>([\s\S]*?)$/i, "$2"));
 		var returnValue = {};
 		var reg = /\b([\w\.]+)\=(\"|\')(.+?)(\"|\')( |$)/igm;
 		var a = reg.exec(src);

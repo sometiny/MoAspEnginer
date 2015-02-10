@@ -30,43 +30,43 @@ var GLOBAL = this,
 			["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", ""],
 			["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", ""]
 		];
-		var post__ = null,
-			get__ = {},
-			server__ = {},
-			activex__ = [],
-			postinited__ = false,
-			required__ = {},
-			included__ = {},
-			__POST_MAPPER__ = null;
+		var _post_ = null,
+			_get_ = {},
+			_server_ = {},
+			_activex_ = [],
+			_postinited_ = false,
+			_required_ = {},
+			_included_ = {},
+			_post_map_ = null;
 		var init = function() {
-				if ((typeof fso_global) != "object") $f.fso = $f.activex("Scripting.FileSystemObject");
-				else $f.fso = fso_global;
-				$f.each(Request.QueryString, function(q) {
-					get__[q] = String(this(q));
+				if ((typeof fso_global) != "object") _.fso = _.activex("Scripting.FileSystemObject");
+				else _.fso = fso_global;
+				_.each(Request.QueryString, function(q) {
+					_get_[q] = String(this(q));
 				});
-				$f.each(Request.ServerVariables, function(q) {
+				_.each(Request.ServerVariables, function(q) {
 					var v = String(this(q));
 					if (q == "URL" && v.indexOf("?") > 0) v = v.substr(0, v.indexOf("?"));
-					server__[q] = v;
+					_server_[q] = v;
 				});
 			};
-		var $f = {};
-		$f.TEXT = {
+		var _ = {};
+		_.TEXT = {
 			BR: 1,
 			NL: 2,
 			BIN: 4,
 			NLBR: 1 | 2
 		};
-		$f.fso = null;
-		$f.exports = {};
-		$f.vbs = {};
-		$f.has = function(obj, key) {
+		_.fso = null;
+		_.exports = {};
+		_.vbs = {};
+		_.has = function(obj, key) {
 			return obj.hasOwnProperty(key);
 		};
-		$f.toString = function() {
+		_.toString = function() {
 			return "v1";
 		};
-		$f.extend = function(src) {
+		_.extend = function(src) {
 			if (arguments.length < 1) return {};
 			if (arguments.length < 2) return src;
 			for (var i = 1; i < arguments.length; i++) {
@@ -76,23 +76,23 @@ var GLOBAL = this,
 			}
 			return src;
 		};
-		$f.exists = function(path, folder) {
+		_.exists = function(path, folder) {
 			if (folder === true) {
-				return $f.fso.folderexists($f.mappath(path));
+				return _.fso.folderexists(_.mappath(path));
 			} else {
-				return $f.fso.fileexists($f.mappath(path));
+				return _.fso.fileexists(_.mappath(path));
 			}
 		};
-		$f.dispose = function(obj) {
+		_.dispose = function(obj) {
 			if (obj != undefined) {
 				obj = null;
 				return;
 			}
-			while (activex__.length > 0) {
-				$f.dispose(activex__.pop());
+			while (_activex_.length > 0) {
+				_.dispose(_activex_.pop());
 			}
 		};
-		$f.random = function(minValue, maxValue) {
+		_.random = function(minValue, maxValue) {
 			if (minValue === undefined && maxValue === undefined) return Math.random();
 			if (maxValue === undefined) {
 				maxValue = minValue;
@@ -100,9 +100,9 @@ var GLOBAL = this,
 			}
 			return parseInt(Math.random() * (maxValue - minValue + 1)) + minValue;
 		};
-		$f.guid = function(format) {
+		_.guid = function(format) {
 			format = format || "D"; //NDBP
-			var typelib = $f.activex("scriptlet.typelib")
+			var typelib = _.activex("scriptlet.typelib")
 			var returnValue = typelib.Guid.replace(/^\{(.+?)\}([\s\S]*)$/i,"$1");
 			switch (format.toUpperCase()) {
 			case "B":
@@ -116,16 +116,16 @@ var GLOBAL = this,
 			}
 			return returnValue;
 		};
-		$f.mappath = function(path) {
+		_.mappath = function(path) {
 			if (path.length < 2) return Server.MapPath(path)
 			if (path.substr(1, 1) == ":") return path;
 			return Server.MapPath(path);
 		};
-		$f.activex = function(classid, fn) {
+		_.activex = function(classid, fn) {
 			var $o = null;
 			try {
 				$o = Server.CreateObject(classid);
-				activex__.push($o);
+				_activex_.push($o);
 			} catch (ex) {
 				return null;
 			}
@@ -136,7 +136,7 @@ var GLOBAL = this,
 			}
 			return $o;
 		};
-		$f.activex.enabled = function(classid) {
+		_.activex.enabled = function(classid) {
 			try {
 				Server.CreateObject(classid);
 				return true;
@@ -144,13 +144,13 @@ var GLOBAL = this,
 				return false;
 			}
 		};
-		$f.stream = function(mode, type) {
-			var stream = $f.activex("Adodb.Stream");
+		_.stream = function(mode, type) {
+			var stream = _.activex("Adodb.Stream");
 			if (mode !== undefined) stream.Mode = mode;
 			if (type !== undefined) stream.Type = type;
 			return stream;
 		};
-		$f.json = function(src, globalvar) {
+		_.json = function(src, globalvar) {
 			var cglobal = false;
 			try {
 				if (typeof globalvar == "string" && /^([0-9a-z]+)$/igm.test(globalvar)) {
@@ -164,19 +164,19 @@ var GLOBAL = this,
 				(new Function(globalvar + " = null;"))();
 			}
 		};
-		$f.post = function(key, value) {
+		_.post = function(key, value) {
 			postinit__();
-			if (key === undefined) return post__;
+			if (key === undefined) return _post_;
 			if (value === null) {
-				$f.post.remove(key);
+				_.post.remove(key);
 				return;
 			}
-			if (value === undefined) return (__POST_MAPPER__.hasOwnProperty(key.toUpperCase()) ? post__[__POST_MAPPER__[key.toUpperCase()]] : "");
-			post__[key] = value;
-			__POST_MAPPER__[key.toUpperCase()] = key;
+			if (value === undefined) return (_post_map_.hasOwnProperty(key.toUpperCase()) ? _post_[_post_map_[key.toUpperCase()]] : "");
+			_post_[key] = value;
+			_post_map_[key.toUpperCase()] = key;
 			return;
 		};
-		$f.session = function(key, value) {
+		_.session = function(key, value) {
 			if (key === undefined) return "";
 			if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
 			if (value === null) {
@@ -189,34 +189,34 @@ var GLOBAL = this,
 			}
 			Session(key) = value;
 		};
-		$f.get = function(key, value) {
-			if (key === undefined) return get__;
+		_.get = function(key, value) {
+			if (key === undefined) return _get_;
 			if (value === null) {
-				$f.get.remove(key);
+				_.get.remove(key);
 				return;
 			}
-			if (value === undefined) return (get__.hasOwnProperty(key) ? get__[key] : "");
-			get__[key] = value;
+			if (value === undefined) return (_get_.hasOwnProperty(key) ? _get_[key] : "");
+			_get_[key] = value;
 			return;
 		};
-		$f.all = function(key) {
+		_.all = function(key) {
 			if (key == undefined) return "";
-			if (get__.hasOwnProperty(key)) return $f.get(key);
+			if (_get_.hasOwnProperty(key)) return _.get(key);
 			postinit__();
-			if (__POST_MAPPER__.hasOwnProperty(key.toUpperCase())) return post__[__POST_MAPPER__[key.toUpperCase()]];
+			if (_post_map_.hasOwnProperty(key.toUpperCase())) return _post_[_post_map_[key.toUpperCase()]];
 			return "";
 		};
-		$f.server = function(key, value) {
-			if (key === undefined) return server__;
+		_.server = function(key, value) {
+			if (key === undefined) return _server_;
 			if (value === null) {
-				delete server__[key];
+				delete _server_[key];
 				return;
 			}
-			if (value === undefined) return (server__.hasOwnProperty(key) ? server__[key] : "");
-			server__[key] = value;
+			if (value === undefined) return (_server_.hasOwnProperty(key) ? _server_[key] : "");
+			_server_[key] = value;
 			return;
 		};
-		$f.cookie = function(key, value, expired, domain, path, secure) {
+		_.cookie = function(key, value, expired, domain, path, secure) {
 			if (key == undefined) return "";
 			var mkey = key,
 				skey = "";
@@ -246,7 +246,7 @@ var GLOBAL = this,
 			if (expired !== undefined && !isNaN(expired)) {
 				var dt = new Date();
 				dt.setTime(dt.getTime() + parseInt(expired) * 1000);
-				Response.Cookies(mkey).Expires = $f.format("{0}-{1}-{2} {3}:{4}:{5}", dt.getYear(), dt.getMonth() + 1, dt.getDate(), dt.getHours(), dt.getMinutes(), dt.getSeconds());
+				Response.Cookies(mkey).Expires = _.format("{0}-{1}-{2} {3}:{4}:{5}", dt.getYear(), dt.getMonth() + 1, dt.getDate(), dt.getHours(), dt.getMinutes(), dt.getSeconds());
 			}
 			if (domain !== undefined) {
 				Response.Cookies(mkey).Domain = domain;
@@ -258,8 +258,8 @@ var GLOBAL = this,
 				Response.Cookies(mkey).Secure = secure;
 			}
 		};
-		$f.echo = function(debug, brnl, newline) {
-			if ((brnl & $f.TEXT.BIN)) {
+		_.echo = function(debug, brnl, newline) {
+			if ((brnl & _.TEXT.BIN)) {
 				Response.BinaryWrite(debug);
 			} else {
 				Response.Write(debug);
@@ -270,14 +270,14 @@ var GLOBAL = this,
 				return;
 			}
 			if (isNaN(brnl)) return;
-			if (brnl & $f.TEXT.BR) Response.Write("<br />");
-			if (brnl & $f.TEXT.NL) Response.Write("\r\n");
+			if (brnl & _.TEXT.BR) Response.Write("<br />");
+			if (brnl & _.TEXT.NL) Response.Write("\r\n");
 		};
-		$f.exit = function(debug, brnl, newline) {
-			$f.echo(debug, brnl, newline);
+		_.exit = function(debug, brnl, newline) {
+			_.echo(debug, brnl, newline);
 			Response.End();
 		};
-		$f.format = function(Str) {
+		_.format = function(Str) {
 			var arg = arguments;
 			if (arg.length <= 1) {
 				return Str;
@@ -295,7 +295,7 @@ var GLOBAL = this,
 					var argtype = (typeof argvalue);
 					if (argformat != "") {
 						if (argtype == "date" || (argtype == "object" && argvalue.constructor == Date)) {
-							return $f.formatdate(argvalue, argformat);
+							return _.formatdate(argvalue, argformat);
 						} else if (argtype == "number") {
 							if (/^(\d+)$/ig.test(argformat)) return argvalue.toString(argformat);
 							var mat2 = /^((\d+)\.)?(D|E|F|X)(\d*)$/igm.exec(argformat);
@@ -340,33 +340,33 @@ var GLOBAL = this,
 				return ma;
 			});
 		};
-		$f.redirect = function(url, msg) {
+		_.redirect = function(url, msg) {
 			if (msg == undefined) msg = "";
 			msg = msg + "";
 			if (msg != "") {
-				msg = $f.encode(msg);
-				$f.echo("<s" + "cript type=\"text/javascript\">alert(decodeURIComponent(\"" + msg + "\"));window.location=decodeURIComponent(\"" + $f.encode(url) + "\");</s" + "cript>");
+				msg = _.encode(msg);
+				_.echo("<s" + "cript type=\"text/javascript\">alert(decodeURIComponent(\"" + msg + "\"));window.location=decodeURIComponent(\"" + _.encode(url) + "\");</s" + "cript>");
 			} else {
 				Response.Redirect(url);
 			}
 			Response.End();
 		};
-		$f["goto"] = function(url, msg) {
+		_["goto"] = function(url, msg) {
 			if (msg == undefined) msg = "";
 			msg = msg + "";
 			if (msg != "") {
-				msg = $f.encode(msg);
-				$f.echo("<s" + "cript type=\"text/javascript\">alert(decodeURIComponent(\"" + msg + "\"));window.location=decodeURIComponent(\"" + $f.encode(url) + "\");</s" + "cript>");
+				msg = _.encode(msg);
+				_.echo("<s" + "cript type=\"text/javascript\">alert(decodeURIComponent(\"" + msg + "\"));window.location=decodeURIComponent(\"" + _.encode(url) + "\");</s" + "cript>");
 			} else {
-				$f.echo("<s" + "cript type=\"text/javascript\">window.location=decodeURIComponent(\"" + $f.encode(url) + "\");</s" + "cript>");
+				_.echo("<s" + "cript type=\"text/javascript\">window.location=decodeURIComponent(\"" + _.encode(url) + "\");</s" + "cript>");
 			}
 		};
-		$f.vendor = function(library){
-			return $f.require.call(this,library,[Mo.Config.Global.MO_APP + "Library/Vendor/", Mo.Config.Global.MO_CORE + "Library/Vendor/"]);
+		_.vendor = function(library){
+			return _.require.call(this,library,[Mo.Config.Global.MO_APP + "Library/Vendor/", Mo.Config.Global.MO_CORE + "Library/Vendor/"]);
 		};
-		$f.require = function(library, path) {
-			if (required__[library] === true) return;
-			if (library.length > 2 && library.substr(1, 1) == ":" && $f.fso.fileexists(library)) {
+		_.require = function(library, path) {
+			if (_required_[library] === true) return;
+			if (library.length > 2 && library.substr(1, 1) == ":" && _.fso.fileexists(library)) {
 				path = library.substr(0, library.lastIndexOf("\\") + 1);
 				library = library.substr(library.lastIndexOf("\\") + 1);
 			}
@@ -381,57 +381,57 @@ var GLOBAL = this,
 			if (path) _targetPaths = _targetPaths.concat(path);
 			else _targetPaths = _targetPaths.concat([Mo.Config.Global.MO_APP + "Library/Extend/", Mo.Config.Global.MO_CORE + "Library/Extend/"]);
 			for (var i = 0; i < _targetPaths.length; i++) {
-				_path = $f.mappath(_targetPaths[i] + library);
-				if ($f.fso.fileexists(_path)) break;
-				_path = $f.mappath(_targetPaths[i] + library + ".js");
-				if ($f.fso.fileexists(_path)) break;
-				if ($f.fso.folderexists($f.mappath(_targetPaths[i] + library))) {
-					_path = $f.mappath(_targetPaths[i] + library + "/index.js");
-					if ($f.fso.fileexists(_path)) break;
+				_path = _.mappath(_targetPaths[i] + library);
+				if (_.fso.fileexists(_path)) break;
+				_path = _.mappath(_targetPaths[i] + library + ".js");
+				if (_.fso.fileexists(_path)) break;
+				if (_.fso.folderexists(_.mappath(_targetPaths[i] + library))) {
+					_path = _.mappath(_targetPaths[i] + library + "/index.js");
+					if (_.fso.fileexists(_path)) break;
 				}
 			}
-			if (_path=="" || !$f.fso.fileexists(_path)) {
+			if (_path=="" || !_.fso.fileexists(_path)) {
 				ExceptionManager.put(new Exception(0, "F.require", "required library '" + library + "' is not exists."));
-				return $f.exports;
+				return _.exports;
 			}
-			_statement = $f.string.fromFile(_path);
+			_statement = _.string.fromFile(_path);
 			_statement = _statement.replace(/^(\s*)<sc(.+)>/ig, "").replace(/<\/script>(\s*)$/ig, "");
 			try {
 				var this_ = this;
 				if (this == F) this_ = null;
-				required__[library] = true;
+				_required_[library] = true;
 				return (new Function("exports", "__FILE__", "__DIR__", _statement))(
-				this_ || $f.exports, _path, _path == "" ? "" : _path.substr(0, _path.lastIndexOf("\\"))) || $f.exports;
+				this_ || _.exports, _path, _path == "" ? "" : _path.substr(0, _path.lastIndexOf("\\"))) || _.exports;
 			} catch (ex) {
 				ExceptionManager.put(ex, "F.require");
-				return $f.exports;
+				return _.exports;
 			}
 		};
-		$f.include = function(path, charset) {
-			if (included__[path] === true) return true;
+		_.include = function(path, charset) {
+			if (_included_[path] === true) return true;
 			try {
-				path = $f.mappath(path);
-				if (!$f.fso.fileexists(path)) {
+				path = _.mappath(path);
+				if (!_.fso.fileexists(path)) {
 					ExceptionManager.put(new Exception(0, "F.include", "file not exists:" + path));
 					return false;
 				}
 				var iscached = false;
 				var src;
-				if ($f.cache.enabled && $f.cache.exists(path)) {
-					src = $f.cache.read(path);
+				if (_.cache.enabled && _.cache.exists(path)) {
+					src = _.cache.read(path);
 					if (src != null) iscached = true;
 				}
 				if (!iscached) {
-					src = $f.string.fromFile(path, charset || "utf-8");
+					src = _.string.fromFile(path, charset || "utf-8");
 					src = src.replace(/^(\s*)<sc(.+)>/ig, "").replace(/<\/script>(\s*)$/ig, "");
 					if (src == "") {
 						ExceptionManager.put(new Exception(0, "F.include", "read file failed:" + path));
 						return false;
 					}
 				}
-				if ($f.execute.call(path, src)) {
-					if (!iscached && $f.cache.enabled) $f.cache.write(path, src);
-					return included__[path] = true;
+				if (_.execute.call(path, src)) {
+					if (!iscached && _.cache.enabled) _.cache.write(path, src);
+					return _included_[path] = true;
 				} else {
 					return false;
 				}
@@ -440,7 +440,7 @@ var GLOBAL = this,
 				return false;
 			}
 		};
-		$f.execute = function() {
+		_.execute = function() {
 			if (arguments.length < 1) return false;
 			try {
 				var path = this;
@@ -464,7 +464,7 @@ var GLOBAL = this,
 				return false;
 			}
 		};
-		$f.globalize = function(src, cname) {
+		_.globalize = function(src, cname) {
 			if (cname === undefined) return;
 			if (typeof cname == "string") cname = [cname];
 			else if (typeof cname == "object" && cname.constructor == Array) {} else return;
@@ -473,19 +473,19 @@ var GLOBAL = this,
 				(new Function("src", cname[i] + " = src;"))(src);
 			}
 		};
-		$f.initialize = function(name) {
+		_.initialize = function(name) {
 			if (typeof name == "string") name = eval(name);
 			return typeof name == "object" ? name : new name();
 		};
-		$f.encode = function(src) {
+		_.encode = function(src) {
 			src = src || "";
 			return encodeURIComponent(src).replace(/\+/, "%2B");
 		};
-		$f.decode = function(src) {
+		_.decode = function(src) {
 			src = src || "";
 			return decodeURIComponent(src);
 		};
-		$f.encodeHtml = function(src) {
+		_.encodeHtml = function(src) {
 			src = src || "";
 			var ret = src.replace(/&/igm, "&amp;");
 			ret = ret.replace(/>/igm, "&gt;");
@@ -505,7 +505,7 @@ var GLOBAL = this,
 			ret = ret.replace(/\u2122/igm, "&trade;");
 			return ret
 		};
-		$f.decodeHtml = function(src) {
+		_.decodeHtml = function(src) {
 			src = src || "";
 			var ret = src.replace(/&amp;/igm, "&");
 			ret = ret.replace(/&gt;/igm, ">");
@@ -525,7 +525,7 @@ var GLOBAL = this,
 			ret = ret.replace(/&trade;/igm, "\u2122");
 			return ret
 		};
-		$f.jsEncode = function(str) {
+		_.jsEncode = function(str) {
 			if (str == undefined) return "";
 			if (str == "") return "";
 			var i, j, aL1, aL2, c, p, ret = "";
@@ -556,7 +556,7 @@ var GLOBAL = this,
 			}
 			return ret;
 		};
-		$f.formatdate = function(dt, fs) {
+		_.formatdate = function(dt, fs) {
 			if (dt !== null) {
 				var src = dt;
 				if (typeof dt == "object" && dt.constructor == Date) {
@@ -592,12 +592,12 @@ var GLOBAL = this,
 				H = [dt.getHours() % 12];
 
 			y[1] = y[0];
-			m[1] = $f.string.right("0" + m[0], 2);
-			d[1] = $f.string.right("0" + d[0], 2);
-			h[1] = $f.string.right("0" + h[0], 2);
-			H[1] = $f.string.right("0" + H[0], 2);
-			n[1] = $f.string.right("0" + n[0], 2);
-			s[1] = $f.string.right("0" + s[0], 2);
+			m[1] = _.string.right("0" + m[0], 2);
+			d[1] = _.string.right("0" + d[0], 2);
+			h[1] = _.string.right("0" + h[0], 2);
+			H[1] = _.string.right("0" + H[0], 2);
+			n[1] = _.string.right("0" + n[0], 2);
+			s[1] = _.string.right("0" + s[0], 2);
 
 			fs = fs.replace(/dddd/g, "{````}");
 			fs = fs.replace(/ddd/g, "{```}");
@@ -624,26 +624,26 @@ var GLOBAL = this,
 			fs = fs.replace(/\{~~~\}/g, ms[1][m[0] - 1]);
 			return fs;
 		};
-		$f.date = function(srcDate) {
-			var date_ = $f.date.parse(srcDate);
+		_.date = function(srcDate) {
+			var date_ = _.date.parse(srcDate);
 			for (var i in date_) {
 				if (!date_.hasOwnProperty(i)) continue;
 				this[i] = date_[i];
 			}
 		};
-		$f.date.timezone = new Date().getTimezoneOffset() / 60;
-		$f.date.format = function() {
-			return $f.formatdate.apply(this, arguments);
+		_.date.timezone = new Date().getTimezoneOffset() / 60;
+		_.date.format = function() {
+			return _.formatdate.apply(this, arguments);
 		};
-		$f.date.firstweekdayofmonth = function(srcDate) {
+		_.date.firstweekdayofmonth = function(srcDate) {
 			var date_ = new Date(srcDate - 0);
 			return (new Date(date_.getFullYear(), date_.getMonth(), 1)).getDay();
 		};
-		$f.date.firstweekdayoflastmonth = function(srcDate) {
+		_.date.firstweekdayoflastmonth = function(srcDate) {
 			var date_ = new Date(srcDate - 0);
-			return $f.date.firstweekdayofmonth(new Date(date_.getFullYear(), date_.getMonth(), 1) - 12 * 3600000);
+			return _.date.firstweekdayofmonth(new Date(date_.getFullYear(), date_.getMonth(), 1) - 12 * 3600000);
 		};
-		$f.date.parse = function(srcDate) {
+		_.date.parse = function(srcDate) {
 			if (typeof srcDate == "string") {
 				srcDate = srcDate.replace(/(\-|\s|\:|\.)0/ig, "$1");
 				var match = /^(\d{4})\-(\d{1,2})\-(\d{1,2})( (\d{1,2})\:(\d{1,2})\:(\d{1,2})(\.(\d{1,3}))?)?$/.exec(srcDate);
@@ -675,7 +675,7 @@ var GLOBAL = this,
 				ms: date_.getMilliseconds(),
 				weekday: date_.getDay()
 			};
-			obj_["yeardays"] = $f.date.datediff("d", new Date(obj_.year, 0, 1), date_) + 1;
+			obj_["yeardays"] = _.date.datediff("d", new Date(obj_.year, 0, 1), date_) + 1;
 			obj_["season"] = (obj_.month - obj_.month % 3) / 3 + 1;
 			var firstday = new Date(obj_.year, 0, 1);
 			if (firstday.getDay() == 0) {
@@ -686,7 +686,7 @@ var GLOBAL = this,
 			}
 			return obj_;
 		};
-		$f.date.datediff = function(diff, src1, src2) {
+		_.date.datediff = function(diff, src1, src2) {
 			var miisecond = new Date(src2 - 0) - new Date(src1 - 0);
 			switch (diff) {
 			case "s":
@@ -706,8 +706,8 @@ var GLOBAL = this,
 			}
 			return miisecond;
 		};
-		$f.date.dateadd = function(diff, value, srcDate) {
-			var date_ = $f.date.parse(srcDate);
+		_.date.dateadd = function(diff, value, srcDate) {
+			var date_ = _.date.parse(srcDate);
 			switch (diff) {
 			case "ms":
 				return new Date(date_.ticks - value * -1);
@@ -728,26 +728,26 @@ var GLOBAL = this,
 			}
 			return srcDate;
 		};
-		$f.date.prototype.add = function(diff, value) {
-			return $f.date.call(this, $f.date.dateadd(diff, value, this.ticks));
+		_.date.prototype.add = function(diff, value) {
+			return _.date.call(this, _.date.dateadd(diff, value, this.ticks));
 		};
-		$f.date.prototype.diff = function(diff, srcdate) {
-			return $f.date.datediff(diff, srcdate, this.ticks);
+		_.date.prototype.diff = function(diff, srcdate) {
+			return _.date.datediff(diff, srcdate, this.ticks);
 		};
-		$f.date.prototype.toString = function(format) {
-			if (format) return $f.formatdate(this.ticks, format);
+		_.date.prototype.toString = function(format) {
+			if (format) return _.formatdate(this.ticks, format);
 			return (new Date(this.ticks)).toString();
 		};
 
-		$f.untimespan = function(ts, format) {
+		_.untimespan = function(ts, format) {
 			if (format === undefined) format = "yyyy-MM-dd HH:mm:ss"
-			return $f.formatdate(new Date(ts * 1000), format);
+			return _.formatdate(new Date(ts * 1000), format);
 		};
-		$f.timespan = function(src) {
-			src = $f.date.parse(src || new Date());
+		_.timespan = function(src) {
+			src = _.date.parse(src || new Date());
 			return (src.ticks - (src.ticks % 1000)) / 1000;
 		};
-		$f.each = function(src, fn, state) {
+		_.each = function(src, fn, state) {
 			if (typeof fn != "function") return;
 			var e = new Enumerator(src);
 			for (; !e.atEnd(); e.moveNext()) {
@@ -755,41 +755,41 @@ var GLOBAL = this,
 			}
 			e = null;
 		};
-		$f.foreach = function(src, fn, state) {
+		_.foreach = function(src, fn, state) {
 			if (typeof fn != "function") return;
 			for (var i in src) {
 				if (!src.hasOwnProperty(i)) continue;
 				if (fn.apply(src, [i, src[i], state]) === false) break;
 			}
 		};
-		$f.safe = function(src) {
+		_.safe = function(src) {
 			src = src || "";
 			return src.replace(/\'/igm, "").replace(/((^[\s]+)|([\s]+$))/igm, "").replace(/[\r\n]+/igm, "").replace(/>/igm, "&gt;").replace(/</igm, "&lt;");
 		};
 
-		$f.cache = {};
-		$f.cache.enabled = false;
-		$f.cache.write = function(key, value) {
-			if (!$f.cache.enabled) return;
+		_.cache = {};
+		_.cache.enabled = false;
+		_.cache.write = function(key, value) {
+			if (!_.cache.enabled) return;
 			Application.Lock();
 			Application(key) = value;
 			Application.UnLock();
 		};
-		$f.cache.read = function(key) {
+		_.cache.read = function(key) {
 			if (Application.Contents(key) != undefined) return Application.Contents(key);
 			return null;
 		};
-		$f.cache.exists = function(key) {
+		_.cache.exists = function(key) {
 			return Application.Contents(key) != undefined;
 		};
-		$f.cache.clear = function(key) {
+		_.cache.clear = function(key) {
 			if (key != undefined && (typeof key == "string") && key.length > 0) {
 				if (key.substr(key.length - 1) == ".") {
 					var list = [];
-					$f.each(Application.Contents, function(q) {
+					_.each(Application.Contents, function(q) {
 						if (q.length > key.length && q.substr(0, key.length) == key) list.push(q);
 					});
-					$f.each(list, function(q) {
+					_.each(list, function(q) {
 						Application.Contents.Remove(q);
 					});
 					return list.length;
@@ -798,52 +798,52 @@ var GLOBAL = this,
 				return;
 			}
 			var all = [];
-			$f.each(Application.Contents, function(q) {
+			_.each(Application.Contents, function(q) {
 				all.push(q);
 			});
-			$f.each(all, function(q) {
+			_.each(all, function(q) {
 				Application.Contents.Remove(q);
 			});
 			return all.length;
 		};
 
 
-		$f.sortable = {};
-		$f.sortable.data__ = [];
-		$f.sortable.add = function(v) {
-			$f.sortable.data__.push(v);
+		_.sortable = {};
+		_.sortable.data__ = [];
+		_.sortable.add = function(v) {
+			_.sortable.data__.push(v);
 		};
-		$f.sortable.clear = function() {
-			while ($f.sortable.data__.length > 0) {
-				$f.sortable.data__.pop();
+		_.sortable.clear = function() {
+			while (_.sortable.data__.length > 0) {
+				_.sortable.data__.pop();
 			}
 		};
-		$f.sortable.sort = function(asc) {
+		_.sortable.sort = function(asc) {
 			if (asc == undefined) asc = true;
-			$f.sortable.data__ = $f.sortable.data__.sort(function(a, b) {
+			_.sortable.data__ = _.sortable.data__.sort(function(a, b) {
 				if (a > b == asc) return 1;
 				if (a == b) return 0;
 				if (a < b == asc) return -1;
 			});
 		};
-		$f.sortable.join = function(c) {
-			return $f.sortable.data__.join(c || "");
+		_.sortable.join = function(c) {
+			return _.sortable.data__.join(c || "");
 		};
 
 
-		$f.timer = {};
-		$f.timer.start = null;
-		$f.timer.end = null;
-		$f.timer.run = function() {
+		_.timer = {};
+		_.timer.start = null;
+		_.timer.end = null;
+		_.timer.run = function() {
 			this.start = new Date();
 			return this.start;
 		};
-		$f.timer.stop = function(start) {
+		_.timer.stop = function(start) {
 			this.end = new Date();
 			return this.end - (start || this.start);
 		};
 
-		$f.replace = function(src, search, replacement) {
+		_.replace = function(src, search, replacement) {
 			if (typeof search == "object") return src.replace(search, replacement);
 			var rv = "",
 				r = "";
@@ -855,8 +855,8 @@ var GLOBAL = this,
 			}
 			return rv + src;
 		};
-		$f.string = {};
-		$f.string.left = function(src, len) {
+		_.string = {};
+		_.string.left = function(src, len) {
 			src = src || "";
 			if (typeof len == "number") {
 				if (src.length <= len) return src;
@@ -868,7 +868,7 @@ var GLOBAL = this,
 			}
 			return src;
 		};
-		$f.string.right = function(src, len) {
+		_.string.right = function(src, len) {
 			src = src || "";
 			if (typeof len == "number") {
 				if (src.length <= len) return src;
@@ -880,56 +880,56 @@ var GLOBAL = this,
 			}
 			return src;
 		};
-		$f.string.startWith = $f.string.startsWith = function(src, opt) {
+		_.string.startWith = _.string.startsWith = function(src, opt) {
 			if (src == "") return false;
 			if (opt === undefined) return false;
 			if (opt.length > src) return false;
 			if (src.substr(0, opt.length) == opt) return true;
 			return false;
 		};
-		$f.string.endWith = $f.string.endsWith = function(src, opt) {
+		_.string.endWith = _.string.endsWith = function(src, opt) {
 			if (src == "") return false;
 			if (opt === undefined) return false;
 			if (opt.length > src) return false;
 			if (src.substr(src.length - opt.length) == opt) return true;
 			return false;
 		};
-		$f.string.trim = function(src, opt) {
-			return $f.string.trimLeft($f.string.trimRight(src, opt), opt);
+		_.string.trim = function(src, opt) {
+			return _.string.trimLeft(_.string.trimRight(src, opt), opt);
 		};
-		$f.string.trimLeft = function(src, opt) {
+		_.string.trimLeft = function(src, opt) {
 			if (src == "") return "";
 			if (opt === undefined) return src.replace(/^(\s+)/igm, "");
-			if ($f.string.startWith(src, opt)) {
+			if (_.string.startWith(src, opt)) {
 				if (src == opt) return "";
-				return $f.string.trimLeft(src.substr(opt.length), opt);
+				return _.string.trimLeft(src.substr(opt.length), opt);
 			}
 			return src;
 		};
-		$f.string.trimRight = function(src, opt) {
+		_.string.trimRight = function(src, opt) {
 			if (src == "") return "";
 			if (opt === undefined) return src.replace(/(\s+)$/igm, "");
-			if ($f.string.endWith(src, opt)) {
+			if (_.string.endWith(src, opt)) {
 				if (src == opt) return "";
-				return $f.string.trimRight(src.substr(0, src.length - opt.length), opt);
+				return _.string.trimRight(src.substr(0, src.length - opt.length), opt);
 			}
 			return src;
 		};
-		$f.string.format = function() {
-			return $f.format.apply(F, arguments);
+		_.string.format = function() {
+			return _.format.apply(F, arguments);
 		};
-		$f.string.email = function(str) {
-			return $f.string.exp(str, /^([\w\.\-]+)@([\w\.\-]+)$/);
+		_.string.email = function(str) {
+			return _.string.exp(str, /^([\w\.\-]+)@([\w\.\-]+)$/);
 		};
-		$f.string.url = function(str) {
-			return $f.string.exp(str, /^http(s)?\:\/\/(.+?)$/i);
+		_.string.url = function(str) {
+			return _.string.exp(str, /^http(s)?\:\/\/(.+?)$/i);
 		};
-		$f.string.test = function(str, exp, option) {
-			exp = $f.string.exp_(exp, option);
+		_.string.test = function(str, exp, option) {
+			exp = _.string.exp_(exp, option);
 			if (exp == null) return false;
 			return exp.test(str);
 		};
-		$f.string.replace = function(src, exp, option, replacement) {
+		_.string.replace = function(src, exp, option, replacement) {
 			if (arguments.length == 3) {
 				replacement = option;
 				option = "";
@@ -937,11 +937,11 @@ var GLOBAL = this,
 			src = src || "";
 			if (typeof exp != "object") {
 				exp = exp + "";
-				exp = $f.string.exp_(exp, option) || exp;
+				exp = _.string.exp_(exp, option) || exp;
 			}
 			return src.replace(exp, replacement);
 		};
-		$f.string.matches = function(src, exp, option,fn) {
+		_.string.matches = function(src, exp, option,fn) {
 			var ref=null;
 			if(typeof option=="function")
 			{
@@ -949,7 +949,7 @@ var GLOBAL = this,
 				fn = option;
 				option = ""; 
 			}
-			exp = $f.string.exp_(exp, option);
+			exp = _.string.exp_(exp, option);
 			if (exp == null) return null;
 			if (!exp.global) return exp.exec(src);
 			var ret = [],
@@ -967,16 +967,16 @@ var GLOBAL = this,
 			}
 			return ret;
 		};
-		$f.string.exp = function(str, exp, option) {
+		_.string.exp = function(str, exp, option) {
 			if (typeof exp != "object") {
 				if (typeof exp !== "string") return "";
-				exp = $f.string.exp_(exp, option);
+				exp = _.string.exp_(exp, option);
 				if (exp == null) return "";
 			}
 			str = str || "";
 			return (exp.test(str) ? str : "");
 		};
-		$f.string.exp_ = function(exp, option) {
+		_.string.exp_ = function(exp, option) {
 			if (typeof exp == "object") return exp;
 			option = option || "";
 			if (!/^\/(.+)\/([igm]*)$/.test(exp)) exp = "/" + exp + "/" + option;
@@ -988,8 +988,8 @@ var GLOBAL = this,
 			}
 			return exp;
 		};
-		$f.string.fromBinary = function(bin, charset) {
-			var byts, stream = $f.stream(3, 1);
+		_.string.fromBinary = function(bin, charset) {
+			var byts, stream = _.stream(3, 1);
 			stream.Open();
 			stream.Write(bin);
 			stream.Position = 0;
@@ -1000,9 +1000,9 @@ var GLOBAL = this,
 			stream = null;
 			return byts;
 		};
-		$f.string.fromFile = function(path, charset) {
-			if (!$f.fso.fileexists(path)) return "";
-			var byts, stream = $f.stream(3, 2);
+		_.string.fromFile = function(path, charset) {
+			if (!_.fso.fileexists(path)) return "";
+			var byts, stream = _.stream(3, 2);
 			stream.CharSet = charset || "utf-8";
 			stream.Open();
 			stream.LoadFromFile(path);
@@ -1012,8 +1012,8 @@ var GLOBAL = this,
 			stream = null;
 			return byts;
 		};
-		$f.string.saveToFile = function(path, content, charset) {
-			var byts, stream = $f.stream(3, 2);
+		_.string.saveToFile = function(path, content, charset) {
+			var byts, stream = _.stream(3, 2);
 			stream.CharSet = charset || "utf-8";
 			stream.Open();
 			stream.writetext(content)
@@ -1021,11 +1021,11 @@ var GLOBAL = this,
 			stream.Close();
 			stream = null;
 		};
-		$f.string.appendToFile = function(path, content, charset) {
-			var byts, stream = $f.stream(3, 2);
+		_.string.appendToFile = function(path, content, charset) {
+			var byts, stream = _.stream(3, 2);
 			stream.CharSet = charset || "utf-8";
 			stream.Open();
-			if (!$f.fso.fileexists(path)) {
+			if (!_.fso.fileexists(path)) {
 				stream.LoadFromFile(path);
 				stream.Position = stream.Size;
 			}
@@ -1034,9 +1034,9 @@ var GLOBAL = this,
 			stream.Close();
 			stream = null;
 		};
-		$f.string.getByteArray = function(string) {
+		_.string.getByteArray = function(string) {
 			if (string == "") return [];
-			var enc = $f.encode(string);
+			var enc = _.encode(string);
 			var byteArray = [];
 			for (var i = 0; i < enc.length; i++) {
 				if (enc.substr(i, 1) == "%") {
@@ -1048,16 +1048,16 @@ var GLOBAL = this,
 			}
 			return byteArray;
 		};
-		$f.string.fromByteArray = function(byteArray) {
+		_.string.fromByteArray = function(byteArray) {
 			if (byteArray.constructor != Array || byteArray.length <= 0) return "";
 			var string = "";
 			for (var i = 0; i < byteArray.length; i++) {
 				string += "%" + byteArray[i].toString(16);
 			}
-			return $f.decode(string);
+			return _.decode(string);
 		};
 
-		$f.base64 = (function() {
+		_.base64 = (function() {
 			var base64keyStr_ = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 			var encode_ = function(Str) {
 					var output = "";
@@ -1112,7 +1112,7 @@ var GLOBAL = this,
 					} while (i < Str.length);
 					return output;
 				};
-			var $node = $f.activex("Microsoft.XMLDOM", function() {
+			var $node = _.activex("Microsoft.XMLDOM", function() {
 				this.loadXML("<?xml version=\"1.0\" encoding=\"gb2312\"?><root xmlns:dt=\"urn:schemas-microsoft-com:datatypes\"><data dt:dt=\"bin.base64\"></data></root>");
 				return this.selectSingleNode("//root/data");
 			}),
@@ -1120,11 +1120,11 @@ var GLOBAL = this,
 			$base64.e = encode_;
 			$base64.d = decode_;
 			$base64.encode = function(Str) {
-				if (typeof Str == "string") Str = $f.string.getByteArray(Str);
+				if (typeof Str == "string") Str = _.string.getByteArray(Str);
 				return encode_(Str);
 			};
 			$base64.decode = function(Str) {
-				return $f.string.fromByteArray(decode_(Str));
+				return _.string.fromByteArray(decode_(Str));
 			};
 			$base64.toBinary = function(str) {
 				$node.text = str;
@@ -1161,7 +1161,7 @@ var GLOBAL = this,
 				if (typeof parm == "object") {
 					if ((parm instanceof ActiveXObject) && (typeof(parm.Count) == "number") && (typeof(parm.Keys) == "unknown") && (typeof(parm.Items) == "unknown") && (typeof(parm.Key) == "unknown") && (typeof(parm.Item) == "unknown")) {
 						var returnValue = "dictionary{\r\n";
-						$f.each(parm, function(i) {
+						_.each(parm, function(i) {
 							returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this(i), level + 1) + "\r\n";
 						});
 						returnValue += dumpHelper__(level - 1) + "}";
@@ -1175,7 +1175,7 @@ var GLOBAL = this,
 					}
 					if (parm.constructor == Array) {
 						var returnValue = "array(" + parm.length + "){\r\n";
-						$f.foreach(parm, function(i) {
+						_.foreach(parm, function(i) {
 							returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this[i], level + 1) + "\r\n";
 						});
 						returnValue += dumpHelper__(level - 1) + "}";
@@ -1183,7 +1183,7 @@ var GLOBAL = this,
 					}
 					if (parm.constructor == Object) {
 						var returnValue = "object{\r\n";
-						$f.foreach(parm, function(i) {
+						_.foreach(parm, function(i) {
 							returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this[i], level + 1) + "\r\n";
 						});
 						returnValue += dumpHelper__(level - 1) + "}";
@@ -1207,10 +1207,10 @@ var GLOBAL = this,
 							return returnValue;
 						}
 						var returnValue = "[object Object]{\r\n";
-						$f.foreach(parm, function(i) {
+						_.foreach(parm, function(i) {
 							returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this[i], level + 1) + "\r\n";
 						});
-						$f.foreach(parm.constructor.prototype, function(i) {
+						_.foreach(parm.constructor.prototype, function(i) {
 							returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this[i], level + 1) + "\r\n";
 						});
 						returnValue += dumpHelper__(level - 1) + "}";
@@ -1221,7 +1221,7 @@ var GLOBAL = this,
 					try{
 						if (parm.constructor == VBArray) {
 							var returnValue = "array{\r\n";
-							$f.foreach((new VBArray(parm)).toArray(), function(i) {
+							_.foreach((new VBArray(parm)).toArray(), function(i) {
 								returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this[i], level + 1) + "\r\n";
 							});
 							returnValue += dumpHelper__(level - 1) + "}";
@@ -1233,23 +1233,23 @@ var GLOBAL = this,
 				}
 				return "unknown(object)";
 			};
-		$f.dump = function(parm, returnValue) {
+		_.dump = function(parm, returnValue) {
 			var value = dump__(parm, 1);
 			if (returnValue === true) return value;
-			$f.echo(value);
+			_.echo(value);
 		};
 
-		$f.object = {};
-		$f.object.sort = function(src, asc) {
-			$f.sortable.data__ = $f.object.keys(src);
-			$f.sortable.sort(asc);
+		_.object = {};
+		_.object.sort = function(src, asc) {
+			_.sortable.data__ = _.object.keys(src);
+			_.sortable.sort(asc);
 			var new_ = {};
-			for (var i = 0; i < $f.sortable.data__.length; i++) {
-				new_[$f.sortable.data__[i]] = src[$f.sortable.data__[i]];
+			for (var i = 0; i < _.sortable.data__.length; i++) {
+				new_[_.sortable.data__[i]] = src[_.sortable.data__[i]];
 			}
 			return new_;
 		};
-		$f.object.keys = function(src) {
+		_.object.keys = function(src) {
 			var returnValue = [];
 			for (var i in src) {
 				if (!src.hasOwnProperty(i)) continue;
@@ -1257,7 +1257,7 @@ var GLOBAL = this,
 			}
 			return returnValue;
 		};
-		$f.object.values = function(src) {
+		_.object.values = function(src) {
 			var returnValue = [];
 			for (var i in src) {
 				if (!src.hasOwnProperty(i)) continue;
@@ -1265,7 +1265,7 @@ var GLOBAL = this,
 			}
 			return returnValue;
 		};
-		$f.object.toArray = function(src, key, value) {
+		_.object.toArray = function(src, key, value) {
 			var returnValue = [];
 			key = key || "key";
 			value = value || "value";
@@ -1280,41 +1280,41 @@ var GLOBAL = this,
 			}
 			return returnValue;
 		};
-		$f.object.toURIString = function(src, charset) {
-			var fn = charset == "utf-8" ? $f.encode : escape;
-			if ($f.object.toURIString.fn == 0) fn = function(src) {
+		_.object.toURIString = function(src, charset) {
+			var fn = charset == "utf-8" ? _.encode : escape;
+			if (_.object.toURIString.fn == 0) fn = function(src) {
 				return src;
 			};
 			var returnValue = "";
 			for (var i in src) {
 				if (!src.hasOwnProperty(i)) continue;
 				var cn = true;
-				for (var j = 0; j < $f.object.toURIString.filter.length; j++) {
-					if ($f.object.toURIString.filter[j].substr(0, 1) == "!" && i == $f.object.toURIString.filter[j].substr(1)) cn = false;
-					if ($f.object.toURIString.filter[j].substr(0, 1) == "@" && !$f.string.startWith(i, $f.object.toURIString.filter[j].substr(1))) cn = false;
+				for (var j = 0; j < _.object.toURIString.filter.length; j++) {
+					if (_.object.toURIString.filter[j].substr(0, 1) == "!" && i == _.object.toURIString.filter[j].substr(1)) cn = false;
+					if (_.object.toURIString.filter[j].substr(0, 1) == "@" && !_.string.startWith(i, _.object.toURIString.filter[j].substr(1))) cn = false;
 					if (!cn) break;
 				}
-				if (cn) returnValue += fn(i) + $f.object.toURIString.split_char_1 + fn(src[i]) + $f.object.toURIString.split_char_2;
+				if (cn) returnValue += fn(i) + _.object.toURIString.split_char_1 + fn(src[i]) + _.object.toURIString.split_char_2;
 			}
 			if (returnValue != "") returnValue = returnValue.substr(0, returnValue.length - 1);
 			return returnValue;
 		};
-		$f.object.fromURIString = function(src) {
+		_.object.fromURIString = function(src) {
 			var obj={};
-			var ucs = src.split($f.object.toURIString.split_char_2);
+			var ucs = src.split(_.object.toURIString.split_char_2);
 			for (var i = 0; i < ucs.length; i++) {
-				if (ucs[i].indexOf($f.object.toURIString.split_char_1) > 0) {
-					obj[$f.decode(ucs[i].substr(0, ucs[i].indexOf($f.object.toURIString.split_char_1)))] = $f.decode($f.string.trimLeft(ucs[i].substr(ucs[i].indexOf($f.object.toURIString.split_char_1)), $f.object.toURIString.split_char_1));
+				if (ucs[i].indexOf(_.object.toURIString.split_char_1) > 0) {
+					obj[_.decode(ucs[i].substr(0, ucs[i].indexOf(_.object.toURIString.split_char_1)))] = _.decode(_.string.trimLeft(ucs[i].substr(ucs[i].indexOf(_.object.toURIString.split_char_1)), _.object.toURIString.split_char_1));
 				}
 			}
 			return obj;
 		};
-		$f.dbl = function(value, default_) {
+		_.dbl = function(value, default_) {
 			if (value == "") return (default_ === undefined ? 0 : default_);
 			if (isNaN(value)) return (default_ === undefined ? 0 : default_);
 			return parseFloat(value);
 		};
-		$f.bool = function(value, default_) {
+		_.bool = function(value, default_) {
 			if (value == null) return !!(default_ || false);
 			if (typeof value == "number") return value != 0;
 			if (typeof value == "boolean") return value;
@@ -1322,7 +1322,7 @@ var GLOBAL = this,
 			if (value == "") return !!(default_ || false);
 			return (value.toLowerCase() === "true" ? true : false);
 		};
-		$f["int"] = function(value, default_, islist) {
+		_["int"] = function(value, default_, islist) {
 			if (islist !== true) islist = false;
 			value = String(value).replace(/\s/igm, "");
 			if (value == "") return (default_ === undefined ? 0 : default_);
@@ -1334,23 +1334,23 @@ var GLOBAL = this,
 				return (value);
 			}
 		};
-		$f.md5 = function(src) {
-			if (!$f.exports.md5) $f.require("md5");
-			if (!$f.exports["md5"]) {
+		_.md5 = function(src) {
+			if (!_.exports.md5) _.require("md5");
+			if (!_.exports["md5"]) {
 				ExceptionManager.put(0x000003A8, "F.md5", "can not load 'md5' method.");
 				return "";
 			}
-			return $f.exports.md5(src);
+			return _.exports.md5(src);
 		};
-		$f.md5_bytes = function(src) {
-			if (!$f.exports.md5_bytes) $f.require("md5");
-			if (!$f.exports["md5"]) {
+		_.md5_bytes = function(src) {
+			if (!_.exports.md5_bytes) _.require("md5");
+			if (!_.exports["md5"]) {
 				ExceptionManager.put(0x000003A8, "F.md5", "can not load 'md5' method.");
 				return "";
 			}
-			return $f.exports.md5_bytes(src);
+			return _.exports.md5_bytes(src);
 		};
-		$f.delgate = function() {
+		_.delgate = function() {
 			try {
 				var args, body = (args = Array.prototype.slice.apply(arguments)).pop();
 				return new Function(args, body);
@@ -1358,7 +1358,7 @@ var GLOBAL = this,
 				ExceptionManager.put(ex.number, "F.func", ex.description + " function body [ " + body + " ]");
 			}
 		};
-		$f.lambda = function(src) {
+		_.lambda = function(src) {
 			if (arguments.length == 0) return new Function();
 			if (arguments.length == 1 && typeof src == "string") {
 				var exp_ = /^(\()?([\w\,\s]*?)(\))?(\s*)\=\>(\s*)(\{)?([\s\S]+?)(\})?(\s*)$/igm;
@@ -1368,8 +1368,8 @@ var GLOBAL = this,
 					if (match[2].indexOf(",") > 0 && match[1] == "") ExceptionManager.put(0, "F.lambda", "[Notice] '()' for arguments is missed in expression [ " + src + " ].");
 					var body = match[7],
 						bodytemp = body;
-					body = $f.string.trim(body);
-					body = $f.string.trim(body, ";");
+					body = _.string.trim(body);
+					body = _.string.trim(body, ";");
 					bodytemp = body.replace(/\\\'/igm, "");
 					bodytemp = bodytemp.replace(/\\\"/igm, "");
 					bodytemp = bodytemp.replace(/\'([\s\S]*?)\'/igm, "");
@@ -1379,95 +1379,95 @@ var GLOBAL = this,
 					return new Function(match[2].replace(/\s/igm, "").split(","), body);
 				}
 			}
-			return $f.delgate.apply(null, arguments);
+			return _.delgate.apply(null, arguments);
 		};
 		var postinit__ = function() {
-				if (!postinited__) {
-					post__ = {};
-					__POST_MAPPER__ = {};
-					$f.each(Request.Form, function(q) {
-						post__[q] = String(this(q));
-						__POST_MAPPER__[q.toUpperCase()] = q;
+				if (!_postinited_) {
+					_post_ = {};
+					_post_map_ = {};
+					_.each(Request.Form, function(q) {
+						_post_[q] = String(this(q));
+						_post_map_[q.toUpperCase()] = q;
 					});
-					postinited__ = true;
+					_postinited_ = true;
 				}
 			};
-		$f.foreach(["get", "post", "session", "all"], function(i, v) {
-			$f[v].exp = function(key, exp, option) {
-				return $f.string.exp($f[v](key), exp, option);
+		_.foreach(["get", "post", "session", "all"], function(i, v) {
+			_[v].exp = function(key, exp, option) {
+				return _.string.exp(_[v](key), exp, option);
 			};
-			$f[v].email = function(key) {
-				return $f.string.email($f[v].safe(key));
+			_[v].email = function(key) {
+				return _.string.email(_[v].safe(key));
 			};
-			$f[v].url = function(key) {
-				return $f.string.url($f[v].safe(key));
+			_[v].url = function(key) {
+				return _.string.url(_[v].safe(key));
 			};
-			$f[v].safe = function(key, len) {
-				if (len !== undefined) return $f.safe($f[v](key)).substr(0, len);
-				return $f.safe($f[v](key));
+			_[v].safe = function(key, len) {
+				if (len !== undefined) return _.safe(_[v](key)).substr(0, len);
+				return _.safe(_[v](key));
 			};
-			$f[v].intList = function(key, default_) {
-				return $f[v]["int"](key, default_, true);
+			_[v].intList = function(key, default_) {
+				return _[v]["int"](key, default_, true);
 			};
 			if (v != "all") {
-				$f[v]["int"] = function(key, default_, islist) {
-					return $f["int"]($f[v](key), default_, islist);
+				_[v]["int"] = function(key, default_, islist) {
+					return _["int"](_[v](key), default_, islist);
 				};
-				$f[v].dbl = function(key, default_) {
-					return $f.dbl($f[v](key), default_);
+				_[v].dbl = function(key, default_) {
+					return _.dbl(_[v](key), default_);
 				};
-				$f[v].bool = function(key, default_) {
-					return $f.bool($f[v](key), default_);
+				_[v].bool = function(key, default_) {
+					return _.bool(_[v](key), default_);
 				};
 			}
 		});
-		$f.foreach(["int", "dbl", "bool"], function(i, v) {
-			$f.all[v] = function(key, default_, islist) {
-				if ($f.get.exists(key)) return $f.get[v](key, default_, islist);
+		_.foreach(["int", "dbl", "bool"], function(i, v) {
+			_.all[v] = function(key, default_, islist) {
+				if (_.get.exists(key)) return _.get[v](key, default_, islist);
 				postinit__();
-				if ($f.post.exists(key)) return $f.post[v](key, default_, islist);
+				if (_.post.exists(key)) return _.post[v](key, default_, islist);
 				return default_ || (v == "bool" ? false : 0);
 			};
 		});
-		$f.post.remove = function(key) {
+		_.post.remove = function(key) {
 			postinit__();
-			if (__POST_MAPPER__.hasOwnProperty(key.toUpperCase())) {
-				delete post__[__POST_MAPPER__[key.toUpperCase()]];
-				delete __POST_MAPPER__[key.toUpperCase()];
+			if (_post_map_.hasOwnProperty(key.toUpperCase())) {
+				delete _post_[_post_map_[key.toUpperCase()]];
+				delete _post_map_[key.toUpperCase()];
 			}
 		};
-		$f.get.remove = function(key) {
-			delete get__[key];
+		_.get.remove = function(key) {
+			delete _get_[key];
 		};
-		$f.post.clear = function() {
+		_.post.clear = function() {
 			postinit__();
-			delete post__;
-			post__ = {};
-			__POST_MAPPER__ = {};
+			delete _post_;
+			_post_ = {};
+			_post_map_ = {};
 		};
-		$f.get.clear = function() {
-			delete get__;
-			get__ = {};
+		_.get.clear = function() {
+			delete _get_;
+			_get_ = {};
 		};
 
-		$f.post.exists = function(key) {
+		_.post.exists = function(key) {
 			postinit__();
-			return __POST_MAPPER__.hasOwnProperty(key.toUpperCase())
+			return _post_map_.hasOwnProperty(key.toUpperCase())
 		};
-		$f.get.exists = function(key) {
-			return get__[key] != undefined
+		_.get.exists = function(key) {
+			return _get_[key] != undefined
 		};
-		$f.all.exists = function(key) {
+		_.all.exists = function(key) {
 			postinit__();
-			return $f.get.exists(key) || $f.post.exists(key);
+			return _.get.exists(key) || _.post.exists(key);
 		};
-		$f.session.exists = function(key) {
+		_.session.exists = function(key) {
 			if (key == undefined) return false;
 			if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
 			if (Session.Contents(key) != undefined) return true;
 			return false;
 		};
-		$f.session.destroy = function(key) {
+		_.session.destroy = function(key) {
 			if (key === true) {
 				Session.Abandon();
 				return;
@@ -1482,141 +1482,141 @@ var GLOBAL = this,
 				return;
 			}
 		};
-		$f.session.clear = function() {
+		_.session.clear = function() {
 			Session.Contents.RemoveAll();
 		};
-		$f.session.parse = function(name) {
+		_.session.parse = function(name) {
 			var obj = {};
-			$f.each(Session.Contents, function(q) {
+			_.each(Session.Contents, function(q) {
 				var nq = q;
-				if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) nq = $f.string.trimLeft(q, Mo.Config.Global.MO_APP_NAME + "_");
-				if ($f.string.startWith(nq, name + ".")) {
+				if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) nq = _.string.trimLeft(q, Mo.Config.Global.MO_APP_NAME + "_");
+				if (_.string.startWith(nq, name + ".")) {
 					obj[nq.substr(name.length + 1)] = Session.Contents(q);
 				}
 			});
 			return obj;
 		}
-		$f.post.dump = function(returnValue) {
+		_.post.dump = function(returnValue) {
 			postinit__();
-			var dump = dump__(post__, 1);
+			var dump = dump__(_post_, 1);
 			if (returnValue === true) return dump;
-			$f.echo(dump);
+			_.echo(dump);
 		};
-		$f.get.dump = function(returnValue) {
-			var dump = dump__(get__, 1);
+		_.get.dump = function(returnValue) {
+			var dump = dump__(_get_, 1);
 			if (returnValue === true) return dump;
-			$f.echo(dump);
+			_.echo(dump);
 		};
-		$f.session.dump = function(returnValue) {
+		_.session.dump = function(returnValue) {
 			var dump = ("session{\n");
 			dump += ("  [Timeout] => " + dump__(Session.Timeout) + "\n");
 			dump += ("  [CodePage] => " + dump__(Session.CodePage) + "\n");
 			dump += ("  [LCID] => " + dump__(Session.LCID) + "\n");
 			dump += ("  [SessionID] => " + dump__(Session.SessionID) + "\n");
 			dump += ("  [Contents] => {\n");
-			$f.each(Session.Contents, function(q) {
+			_.each(Session.Contents, function(q) {
 				var nq = q;
-				if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) nq = $f.string.trimLeft(q, Mo.Config.Global.MO_APP_NAME + "_");
+				if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) nq = _.string.trimLeft(q, Mo.Config.Global.MO_APP_NAME + "_");
 				dump += ("    [" + nq + "] => " + dump__(Session.Contents(q)) + "\n");
 			});
 			dump += ("  }\n");
 			dump += ("}");
 			if (returnValue === true) return dump;
-			$f.echo(dump);
+			_.echo(dump);
 		}
-		$f.object.toURIString.split_char_1 = "=";
-		$f.object.toURIString.split_char_2 = "&";
-		$f.object.toURIString.filter = [];
-		$f.object.toURIString.clearFilter = function() {
-			while ($f.object.toURIString.filter.length > 0) $f.object.toURIString.filter.pop();
+		_.object.toURIString.split_char_1 = "=";
+		_.object.toURIString.split_char_2 = "&";
+		_.object.toURIString.filter = [];
+		_.object.toURIString.clearFilter = function() {
+			while (_.object.toURIString.filter.length > 0) _.object.toURIString.filter.pop();
 		};
-		$f.object.toURIString.fn = 1;
-		$f.get.keys = function() {
-			return $f.object.keys(get__);
+		_.object.toURIString.fn = 1;
+		_.get.keys = function() {
+			return _.object.keys(_get_);
 		};
-		$f.post.keys = function() {
+		_.post.keys = function() {
 			postinit__();
-			return $f.object.keys(post__);
+			return _.object.keys(_post_);
 		};
-		$f.get.values = function() {
-			return $f.object.values(get__);
+		_.get.values = function() {
+			return _.object.values(_get_);
 		};
-		$f.post.values = function() {
+		_.post.values = function() {
 			postinit__();
-			return $f.object.values(post__);
+			return _.object.values(_post_);
 		};
-		$f.get.fromURIString = function(src) {
-			var ucs = src.split($f.object.toURIString.split_char_2);
+		_.get.fromURIString = function(src) {
+			var ucs = src.split(_.object.toURIString.split_char_2);
 			for (var i = 0; i < ucs.length; i++) {
-				if (ucs[i].indexOf($f.object.toURIString.split_char_1) > 0) {
-					get__[$f.decode(ucs[i].substr(0, ucs[i].indexOf($f.object.toURIString.split_char_1)))] = $f.decode($f.string.trimLeft(ucs[i].substr(ucs[i].indexOf($f.object.toURIString.split_char_1)), $f.object.toURIString.split_char_1));
+				if (ucs[i].indexOf(_.object.toURIString.split_char_1) > 0) {
+					_get_[_.decode(ucs[i].substr(0, ucs[i].indexOf(_.object.toURIString.split_char_1)))] = _.decode(_.string.trimLeft(ucs[i].substr(ucs[i].indexOf(_.object.toURIString.split_char_1)), _.object.toURIString.split_char_1));
 				}
 			}
 		};
-		$f.post.fromURIString = function(src) {
+		_.post.fromURIString = function(src) {
 			postinit__();
-			var ucs = src.split($f.object.toURIString.split_char_2);
+			var ucs = src.split(_.object.toURIString.split_char_2);
 			for (var i = 0; i < ucs.length; i++) {
-				if (ucs[i].indexOf($f.object.toURIString.split_char_1) > 0) {
-					var key = $f.decode(ucs[i].substr(0, ucs[i].indexOf($f.object.toURIString.split_char_1))),
-						value = $f.decode($f.string.trimLeft(ucs[i].substr(ucs[i].indexOf($f.object.toURIString.split_char_1)), $f.object.toURIString.split_char_1));
-					post__[key] = value;
-					__POST_MAPPER__[key.toUpperCase()] = key;
+				if (ucs[i].indexOf(_.object.toURIString.split_char_1) > 0) {
+					var key = _.decode(ucs[i].substr(0, ucs[i].indexOf(_.object.toURIString.split_char_1))),
+						value = _.decode(_.string.trimLeft(ucs[i].substr(ucs[i].indexOf(_.object.toURIString.split_char_1)), _.object.toURIString.split_char_1));
+					_post_[key] = value;
+					_post_map_[key.toUpperCase()] = key;
 				}
 			}
 		};
-		$f.get.toURIString = function(charset) {
-			return $f.object.toURIString(get__, charset || "utf-8");
+		_.get.toURIString = function(charset) {
+			return _.object.toURIString(_get_, charset || "utf-8");
 		};
-		$f.post.toURIString = function(charset) {
+		_.post.toURIString = function(charset) {
 			postinit__();
-			return $f.object.toURIString(post__, charset || "utf-8");
+			return _.object.toURIString(_post_, charset || "utf-8");
 		};
-		$f.server.toURIString = function(charset) {
-			return $f.object.toURIString(server__, charset || "utf-8");
+		_.server.toURIString = function(charset) {
+			return _.object.toURIString(_server_, charset || "utf-8");
 		};
-		$f.session.toURIString = function(charset) {
+		_.session.toURIString = function(charset) {
 			charset = charset || "utf-8"
-			var fn = charset == "utf-8" ? $f.encode : escape;
+			var fn = charset == "utf-8" ? _.encode : escape;
 			var returnValue = "";
-			$f.each(Session.Contents, function(q) {
+			_.each(Session.Contents, function(q) {
 				var nq = q;
-				if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) nq = $f.string.trimLeft(q, Mo.Config.Global.MO_APP_NAME + "_");
+				if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) nq = _.string.trimLeft(q, Mo.Config.Global.MO_APP_NAME + "_");
 				returnValue += fn(nq) + "=" + fn(Session.Contents(q)) + "&";
 			});
 			if (returnValue != "") returnValue = returnValue.substr(0, returnValue.length - 1);
 			return returnValue;
 		}
-		$f.get.sort = function(asc) {
-			get__ = $f.object.sort(get__, asc);
+		_.get.sort = function(asc) {
+			_get_ = _.object.sort(_get_, asc);
 		};
-		$f.post.sort = function(asc) {
+		_.post.sort = function(asc) {
 			postinit__();
-			post__ = $f.object.sort(post__, asc);
+			_post_ = _.object.sort(_post_, asc);
 		};
-		$f.activex.connection = function() {
-			return $f.activex("ADODB.CONNECTION");
+		_.activex.connection = function() {
+			return _.activex("ADODB.CONNECTION");
 		};
-		$f.activex.recordset = function() {
-			return $f.activex("ADODB.RECORDSET");
+		_.activex.recordset = function() {
+			return _.activex("ADODB.RECORDSET");
 		};
-		$f.activex.stream = function() {
-			return $f.activex("ADODB.STREAM");
+		_.activex.stream = function() {
+			return _.activex("ADODB.STREAM");
 		};
-		$f.activex.dictionary = function() {
-			return $f.activex("SCRIPTING.DICTIONARY");
+		_.activex.dictionary = function() {
+			return _.activex("SCRIPTING.DICTIONARY");
 		};
-		$f.activex.document = function() {
-			return $f.activex("MSXML2.DOMDocument");
+		_.activex.document = function() {
+			return _.activex("MSXML2.DOMDocument");
 		};
-		$f.activex.httprequest = function() {
+		_.activex.httprequest = function() {
 			var b = null;
 			var httplist = ["MSXML2.serverXMLHttp.3.0", "MSXML2.serverXMLHttp", "MSXML2.XMLHttp.3.0", "MSXML2.XMLHttp", "Microsoft.XMLHttp"];
 			for (var i = 0; i <= httplist.length - 1; i++) {
 				try {
 					b = new ActiveXObject(httplist[i]);
 					(function(o) {
-						$f.activex.httprequest = function() {
+						_.activex.httprequest = function() {
 							return new ActiveXObject(o)
 						};
 					})(httplist[i]);
@@ -1626,7 +1626,7 @@ var GLOBAL = this,
 			if (b == null) ExceptionManager.put(0x000001A8, "F.activex.httprequest", "can not load httprequest object.");
 			return b;
 		};
-		$f.random.initialize = function(seeds, length) {
+		_.random.initialize = function(seeds, length) {
 			if (seeds.length <= 0) return "";
 			if (isNaN(length)) {
 				ExceptionManager.put(0x000001A9, "F.random.initialize", "argument 'length' must be a number.");
@@ -1635,24 +1635,24 @@ var GLOBAL = this,
 			length = parseInt(length);
 			var returnValue = "";
 			for (var i = 0; i < length; i++) {
-				returnValue += seeds.substr($f.random(0, seeds.length - 1), 1);
+				returnValue += seeds.substr(_.random(0, seeds.length - 1), 1);
 			}
 			return new String(returnValue);
 		};
-		$f.foreach({
+		_.foreach({
 			"number": "123456789012345678901234567890",
 			"letter": "abcdefghiIJKLMNOPQRSTUVWXYZjklmnopqrstuvwxyzABCDEFGH",
 			"hex": "123456789012345678901234567890ABCDEFABCDEFABCDEFABCDEFABCDEF",
 			"word": "abcdefghiIJKLMNOPQRSTUVWXYZjklmnopqrstuvwxyzABCDEFGH12345678906789012678901234534567890126789012345345",
 			"mix": "~!@#$%^&*()_+=-[]{}:'<>/?\\,.|`abcdefghiIJKLMNOPQRSTUVWXYZjklmnopqrstuvwxyzABCDEFGH6789012678901234534567890126789012345345"
 		}, function(i, v) {
-			$f.random[i] = function(length) {
-				return $f.random.initialize(v, length);
+			_.random[i] = function(length) {
+				return _.random.initialize(v, length);
 			};
 		});
-		$f.timer.ticks = $f.timer.stop;
+		_.timer.ticks = _.timer.stop;
 		init();
-		return $f;
+		return _;
 	})(), 
 	Exports = F.exports, 
 	Require = function(){return F.require.apply(F,arguments);}, 
