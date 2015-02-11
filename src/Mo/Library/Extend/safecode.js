@@ -17,14 +17,14 @@ function $safecode(sessionKey,opt){
 	};
 	F.extend(cfg,opt||{});
 	function getrndcolor(){
-		return [F.random(0,128),F.random(64,128),F.random(0,128)];
+		return (F.random(0,128) <<16 ) + (F.random(64,128)<<8) + F.random(0,128);
 	}
 	Response.Buffer = true;
 	Response.Expires = -1;
 	Response.AddHeader("Pragma", "no-cache");
 	Response.AddHeader("cache-ctrol", "no-cache");
 	Response.ContentType = "Image/bmp";
-	var I, ii, iii,bgColor=[0xff,0xff,0xff],vNumberData=[],vCode=[], vCodes="";
+	var I, ii, iii,bgColor=0xffffff,vNumberData=[],vCode=[], vCodes="";
 	var fontdata = IO.file.readAllText(__DIR__ + "\\exts\\" + cfg.font + ".font");
 	var cCode = (new Function("Font",fontdata))(vNumberData) || "0123456789aAcCeEmMnNrRsSuUvVwWxXzZjJbBdDfFhHkKtTgGpPqQyY＋－×÷＝+-/= .";
 	cfg.size = Math.sqrt(vNumberData[0].length);
@@ -34,66 +34,62 @@ function $safecode(sessionKey,opt){
 			vCodes += cCode.substr(vCode[vCode.length-1],1);
 		}
 	}else{
-		cfg.length = cfg.data.length;
-		vCodes = cfg.data;
-		for(var i=0;i<=cfg.length-1;i++){
-			vCode.push(cCode.indexOf(vCodes.substr(i,1)));
+		for(var i=0;i<=cfg.data.length-1;i++){
+			var index = cCode.indexOf(cfg.data.substr(i,1));
+			if(index>=0){
+				vCode.push(index);
+				vCodes+=cfg.data.substr(i,1);
+			}
 		}
+		cfg.length = vCode.length;
 	}
 	F.session(sessionKey,vCodes);
 	var padding = cfg.padding,
 		image = bmpImage(cfg.length * cfg.size + padding*2,cfg.size + padding*2,cfg.bit),
 		header = byteArrayOutputStream(),
-		padzero = image.writeHeader(header);
-	var byt=[];
+		body = byteArrayOutputStream(),
+		padzero = image.writeHeader(header),
+		bytepad=[];
 	if(padzero>0){
-		for(var i=0;i<padzero;i++) byt.push(0);
+		for(var i=0;i<padzero;i++) bytepad.push(0);
 	}
-	var output=header.toByteArray();
 	for(var i=(cfg.size-1)+padding*2;i>=0;i--){
 		for(var ii=0;ii<=cfg.length-1;ii++){
 			if(ii==0){
 				for(var m=0;m<padding;m++){
-					ArrayPush(output,bgColor);
+					body.writeRGB(bgColor);
 				}
 			}
 			for(var iii=0;iii<cfg.size;iii++){
 				if(F.random(1,100) < cfg.odd){
-					ArrayPush(output,getrndcolor());
+					body.writeRGB(getrndcolor());
 				}else{
 					var num;
 					if(i>=padding && i<cfg.size+padding){
 						num = vNumberData[vCode[ii]][(i-padding) * cfg.size + iii];
 						if(num==-1){
-							ArrayPush(output,[0,0,0]);
+							body.writeRGB(0);
 						}else if(num==0){
-							ArrayPush(output,bgColor);
+							body.writeRGB(bgColor);
 						}else{
-							ArrayPushLong(output,0xffffff - num);
+							body.writeRGB(0xffffff - num);
 						}
 					}else{
-						ArrayPush(output,bgColor);
+						body.writeRGB(bgColor);
 					}
 				}
 			}
 			if(ii==cfg.length-1){
 				for(var m=0;m<padding;m++){
-					ArrayPush(output,bgColor);
+					body.writeRGB(bgColor);
 				}
 			}
 		}
-		ArrayPush(output,byt);
+		body.writeBytes(bytepad);
 	}
-	F.echo(F.base64.toBinary(F.base64.e(output)),F.TEXT.BIN);
+	F.echo(F.base64.toBinary(F.base64.e(header.toByteArray())),F.TEXT.BIN);
+	F.echo(F.base64.toBinary(F.base64.e(body.toByteArray())),F.TEXT.BIN);
 }
-var ArrayPush = function(src,data){
-	for(var i=0;i<data.length;i++) src.push(data[i]);
-};
-var ArrayPushLong = function(src,data){
-	src.push(data & 0xff);
-	src.push((data >>> 8) & 0xff);
-	src.push((data >>> 16) & 0xff);
-};
 //=====================================================================
 // GIF Support etc.
 //
