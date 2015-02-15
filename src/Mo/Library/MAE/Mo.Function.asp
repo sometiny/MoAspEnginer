@@ -55,7 +55,8 @@ var GLOBAL = this,
 			BR: 1,
 			NL: 2,
 			BIN: 4,
-			NLBR: 1 | 2
+			NLBR: 1 | 2,
+			FILE: 8
 		};
 		_.fso = null;
 		_.exports = {};
@@ -258,7 +259,7 @@ var GLOBAL = this,
 				Response.Cookies(mkey).Secure = secure;
 			}
 		};
-		_.echo = function(debug, brnl, newline) {
+		_.echo = function(debug, brnl, newline,contenttype) {
 			if ((brnl & _.TEXT.BIN)) {
 				Response.BinaryWrite(debug);
 			} else {
@@ -272,6 +273,10 @@ var GLOBAL = this,
 			if (isNaN(brnl)) return;
 			if (brnl & _.TEXT.BR) Response.Write("<br />");
 			if (brnl & _.TEXT.NL) Response.Write("\r\n");
+			if (brnl & _.TEXT.FILE){
+				Response.ContentType=contenttype || "application/octet-stream";
+				Response.AddHeader("Content-Disposition", "attachment; filename=\"" + newline + "\"");
+			}
 		};
 		_.exit = function(debug, brnl, newline) {
 			_.echo(debug, brnl, newline);
