@@ -127,11 +127,11 @@ class upload
 					LocalName = FileName
 					FileName = Mid(FileName, InStrRev(FileName, "\") + 1)
 					if instr(FileName,".")>0 then
-						fileExtension = Split(FileName, ".")(UBound(Split(FileName, ".")))
+						fileExtension = Mid(FileName,InStrRev(FileName,".")+1)
 					else
 						fileExtension = ""
 					end if
-					if CheckExtension(fileExtension) = True then
+					if CheckExtension(LCase(fileExtension)) = True then
 						mvarDescription = "ERROR_INVALID_FILETYPE(." & ucase(fileExtension) & ")"
 						tempdata = empty
 						exit function
