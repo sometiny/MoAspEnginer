@@ -1,7 +1,6 @@
 <!--#include file="maeloader.asp"-->
 <script language="jscript" runat="server">
-require("json");
-var data = exports.json.create();
-data.put("id", 1).put("name", "anlige");
+var data = JSON.create();
+data.put("id", 1).put("name", "anlige").put("realname","°¬¶÷");
 echo(data);
 </script>

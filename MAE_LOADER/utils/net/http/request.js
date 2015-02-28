@@ -143,7 +143,10 @@ $httprequest.create = function(url, method, data, autoClearBuffer)
 {
 	return new $httprequest(url, method, data, autoClearBuffer);
 };
-
+$httprequest.get = function(url,charset){return (new $httprequest(url)).gettext(charset);};
+$httprequest.post = function(url,data,charset){return (new $httprequest(url,{method:"POST",data:data})).gettext(charset);};
+$httprequest.getJSON = function(url,charset){return (new $httprequest(url)).getjson(charset);};
+$httprequest.postJSON = function(url,data,charset){return (new $httprequest(url,{method:"POST",data:data})).getjson(charset);};
 $httprequest.save = function(url, localpath, opt)
 {
 	localpath = F.mappath(localpath);

@@ -387,6 +387,9 @@ var $qrcode = function() {
 			Response.ContentType="image/gif";
 			F.echo(F.base64.toBinary(_this.getBase64(data,scale,margin)),F.TEXT.BIN);
 		};
+		_this.save = function(path,data, scale, margin){
+			IO.file.writeAllBytes(path,F.base64.toBinary(_this.getBase64(data,scale,margin)));
+		};
 		_this.getBase64 = function(data, scale,margin){
 			scale = scale || 2;
 			margin = margin || 3;
