@@ -13,7 +13,8 @@ function $safecode(sessionKey,opt){
 		data : "",
 		size:10,
 		bit : 24,
-		font:"songti"
+		font:"songti",
+		bgColor:0xffffff
 	};
 	F.extend(cfg,opt||{});
 	function getrndcolor(){
@@ -24,7 +25,7 @@ function $safecode(sessionKey,opt){
 	Response.AddHeader("Pragma", "no-cache");
 	Response.AddHeader("cache-ctrol", "no-cache");
 	Response.ContentType = "Image/bmp";
-	var I, ii, iii,bgColor=0xffffff,vNumberData=[],vCode=[], vCodes="";
+	var I, ii, iii,bgColor=cfg.bgColor,vNumberData=[],vCode=[], vCodes="";
 	var fontdata = IO.file.readAllText(__DIR__ + "\\exts\\" + cfg.font + ".font");
 	var cCode = (new Function("Font",fontdata))(vNumberData) || "0123456789aAcCeEmMnNrRsSuUvVwWxXzZjJbBdDfFhHkKtTgGpPqQyY＋－×÷＝+-/= .";
 	cfg.size = Math.sqrt(vNumberData[0].length);
@@ -53,40 +54,40 @@ function $safecode(sessionKey,opt){
 	if(padzero>0){
 		for(var i=0;i<padzero;i++) bytepad.push(0);
 	}
+	function WriteRndColor(oldColor){
+		if(F.random(1,100) <= cfg.odd){
+			body.writeRGB(getrndcolor());
+		}else{
+			body.writeRGB(oldColor);
+		}
+	}
 	for(var i=(cfg.size-1)+padding*2;i>=0;i--){
 		for(var ii=0;ii<=cfg.length-1;ii++){
 			if(ii==0){
-				for(var m=0;m<padding;m++){
-					body.writeRGB(bgColor);
-				}
+				for(var m=0;m<padding;m++) WriteRndColor(bgColor);
 			}
 			for(var iii=0;iii<cfg.size;iii++){
-				if(F.random(1,100) < cfg.odd){
-					body.writeRGB(getrndcolor());
-				}else{
-					var num;
-					if(i>=padding && i<cfg.size+padding){
-						num = vNumberData[vCode[ii]][(i-padding) * cfg.size + iii];
-						if(num==-1){
-							body.writeRGB(0);
-						}else if(num==0){
-							body.writeRGB(bgColor);
-						}else{
-							body.writeRGB(0xffffff - num);
-						}
+				var num;
+				if(i>=padding && i<cfg.size+padding){
+					num = vNumberData[vCode[ii]][(i-padding) * cfg.size + iii];
+					if(num==-1){
+						WriteRndColor(0);
+					}else if(num==0){
+						WriteRndColor(bgColor);
 					}else{
-						body.writeRGB(bgColor);
+						WriteRndColor(0xffffff - num);
 					}
+				}else{
+					WriteRndColor(bgColor);
 				}
 			}
 			if(ii==cfg.length-1){
-				for(var m=0;m<padding;m++){
-					body.writeRGB(bgColor);
-				}
+				for(var m=0;m<padding;m++) WriteRndColor(bgColor);
 			}
 		}
 		body.writeBytes(bytepad);
 	}
+	delete WriteRndColor;
 	F.echo(F.base64.toBinary(F.base64.e(header.toByteArray())),F.TEXT.BIN);
 	F.echo(F.base64.toBinary(F.base64.e(body.toByteArray())),F.TEXT.BIN);
 }
