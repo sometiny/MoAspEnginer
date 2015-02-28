@@ -128,4 +128,9 @@ HomeController.extend("Soap",function(){
 	Mo.assign("comment","直接指定参数请求WebServices");
 	Mo.display("Soap");
 });
+HomeController.extend("safecode",function(){
+	/*todo*/
+	F.require("safecode");
+	F.exports.safecode("sessionname",{length:4,odd:0,padding:3,font:"songti"});
+});
 </script>
