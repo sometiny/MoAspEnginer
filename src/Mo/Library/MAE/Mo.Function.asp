@@ -1117,7 +1117,7 @@ var GLOBAL = this,
 					} while (i < Str.length);
 					return output;
 				};
-			var $node = _.activex("Microsoft.XMLDOM", function() {
+			var $node = _.activex("MSXML2.DOMDocument", function() {
 				this.loadXML("<?xml version=\"1.0\" encoding=\"gb2312\"?><root xmlns:dt=\"urn:schemas-microsoft-com:datatypes\"><data dt:dt=\"bin.base64\"></data></root>");
 				return this.selectSingleNode("//root/data");
 			}),
