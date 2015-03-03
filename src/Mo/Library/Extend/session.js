@@ -44,6 +44,10 @@ return exports.session = (function(driver){
 		}
 	}
 	driver.setStartTimeSpan($session.id, F.timespan());
+	var badsession = driver.checkSession();
+	while(badsession.length>0){
+		driver.clearSession(badsession.pop());
+	}
 	return $session;
 })((function(){
 	/*session driver, you can use your own driver, such as IO, Database and so on...*/
@@ -58,6 +62,21 @@ return exports.session = (function(driver){
 	driver.readSession = function(sessionid, key)
 	{
 		return Application(sessionid + ":" + key);
+	};
+
+	driver.checkSession = function()
+	{
+		var lists=[];
+		F.each(Application.Contents, function(q) {
+			if(F.string.endsWith(q,".timeout"))
+			{
+				var sessionid = q.substr(0,q.indexOf(".timeout"));
+				if(F.timespan() - Application(sessionid) > Application(q)){
+					lists.push(q);
+				}
+			}
+		});
+		return lists;
 	};
 
 	driver.clearSession = function(sessionid)

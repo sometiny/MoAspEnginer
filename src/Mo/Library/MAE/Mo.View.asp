@@ -140,7 +140,11 @@ MoAspEnginerView.prototype.doSomethingToAsp = function() {
 	if (G.MO_DIRECT_OUTPUT) {
 		this.Content = "if(typeof Mo==\"undefined\"){Response.Write(\"invalid call.\");Response.End();}\r\n" + this.Content.replace(/__Mo__\.Echo\(/igm, "T = T `&&` (");
 	} else {
-		this.Content = "if(typeof Mo==\"undefined\"){Response.Write(\"invalid call.\");Response.End();}\r\nfunction Temp___(){\r\nvar WriteStreamText=function(st,txt){if(txt==null)txt=\"\";st.WriteText(String(txt));};\r\n" + "var TplStream = F.activex.stream();\r\n" + "TplStream.Mode=3;\r\n" + "TplStream.Type=2;\r\n" + "TplStream.Charset=Mo.Config.Global.MO_CHARSET;\r\n" + "TplStream.Open();\r\n" + this.Content.replace(/__Mo__\.Echo\(/igm, "T = T `&&` (") + "\r\n" + "TplStream.Position=0;\r\n" + "var Temp____ = TplStream.ReadText();\r\n" + "TplStream.Close();\r\ndelete WriteStreamText;\r\nreturn Temp____;\r\n" + "}";
+		if (G.MO_OUTPUT_WITH_STREAM) {
+			this.Content = "if(typeof Mo==\"undefined\"){Response.Write(\"invalid call.\");Response.End();}\r\nfunction Temp___(){\r\nvar WriteStreamText=function(st,txt){if(txt==null)txt=\"\";st.WriteText(String(txt));};\r\n" + "var TplStream = F.activex.stream();\r\n" + "TplStream.Mode=3;\r\n" + "TplStream.Type=2;\r\n" + "TplStream.Charset=Mo.Config.Global.MO_CHARSET;\r\n" + "TplStream.Open();\r\n" + this.Content.replace(/__Mo__\.Echo\(/igm, "T = T `&&` (") + "\r\n" + "TplStream.Position=0;\r\n" + "var Temp____ = TplStream.ReadText();\r\n" + "TplStream.Close();\r\ndelete WriteStreamText;\r\nreturn Temp____;\r\n" + "}";
+		}else{
+			this.Content = "if(typeof Mo==\"undefined\"){Response.Write(\"invalid call.\");Response.End();}\r\nfunction Temp___(){\r\nvar WriteStreamText=\"\";\r\n" + this.Content.replace(/__Mo__\.Echo\(/igm, "WriteStreamText += (") + "\r\nreturn WriteStreamText;\r\n" + "}";
+		}
 	}
 	this.Content = this.Content.replace(/--movbcrlf--/igm, "\\r\\n");
 	if (G.MO_DIRECT_OUTPUT) {
@@ -148,8 +152,13 @@ MoAspEnginerView.prototype.doSomethingToAsp = function() {
 		this.Content = this.Content.replace(/`&&`/igm, "\r\nResponse.Write(");
 		this.Content = this.Content.replace(/\\r\\n"\);\r\nResponse.Write\("/igm,"\\r\\n");
 	} else {
-		this.Content = this.Content.replace(/T \= T `&&` \(/igm, "WriteStreamText(TplStream,");
-		this.Content = this.Content.replace(/\\r\\n"\);\r\nWriteStreamText\(TplStream,"/igm,"\\r\\n");
+		if (G.MO_OUTPUT_WITH_STREAM) {
+			this.Content = this.Content.replace(/T \= T `&&` \(/igm, "WriteStreamText(TplStream,");
+			this.Content = this.Content.replace(/\\r\\n"\);\r\nWriteStreamText\(TplStream,"/igm,"\\r\\n");
+		}else{
+			this.Content = this.Content.replace(/\\r\\n"\);\r\nWriteStreamText +\= \("/igm,"\\r\\n");
+			this.Content = this.Content.replace(/WriteStreamText \+\= \(([\s\S]+?)\)\;\r\n/igm,"WriteStreamText += $1;\r\n");
+		}
 	}
 	if(G.MO_PREETY_HTML){
 		this.Content = this.Content.replace(/\\r\\n\\t/igm,"");
@@ -168,7 +177,7 @@ MoAspEnginerView.prototype.parsePreCombine = function() {
 		this.Content = F.replace(this.Content, $0, (new Function("return Mo.U(" + $1 + ");"))())
 	},this);
 	F.string.matches(this.Content, /\{\$U\((.*?)\)\}/igm, function($0,$1){
-		this.Content = F.replace(this.Content, $0, "{?MoAsp __Mo__.Echo(Mo.U(" + $1 + ")) MoAsp?}")
+		this.Content = F.replace(this.Content, $0, "{?MoAsp __Mo__.Echo(Mo.U(" + $1 + ")); MoAsp?}")
 	},this);
 }
 
