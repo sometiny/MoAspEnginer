@@ -630,11 +630,7 @@ var GLOBAL = this,
 			return fs;
 		};
 		_.date = function(srcDate) {
-			var date_ = _.date.parse(srcDate);
-			for (var i in date_) {
-				if (!date_.hasOwnProperty(i)) continue;
-				this[i] = date_[i];
-			}
+			return new _.datetime(srcDate);
 		};
 		_.date.timezone = new Date().getTimezoneOffset() / 60;
 		_.date.format = function() {
@@ -733,13 +729,20 @@ var GLOBAL = this,
 			}
 			return srcDate;
 		};
-		_.date.prototype.add = function(diff, value) {
+		_.datetime = function(srcDate) {
+			var date_ = _.date.parse(srcDate);
+			for (var i in date_) {
+				if (!date_.hasOwnProperty(i)) continue;
+				this[i] = date_[i];
+			}
+		};
+		_.datetime.prototype.add = function(diff, value) {
 			return _.date.call(this, _.date.dateadd(diff, value, this.ticks));
 		};
-		_.date.prototype.diff = function(diff, srcdate) {
+		_.datetime.prototype.diff = function(diff, srcdate) {
 			return _.date.datediff(diff, srcdate, this.ticks);
 		};
-		_.date.prototype.toString = function(format) {
+		_.datetime.prototype.toString = function(format) {
 			if (format) return _.formatdate(this.ticks, format);
 			return (new Date(this.ticks)).toString();
 		};
