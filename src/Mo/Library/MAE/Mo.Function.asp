@@ -647,13 +647,13 @@ var GLOBAL = this,
 		_.date.parse = function(srcDate) {
 			if (typeof srcDate == "string") {
 				srcDate = srcDate.replace(/(\-|\s|\:|\.)0/ig, "$1");
-				var match = /^(\d{4})\-(\d{1,2})\-(\d{1,2})( (\d{1,2})\:(\d{1,2})\:(\d{1,2})(\.(\d{1,3}))?)?$/.exec(srcDate);
+				var match = /^(\d{4})\-(\d{1,2})\-(\d{1,2})( (\d{1,2})\:(\d{1,2})(\:(\d{1,2}))?(\.(\d{1,3}))?)?$/.exec(srcDate);
 				if (match) {
 					try {
 						if (match[4] == "") {
 							srcDate = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
 						} else {
-							srcDate = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]), parseInt(match[5]), parseInt(match[6]), parseInt(match[7]), (match[8] == "" ? 0 : parseInt(match[9])));
+							srcDate = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]), parseInt(match[5]), parseInt(match[6]), (match[7] == "" ? 0 : parseInt(match[8])), (match[9] == "" ? 0 : parseInt(match[10])));
 						}
 					} catch (ex) {
 						ExceptionManager.put(ex, "F.date.parse(string)");
