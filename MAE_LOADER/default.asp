@@ -1,6 +1,7 @@
-﻿<!--#include file="maeloader.asp"-->
+﻿<!--#include file="dist/maeloader.asp"-->
 <%
 Response.Charset="utf-8"
+echo "<h3><a href=""fns.asp"">常用方法库</a></h3>"
 '======
 '根据IP查地理位置
 '======
@@ -68,3 +69,6 @@ echo exports.sha1(exports.encoding.utf8.getByteArray("测试")),true
 <img src="safecode.asp" />
 <h4>二维码</h4>
 <img src="qrcode.asp" />
+<%
+echo ExceptionManager.debug()
+%>

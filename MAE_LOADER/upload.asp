@@ -1,4 +1,4 @@
-<!--#include file="maeloader.asp"-->
+<!--#include file="dist/maeloader.asp"-->
 <%
 require "net/http/upload"
 dim httpupload

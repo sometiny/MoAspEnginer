@@ -1,4 +1,4 @@
-<!--#include file="maeloader.asp"-->
+<!--#include file="dist/maeloader.asp"-->
 <%
 require "qrcode"
 set qr = exports.qrcode(0,"Q")
