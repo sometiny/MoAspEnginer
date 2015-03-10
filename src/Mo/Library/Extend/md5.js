@@ -108,22 +108,10 @@ var $md5 = function(e){
 var $md5_bytes = function(e) {
 		var m = Array();
 		var w, y, f, l, v, L, K, E, B;
-		var t = 7,
-			r = 12,
-			p = 17,
-			n = 22;
-		var J = 5,
-			C = 9,
-			A = 14,
-			z = 20;
-		var j = 4,
-			i = 11,
-			h = 16,
-			g = 23;
-		var u = 6,
-			s = 10,
-			q = 15,
-			o = 21;
+		var t = 7, r = 12, p = 17, n = 22;
+		var J = 5, C = 9, A = 14, z = 20;
+		var j = 4, i = 11, h = 16, g = 23;
+		var u = 6, s = 10, q = 15, o = 21;
 		m = convertToWordArray(e);
 		L = 1732584193;
 		K = 4023233417;

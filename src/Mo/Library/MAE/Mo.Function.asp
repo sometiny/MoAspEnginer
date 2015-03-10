@@ -403,10 +403,10 @@ var GLOBAL = this,
 			_statement = _statement.replace(/^(\s*)<sc(.+)>/ig, "").replace(/<\/script>(\s*)$/ig, "");
 			try {
 				var this_ = this;
-				if (this == F) this_ = null;
+				if (this == _) this_ = null;
 				_required_[library] = true;
-				return (new Function("exports", "__FILE__", "__DIR__", _statement))(
-				this_ || _.exports, _path, _path == "" ? "" : _path.substr(0, _path.lastIndexOf("\\"))) || _.exports;
+				return (new Function("exports", "require", "module", "__FILE__", "__DIR__", _statement))(
+				this_ || _.exports, _.require, _, _path, _path == "" ? "" : _path.substr(0, _path.lastIndexOf("\\"))) || _.exports;
 			} catch (ex) {
 				ExceptionManager.put(ex, "F.require");
 				return _.exports;
@@ -630,7 +630,7 @@ var GLOBAL = this,
 			return fs;
 		};
 		_.date = function(srcDate) {
-			return new _.datetime(srcDate);
+			return new _.datetime(srcDate || new Date());
 		};
 		_.date.timezone = new Date().getTimezoneOffset() / 60;
 		_.date.format = function() {
@@ -1244,7 +1244,7 @@ var GLOBAL = this,
 		_.dump = function(parm, returnValue) {
 			var value = dump__(parm, 1);
 			if (returnValue === true) return value;
-			_.echo(value);
+			_.echo("<pre>" + value + "</pre>");
 		};
 
 		_.object = {};
@@ -1662,7 +1662,8 @@ var GLOBAL = this,
 		init();
 		return _;
 	})(), 
-	Exports = F.exports, 
-	Require = function(){return F.require.apply(F,arguments);}, 
-	Vendor = function(){return F.vendor.apply(F,arguments);};
+	exports = Exports = F.exports, 
+	require = Require = function(){return F.require.apply(F,arguments);}, 
+	vendor = Vendor = function(){return F.vendor.apply(F,arguments);},
+	module=F;
 </script>
