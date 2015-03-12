@@ -26,17 +26,21 @@ var $io = exports.io || (function()
 	};
 	$Io.parent = function(path)
 	{
-		return $io.fso.GetParentFolderName(F.mappath(path));
+		return $Io.fso.GetParentFolderName(F.mappath(path));
+	};
+	$Io.build = function(path,name)
+	{
+		return $Io.fso.GetAbsolutePathName($Io.fso.BuildPath(F.mappath(path),name));
 	};
 	$Io.get = function(path)
 	{
 		path = F.mappath(path);
 		var src = null;
-		if($io.file.exists(path))
+		if($Io.file.exists(path))
 		{
 			src = $Io.fso.getFile(path);
 		}
-		else if($io.directory.exists(path))
+		else if($Io.directory.exists(path))
 		{
 			src = $Io.fso.getFolder(path);
 		}
@@ -97,13 +101,13 @@ var $io = exports.io || (function()
 		var attrString = "";
 		if(attr>0)
 		{
-			for(var i in $io.attrs)
+			for(var i in $Io.attrs)
 			{
-				if(!$io.attrs.hasOwnProperty(i))
+				if(!$Io.attrs.hasOwnProperty(i))
 				{
 					continue;
 				}
-				if(attr & $io.attrs[i])
+				if(attr & $Io.attrs[i])
 				{
 					attrString += i + ", ";
 				}
