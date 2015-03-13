@@ -1,10 +1,9 @@
 'use strict';
-exports={};
-var utils = F.require('gzip/utils/common');
-var adler32 = F.require('gzip/zlib/adler32');
-var crc32   = F.require('gzip/zlib/crc32');
-var inflate_fast = F.require('gzip/zlib/inffast');
-var inflate_table = F.require('gzip/zlib/inftrees');
+var utils = require('../utils/common.js');
+var adler32 = require('./adler32.js');
+var crc32   = require('./crc32.js');
+var inflate_fast = require('./inffast.js');
+var inflate_table = require('./inftrees.js');
 
 var CODES = 0;
 var LENS = 1;
@@ -1487,7 +1486,6 @@ exports.inflate = inflate;
 exports.inflateEnd = inflateEnd;
 exports.inflateGetHeader = inflateGetHeader;
 exports.inflateInfo = 'pako inflate (from Nodeca project)';
-return exports;
 /* Not implemented
 exports.inflateCopy = inflateCopy;
 exports.inflateGetDictionary = inflateGetDictionary;

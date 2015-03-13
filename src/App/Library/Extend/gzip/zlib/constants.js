@@ -1,4 +1,4 @@
-return {
+module.exports = {
 
   /* Allowed flush values; see deflate() and inflate() below for details */
   Z_NO_FLUSH:         0,

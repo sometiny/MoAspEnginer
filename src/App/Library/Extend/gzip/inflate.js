@@ -1,12 +1,11 @@
 'use strict';
-exports={};
-var zlib_inflate = F.require('gzip/zlib/inflate.js');
-var utils = F.require('gzip/utils/common');
-var strings = F.require('gzip/utils/strings');
-var c = F.require('gzip/zlib/constants');
-var msg = F.require('gzip/zlib/messages');
-var zstream = F.require('gzip/zlib/zstream');
-var gzheader = F.require('gzip/zlib/gzheader');
+var zlib_inflate = require('./zlib/inflate.js');
+var utils = require('./utils/common.js');
+var strings = require('./utils/strings.js');
+var c = require('./zlib/constants.js');
+var msg = require('./zlib/messages.js');
+var zstream = require('./zlib/zstream.js');
+var gzheader = require('./zlib/gzheader.js');
 
 
 /**
@@ -361,4 +360,3 @@ exports.Inflate = Inflate;
 exports.inflate = inflate;
 exports.inflateRaw = inflateRaw;
 exports.ungzip  = inflate;
-return exports;

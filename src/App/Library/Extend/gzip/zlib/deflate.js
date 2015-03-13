@@ -1,10 +1,9 @@
 'use strict';
-exports={};
-var utils   = F.require('gzip/utils/common');
-var trees   = F.require('gzip/zlib/trees');
-var adler32 = F.require('gzip/zlib/adler32');
-var crc32   = F.require('gzip/zlib/crc32');
-var msg   = F.require('gzip/zlib/messages');
+var utils   = require('../utils/common.js');
+var trees   = require('./trees.js');
+var adler32 = require('./adler32.js');
+var crc32   = require('./crc32.js');
+var msg   = require('./messages.js');
 
 /* Public constants ==========================================================*/
 /* ===========================================================================*/
@@ -1753,7 +1752,6 @@ exports.deflateSetHeader = deflateSetHeader;
 exports.deflate = deflate;
 exports.deflateEnd = deflateEnd;
 exports.deflateInfo = 'pako deflate (from Nodeca project)';
-return exports;
 /* Not implemented
 exports.deflateBound = deflateBound;
 exports.deflateCopy = deflateCopy;

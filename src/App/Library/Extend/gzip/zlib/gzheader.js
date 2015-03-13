@@ -37,4 +37,4 @@ function GZheader() {
   this.done       = false;
 }
 
-return GZheader;
+module.exports = GZheader;

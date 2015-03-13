@@ -1,11 +1,9 @@
 'use strict';
-exports={};
-
-var zlib_deflate = F.require('gzip/zlib/deflate.js');
-var utils = F.require('gzip/utils/common');
-var strings = F.require('gzip/utils/strings');
-var msg = F.require('gzip/zlib/messages');
-var zstream = F.require('gzip/zlib/zstream');
+var zlib_deflate = require('./zlib/deflate.js');
+var utils = require('./utils/common.js');
+var strings = require('./utils/strings.js');
+var msg = require('./zlib/messages.js');
+var zstream = require('./zlib/zstream.js');
 
 /* Public constants ==========================================================*/
 /* ===========================================================================*/
@@ -358,4 +356,3 @@ exports.Deflate = Deflate;
 exports.deflate = deflate;
 exports.deflateRaw = deflateRaw;
 exports.gzip = gzip;
-return exports;

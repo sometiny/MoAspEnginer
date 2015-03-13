@@ -1,5 +1,4 @@
 'use strict';
-exports={};
 var TYPED_OK =  (typeof Uint8Array !== 'undefined') &&
                 (typeof Uint16Array !== 'undefined') &&
                 (typeof Int32Array !== 'undefined');
@@ -99,4 +98,3 @@ exports.setTyped = function (on) {
 };
 
 exports.setTyped(TYPED_OK);
-return exports;

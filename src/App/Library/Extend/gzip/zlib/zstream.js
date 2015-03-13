@@ -26,4 +26,4 @@ function ZStream() {
   this.adler = 0;
 }
 
-return ZStream;
+module.exports = ZStream;

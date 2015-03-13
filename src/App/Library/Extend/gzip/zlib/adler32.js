@@ -28,4 +28,4 @@ function adler32(adler, buf, len, pos) {
 }
 
 
-return adler32;
+module.exports = adler32;

@@ -1,6 +1,6 @@
 'use strict';
 
-return {
+module.exports = {
   '2':    'need dictionary',     /* Z_NEED_DICT       2  */
   '1':    'stream end',          /* Z_STREAM_END      1  */
   '0':    '',                    /* Z_OK              0  */

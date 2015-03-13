@@ -1,7 +1,7 @@
 'use strict';
 
 
-var utils = F.require('gzip/utils/common');
+var utils = require('../utils/common.js');
 
 var MAXBITS = 15;
 var ENOUGH_LENS = 852;
@@ -34,7 +34,7 @@ var dext = [ /* Distance codes 0..29 extra */
   28, 28, 29, 29, 64, 64
 ];
 
-return function inflate_table(type, lens, lens_index, codes, table, table_index, work, opts)
+module.exports = function inflate_table(type, lens, lens_index, codes, table, table_index, work, opts)
 {
   var bits = opts.bits;
       //here = opts.here; /* table entry for duplication */

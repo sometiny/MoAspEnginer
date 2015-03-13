@@ -34,4 +34,4 @@ function crc32(crc, buf, len, pos) {
 
   return (crc ^ (-1)); // >>> 0;
 }
-return crc32;
+module.exports = crc32;

@@ -1,7 +1,5 @@
 'use strict';
-exports={};
-
-var utils = F.require('gzip/utils/common');
+var utils = require('../utils/common.js');
 
 /* Public constants ==========================================================*/
 /* ===========================================================================*/
@@ -1197,4 +1195,3 @@ exports._tr_stored_block = _tr_stored_block;
 exports._tr_flush_block  = _tr_flush_block;
 exports._tr_tally = _tr_tally;
 exports._tr_align = _tr_align;
-return exports;

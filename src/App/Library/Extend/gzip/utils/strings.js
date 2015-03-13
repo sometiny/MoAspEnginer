@@ -1,8 +1,7 @@
 // String encode/decode helpers
 'use strict';
-exports={};
 
-var utils = F.require('gzip/utils/common');
+var utils = require('./common.js');
 
 // Quick check if we can use fast array to bin string conversion
 //
@@ -182,4 +181,3 @@ exports.utf8border = function(buf, max) {
 
   return (pos + _utf8len[buf[pos]] > max) ? pos : max;
 };
-return exports;
