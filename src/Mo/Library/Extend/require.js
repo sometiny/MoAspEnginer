@@ -23,7 +23,12 @@ Module.prototype.compile = function(){
 	var require = function(name){
 		return self.require(name);
 	};
-	return (new Function("exports","require","module","__filename","__dirname", IO.file.readAllText(this.filename))).apply(self.exports, [self.exports, require, self, this.filename, IO.parent(this.filename)]);
+	var dirname = IO.parent(this.filename);
+	if(dirname.length < Module.ROOT.length){
+		ExceptionManager.put(new Exception(0xed35, "Module.compile", "can not access module '" + this.id + "'."));
+		return;
+	}
+	return (new Function("exports","require","module","__filename","__dirname", IO.file.readAllText(this.filename))).apply(self.exports, [self.exports, require, self, this.filename, dirname]);
 };
 Module.prototype.loadpaths = function(){
 	var dir = IO.parent(this.filename);
@@ -33,6 +38,12 @@ Module._load = function(name,parent){
 	var paths = parent ? parent.loadpaths() : Module._pathes, _file=null;
 	for(var i=0;i<paths.length;i++){
 		var filename = IO.build(paths[i],name);
+		if(!IO.file.exists(filename)){
+			filename += ".js";
+			if(!IO.file.exists(filename)){
+				filename = IO.build(paths[i],name+"/index.js");
+			}
+		}
 		if(IO.file.exists(filename)){
 			_file = filename;
 			break;
@@ -41,9 +52,9 @@ Module._load = function(name,parent){
 	var _cache = Module._cache[_file];
 	if(_cache) return _cache.exports;
 	if(!_file){
-		ExceptionManager.put(new Exception(0xed34, "Module._load", "module '" + name + "' is not exists."));
+		ExceptionManager.put(new Exception(0xed34, "Module._load", "module '" + name + "' is not exists, parent module '" + parent.id + "'."));
 	}else{
-		var module = new Module(null,parent);
+		var module = new Module(name,parent);
 		module.filename=_file;
 		try{
 			module.compile();
@@ -54,6 +65,7 @@ Module._load = function(name,parent){
 	}
 	return module.exports;
 };
+Module.ROOT=ROOT;
 Module._cache = {};
 Module._pathes=[];
 exports.module = Module;

@@ -6,7 +6,7 @@
 ** About: 
 **		support@mae.im
 */
-var IO, JSON, require, Mo = Mo || (function(){
+var IO, JSON, require, ROOT = Server.Mappath("/"), Mo = Mo || (function(){
 	var M = function(opt){
 		M.Run(opt);
 	};
