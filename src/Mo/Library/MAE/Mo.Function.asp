@@ -370,13 +370,12 @@ var GLOBAL = this,
 			return _.require.call(this,library,[Mo.Config.Global.MO_APP + "Library/Vendor/", Mo.Config.Global.MO_CORE + "Library/Vendor/"]);
 		};
 		_.require = function(library, path) {
-			if (_required_[library] === true) return;
 			if(library.substr(0,1)=="." && arguments.callee.caller && arguments.callee.caller.arguments.length>=4){
-				library = IO.build(arguments.callee.caller.arguments[3],library.replace(/\//ig,"\\"));
+				library = IO.build(arguments.callee.caller.arguments[3],library);
 				if(library.substr(library.length-3)!=".js") library+=".js";
 			}
-			if (library.length > 2 && library.substr(1, 1) == ":" && _.fso.fileexists(library)) {
-				path = library.substr(0, library.lastIndexOf("\\") + 1);
+			if (library.length > 2 && library.substr(1, 1) == ":") {
+				path = _.fso.fileexists(library) ? library.substr(0, library.lastIndexOf("\\") + 1) : "";
 				library = library.substr(library.lastIndexOf("\\") + 1);
 			}
 			if (!/^([\w\/\.\-]+)$/.test(library)) {
@@ -403,16 +402,13 @@ var GLOBAL = this,
 				ExceptionManager.put(new Exception(0, "F.require", "required library '" + library + "' is not exists."));
 				return _.exports;
 			}
+			if (_required_.hasOwnProperty(_path)) return _required_[_path];
 			_statement = _.string.fromFile(_path);
 			_statement = _statement.replace(/^(\s*)<sc(.+)>/ig, "").replace(/<\/script>(\s*)$/ig, "");
 			try {
-				var this_ = this;
-				if (this == _) this_ = null;
-				_required_[library] = true;
-				return (new Function("exports", "module", "__FILE__", "__DIR__", _statement))(
-					this_ || _.exports, 
-					_, 
-					_path, 
+				return _required_[_path] = (new Function("exports", "__FILE__", "__DIR__", _statement))(
+					_.exports,
+					_path,
 					_path == "" ? "" : _path.substr(0, _path.lastIndexOf("\\"))
 				) || _.exports;
 			} catch (ex) {
@@ -1669,9 +1665,5 @@ var GLOBAL = this,
 		_.timer.ticks = _.timer.stop;
 		init();
 		return _;
-	})(), 
-	exports = Exports = F.exports, 
-	require = Require = function(){return F.require.apply(F,arguments);}, 
-	vendor = Vendor = function(){return F.vendor.apply(F,arguments);},
-	module=F;
+	})();
 </script>

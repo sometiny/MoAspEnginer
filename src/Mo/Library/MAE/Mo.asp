@@ -6,7 +6,7 @@
 ** About: 
 **		support@mae.im
 */
-var IO, JSON, Mo = Mo || (function(){
+var IO, JSON, require, Mo = Mo || (function(){
 	var M = function(opt){
 		M.Run(opt);
 	};
@@ -219,6 +219,10 @@ var IO, JSON, Mo = Mo || (function(){
 		_InitializePath(cfg);
 		IO = F.require("io");
 		JSON = F.require("json");
+		require = F.require("require");
+		if(F.exports.module){
+			F.exports.module._pathes=[F.mappath(Mo.Config.Global.MO_APP + "Library/Extend"),F.mappath(Mo.Config.Global.MO_CORE + "Library/Extend")];
+		}
 		if(F.exists(cfg.MO_CORE + "Conf/Config.asp")) G = M.Config.Global = F.require(F.mappath(cfg.MO_CORE + "Conf/Config.asp"));
 		_extend(G,cfg);
 		if(!G.MO_METHOD_CHAR) G.MO_METHOD_CHAR = "m";

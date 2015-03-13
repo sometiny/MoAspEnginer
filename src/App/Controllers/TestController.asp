@@ -102,7 +102,7 @@ TestController.extend("ShowSession", function(){
 */
 TestController.extend("HttpRequest", function(){
 	F.require("net/http/request");
-	var text = Exports.net.http.request.create(
+	var text = F.exports.net.http.request.create(
 		"http://" + F.server("HTTP_HOST") + Mo.Config.Global.MO_ROOT + "?m=Test&a=ShowServer",
 		{
 			method : "POST",
@@ -132,7 +132,7 @@ TestController.extend("ShowServer", function(){
 TestController.extend("HttpUpload", function(){
 	F.require("net/http/upload");
 	/*Exports.net.http.upload.create(url[,opt])*/
-	var upload = Exports.net.http.upload.create(
+	var upload = F.exports.net.http.upload.create(
 		"http://" + F.server("HTTP_HOST") + Mo.Config.Global.MO_ROOT + "?m=Test&a=UploadFile",
 		/*下面通过create方法直接添加表单数据*/
 		{

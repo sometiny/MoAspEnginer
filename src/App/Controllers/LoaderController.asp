@@ -5,7 +5,7 @@ LoaderController.extend("Index", function(){
 	if(!/^([\w\/\.\-\_\;]+)$/igm.test(files)) return;
 	if(files.substr(files.length-3).toLowerCase()==".js") type = "js";
 	files = files.replace(/\.(js|css)$/ig,"");
-	var gizcachefile = __DIR__ + "\\gzipcache\\" + files.replace(/[^\w]/ig,"_") + ".gz";
+	var gizcachefile = F.mappath(Mo.Config.Global.MO_APP + "Cache/Gzip/" + files.replace(/[^\w]/ig,"_") + ".gz");
 	Response.ContentType="text/" + type.replace("js","javascript");
 	Response.AddHeader("Vary","Accept-Encoding");
 	Response.AddHeader("Content-Encoding","gzip");
