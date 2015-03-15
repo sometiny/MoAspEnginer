@@ -502,6 +502,8 @@ var generateZipParts = function(name, file, compressedObject, offset, platform) 
     dosDate = dosDate | date.getDate();
 
     if (useUTF8ForFileName) {
+	    F.echo(file.name,true);
+	    F.echo(utfEncodedFileName,true);
         // set the unicode path extra field. unzip needs at least one extra
         // field to correctly handle unicode path, so using the path is as good
         // as any other information. This could improve the situation with

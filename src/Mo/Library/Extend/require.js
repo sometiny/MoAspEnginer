@@ -52,18 +52,19 @@ Module._load = function(name,parent){
 	var _cache = Module._cache[_file];
 	if(_cache) return _cache.exports;
 	if(!_file){
-		ExceptionManager.put(new Exception(0xed34, "Module._load", "module '" + name + "' is not exists, parent module '" + parent.id + "'."));
+		ExceptionManager.put(new Exception(0xed34, "Module._load", "module '" + name + "' is not exists, required by '" + (parent ? parent.id : "ROOT") + "'."));
 	}else{
 		var module = new Module(name,parent);
 		module.filename=_file;
 		try{
 			module.compile();
 			Module._cache[module.filename] = module;
+			return module.exports;
 		}catch(ex){
 			ExceptionManager.put(ex, "Module._load('" + name + "');");
 		}
 	}
-	return module.exports;
+	return null;
 };
 Module.ROOT=ROOT;
 Module._cache = {};
