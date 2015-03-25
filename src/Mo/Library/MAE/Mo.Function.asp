@@ -576,6 +576,8 @@ var GLOBAL = this,
 							dt = new Date(parseInt(dt));
 						} else {
 							try {
+								var _dt = _.date.parse(dt);
+								if(_dt) dt = _dt.ticks;
 								dt = new Date(dt);
 							} catch (ex) {
 								ExceptionManager.put(ex, "F.formatdate");
