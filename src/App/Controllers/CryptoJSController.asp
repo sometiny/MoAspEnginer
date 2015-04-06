@@ -1,6 +1,11 @@
 ﻿<script language="jscript" runat="server">
+var CryptoJS;
 CryptoJSController = IController.create(function(){
-	F.vendor("CryptoJS").globalize__("CryptoJS");
+	CryptoJS = require("cryptojs");
+	if(!CryptoJS){
+		F.echo("模块cryptojs不存在，需要安装。",true);
+		return false;
+	}
 	if(F.post("salt")!=""){
 		CryptoJS.require.Hmac();
 	}
@@ -12,8 +17,8 @@ CryptoJSController = IController.create(function(){
 		var result=JSON.stringify({
 			method:Mo.Action,
 			t:F.get("t"),
-			value:Mo.value("result"),
-			debug:Mo.value("debug")
+			value:Mo("result"),
+			debug:Mo("debug")
 		});
 		F.echo("<s\cript type=\"text/javascript\">window.parent.Callback(" + result + ");</\script>");
 	}

@@ -1,33 +1,40 @@
 ﻿<script language="jscript" runat="server">
 return {
-	MO_TEMPLATE_NAME : "default",
-	MO_TEMPLATE_SPLIT : "/",
-	MO_TEMPLATE_PERX : "html",
-	MO_TABLE_PERX : "Mo_",
 	MO_DEBUG: false,
-	MO_SHOW_SERVER_ERROR: true,
 	MO_COMPILE_CACHE: true,
-	MO_COMPILE_CACHE_EXPIRED : 0,
-	MO_COMPILE_STRICT : false,
-	MO_CHARSET : "UTF-8",
-	MO_METHOD_CHAR : "m",
-	MO_ACTION_CHAR : "a",
-	MO_PRE_LIB : "",
-	MO_TAG_LIB : "Test",
-	MO_END_LIB : "",
-	MO_DIRECT_OUTPUT : false,
-	MO_LIB_CACHE : false,
-	MO_REWRITE_MODE : "",
-	MO_REWRITE_CONF : "Rewrite",
-	MO_PREETY_HTML : false,
-	MO_MODEL_CACHE : false,
-	MO_IMPORT_COMMON_FILES : "",
-	MO_SESSION_WITH_SINGLE_TAG : false,
-	MO_LANGUAGE : "CN",
-	MO_PARSEACTIONPARMS : true,
-	MO_CONTROLLER_CNAMES : {
-		"test" : "Test"
+	MO_TAG_LIB : "ontag",
+	MO_DEBUG2FILE : false,
+	MO_DEBUG_FILE : "", //IO.build(Mo.Config.Global.MO_APP,"Controllers\\DEBUG.log"),
+	MO_ROUTE_MODE : "",
+	/*静态路由，不遍历，直接检索*/
+	MO_ROUTE_MAPS : {
+		"index2" : "Home/Index"
 	},
-	MO_ACTION_CASE_SENSITIVITY : false
+	/*动态路由，需遍历检查*/
+	MO_ROUTE_RULES : [
+		{
+			LookFor : /^index$/i,
+			SendTo : "Home/Index"
+		}
+	],
+	/*ACCESS数据库配置*/
+	MO_DATABASE_DB : {
+		"DB_Type": "ACCESS",
+		"DB_Path": "Public/data/GBqcBsFizy.mdb"		
+	},
+	/*通用的数据库配置*/
+	MO_DATABASE_DIST : {
+		DB_Type:"", /* support ACCESS|MSSQL|MYSQL|SQLITE|OTHER,if DB_Type is OTHER,you must set 'DB_Connectionstring'*/
+		DB_Connectionstring:"", /* enabled when DB_Type is 'OTHER' */
+		DB_Path:"", /* enabled when DB_Type is 'ACCESS' or 'SQLITE'*/
+		DB_Server:"",
+		DB_Username:"",
+		DB_Password:"",
+		DB_Name:"",
+		DB_Splitchars:["[","]"], /* use '`' when DB_Type is 'MYSQL' or 'SQLITE'*/
+		DB_Version:"", /* for MSSQL,it can be 2005,2012...;for mysql it can be 3.51,5.1...*/
+		DB_Owner:"dbo", /* for MSSQL */
+		DB_TABLE_PERX:Mo.Config.Global.MO_TABLE_PERX		
+	}
 };
 </script>

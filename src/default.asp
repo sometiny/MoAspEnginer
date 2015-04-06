@@ -1,4 +1,4 @@
-﻿<!--#include file="Mo/Library/MAE/Mo.asp"-->
+﻿<script language="jscript" runat="server" src="Mo/Mo.js"></script>
 <script language="jscript" runat="server">
 /*
 ** File: default.asp
@@ -6,11 +6,8 @@
 ** About: 
 **		support@mae.im
 */
-Mo({
-	MO_APP_NAME : "App", /*application name, it is required.*/
-	MO_APP : "App", /*app-dir's name*/
-	MO_APP_ENTRY : "",/*if blank, auto detect*/
-	MO_ROOT : "", /*if blank, auto detect*/
-	MO_CORE : "Mo" /*you can change core-dir's name for system's safe*/
-});
+define("MO_APP_NAME", "App");
+define("MO_APP", "App");
+define("MO_CORE", "Mo");
+startup();
 </script>

@@ -4,17 +4,22 @@ FormController.extend("Index", function(){
 	this.display("Home:Form");
 });
 FormController.extend("Index",true,function(){
+	require("dump");
 	this.assign("description","哈哈，调用post了。");
 	this.assign("dump",F.post.dump(true));
 	this.display("Home:Form");
 });
 FormController.extend("Upload",function(){
-	F.require("net/upload");
-	F.exports.net.upload({
+	var upload = require("net/upload");
+	if(!upload){
+		F.echo("模块net不存在，需要安装。",true);
+		return;
+	}
+	upload({
 		AllowFileTypes : "*.jpg;*.png;*.gif;*.bmp", /*only these extensions can be uploaded.*/
 		AllowMaxSize : "1Mb", /*max upload-data size*/
 		Charset : "utf-8", /*client text charset*/
-		SavePath : __DIR__ + "\\upload", /*dir that files will be saved in it.*/
+		SavePath : __dirname + "\\upload", /*dir that files will be saved in it.*/
 		RaiseServerError : false /* when it is false, don not push exception to Global ExceptionManager, just save in F.exports.upload.exception.*/,
 		OnError:function(e,cfg){ /*event, on some errors are raised. */
 			Mo.assign("exception", e);

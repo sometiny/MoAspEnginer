@@ -15,8 +15,8 @@
 				<h4>Model生成的数据</h4>
 				<table class="list" width="50%">
 					<tr class="h"><td>ID</td><td>名字</td><td>年龄</td><td>生日</td></tr>
-				<loop name="data">
-					<tr><td>{$data.id}</td><td>{$data.name}</td><td>{$data.age}</td><td>{$data.birthday:F.formatdate="yyyy-MM-dd"}</td></tr>
+				<loop name="data" as="item">
+					<tr><td>{$item.id}</td><td>{$item.name}</td><td>{$item.age}</td><td>{$item.birthday:F.formatdate="yyyy-MM-dd"}</td></tr>
 				</loop>
 				</table>
 			</td>
@@ -29,7 +29,7 @@
 				<table class="list" width="50%">
 					<tr class="h"><td>ID</td><td>名字</td><td>年龄</td><td>生日</td></tr>
 				<loop name="dataself">
-					<tr><td>{$dataself.id}</td><td>{$dataself.name}</td><td>{$dataself.age}</td><td>{$dataself.birthday:F.formatdate="yyyy-MM-dd"}</td></tr>
+					<tr><td>{$value.id}</td><td>{$value.name}</td><td>{$value.age}</td><td>{$value.birthday:F.formatdate="yyyy-MM-dd"}</td></tr>
 				</loop>
 				</table>
 			</td>

@@ -1,7 +1,11 @@
 ﻿<script language="jscript" runat="server">
 EncodingController = IController.create(); 
 EncodingController.extend("Index",function(){
-	var Encoding = F.require("encoding");
+	var Encoding = require("encoding");
+	if(!Encoding){
+		F.echo("模块encoding不存在，需要安装。",true);
+		return;
+	}
 	var string="小蜻蜓123abcdefg+%&=！";
 	var gbka = Encoding.gbk.getByteArray(string);
 	var gbkc = Encoding.gbk.getWordArray(string);
@@ -12,7 +16,7 @@ EncodingController.extend("Index",function(){
 	this.assign("GBKByteArray", gbka);
 	this.assign("GBKWordArray", gbkc);
 	this.assign("GBKBytesHex", Encoding.hex.stringify(gbka));
-	this.assign("GBKBase64", F.base64.encode(gbka));
+	this.assign("GBKBase64", base64.encode(gbka));
 	this.assign("GBKString", gbkb);
 	
 	var utf8a = Encoding.utf8.getByteArray(string);
@@ -24,9 +28,8 @@ EncodingController.extend("Index",function(){
 	this.assign("UTF8ByteArray", utf8a);
 	this.assign("UTF8WordArray", utf8c);
 	this.assign("UTF8BytesHex", Encoding.hex.stringify(utf8a));
-	this.assign("UTF8Base64", F.base64.encode(utf8a));
+	this.assign("UTF8Base64", base64.encode(utf8a));
 	this.assign("UTF8String", utf8b);
-	
 	var u1=Encoding.unicode.getWordArray(string);
 	var u2=Encoding.unicode.getByteArray(string);
 	var u3=Encoding.unicode.toString(u1);
@@ -34,7 +37,7 @@ EncodingController.extend("Index",function(){
 	this.assign("UnicodeWordArray", u1);
 	this.assign("UnicodeBytesToWords", Encoding.unicode.bytesToWords(u2));
 	this.assign("UnicodeBytesHex", Encoding.hex.stringify(u2));
-	this.assign("UnicodeBase64", F.base64.encode(u2));
+	this.assign("UnicodeBase64", base64.encode(u2));
 	this.assign("UnicodeString", u3);
 	this.display("Home:Encoding");
 });

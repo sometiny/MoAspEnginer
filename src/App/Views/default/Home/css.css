@@ -1,6 +1,9 @@
-body{font-size:12px;}
-table tr.h td,table thead.h td{border-top:1px #ddd solid;border-bottom:1px #ddd solid;background-color: #efefef;}
-table tr.l td,table tbody.l td{border-bottom:1px #ddd solid; padding: 5px 0;background-color: #f9f9f9;}
+body,pre,input,textarea,select{font-size:12px; font-family: "Consolas","Courier New","Microsoft YaHei", "Î¢ÈíÑÅºÚ", tahoma,arial, simsun, "ËÎÌå";}
+.clearfix:after {content:"\0020"; display: block; height: 0;clear: both; visibility: hidden; }
+.clearfix {zoom: 1;} 
+.clear{clear:both;}
+table tr.h td,table thead.h td{border-top:1px #ddd solid;border-bottom:1px #ddd solid;background-color: #efefef;padding: 5px;}
+table tr.l td,table tbody.l td{border-bottom:1px #ddd solid; padding: 5px;background-color: #f9f9f9;}
 form input.beauty[type='text'],form input.beauty[type='password']{border:1px #ccc solid; height:22px; line-height:22px;padding:0 5px;}
 form button.beauty,form input.beauty[type='submit'],form input.beauty[type='reset'],form input.beauty[type='button']{
 	height:24px; line-height:24px;border:0;border:#ccc 1px solid; padding:0 5px;
@@ -17,3 +20,11 @@ form button.beauty,form input.beauty[type='submit'],form input.beauty[type='rese
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAMAAAAolt3jAAAAA3NCSVQICAjb4U/gAAAANlBMVEX////////19vfz8/Px8fHv7+/r6+vj4+Pg4eLMzMy8vLy5ubm1tbWxsbGvr6+tra2rq6sXa8DL804UAAAAEnRSTlMA//////////////////////9ewYY+AAAACXBIWXMAAAp1AAAKdQFKJd39AAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAAFZJREFUCJlNxwESgCAIRNFVwwK14v6XDXVC3ww7fICLY4DP4C5GCZuyp1rWVRrqSp0ZJ6sYK1pSTcmmb0M77BtnLIm0o24k/UU37mw0Tw+Es2MB5HWCD/RzBaSjlSU+AAAAAElFTkSuQmCC");
 }
 select.beauty{border:1px #ccc solid; padding:2px;}
+div.navs a{display: inline-block; padding:5px 10px; margin:3px 3px 3px 0; background-color: #f27835; color: #FFF; text-decoration: none;}
+div.navs a.red{background-color: red;}
+div.navs a.green{background-color: green;}
+#demos div ,#demos div.normal{display: inline-block; cursor:pointer;padding:0 10px; margin:3px 3px 3px 0; background-color: #FFF; color: #f27835; text-decoration: none; border: 1px dotted #ccc; float: left;height:30px; line-height:30px}
+#demos div.hover {background-color:#f27835;color:#fff}
+#demo_title {padding-left:20px;}
+#demo_content {padding-left:20px;}
+#demo_result {padding-left:20px;}
