@@ -1,0 +1,22 @@
+﻿{
+	"name" : "xml",
+	"version" : "1.0.0",
+	"description" : "基于DOMDocument的xml读写操作。",
+	"keywords" : ["xml","dom"],
+	"homepage" : "http://mpi.thinkasp.cn/?/mpi/package/info/xml",
+	"bugs" : {
+		"url" : "http://mpi.thinkasp.cn/?/mpi/package/info/xml",
+		"email" : "zhanghuiguoanlige@126.com"
+	},
+	"license" : "GPLv3",
+	"author" : 
+	{
+		"name" : "anlige",
+		"email" : "zhanghuiguoanlige@126.com",
+		"url" : "http://m.thinkasp.cn/"
+	},
+	"files" : [
+		"index.js"
+	],
+	"main" : "xml"
+}

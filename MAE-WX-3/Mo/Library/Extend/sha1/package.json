@@ -1,0 +1,22 @@
+﻿{
+	"name" : "sha1",
+	"version" : "1.0.0",
+	"description" : "计算字符串的SHA1摘要值。",
+	"keywords" : ["sha1","摘要"],
+	"homepage" : "http://mpi.thinkasp.cn/?/mpi/package/info/sha1",
+	"bugs" : {
+		"url" : "http://mpi.thinkasp.cn/?/mpi/package/info/sha1",
+		"email" : "zhanghuiguoanlige@126.com"
+	},
+	"license" : "GPLv3",
+	"author" : 
+	{
+		"name" : "anlige",
+		"email" : "zhanghuiguoanlige@126.com",
+		"url" : "http://m.thinkasp.cn/"
+	},
+	"files" : [
+		"index.js"
+	],
+	"main" : "sha1"
+}

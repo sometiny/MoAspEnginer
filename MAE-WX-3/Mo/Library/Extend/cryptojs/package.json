@@ -1,0 +1,22 @@
+﻿{
+	"name" : "cryptojs",
+	"version" : "1.0.0",
+	"description" : "CryptoJS，提供多种摘要以及加密算法，包括HMACMD5/HMACSHA1/AES/DES/RC4/Rabbit/pbkdf2/ripemd160等。",
+	"keywords" : ["CryptoJS","HMACMD5", "HMACSHA1", "AES", "DES", "RC4", "Rabbit", "pbkdf2", "ripemd160"],
+	"homepage" : "https://code.google.com/p/crypto-js/",
+	"license" : "GPLv3",
+	"author" : 
+	{
+		"name" : "CryptoJS",
+		"url" : "https://code.google.com/p/crypto-js/"
+	},
+	"files" : [
+		"index.js",
+		"components/*"
+	],
+	"main" : "cryptojs",
+	"repository" : {
+		"type" : "svn",
+		"url" : "https://code.google.com/p/crypto-js/"
+	}
+}
