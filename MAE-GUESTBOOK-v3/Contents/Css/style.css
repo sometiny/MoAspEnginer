@@ -48,23 +48,28 @@ body{background-color: #fff;}
 @media screen and (max-width:1024px){
 
 }
-.content-box {width:970px;line-height:18px;border-top:1px #5a9e25 solid;padding:10px 5px; border-top-width:1px;margin:10px auto;text-align: left;}
-.content-box h4{color:#e50087;font-size:14px;width:500px;padding-left:5px}
-.content-box h4 a{color:#e50087;}
-.content-box h5{color:#91c655;width:500px;float: right;text-align: right; padding-left:10px}
+.content-box-list {float:left;width:760px;}
+.content-box {border-radius:5px;line-height:18px;padding:5px 5px 0 5px; border-top-width:1px;margin:0px auto 10px;text-align: left; background-color: #eee;}
+.content-box .box-header{background-color: #666; color: #ddd;border-radius:5px;}
+.content-box .box-header a{color:#ddd}
+
+.content-box h4{font-size:14px;width:500px;padding-left:15px; height:30px; line-height:30px}
+.content-box h5{width:500px;float: right;text-align: right; padding-right:15px;color:#999; height:30px; line-height:30px}
+.content-box .box-header h5 a{color:#999}
 .content-box .content{color:#2a700e;line-height:24px;font-size:14px;padding:5px; }
 .content-box .content span.quote-start,.content-box .content span.quote-end{font-size:36px;color:#ddd;font-family:宋体;}
-.content-box-reply{width:63%;border:1px #ddd solid; background-color: #f6f6f6;padding:5px;border-radius:10px;margin:10px 0;}
+.content-box-reply{border-top:1px #ccc solid; background-color: #eee;padding:5px;margin:10px 0 0 -5px;border-bottom-left-radius:5px;border-bottom-right-radius:5px;}
 .content-box-reply .reply-time{color:#aaa}
 .content-box-reply .reply-content{color:#666; text-indent: 10px; padding:8px 0}
+.box-thread .content-box-reply{border-radius:5px;margin: 0px -0px;}
 
-.list-box{ margin-bottom:15px;}
-.list-box ul li {height:50px;line-height:50px;color:#5a9e25;border:1px #ddd dashed;width:155px; text-align: center;margin:3px; float: left;font-weight:bold;background-color: #FFF;cursor:pointer; border-radius:3px}
-.list-box ul li a{color:#5a9e25;display: block;height:48px;width:154px;}
-.list-box ul li:hover,.list-box ul li.hover {color:#FFF;border:1px #ddd dashed; background-color: #5eae1b;}
+.list-box{ margin-bottom:15px;float:left;width:200px;}
+.list-box ul li {height:50px;line-height:50px;color:#5a9e25;border:1px #ddd solid;width:175px; text-align: center;margin:0px 3px 6px; font-weight:bold;background-color: #FFF;cursor:pointer; border-radius:3px}
+.list-box ul li a{color:#5a9e25;display: block;height:48px;width:174px;}
+.list-box ul li:hover,.list-box ul li.hover {color:#FFF;border:1px #5a9e25 solid; background-color: #5eae1b;}
 .list-box ul li:hover a,.list-box ul li.hover a{color:#fff}
 
-.box-forum {border:1px #ddd solid; background-color: #f6f6f6;padding:5px;border-radius:10px;margin:10px 0;}
+.box-forum {border:1px #ddd solid; background-color: #f6f6f6;padding:5px;border-radius:3px;margin:0 0 10px;}
 .box-forum h5{color:#999;font-weight:normal;}
 #wapper-page{text-align: center;height:30px; line-height:30px;margin-top:10px;}
 #wapper-foot{width:100%;height:48px;text-align: center;color:#2a700e; line-height:48px;border-top:3px #5a9e25 solid;margin-top:10px;}

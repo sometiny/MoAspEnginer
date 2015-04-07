@@ -1,12 +1,16 @@
 ﻿<include file="top" />
+<div class="content-box-list">
 <div class="box-forum"><h4>当前版块：{$ForumInfo.Title:F.encodeHtml}</h4><h5>{$ForumInfo.Description:F.encodeHtml}</h5></div>
 <loop name="Thread" as="Thread">
 <div class="content-box">
-	<h5>Post By '{$Thread.PostFrom}', At '{$Thread.PostIp}', On '{$Thread.PostDate:F.untimespan}' About '<a href="?Id={$Thread.ForumTag}">{$Thread.ForumName}</a>'</h5>
-	<h4><a href="?a=thread&Id={$Thread.Id}"><eq name="Thread.IsReplied" value="1" type="number">【已回复】</eq>{$Thread.Title}</a></h4>
+	<div class="box-header">
+		<h5>Post By '{$Thread.PostFrom}', At '{$Thread.PostIp}', On '{$Thread.PostDate:F.untimespan}' About '<a href="?Id={$Thread.ForumTag}">{$Thread.ForumName}</a>'</h5>
+		<h4><a href="?a=thread&Id={$Thread.Id}">{$Thread.Title}</a></h4>
+	</div>
 	<div class="content">{$Thread.Description}</div>
 	<eq name="Thread.IsReplied" value="1" type="number"><div class="reply"><quot>{$Thread.Id:Mo.A.Home.GetReply}</quot></div></eq>
 </div>
 </loop>
 <nempty name="mo.get.int.Id"><div id="wapper-page"><page for="Thread" /></div></nempty>
+</div>
 <include file="foot" />

@@ -16,10 +16,10 @@ HomeController.extend("Index",function(){
 	
 	/*按条件读取留言记录*/
 	var Id;
+	Model__("Forum","Id").orderby("OrderBy DESC,Id DESC").where("Hidden=0").query().assign("Forum");
 	if((Id=F.get.int("Id",0))>0){
 		/*如果有传递版块Id，则显示当前版块的信息*/
 		var Forum = Model__("Forum","Id").orderby("OrderBy DESC,Id DESC").where("Hidden=0 and Tag=" + Id).query().read();
-		this.assign("Forum",new DataTable([Forum])); /*板块列表，显示在头部的*/
 		this.assign("ForumInfo",Forum); /*当前版块的信息*/
 
 		/*读取当前板块下的留言列表*/
@@ -27,7 +27,6 @@ HomeController.extend("Index",function(){
 		this.display("Forum");
 	}else{
 		/* 读取所有版块和前五条留言信息*/
-		Model__("Forum","Id").orderby("OrderBy DESC,Id DESC").where("Hidden=0").query().assign("Forum");
 		Model__("Thread","Id").where("PostFor=0").limit(1,5).orderby("Id DESC").query().assign("Thread");
 		this.display("Home");
 	}
@@ -38,6 +37,7 @@ HomeController.extend("thread",function(){
 	
 	/*按条件读取留言记录*/
 	var Id=F.get.int("Id",0);
+	Model__("Forum","Id").orderby("OrderBy DESC,Id DESC").where("Hidden=0").query().assign("Forum");
 	if(Id>0){
 		var L = Model__("Thread","Id").where("Id=" + Id).query().fetch().read();
 		if(!L){
@@ -50,7 +50,6 @@ HomeController.extend("thread",function(){
 			}else{
 				F.get("Id",ForumTag);/*这里覆盖Id的值，是为了让当前版块高亮*/
 				this.assign("Thread",L);
-				this.assign("Forum",Forum);
 				/*读取所有的回复信息*/
 				Model__("Thread","Id").where("PostFor=" +  Id).limit(F.get.int("page",1),System.PageSize).orderby("Id DESC").query().assign("Reply");
 				this.display("Thread");
