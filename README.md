@@ -3,10 +3,10 @@
 > 
 
 ##示例(Demos)
-MAE-GUESTBOOK：简单的留言本程序
-MAE-GUESTBOOK-v3：简单的留言本程序，基于MAE3.0
-MAE-WX：MAE对接微信接口
-MAE-WX-3：MAE对接微信接口，基于MAE3.0
+MAE-GUESTBOOK：简单的留言本程序<br />
+MAE-GUESTBOOK-v3：简单的留言本程序，基于MAE3.0<br />
+MAE-WX：MAE对接微信接口<br />
+MAE-WX-3：MAE对接微信接口，基于MAE3.0<br />
 ##链接(Links)
 [官网(http://m.thinkasp.cn/)](http://m.thinkasp.cn/)<br />  
 [文档(http://mae.im)](http://mae.im)<br />
