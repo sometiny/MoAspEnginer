@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!--<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />-->
+<title>{$System.SubTitle}-{$System.Title}</title>
+<css file="Contents/Css/reset.css" />
+<css file="Contents/Css/style.css" />
+<js file="Contents/Scripts/f.js" />
+<js file="Contents/Scripts/f.e.js" />
+<js file="Contents/Scripts/f.ajax.js" />
+<js file="Contents/Scripts/common.js" />
+</head>
+<body>
+<div id="wapper">
+	<div id="wapper-header-top">{$System.Notice}</div>
+	<div id="wapper-header">
+		<h3>{$System.Title}</h3>
+		<h4>{$System.SubTitle}</h4>
+	</div>
+	<div id="wapper-body">
+		<div class="list-box clearfix">
+			<ul class="clearfix">
+				<li<ngt name="mo.get.int.Id" value="0"> class="hover"</ngt>><a href="{$$MO_ROOT}">首页</a></li>
+				<loop name="Forum" as="Forum">
+				<li rel="{$Forum.Tag}:{$Forum.Title}"<eq name="Forum.Tag" value="mo.get.int.Id" type="assign"> class="hover"</eq>><a href="?Id={$Forum.Tag}">{$Forum.Title}</a></li>
+				</loop>
+			</ul>
+		</div>

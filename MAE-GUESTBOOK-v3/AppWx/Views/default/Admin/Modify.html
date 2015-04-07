@@ -1,0 +1,14 @@
+﻿<include file="top" />
+<form action="?m=Modify&a=modify" method="post">
+<input type="hidden" name="NameOld" value="{$NameOld}" />
+<table width="100%">
+<tr class="h"><td colspan="2">修改管理员</td></tr>
+<tr class="l"><td width="80">登录名：</td><td><input type="text" name="Name" value="{$NameOld}" /> *用户名可修改</td></tr>
+<tr class="l"><td>原密码：</td><td><input type="password" name="AuthOld" value="" /> *原密码</td></tr>
+<tr class="l"><td>新密码：</td><td><input type="password" name="Auth" value="" /> *新密码，不修改请留空</td></tr>
+<tr class="l"><td>重复密码：</td><td><input type="password" name="AuthRe" value="" /> *重复输入新密码</td></tr>
+<tr class="l"><td colspan="2"><input type="submit" name="act" value="修改" /></td></tr>
+</table>
+
+</form>
+<include file="foot" />

@@ -1,0 +1,17 @@
+﻿<include file="top" />
+<form action="?m=Admin&a=savesetting" method="post">
+<input type="hidden" name="Tag" value="{$System.Tag}" />
+<table width="100%">
+<tr class="h"><td colspan="2"><input type="submit" value="保存配置" style="float: right;" />系统配置</td></tr>
+<tr class="l"><td width="80">标题</td><td><input type="text" name="Title" value="{$System.Title:F.encodeHtml}" class="width_250" /></td></tr>
+<tr class="l"><td>副标题</td><td><input type="text" name="SubTitle" value="{$System.SubTitle:F.encodeHtml}" class="width_250" /></td></tr>
+<tr class="l"><td>版权声明</td><td><input type="text" name="CopyRight" value="{$System.CopyRight:F.encodeHtml}" class="width_250" /></td></tr>
+<tr class="l"><td>通知</td><td><input type="text" name="Notice" value="{$System.Notice:F.encodeHtml}" class="width_250" /></td></tr>
+<tr class="l"><td>每页记录数</td><td><input type="text" name="PageSize" value="{$System.PageSize}" class="width_250" /></td></tr>
+<tr class="l"><td>系统状态</td><td>
+<input type="radio" name="IsClosed" value="0"<eq name="System.IsClosed" value="0"> checked="checked"</eq> /> 开放
+<input type="radio" name="IsClosed" value="1"<eq name="System.IsClosed" value="1"> checked="checked"</eq> /> 关闭</td></tr>
+<tr class="l"><td>状态说明</td><td><input type="text" name="Reason" value="{$System.Reason:F.encodeHtml}" class="width_250" /></td></tr>
+</table>
+</form>
+<include file="foot" />

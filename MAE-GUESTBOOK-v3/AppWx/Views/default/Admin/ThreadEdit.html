@@ -1,0 +1,15 @@
+﻿<form action="?m=Thread&a=save" method="post" name="frm_saverules" onsubmit="return false;">
+	<input type="hidden" name="Id" value="{$E.Id}" />
+	<table width="100%">
+		<tr class="h"><td colspan="2">回复留言</td></tr>
+		<tr class="l"><td width="100">留言标题</td><td>{$E.Title:F.encodeHtml}</td></tr>
+		<tr class="l"><td>留言内容</td><td>{$E.Description:F.encodeHtml}</td></tr>
+		<tr class="h"><td colspan="2">回复记录</td></tr>
+		<loop name="Reply" as="Reply">
+			<tr class="l"><td colspan="2">[<i>{$Reply.PostDate:F.untimespan}</i>]&nbsp;{$Reply.Description:F.encodeHtml}</td></tr>
+		</loop>
+		<tr class="l"><td>新回复</td><td>
+			<textarea cols="60" rows="4" name="Description"></textarea>
+		</td></tr>
+	</table>
+</form>

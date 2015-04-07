@@ -1,0 +1,22 @@
+﻿{
+	"name" : "validatee",
+	"version" : "1.0.0",
+	"description" : "在服务器端进行表单校验。",
+	"keywords" : ["validatee","表单校验"],
+	"homepage" : "http://mpi.thinkasp.cn/?/mpi/package/info/validatee",
+	"bugs" : {
+		"url" : "http://mpi.thinkasp.cn/?/mpi/package/info/validatee",
+		"email" : "zhanghuiguoanlige@126.com"
+	},
+	"license" : "GPLv3",
+	"author" : 
+	{
+		"name" : "anlige",
+		"email" : "zhanghuiguoanlige@126.com",
+		"url" : "http://m.thinkasp.cn/"
+	},
+	"files" : [
+		"index.js"
+	],
+	"main" : "validatee"
+}

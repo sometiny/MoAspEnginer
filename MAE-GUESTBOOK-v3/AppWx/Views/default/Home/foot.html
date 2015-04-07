@@ -1,0 +1,46 @@
+﻿<script type="text/javascript">
+var html = '';
+html += '<form action="?a=postmessage" method="post" onsubmit="return false;" name="postmessageform">';
+html += '<label>版块：</label>';
+html += '<select name="ForumTag">';
+F("li[rel]").each(function(){
+	var rel = F(this).attr("rel").split(":");
+	html += '<option value="'+ rel[0] +'">'+ rel[1] +'</option>';
+});
+html += '</select>';
+html += '<label>名字：</label><input type="text" name="PostFrom" class="width_200" value="#匿名#" /> 您的名字。';
+html += '<label>邮箱：</label><input type="text" name="PostEmail" class="width_200" /> *您的邮箱。';
+html += '<label>主页：</label><input type="text" name="PostHomepage" class="width_200" /> 您的主页。';
+html += '<label>标题：</label><input type="text" name="Title" class="width_200" /> *留言标题，不超过50字。';
+html += '<label>内容：</label><textarea cols="60" rows="4" name="Description"></textarea> *留言内容，不超过1000字';
+html += '<label>验证码：</label><input type="text" name="SafeCode" /> <img src="?a=code" onclick="this.src=\'?a=code&_t=\'+Math.random();" style="cursor:pointer" />';
+html += '</form>';
+function PostMessage(){
+	F("#DialogAlert").attr("title","发表留言").html(html).dialog({
+		"width":575,"height":600,"maxHeight":600,buttons:{
+			"立即发表":function(){
+				Ajax({
+					form:document.forms["postmessageform"],
+					succeed:function(msg){
+						ShowTips("提示",msg.replace(/\n/igm,"<br />"));
+						if(msg=="留言发表成功。")window.setTimeout(function(){window.location.reload();}, 1000);
+					}
+				});
+				return false;
+			}
+		}
+	});
+}
+</script>
+<div id="DialogAlert"></div>
+	</div>
+	<div id="wapper-foot">{$System.CopyRight}&nbsp;<a href="http://m.thinkasp.cn/" target="_blank">MAE官网</a></div>
+</div>
+<div class="round round-1"></div>
+<div class="round round-2"></div>
+<div class="round round-3"></div>
+<div class="round round-4"></div>
+<div class="round round-5"></div>
+<div class="round round-6"><a href="javascript:void(0)" onclick="PostMessage();">发表</a></div>
+<div class="round round-7"><a href="?m=Login">管理</a></div>
+</body></html>
