@@ -3,20 +3,12 @@ return {
 	MO_DEBUG: false,
 	MO_COMPILE_CACHE: true,
 	MO_TAG_LIB : "ontag",
-	MO_DEBUG2FILE : false,
-	MO_DEBUG_FILE : "", //IO.build(Mo.Config.Global.MO_APP,"Controllers\\DEBUG.log"),
+	MO_ERROR_REPORTING : E_ERROR | E_WARNING,
 	MO_ROUTE_MODE : "",
 	/*静态路由，不遍历，直接检索*/
-	MO_ROUTE_MAPS : {
-		"index2" : "Home/Index"
-	},
+	MO_ROUTE_MAPS : {},
 	/*动态路由，需遍历检查*/
-	MO_ROUTE_RULES : [
-		{
-			LookFor : /^index$/i,
-			SendTo : "Home/Index"
-		}
-	],
+	MO_ROUTE_RULES : [],
 	/*ACCESS数据库配置*/
 	MO_DATABASE_DB : {
 		"DB_Type": "ACCESS",
