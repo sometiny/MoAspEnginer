@@ -11,14 +11,21 @@
 		<for name="modules" value="module">
 			<tr>
 				<td>{$key + 1}</td>
-				<td>{$module.name}</td>
+				<td><a href="http://mpi.thinkasp.cn/?/mpi/package/info/{$module.name}" target="_blank">{$module.name}</a></td>
 				<td>{$module.version}</td>
 				<eq name="module.exists" value="true" type="bool">
 				<td><span style="color:green">已安装</span></td>
 				</else>
 				<td><a href="?m=Mpi&a=Install&pkgname={$module.name}" onclick="return window.confirm('确定要安装模块[{$module.name}]吗？');">安装</a></td>
 				</eq>
-				<td>{$module.description}</td>
+				<td>{$module.description}
+				<nempty name="module.extfiles">
+					<fieldset style="margin:0;padding: 5px;border:1px #999 solid; width:40%">
+						<legend>其他文件</legend>
+					<foreach name="module.extfiles" key="file" value="item"><span style="color:red">{$item.name}：{$item.description}</span> <a href="{$item.url}" target="_blank">下载</a><br /></foreach>
+					</fieldset>
+				</nempty>
+				</td>
 				<td><foreach name="module.dependencies" key="name">{$name}<br /></foreach></td>
 			</tr>
 		</for>
