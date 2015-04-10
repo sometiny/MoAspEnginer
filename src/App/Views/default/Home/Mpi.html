@@ -5,7 +5,7 @@
 	<h5>可用模块：</h5>
 	<table width="100%" class="list">
 		<thead class="h">
-			<tr><td width="30">序号</td><td width="200">名称</td><td width="60">版本</td><td width="40">安装</td><td width="60">依赖</td><td>描述</td></tr>
+			<tr><td width="30">序号</td><td width="200">名称</td><td width="60">版本</td><td width="120">安装</td><td width="120">依赖</td><td>描述</td></tr>
 		</thead>
 		<tbody class="l">
 		<for name="modules" value="module">
@@ -13,15 +13,19 @@
 				<td>{$key + 1}</td>
 				<td><a href="http://mpi.thinkasp.cn/?/mpi/package/info/{$module.name}" target="_blank">{$module.name}</a></td>
 				<td>{$module.version}</td>
-				<eq name="module.exists" value="true" type="bool">
-				<td><span style="color:green">已安装</span></td>
-				</else>
-				<td><a href="?m=Mpi&a=Install&pkgname={$module.name}" onclick="return window.confirm('确定要安装模块[{$module.name}]吗？');">安装</a></td>
-				</eq>
-				<td><foreach name="module.dependencies" key="name">{$name}<br /></foreach></td>
+				<expression and="module.exists eq -1 as number">
+					<td><span style="color:green">异常：{$module.e}</span></td>
+				<else and="module.exists eq 0 as number" />
+					<td><a href="?m=Mpi&a=Install&pkgname={$module.name}" onclick="return window.confirm('确定要安装模块[{$module.name}]吗？');">安装</a></td>
+				<else and="module.exists eq 1 as number" />
+					<td>已安装</td>
+				<else and="module.exists eq 2 as number" />
+					<td><a href="?m=Mpi&a=Install&pkgname={$module.name}&update=yes" onclick="return window.confirm('确定要安装模块[{$module.name}]吗？');">升级</a>({$module.e}-&gt;{$module.version})</td>
+				</expression>
+				<td><nempty name="module.dependencies"><span style="color:green"><foreach name="module.dependencies" key="name" value="version">{$name}:{$version}<br /></foreach></span></nempty></td>
 				<td>{$module.description}
 				<nempty name="module.extfiles">
-					<fieldset style="margin:0;padding: 5px;border:1px #999 solid; width:40%">
+					<fieldset style="margin:0;padding: 5px;border:1px #999 solid; width:80%">
 						<legend>其他文件</legend>
 					<foreach name="module.extfiles" key="file" value="item"><span style="color:red">{$item.name}：{$item.description}</span> <a href="{$item.url}" target="_blank">下载</a><br /></foreach>
 					</fieldset>
