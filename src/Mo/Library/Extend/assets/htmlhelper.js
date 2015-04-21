@@ -1,1 +1,76 @@
-var parseattrs=function(b){b=b||{};var a="";for(var c in b){if(!b.hasOwnProperty(c)){continue}a+=F.format(' {0}="{1}"',c,b[c])}return a};var helper={};helper.ActionLink=function(c,b,a){return F.format('<a href="{0}"{1}>{2}</a>',Mo.U(b),parseattrs(a),c)};helper.Form=function(b,c,d,a){return F.format('<form name="{2}" action="{0}"{1} method="{3}">',Mo.U(c),parseattrs(a),b,d||"GET")};helper.FormUpload=function(b,c,a){return F.format('<form name="{2}" action="{0}"{1} method="POST" enctype="multipart/form-data">',Mo.U(c),parseattrs(a),b)};helper.FormEnd=function(){return"</form>"};helper.Input=function(d,c,e,b){var a='<input type="'+d+'"';if(c){a+=' name="'+c+'"'}if(e){a+=' value="'+e+'"'}a+=parseattrs(b);return a+" />"};helper.CheckBox=function(b,c,a){return helper.Input("checkbox",b,c,a)};helper.DropDownList=function(e,g,b,d){b=b||0;var a='<select name="'+e+'"'+parseattrs(d)+">";var c=0;for(var f in g){if(!g.hasOwnProperty(f)){continue}a+=F.format('<option value="{0}"{2}>{1}</option>',f,g[f],b==c?' selected="selected"':"");c++}return a+"</select>"};helper.ListBox=function(c,d,a,b){b=b||{};b.multiple="multiple";return helper.DropDownList(c,d,a,b)};helper.Hidden=function(a,b){return helper.Input("hidden",a,b)};helper.Password=function(b,c,a){return helper.Input("password",b,c,a)};helper.RadioButton=function(b,c,a){return helper.Input("radio",b,c,a)};helper.TextArea=function(b,c,a){return F.format('<textarea name="{0}"{2}>{1}</textarea>',b,c,parseattrs(a))};helper.TextBox=function(b,c,a){return helper.Input("text",b,c,a)};helper.Button=function(b,c,a){return helper.Input("button",b,c,a)};helper.ResetButton=function(b,c,a){return helper.Input("reset",b,c,a)};helper.SubmitButton=function(b,c,a){return helper.Input("submit",b,c,a)};module.exports=helper;
+﻿/*
+html helper
+*/
+var parseattrs = function(attrs){
+	attrs = attrs || {};
+	var ret = "";
+	for(var i in attrs){
+		if(!attrs.hasOwnProperty(i)) continue;
+		ret += F.format(" {0}=\"{1}\"", i, attrs[i]);
+	}
+	return ret;
+}
+var helper = {};
+helper.ActionLink = function(title, url, attrs){
+	return F.format("<a href=\"{0}\"{1}>{2}</a>", Mo.U(url), parseattrs(attrs), title);
+};
+helper.Form = function(name, action, method, attrs){
+	return F.format("<form name=\"{2}\" action=\"{0}\"{1} method=\"{3}\">", Mo.U(action), parseattrs(attrs), name, method || "GET");
+};
+helper.FormUpload = function(name, action, attrs){
+	return F.format("<form name=\"{2}\" action=\"{0}\"{1} method=\"POST\" enctype=\"multipart/form-data\">", Mo.U(action), parseattrs(attrs), name);
+};
+helper.FormEnd = function(){
+	return "</form>";
+};
+helper.Input = function(type, name, value, attrs){
+	var input = "<input type=\"" + type + "\"";
+	if(name) input += " name=\"" + name + "\"";
+	if(value) input += " value=\"" + value + "\"";
+	input += parseattrs(attrs);
+	return input + " />";
+};
+helper.CheckBox = function(name, value,attrs){
+	return helper.Input("checkbox", name, value, attrs);
+};
+helper.DropDownList = function(name, list, selectedIndex, attrs){
+	selectedIndex = selectedIndex || 0;
+	var select = "<select name=\"" + name + "\"" + parseattrs(attrs) + ">";
+	var index=0;
+	for(var i in list){
+		if(!list.hasOwnProperty(i)) continue;
+		select += F.format("<option value=\"{0}\"{2}>{1}</option>", i, list[i], selectedIndex==index ? " selected=\"selected\"":"");
+		index++;
+	}
+	return select + "</select>";
+};
+helper.ListBox = function(name, list, selectedIndex, attrs){
+	attrs = attrs || {};
+	attrs["multiple"] = "multiple";
+	return helper.DropDownList(name, list, selectedIndex, attrs);
+};
+helper.Hidden = function(name, value){
+	return helper.Input("hidden", name, value);
+};
+helper.Password = function(name, value, attrs){
+	return helper.Input("password", name, value, attrs);
+};
+helper.RadioButton = function(name, value, attrs){
+	return helper.Input("radio", name, value, attrs);
+};
+helper.TextArea = function(name, value, attrs){
+	return F.format("<textarea name=\"{0}\"{2}>{1}</textarea>", name, value, parseattrs(attrs));
+};
+helper.TextBox = function(name, value, attrs){
+	return helper.Input("text", name, value, attrs);
+};
+helper.Button = function(name, value, attrs){
+	return helper.Input("button", name, value, attrs);
+};
+helper.ResetButton = function(name, value, attrs){
+	return helper.Input("reset", name, value, attrs);
+};
+helper.SubmitButton = function(name, value, attrs){
+	return helper.Input("submit", name, value, attrs);
+};
+module.exports = helper;

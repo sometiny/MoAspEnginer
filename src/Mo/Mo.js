@@ -1,1 +1,1126 @@
-var defaultConfig={},define=function(a,b){defaultConfig[a.toUpperCase()]=b};var F,JSON,require,VBS,View,Model__,req=Request,res=Response,ROOT=Server.Mappath("/"),Mo,startup=Mo=Mo||(function(){var w=function(c){if(typeof c!="string"){return""}if(c.substr(1,1)==":"){return c}return Server.MapPath(c)};var p="",o={},x={};var g=function(B,A){for(var C in A){if(A.hasOwnProperty(C)){B[C]=A[C]}}return B};var v=function(B,A){var c=0;while(true){if(c>=B.length||c>=A.length){break}B[B.length-c-1]=A[A.length-c-1];c++}return B};var b=function(C){var H,c,G,E;H=C.split(":");if(H.length==1){c=r.MO_TEMPLATE_NAME+"/"+l.Method+r.MO_TEMPLATE_SPLIT+C;H=[r.MO_TEMPLATE_NAME,l.Method,C]}else{if(H.length==2){c=r.MO_TEMPLATE_NAME+"/"+C.replace(":",r.MO_TEMPLATE_SPLIT);H=[r.MO_TEMPLATE_NAME].concat(H)}else{if(H.length==3){c=H[0]+"/"+H[1]+r.MO_TEMPLATE_SPLIT+H[2]}}}G=r.MO_APP+"Views/"+c+"."+r.MO_TEMPLATE_PERX;if(c.indexOf("@")>0){G=r.MO_ROOT+c.substr(c.indexOf("@")+1)+"/Views/"+c.substr(0,c.indexOf("@"))+"."+r.MO_TEMPLATE_PERX}if(!IO.file.exists(G)){G=r.MO_CORE+"Views/"+c+"."+r.MO_TEMPLATE_PERX}if(!IO.file.exists(G)){ExceptionManager.put(25344,"_LoadTemplate()","模板["+C+"]不存在",E_NOTICE);return""}var A=IO.file.readAllText(F.mappath(G),r.MO_CHARSET);var D=new RegExp('<include file\\=\\"(.+?)(\\.'+r.MO_TEMPLATE_PERX+')?\\" />',"igm");var B=F.string.matches(A,D,function(J,I){E=v(H,I.split(":"));A=F.replace(A,J,b(E.join(":")))});return A};var h=function(A){var B,c;B=A.split(":");if(B.length==1){c=r.MO_TEMPLATE_NAME+"/"+l.Method+r.MO_TEMPLATE_SPLIT+A}else{if(B.length==2){c=r.MO_TEMPLATE_NAME+"/"+A.replace(":",r.MO_TEMPLATE_SPLIT)}else{if(B.length==3){c=B[0]+"/"+B[1]+r.MO_TEMPLATE_SPLIT+B[2]}}}return c};var j=function(c){res.Write(c);res.End()};var q=function(c){return new Function(c)};var i=function(A){var c={exports:{}};(new Function("exports","module",A))(c.exports,c);return c.exports};var s=function(c){return(new Function("__filename","__dirname",IO.file.readAllScript(c)))(c,IO.parent(c))};var m=function(G,c){var D=r.MO_APP_NAME+"@"+c,B=c+"Controller";if(m._controllers.hasOwnProperty(D)){return m._controllers[D]}try{G=F.mappath(G);var A=IO.file.readAllScript(G,r.MO_CHARSET);if(r.MO_DEBUG){A=ReCompileForDebug(A)}A="var "+B+";\r\n"+A+"\r\n return "+B+";";var E=(new Function("__filename","__dirname","M","C","L","__scripts",A))(G,G==""?"":G.substr(0,G.lastIndexOf("\\")),Model__,l.C,l.L,r.MO_DEBUG?A:"");if(E){return E&&(m._controllers[D]=E)}ExceptionManager.put(33536,"_LoadController()","加载控制器时出现错误，请检查是否已经定义相关控制器'"+c+"'。")}catch(C){ExceptionManager.put(C.number,"_LoadController()",'加载控制器"'+c+'"时出现错误:'+C.description)}return false};m._controllers={};var a=function(B){var D=r.MO_APP_NAME+"@"+B;if(a.assets.hasOwnProperty(D)){return new a.assets[D]()}var E=F.mappath(r.MO_APP+"Library/Assets/"+B+".asp");if(!IO.file.exists(E)){E=F.mappath(r.MO_CORE+"Library/Assets/"+B+".asp")}if(!IO.file.exists(E)){return false}var A=IO.file.readAllScript(E,r.MO_CHARSET);A="var "+B+";\r\n"+A+"\r\n return "+B+";";try{var c=(new Function("__filename","__dirname","M","C","L",A))(E,E==""?"":E.substr(0,E.lastIndexOf("\\")),Model__,l.C,l.L);return c&&(new (a.assets[D]=c)());ExceptionManager.put(33536,"_LoadAssets()",'加载asset["'+B+'"]时出现错误，请检查是否已经定义相关Class')}catch(C){ExceptionManager.put(C.number,"_LoadAssets()",'加载asset["'+B+'"]时出现错误:'+C.description)}return false};a.assets={};var f=function(A,C){C=C||"Conf";var B=C+A+"@"+r.MO_APP_NAME;if(f.configs.hasOwnProperty(B)){return f.configs[B]}var D=F.mappath(r.MO_APP+C+"/"+A+".asp");if(!IO.file.exists(D)){D=F.mappath(r.MO_CORE+C+"/"+A+".asp")}if(!IO.file.exists(D)){return null}var c=null;if(c=s(D)){f.configs[B]=c;return c}return null};f.configs={};var z=function(E,D,C){C=C||{};var B=C.sensitive;var A=C.strict;var c=C.end!==false;D=D||[];if(E instanceof RegExp){return E}if(E instanceof Array){E="("+E.join("|")+")"}E=E.concat(A?"":"/?").replace(/\/\(/g,"/(?:").replace(/([\/\.])/g,"\\$1").replace(/(\\\/)?(\\\.)?:(\w+)(\(.*?\))?(\*)?(\?)?/g,function(I,K,M,J,G,L,H){K=K||"";M=M||"";G=G||"([^/"+M+"]+?)";H=H||"";D.push({name:J,optional:!!H});return""+(H?"":K)+"(?:"+M+(H?K:"")+G+(L?"((?:[\\/"+M+"].+?)?)":"")+")"+H}).replace(/\*/g,"(.*)");return new RegExp("^"+E+(c?"$":"(?=/|$)"),B?"":"i")};var u=function(){if(r.MO_PRE_LIB!=""){var B=r.MO_PRE_LIB.split(",");for(var c=0;c<B.length;c++){var A=a(B[c]);if(A){A.Index();A.__destruct()}}}};var k=function(){if(r.MO_END_LIB!=""){var B=r.MO_END_LIB.split(",");for(var c=0;c<B.length;c++){var A=a(B[c]);if(A){A.Index();A.__destruct()}}}};var e={start:0,run:function(){e.start=new Date();return e.start},ticks:function(c){return(new Date())-(c||e.start)},line:0,debugLine:0,scripts:"",file:"",log:function(B,C,A,c){e.line=B;e.file=C;e.debugLine=A;if(c){e.scripts=c}},timelines:{initialize:0,route:0,run:0,load:0,compile:0,run1:0,recompile:0,terminate:0}};var d=function(){if(F.server("HTTP_X_REQUESTED_WITH").toLowerCase()=="xmlhttprequest"){if(E_ERROR&ExceptionManager.errorReporting()){ExceptionManager.errorReporting(E_ERROR)}}if(r.MO_DEBUG){ExceptionManager.put(0,"MO","当前系统开启了DEBUG模式，正式上线后请关闭MO_DEBUG选项，并通过ERROR_REPORTING来显示指定级别异常。",E_WARNING)}if(!r.MO_COMPILE_CACHE){ExceptionManager.put(0,"MO","当前系统未开启编译缓存，建议正式上线后开启编译缓存(MO_COMPILE_CACHE设置为true)。",E_WARNING)}ExceptionManager.put(0,"MO",F.format("System：{7}MS > Initialize：{0}MS；Route：{1}MS；Controller：{2}MS（Load：{3}MS，Compile：{4}MS，DebugCompile：{5}MS，Execute：{6}MS）；Terminate：{8}MS。",e.timelines.initialize,e.timelines.route,e.timelines.run,e.timelines.load,e.timelines.compile,e.timelines.recompile,e.timelines.run1,e.timelines.initialize+e.timelines.route+e.timelines.run+e.timelines.terminate,e.timelines.terminate),E_INFO);if(Model__&&Model__.debug){Model__.debug()}if(r.MO_DEBUG2FILE){ExceptionManager.debug2file()}else{F.echo(ExceptionManager.debug())}};var y=function(B){var c=B.toString().replace(/^function(.*?)\((.*?)\)([\s\S]+)$/,"$2").replace(/\s/igm,"").split(",");for(var A=0;A<c.length;A++){c[A]=F.get(c[A])}return c};var n=function(c){var A=String(req.ServerVariables("URL"));if(c.MO_APP_NAME==""){j("未定义应用名称：MO_APP_NAME，请检查初始配置参数。")}if(c.MO_ROOT==""){c.MO_ROOT=A.substr(0,A.lastIndexOf("/")+1)}if(c.MO_APP==""){c.MO_APP=c.MO_ROOT+c.MO_APP_NAME+"/"}if(c.MO_CORE==""){c.MO_CORE=c.MO_ROOT+"Mo/"}if(c.MO_APP.slice(-1)!="/"){c.MO_APP=c.MO_APP+"/"}if(c.MO_CORE.slice(-1)!="/"){c.MO_CORE=c.MO_CORE+"/"}if(!IO.directory.exists(c.MO_CORE)){j("核心目录["+c.MO_CORE+"]不存在，请检查初始配置参数。")}if(c.MO_APP_ENTRY==""){c.MO_APP_ENTRY=A.substr(A.lastIndexOf("/")+1);if(c.MO_APP_ENTRY.toLowerCase()=="default.asp"){c.MO_APP_ENTRY=""}}};var l=function(A){if(typeof A=="string"){return A?o[A]:o}A=g({},defaultConfig);var c=e.run();if(!l.Initialize(A)){l.Terminate();return}e.timelines.initialize=e.ticks(c);c=e.run();if(r.MO_ROUTE_MODE){l.Route()}e.timelines.route=e.ticks(c);c=e.run();l.Run();e.timelines.run=e.ticks(c);l.Terminate()},r={};l.Runtime=e;l.Version="MoAspEnginer 3.0";l.Config={};l.IsRewrite=false;l.Action="";l.Method="";l.Group="";l.RealAction="";l.RealMethod="";l.Status="";l.Buffer=false;l.LoadAssets=a;l.Debug=function(){e.log.apply(null,arguments)};l.Initialize=function(A){if(!A||typeof A!="object"){A={MO_AUTO_CREATE_APP:false}}A=g({MO_APP_NAME:"App",MO_APP:"App",MO_APP_ENTRY:"",MO_ROOT:"",MO_CORE:"Mo",MO_HOST:String(req.ServerVariables("HTTP_HOST")),MO_PROTOCOL:String(req.ServerVariables("HTTPS"))=="off"?"http://":"https://"},A);res.Charset="utf-8";l.Config.Global=A;l.Status="200 OK";var c=e.run();n(A);if(IO.file.exists(A.MO_CORE+"Conf/Config.asp")){r=l.Config.Global=q(IO.file.readAllScript(A.MO_CORE+"Conf/Config.asp"))()}g(r,A);IO.directory.files(r.MO_CORE+"Common",function(D){if(D.name.slice(-4)==".asp"){s(D.path)}});require=i(IO.file.readAllText(A.MO_CORE+"Library/Extend/lib/require.js"));require.module._pathes=[w(r.MO_APP+"Library/Extend"),w(r.MO_CORE+"Library/Extend")];F=require("lib/fns.js");if(!F){ExceptionManager.put(136159,"F","fns模块加载异常，系统将不可用。",E_ERROR);return}IO=require("lib/io.js");if(!IO){ExceptionManager.put(136159,"IO","IO模块加载异常，系统将不可用。",E_ERROR);return}if(r.MO_AUTO_CREATE_APP!==false&&!IO.directory.exists(r.MO_APP)){F.foreach(["","Controllers","Cache/Compiled","Cache/Model","Views","Conf","Lang","Library/Extend","Library/Assets","Common"],function(E,D){IO.directory.create(r.MO_APP+D)})}require(w(r.MO_APP+"Conf/Config.asp"),true,function(){if(this.hasOwnProperty("MO_LIB_CNAMES")){if(this.MO_LIB_CNAMES){g(r.MO_LIB_CNAMES,this.MO_LIB_CNAMES)}delete this.MO_LIB_CNAMES}for(var D in A){delete this[D]}g(r,this)});if(!r.MO_METHOD_CHAR){r.MO_METHOD_CHAR="m"}if(!r.MO_ACTION_CHAR){r.MO_ACTION_CHAR="a"}if(!r.MO_GROUP_CHAR){r.MO_GROUP_CHAR="g"}ExceptionManager.errorReporting(r.MO_ERROR_REPORTING);if(r.MO_CHARSET!="utf-8"){res.Charset=r.MO_CHARSET}if(IO.file.exists(r.MO_APP+"Common/Function.asp")){s(r.MO_APP+"Common/Function.asp")}if(r.MO_IMPORT_COMMON_FILES!=""){var C=r.MO_IMPORT_COMMON_FILES.split(";");if(C.length<=0){return}for(var B=0;B<C.length;B++){if(!C[B]){continue}s(r.MO_APP+"Common/"+C[B]+".asp")}}u();l.assign("VERSION",l.Version);return true};l.Terminate=function(){var c=e.run();k();if(Model__&&Model__.dispose){Model__.dispose()}F.dispose();e.timelines.terminate=e.ticks(c);d();o=null;this.Config=null;x=null};function t(c){var A=/^(.+?)(\?(.+))?$/.exec(c);if(A){var B=v(["","",""],A[1].split("/"));F.get(r.MO_GROUP_CHAR,B[0]);F.get(r.MO_METHOD_CHAR,B[1]);F.get(r.MO_ACTION_CHAR,B[2]);F.get.fromURIString(A[3])}}l.Route=function(){var G=req.QueryString+"",B="";var J=/^404\;http(s)?\:\/\/(.+?)\/(.*?)$/i.exec(G);if(J!=null){r.MO_ROUTE_MODE="404";l.IsRewrite=true;B="/"+J[3]}if(r.MO_ROUTE_MODE=="404"){if(F.server("HTTP_X_REWRITE_URL")!=""){B=F.server("HTTP_X_REWRITE_URL")}}else{if(r.MO_ROUTE_MODE=="URL"){B=G;l.IsRewrite=true;if(B==""){return}}else{return}}if(r.MO_ROOT!="/"&&B.substr(0,r.MO_ROOT.length)==r.MO_ROOT){B=B.substr(r.MO_ROOT.length-1)}if(r.MO_ROUTE_URL_EXT){B=B.replace(new RegExp("\\."+r.MO_ROUTE_URL_EXT+"$","i"),"");if(B.slice(0,1)=="/"){B=B.substr(1)}if(B.slice(-1)=="/"){B=B.substr(0,B.length-1)}}if(!B){return}var A=r.MO_ROUTE_MAPS;if(A&&A.hasOwnProperty(B)){t(A[B]);return}var D=F.server("REQUEST_METHOD"),K=r.MO_ROUTE_REST_ENABLED,c="";var E=r.MO_ROUTE_RULES;for(var C=0;C<E.length;C++){var H=E[C],I=H.LookFor;if(!H.Method){H.Method="GET"}if(typeof I=="string"){I=z(I,null,{strict:true})}if(I.test(B)&&(!K||D==H.Method)){c=B.replace(I,H.SendTo);break}}if(c){t(c)}};l.display=function(c,A){res.Status=this.Status;res.AddHeader("Content-Type","text/html; charset="+r.MO_CHARSET);l.fetch(c,A)};l.fetch=function(M,J){l.Buffer=!(arguments.callee.caller==l.display);if(!r.MO_TEMPLATE_ENGINE){ExceptionManager.put(77535,"Mo.fetch()","未定义模板引擎！");return""}var D=e.run();if(!M||M==""){M=l.Action}var I,E,C,G=false,H,B="";if(r.MO_COMPILE_CACHE){E=l.Method+"^"+l.Action+"^"+F.string.replace(M,/\:/igm,"^");if(J){E+="^"+J}B=F.mappath(r.MO_APP+"Cache/Compiled/"+E+".asp");if(IO.file.exists(B)){G=true;if(r.MO_COMPILE_CACHE_EXPIRED>0){C=F.fso.GetFile(B).DateLastModified;if(F.date.datediff("s",C,new Date())>=r.MO_COMPILE_CACHE_EXPIRED){G=false}}if(G){H=IO.file.readAllScript(B,r.MO_CHARSET)}}}if(!G){I=b(M);if(I==""){return""}if(!View){View=require(r.MO_TEMPLATE_ENGINE)}if(!View){ExceptionManager.put(77535,"Mo.fetch()","模板解析器加载失败！");return""}H=View.compile(I);if(r.MO_COMPILE_CACHE){IO.file.writeAllText(B,'\u003cscript language="jscript" runat="server"\u003e\r\n'+H+"\r\n\u003c/script\u003e",r.MO_CHARSET)}}e.timelines.compile=e.ticks(D);if(r.MO_DEBUG){D=e.run();H=ReCompileForDebug(H,-1);e.timelines.recompile=e.ticks(D)}D=e.run();var A,K;try{A=new Function("$","__filename","__scripts","__buffer","__buffersize",H)}catch(L){ExceptionManager.put(L.number,"Mo.fetch()","已编译的模板代码包装错误："+L.description,E_ERROR);return}var c=B;if(r.MO_DEBUG){c+=";由模板["+h(M)+"."+r.MO_TEMPLATE_PERX+"]编译，请检查模板是否有语法错误或使用了未声明的变量。"}K=A(o,c,r.MO_DEBUG?H:"",l.Buffer,1024);if(r.MO_CACHE&&r.MO_CACHE_DIR!=""&&IO.directory.exists(r.MO_CACHE_DIR)){IO.file.writeAllText(F.mappath(r.MO_CACHE_DIR+p+".cache"),K,r.MO_CHARSET)}e.timelines.run1=e.ticks(D);return K};l.U=function(I,J,A){var D=/^(.*?)(\?(.*?))?(\#(.*?))?(\@(.*?))?(\!)?$/igm.exec(I||"");if(!D){return""}F.object.toURIString.fn=0;var I=D[1],G=F.object.fromURIString(D[3]),C=D[5],B=D[7],H=I.split("/"),c=r.MO_PROTOCOL+(B||r.MO_HOST)+r.MO_ROOT+r.MO_APP_ENTRY;if(J){if(typeof J=="string"){G=F.object.fromURIString(J)}else{if(typeof J=="object"){G=J}}}if(D[8]=="!"){c=r.MO_ROOT+r.MO_APP_ENTRY}var E=["?{0}={1}&{2}={3}&{4}={5}","?{0}={1}&{2}={3}"];if(r.MO_ROUTE_MODE=="404"){E=["{1}/{3}/{5}","{1}/{3}"]}else{if(r.MO_ROUTE_MODE=="URL"){E=["?/{1}/{3}/{5}","?/{1}/{3}"]}}if(H.length==3){c+=F.format(E[0],r.MO_GROUP_CHAR,H[0],r.MO_METHOD_CHAR,H[1],r.MO_ACTION_CHAR,H[2])}else{if(H.length==2){c+=F.format(E[1],r.MO_METHOD_CHAR,H[0],r.MO_ACTION_CHAR,H[1])}else{if(H.length==1&&I!=""){c+=F.format(E[1],r.MO_METHOD_CHAR,l.Method,r.MO_ACTION_CHAR,H[0])}else{c+=F.format(E[1],r.MO_METHOD_CHAR,l.Method,r.MO_ACTION_CHAR,l.Action)}}}if(r.MO_ROUTE_MODE=="404"||r.MO_ROUTE_MODE=="URL"){F.object.toURIString.split_char_1=F.object.toURIString.split_char_2="/";c+="/"+F.object.toURIString(G);F.object.toURIString.split_char_1="=";F.object.toURIString.split_char_2="&";if(A){c+="."+A}}else{c+="&"+F.object.toURIString(G)}if(F.string.endsWith(c,"/")||F.string.endsWith(c,"&")){c=c.substr(0,c.length-1)}if(C!=""){c+="#"+C}F.object.toURIString.fn=1;return c};l.L=function(A){if(!r.MO_LANGUAGE){ExceptionManager.put(5,"Mo.L(key)","未定义语言包",E_WARNING);return""}var B=r.MO_LANGUAGE;if(A.indexOf(".")>0){B=A.substr(0,A.indexOf("."));A=A.substr(A.indexOf(".")+1)}var c=null;if(c=f(B,"Lang")){return c[A]}else{ExceptionManager.put(3,"Mo.L(key)","语言包["+B+"]无法加载,请检查语言包是否存在及正确",E_ERROR)}};l.C=function(A,C){var B="";if(A.indexOf(".")>0){B=A.substr(A.indexOf(".")+1);A=A.substr(0,A.indexOf("."));if(A=="@"){A="Global"}}if(l.Config.hasOwnProperty(A)){if(B!=""&&C!==undefined){l.Config[A][B]=C}return(B==""?l.Config[A]:l.Config[A][B])}var c=null;if(c=f(A)){l.Config[A]=c;if(B!=""&&C!==undefined){l.Config[A][B]=C}return(B==""?l.Config[A]:l.Config[A][B])}else{ExceptionManager.put(3,"Mo.C(conf,value)","配置["+A+"]无法加载,请检查配置文件是否存在以及正确")}};l.C.SaveAs=function(c,B){if(!B){return}var A=F.mappath(r.MO_APP+"Conf/"+c+".asp");IO.file.writeAllText(A,'\u003cscript language="jscript" runat="server"\u003e\r\nreturn '+JSON.stringify(B)+";\r\n\u003c/script\u003e","utf-8")};l.C.Exists=function(c){return IO.file.exists(r.MO_APP+"Conf/"+c+".asp")};l.A=function(A){var c=F.mappath(r.MO_APP+"Controllers/"+A+"Controller.asp");if(!IO.file.exists(c)){c=F.mappath(r.MO_CORE+"Controllers/"+A+"Controller.asp")}if(IO.file.exists(c)){var B;if(r.MO_CONTROLLER_CNAMES&&r.MO_CONTROLLER_CNAMES.hasOwnProperty(A.toLowerCase())){A=r.MO_CONTROLLER_CNAMES[A.toLowerCase()]}if(B=m(c,A)){return new B()}else{ExceptionManager.put(5,"Mo.A(ctrl)","模块["+A+"]无法加载,请检查模块文件")}}else{ExceptionManager.put(6,"Mo.A(ctrl)","模块["+A+"]无法加载,请检查模块文件是否存在")}};l.Run=function(){var A=e.run();this.Method=F.get(r.MO_METHOD_CHAR);this.Action=F.get(r.MO_ACTION_CHAR);this.Group=F.get(r.MO_GROUP_CHAR);if(!/^(\w+)$/i.test(this.Action)){this.Action="Index"}if(!/^(\w+)$/i.test(this.Method)){this.Method="Home"}if(!/^(\w+)$/i.test(this.Group)){this.Group=""}if(this.Group!=""){this.Group+="/"}if(r.MO_CONTROLLER_CNAMES&&r.MO_CONTROLLER_CNAMES.hasOwnProperty(this.Method.toLowerCase())){this.Method=r.MO_CONTROLLER_CNAMES[this.Method.toLowerCase()]}if(r.MO_CACHE){p=MD5(F.server("URL")+F.get.toURIString()+"");if(IO.file.exists(r.MO_CACHE_DIR+p+".cache")){res.Write(IO.file.readAllText(F.mappath(r.MO_CACHE_DIR+p+".cache"),r.MO_CHARSET));return}}var E=r.MO_APP+"Controllers/"+this.Group+this.Method+"Controller.asp",D=true;this.RealMethod=this.Method;this.RealAction=this.Action;if(!IO.file.exists(E)){E=r.MO_APP+"Controllers/"+this.Group+"EmptyController.asp";this.RealMethod="Empty";if(!IO.file.exists(E)){E=r.MO_CORE+"Controllers/"+this.Group+this.Method+"Controller.asp";this.RealMethod=this.Method;if(!IO.file.exists(E)){E=r.MO_CORE+"Controllers/"+this.Group+"EmptyController.asp";this.RealMethod="Empty";if(!IO.file.exists(E)){if(l.templateIsInApp(this.Action)||l.templateIsInCore(this.Action)){l.display(this.Action);D=false}else{ExceptionManager.put(11772,this.RealMethod+"."+this.RealAction,"模块["+this.Method+"]不存在");return}}}}}var G;if(!(D&&(G=m(E,this.RealMethod)))){return}if(G.__PRIVATE__===true){ExceptionManager.put(11772,this.RealMethod+"."+this.RealAction,"模块["+this.Method+"]不存在");return}e.timelines.load=e.ticks(A);var C=new G(this.Action);if(C.__STATUS__===true){var B=this.Action;if(r.MO_ACTION_CASE_SENSITIVITY===false){B=B.toLowerCase()}var J=null,I=[],K=C;if(F.server("REQUEST_METHOD")=="POST"&&C[B+"_Post_"]&&C[B+"_Post_"]["__PRIVATE__"]!==true){J=C[B+"_Post_"]}else{if(C[B]&&C[B]["__PRIVATE__"]!==true){J=C[B]}else{if(r.MO_AUTO_DISPLAY&&(l.templateIsInApp(this.Action)||l.templateIsInCore(this.Action))){K=l;J=l.display;I=[this.Action]}else{if(C.empty&&C.empty["__PRIVATE__"]!==true){l.RealAction="empty";J=C.empty;I=[this.Action]}else{ExceptionManager.put(936,this.RealMethod+"."+this.RealAction,"未定义相应"+this.Action+"或empty方法。")}}}}if(r.MO_PARSEACTIONPARMS===true){I=y(J)}try{J&&J.apply(K,I)}catch(H){var c=new Exception(H.number,this.RealMethod+"."+this.RealAction,H.description);if(e.line>0){c.lineNumber=e.line;c.filename=e.file.replace(F.mappath("/"),"").replace(/\\/ig,"/");if(e.debugLine>0&&e.scripts!=""){c.traceCode=e.scripts.split("\n")[e.debugLine]}}ExceptionManager.put(c)}}C.__destruct();C=null};l.ModelCacheExists=function(c){if(c==""){return false}return F.exists(r.MO_APP+"Cache/Model/"+c+".cak")};l.ModelCacheSave=function(c,A){if(c==""){return false}return IO.file.writeAllText(F.mappath(r.MO_APP+"Cache/Model/"+c+".cak"),A,r.MO_CHARSET)};l.ModelCacheLoad=function(c){if(c==""){return""}return IO.file.readAllText(F.mappath(r.MO_APP+"Cache/Model/"+c+".cak"),r.MO_CHARSET)};l.ModelCacheDelete=function(c){if(c==""){return false}return IO.file.del(F.mappath(r.MO_APP+"Cache/Model/"+c+".cak"))};l.ModelCacheClear=function(){return IO.directory.clear(F.mappath(r.MO_APP+"Cache/Model"),function(c,A){if(A&&c.name==".mae"){return false}})};l.ClearCompiledCache=function(){return IO.directory.clear(F.mappath(r.MO_APP+"Cache/Compiled"),function(c,A){if(A&&c.name==".mae"){return false}})};l.templateIsInApp=function(A){var c=h(A),B;B=r.MO_APP+"Views/"+c+"."+r.MO_TEMPLATE_PERX;if(c.indexOf("@")>0){B=r.MO_ROOT+c.substr(c.indexOf("@")+1)+"/Views/"+c.substr(0,c.indexOf("@"))+"."+r.MO_TEMPLATE_PERX}return IO.file.exists(B)};l.templateIsInCore=function(A){var c,B;c=h(A);B=r.MO_CORE+"Views/"+c+"."+r.MO_TEMPLATE_PERX;return IO.file.exists(B)};l.assign=function(c,A){if(!/^(\w+)$/ig.test(c)){return ExceptionManager.put(11852,"Mo.assign","Parameter 'key' is invalid.")}o[c]=A};return l})();(function(){var e={base64:["e","d","encode","decode","toBinary","fromBinary","base64"],JSON:["parse","stringify","create","decodeStrict","encodeUnicode","assets/json.js"],IController:["create","IController@lib/dist.js"],IClass:["create","IClass@lib/dist.js"],dump:[null,"dump"],"cookie=Cookie":[null,"assets/cookie.js"],Model__:[null,"useCommand","Debug","setDefault","setDefaultPK","begin","commit","rollback","getConnection","dispose","connect","execute","executeQuery","Model__@lib/model.js"],DataTable:[null,"Model__.helper.DataTable@lib/model.js"],DataTableRow:[null,"Model__.helper.DataTableRow@lib/model.js"],VBS:["ns","include","eval","require","getref","execute","run","assets/vbs.js"],Mpi:["downloadAndInstall","Host","setDefaultInstallDirectory","download","fetchPackagesList","fetchPackage","packageExists","install","assets/mpi.js"],Tar:[null,"packFolder","packFile","unpack","assets/tar.js"],"md5=MD5":[null,"md5@assets/md5.js"],"md5_bytes=MD5Bytes":[null,"md5_bytes@assets/md5.js"],Html:["ActionLink","Form","FormUpload","FormEnd","CheckBox","DropDownList","ListBox","Hidden","Password","RadioButton","TextArea","TextBox","assets/htmlhelper.js"]};var m=Mo.Runtime.run();for(var k in e){if(!e.hasOwnProperty(k)){continue}var l=e[k],b=l.pop(),h=b.indexOf("@"),c="",f="",j=k.indexOf("=");if(h>0){c="."+b.substr(0,h);b=b.substr(h+1)}(new Function(k+" = {};"))();if(j>0){f=k.substr(j+1);k=k.substr(0,j)}for(var d=0;d<l.length;d++){var a="."+l[d];if(l[d]==null){a=""}var g=k+a+" = function(){"+k+' = require("'+b+'")'+c+"; return "+k+a+".apply("+k+",arguments)};";(new Function(g))()}if(f){(new Function(f+" = "+k+";"))()}}})();var Encapsulate=Function.Create=function(a){var c=[];for(var d=0;d<a;d++){c.push("arg"+d)}var b=c.join(",");return new Function(b,"return new this("+b+");")};var E_NONE=0,E_ERROR=1,E_NOTICE=2,E_WARNING=4,E_INFO=8,E_ALL=E_ERROR|E_NOTICE|E_WARNING|E_INFO;var ExceptionManager=(function(){var e={};var l=[],k=E_ALL,g={1:"red",2:"orange",4:"blue",8:"green"};var f=function(b){var a="0000000"+b.toString(16).toUpperCase();return a.substr(a.length-8)};function i(a){return a==1?"E_ERROR":(a==2?"E_NOTICE":(a==4?"E_WARNING":"E_INFO"))}e.put=function(){var b=Array.prototype.slice.call(arguments,0),a=E_ERROR;if(typeof b[b.length-1]=="number"){a=b.pop()}if(b.length==1){if(b[0].constructor==Exception){l.push(b[0])}else{l.push(new Exception(b[0].number,"Microsoft.JScriptError",b[0].description,a))}}else{if(b.length==2){l.push(new Exception(b[0].number,b[1],b[0].description,a))}else{if(b.length==3){l.push(new Exception(b[0],b[1],b[2],a))}}}};e.putNotice=function(){var a=Array.prototype.slice.call(arguments,0);a.push(E_NOTICE);e.put.apply(null,a)};e.putWarning=function(b){var a=Array.prototype.slice.call(arguments,0);a.push(E_WARNING);e.put.apply(null,a)};e.errorReporting=function(a){if(arguments.length==0){return k}k=a};e.clear=function(){while(l.length>0){l.pop()}};e.debug=function(){if(l.length==0){return""}var a="";for(var b=0;b<l.length;b++){var c=l[b];if(c.level&k){a+=F.format('[<b>0x{0:X8}</b>] <span style="color:'+g[c.level]+'">{1}：{2} [{3}]</span>\r\n',c.Number,c.Source,F.encodeHtml(c.Description),i(c.level));if(c.filename){a+="  文件："+c.filename+"\r\n"}if(c.lineNumber>0){a+="  行号："+c.lineNumber+"\r\n"}if(c.traceCode){a+='  源码：<span style="color:red">'+c.traceCode+"</span>\r\n"}}}if(a==""){return""}return"<pre style=\"font-family:'Courier New';font-size:12px; padding:8px; background-color:#f6f6f6;border:1px #ddd solid;border-radius:5px;line-height:18px;\">"+a+"</pre>"};e.debug2file=function(){if(l.length==0){return""}var a="";for(var b=0;b<l.length;b++){var c=l[b];if(c.level&k){a+=F.format("{0}：{1} [{2}]\r\n",c.Source,c.Description,i(c.level));if(c.filename){a+="  文件："+c.filename+"\r\n"}if(c.lineNumber>0){a+="  行号："+c.lineNumber+"\r\n"}if(c.traceCode){a+="  源码："+c.traceCode+"\r\n"}}}if(a==""){return}if(Mo.Config.Global.MO_DEBUG_FILE){IO.file.appendAllText(Mo.Config.Global.MO_DEBUG_FILE,a+"\r\n")}};return e})();function Exception(e,h,f,g){this.level=g||E_ERROR;this.levelString="E_ERROR";this.Number=e||0;if(this.Number<0){this.Number=this.Number+4294967296}this.Source=h||"";this.Message=f||"";this.Description=f||"";this.lineNumber=0;this.filename="";this.traceCode=""}var IO=(function(){var f=function(a){if(typeof a!="string"){return""}if(a.substr(1,1)==":"){return a}return Server.MapPath(a)};var e=function(b,c){for(var a in c){if(c.hasOwnProperty(a)){b[a]=c[a]}}return b};var d=(function(){var a={};a.resolve=f;a.is=function(b){if(b.length<2){return false}return b.substr(1,1)==":"};a.fso=new ActiveXObject("scripting.filesystemobject");a.parent=function(b){return a.fso.GetParentFolderName(f(b))};a.absolute=function(b){return a.fso.GetAbsolutePathName(f(b))};a.base=function(b){return a.fso.GetBaseName(f(b))};a.parent=function(b){return a.fso.GetParentFolderName(f(b))};a.build=function(c,b){return a.fso.GetAbsolutePathName(a.fso.BuildPath(f(c),b))};a.stream=function(b,h){var c=new ActiveXObject("adodb.stream");c.mode=b||3;c.type=h||1;return c};a.fps=[];return a})();d.file=d.file||(function(){var a={};a.exists=function(b){b=f(b);return d.fso.fileexists(b)};a.readAllText=function(b,c){return(function(j){var i=d.file.read(j);d.file.close(j);return i})(d.file.open(b,{forText:true,forRead:true,encoding:c||"utf-8"}))};a.readAllScript=function(b,c){var h=(function(j){var g=d.file.read(j);d.file.close(j);return g})(d.file.open(b,{forText:true,forRead:true,encoding:c||"utf-8"}));h=h.replace(new RegExp("^(\\s*)\\u003cscript(.+?)\\u003e(\\s*)","i"),"").replace(new RegExp("(\\s*)\\u003c\\/script\\u003e(\\s*)$","i"),"");return h};a.open=function(b,c){b=f(b);var j={forAppend:false,forText:true,forRead:false,encoding:"utf-8"};e(j,c||{});var i=d.stream(3,j.forText?2:1);if(j.forText){i.charset=j.encoding}i.open();if(a.exists(b)&&(j.forAppend||j.forRead)){i.loadfromfile(b);if(j.forAppend){i.position=i.size}}d.fps.push([i,b,j]);return d.fps.length-1};a.read=function(c,b){if(!d.fps[c]){ExceptionManager.put(11598,"io.file.read","file resource id is invalid.");return null}if(d.fps[c][2].forText){if(b){return d.fps[c][0].readText(b)}return d.fps[c][0].readText()}else{if(b){return d.fps[c][0].read(b)}return d.fps[c][0].read()}};a.close=function(b){if(!d.fps[b]){ExceptionManager.put(11630,"io.file.close","file resource id is invalid.");return}d.fps[b][0].close()};return a})();d.directory=d.directory||(function(){var a={};a.exists=function(b){return d.fso.folderexists(f(b))};a.files=function(h,i){if(!a.exists(h)){return[]}var c=[];var b=new Enumerator(d.fso.getFolder(f(h)).files);var g=(typeof i=="function");for(;!b.atEnd();b.moveNext()){if(g){i(b.item())}else{c.push(b.item().path)}}return c};return a})();return d})();
+﻿/*
+ ** File: Mo.js
+ ** Usage: core code of MAE, don't change 'Mo' to other name.
+ ** About:
+ **		support@mae.im
+ */
+var defaultConfig={}, define = function(name,value){
+	defaultConfig[name.toUpperCase()] = value;
+};
+var F, JSON, require, VBS, View, Model__,
+	req = Request,
+	res = Response,
+	ROOT = Server.Mappath("/"), Mo,
+	startup = Mo = Mo || (function() {
+		var c = function(d) {
+			if (typeof d != "string") {
+				return ""
+			}
+			if (d.substr(1,1) == ":") {
+				return d
+			}
+			return Server.MapPath(d)
+		};
+		var _CacheFileName = "",
+			_Assigns = {},
+			_Language = {};
+		var _extend = function(src, dest) {
+			for (var c in dest) {
+				if (dest.hasOwnProperty(c)) src[c] = dest[c];
+			}
+			return src;
+		};
+
+		var _RightCopy = function(src, target) {
+			var i = 0;
+			while (true) {
+				if (i >= src.length || i >= target.length) break;
+				src[src.length - i - 1] = target[target.length - i - 1];
+				i++;
+			}
+			return src;
+		};
+
+		var _LoadTemplate = function(template) {
+			var templatelist, vpath, path, templatelist2;
+			templatelist = template.split(":");
+			if (templatelist.length == 1) {
+				vpath = G.MO_TEMPLATE_NAME + "/" + M.Method + G.MO_TEMPLATE_SPLIT + template;
+				templatelist = [G.MO_TEMPLATE_NAME, M.Method, template];
+			} else if (templatelist.length == 2) {
+				vpath = G.MO_TEMPLATE_NAME + "/" + template.replace(":", G.MO_TEMPLATE_SPLIT);
+				templatelist = [G.MO_TEMPLATE_NAME].concat(templatelist);
+			} else if (templatelist.length == 3) {
+				vpath = templatelist[0] + "/" + templatelist[1] + G.MO_TEMPLATE_SPLIT + templatelist[2];
+			}
+			path = G.MO_APP + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
+			if (vpath.indexOf("@") > 0) path = G.MO_ROOT + vpath.substr(vpath.indexOf("@") + 1) + "/Views/" + vpath.substr(0, vpath.indexOf("@")) + "." + G.MO_TEMPLATE_PERX;
+			if (!IO.file.exists(path)) path = G.MO_CORE + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
+			if (!IO.file.exists(path)) {
+				ExceptionManager.put(0x6300, "_LoadTemplate()", "模板[" + template + "]不存在", E_NOTICE);
+				return "";
+			}
+			var tempStr = IO.file.readAllText(F.mappath(path), G.MO_CHARSET);
+			var regexp = new RegExp("<include file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "igm");
+			var Matches = F.string.matches(tempStr, regexp, function($0, $1) {
+				templatelist2 = _RightCopy(templatelist, $1.split(":"));
+				tempStr = F.replace(tempStr, $0, _LoadTemplate(templatelist2.join(":")));
+			});
+			return tempStr;
+		};
+
+		var _ParseTemplatePath = function(template) {
+			var templatelist, vpath;
+			templatelist = template.split(":");
+			if (templatelist.length == 1) {
+				vpath = G.MO_TEMPLATE_NAME + "/" + M.Method + G.MO_TEMPLATE_SPLIT + template;
+			} else if (templatelist.length == 2) {
+				vpath = G.MO_TEMPLATE_NAME + "/" + template.replace(":", G.MO_TEMPLATE_SPLIT);
+			} else if (templatelist.length == 3) {
+				vpath = templatelist[0] + "/" + templatelist[1] + G.MO_TEMPLATE_SPLIT + templatelist[2];
+			}
+			return vpath;
+		};
+		var _exit = function(msg) {
+			res.Write(msg);
+			res.End();
+		};
+		var _wapper = function(content) {
+			return new Function(content);
+		};
+		var _wappermodule = function(content) {
+			var module = {exports:{}};
+			(new Function("exports", "module", content))(module.exports, module);
+			return module.exports;
+		};
+		var _wapperfile = function(path) {
+			return (new Function("__filename", "__dirname", IO.file.readAllScript(path)))(
+				path,
+				IO.parent(path)
+			);
+		};
+		var _LoadController = function(path, controller) {
+			var ccname = G.MO_APP_NAME + "@" + controller,
+				name = controller + "Controller";
+			if (_LoadController._controllers.hasOwnProperty(ccname)) return _LoadController._controllers[ccname];
+			try {
+				path = F.mappath(path);
+				var ret = IO.file.readAllScript(path, G.MO_CHARSET);
+				if (G.MO_DEBUG) {
+					ret = ReCompileForDebug(ret);
+				}
+				ret = "var " + name + ";\r\n" + ret + "\r\n return " + name + ";";
+				var _controller = (new Function("__filename", "__dirname", "M", "C", "L", "__scripts", ret))(
+					path,
+					path == "" ? "" : path.substr(0, path.lastIndexOf("\\")),
+					Model__, M.C, M.L, G.MO_DEBUG ? ret : ""
+				);
+				if(_controller) return _controller && (_LoadController._controllers[ccname] = _controller);
+				ExceptionManager.put(0x8300, "_LoadController()", "加载控制器时出现错误，请检查是否已经定义相关控制器'" + controller + "'。");
+			} catch (ex) {
+				ExceptionManager.put(ex.number, "_LoadController()", "加载控制器\"" + controller + "\"时出现错误:" + ex.description);
+			}
+			return false;
+		};
+		_LoadController._controllers = {};
+
+		var _LoadAssets = function(name) {
+			var ccname = G.MO_APP_NAME + "@" + name;
+			if (_LoadAssets.assets.hasOwnProperty(ccname)) return new _LoadAssets.assets[ccname]();
+			var path = F.mappath(G.MO_APP + "Library/Assets/" + name + ".asp");
+			if (!IO.file.exists(path)) path = F.mappath(G.MO_CORE + "Library/Assets/" + name + ".asp");
+			if (!IO.file.exists(path)) return false;
+
+			var ret = IO.file.readAllScript(path, G.MO_CHARSET);
+			ret = "var " + name + ";\r\n" + ret + "\r\n return " + name + ";";
+			try {
+				var _asset = (new Function("__filename", "__dirname", "M", "C", "L", ret))(
+					path,
+					path == "" ? "" : path.substr(0, path.lastIndexOf("\\")),
+					Model__, M.C, M.L
+				);
+				return _asset && (new(_LoadAssets.assets[ccname] = _asset)());
+				ExceptionManager.put(0x8300, "_LoadAssets()", "加载asset[\"" + name + "\"]时出现错误，请检查是否已经定义相关Class");
+			} catch (ex) {
+				ExceptionManager.put(ex.number, "_LoadAssets()", "加载asset[\"" + name + "\"]时出现错误:" + ex.description);
+			}
+			return false;
+		};
+		_LoadAssets.assets = {};
+
+		var _LoadConfig = function(name, type) {
+			type = type || "Conf";
+			var ccname = type + name + "@" + G.MO_APP_NAME;
+			if (_LoadConfig.configs.hasOwnProperty(ccname)) return _LoadConfig.configs[ccname];
+			var filepath = F.mappath(G.MO_APP + type + "/" + name + ".asp");
+			if (!IO.file.exists(filepath)) filepath = F.mappath(G.MO_CORE + type + "/" + name + ".asp");
+			if (!IO.file.exists(filepath)) return null;
+			var cfg = null;
+			if (cfg = _wapperfile(filepath)) {
+				_LoadConfig.configs[ccname] = cfg;
+				return cfg;
+			}
+			return null;
+		};
+		_LoadConfig.configs = {};
+		
+		/*
+		from "https://github.com/component/path-to-regexp"
+		thanks!
+		*/
+		var _pathtoRegexp = function(path, keys, options) {
+			options = options || {};
+			var sensitive = options.sensitive;
+			var strict = options.strict;
+			var end = options.end !== false;
+			keys = keys || [];
+
+			if (path instanceof RegExp) return path;
+			if (path instanceof Array) path = '(' + path.join('|') + ')';
+
+			path = path
+			.concat(strict ? '' : '/?')
+			.replace(/\/\(/g, '/(?:')
+			.replace(/([\/\.])/g, '\\$1')
+			.replace(/(\\\/)?(\\\.)?:(\w+)(\(.*?\))?(\*)?(\?)?/g, function (match, slash, format, key, capture, star, optional) {
+			  slash = slash || '';
+			  format = format || '';
+			  capture = capture || '([^/' + format + ']+?)';
+			  optional = optional || '';
+
+			  keys.push({ name: key, optional: !!optional });
+
+			  return ''
+			    + (optional ? '' : slash)
+			    + '(?:'
+			    + format + (optional ? slash : '') + capture
+			    + (star ? '((?:[\\/' + format + '].+?)?)' : '')
+			    + ')'
+			    + optional;
+			})
+			.replace(/\*/g, '(.*)');
+
+			return new RegExp('^' + path + (end ? '$' : '(?=\/|$)'), sensitive ? '' : 'i');
+		};
+		var _start = function() {
+			if (G.MO_PRE_LIB != "") {
+				var libs = G.MO_PRE_LIB.split(",");
+				for (var i = 0; i < libs.length; i++) {
+					var asset = _LoadAssets(libs[i]);
+					if (asset) {
+						asset.Index();
+						asset.__destruct();
+					}
+				}
+			}
+		};
+
+		var _end = function() {
+			if (G.MO_END_LIB != "") {
+				var libs = G.MO_END_LIB.split(",");
+				for (var i = 0; i < libs.length; i++) {
+					var asset = _LoadAssets(libs[i]);
+					if (asset) {
+						asset.Index();
+						asset.__destruct();
+					}
+				}
+			}
+		};
+
+		var _runtime = {
+			start: 0,
+			run: function() {
+				_runtime.start = new Date();
+				return _runtime.start;
+			},
+			ticks: function(tag) {
+				return (new Date()) - (tag || _runtime.start);
+			},
+			line: 0,
+			debugLine: 0,
+			scripts: "",
+			file: "",
+			log: function(line, file, lineNumber, scripts) {
+				_runtime.line = line;
+				_runtime.file = file;
+				_runtime.debugLine = lineNumber;
+				if (scripts) _runtime.scripts = scripts;
+			},
+			timelines: {
+				initialize : 0,
+				route : 0,
+				run : 0,
+				load : 0,
+				compile : 0,
+				run1 : 0,
+				recompile : 0,
+				terminate : 0
+			}
+		};
+
+		var _debug = function() {
+			if(F.server("HTTP_X_REQUESTED_WITH").toLowerCase()=="xmlhttprequest"){
+				if(E_ERROR & ExceptionManager.errorReporting()) ExceptionManager.errorReporting(E_ERROR);
+			}
+			if (G.MO_DEBUG) {
+				ExceptionManager.put(0, "MO", "当前系统开启了DEBUG模式，正式上线后请关闭MO_DEBUG选项，并通过ERROR_REPORTING来显示指定级别异常。", E_WARNING);
+			}
+			if (!G.MO_COMPILE_CACHE) {
+				ExceptionManager.put(0, "MO", "当前系统未开启编译缓存，建议正式上线后开启编译缓存(MO_COMPILE_CACHE设置为true)。", E_WARNING);
+			}
+			ExceptionManager.put(
+				0, "MO",
+				F.format(
+					"System：{7}MS > Initialize：{0}MS；Route：{1}MS；Controller：{2}MS（Load：{3}MS，Compile：{4}MS，DebugCompile：{5}MS，Execute：{6}MS）；Terminate：{8}MS。",
+					_runtime.timelines.initialize,
+					_runtime.timelines.route,
+					_runtime.timelines.run,
+					_runtime.timelines.load,
+					_runtime.timelines.compile,
+					_runtime.timelines.recompile,
+					_runtime.timelines.run1,
+					_runtime.timelines.initialize + _runtime.timelines.route + _runtime.timelines.run + _runtime.timelines.terminate,
+					_runtime.timelines.terminate
+				), E_INFO
+			);
+			if (Model__ && Model__.debug) Model__.debug();
+			if(G.MO_DEBUG2FILE){
+				ExceptionManager.debug2file();
+			}else{
+				F.echo(ExceptionManager.debug());
+			}
+		};
+		var _getfunctionParms = function(fn) {
+			var _parms = fn.toString().replace(/^function(.*?)\((.*?)\)([\s\S]+)$/, "$2").replace(/\s/igm, "").split(",");
+			for (var i = 0; i < _parms.length; i++) {
+				_parms[i] = F.get(_parms[i]);
+			}
+			return _parms;
+		};
+		var _InitializePath = function(cfg) {
+			var url_ = String(req.ServerVariables("URL"));
+			if (cfg.MO_APP_NAME == "") _exit("未定义应用名称：MO_APP_NAME，请检查初始配置参数。")
+			if (cfg.MO_ROOT == "") cfg.MO_ROOT = url_.substr(0, url_.lastIndexOf("/") + 1);
+			if (cfg.MO_APP == "") cfg.MO_APP = cfg.MO_ROOT + cfg.MO_APP_NAME + "/";
+			if (cfg.MO_CORE == "") cfg.MO_CORE = cfg.MO_ROOT + "Mo/";
+			if (cfg.MO_APP.slice(-1) != "/") cfg.MO_APP = cfg.MO_APP + "/";
+			if (cfg.MO_CORE.slice(-1) != "/") cfg.MO_CORE = cfg.MO_CORE + "/";
+			if (!IO.directory.exists(cfg.MO_CORE)) _exit("核心目录[" + cfg.MO_CORE + "]不存在，请检查初始配置参数。");
+			if (cfg.MO_APP_ENTRY == "") {
+				cfg.MO_APP_ENTRY = url_.substr(url_.lastIndexOf("/") + 1);
+				if (cfg.MO_APP_ENTRY.toLowerCase() == "default.asp") cfg.MO_APP_ENTRY = "";
+			}
+		}
+
+		var M = function(opt) {
+				if ( typeof opt == "string") return opt ? _Assigns[opt] : _Assigns ;
+				opt = _extend({}, defaultConfig);
+				var _tag = _runtime.run();
+				if (!M.Initialize(opt)) {
+					M.Terminate();
+					return;
+				}
+				_runtime.timelines.initialize = _runtime.ticks(_tag);
+
+				_tag = _runtime.run();
+				if (G.MO_ROUTE_MODE) M.Route();
+				_runtime.timelines.route = _runtime.ticks(_tag);
+
+				_tag = _runtime.run();
+				M.Run();
+				_runtime.timelines.run = _runtime.ticks(_tag);
+
+				M.Terminate();
+			},
+			G = {};
+		M.Runtime = _runtime;
+		M.Version = "MoAspEnginer 3.0";
+		M.Config = {};
+		M.IsRewrite = false;
+		M.Action = "";
+		M.Method = "";
+		M.Group = "";
+		M.RealAction = "";
+		M.RealMethod = "";
+		M.Status = "";
+		M.Buffer = false;
+		M.LoadAssets = _LoadAssets;
+		M.Debug = function() {
+			_runtime.log.apply(null, arguments)
+		};
+		M.Initialize = function(cfg) {
+			if (!cfg || typeof cfg != "object") cfg = {
+				MO_AUTO_CREATE_APP: false
+			}
+			cfg = _extend({
+				MO_APP_NAME: "App",
+				MO_APP: "App",
+				MO_APP_ENTRY: "",
+				MO_ROOT: "",
+				MO_CORE: "Mo",
+				MO_HOST: String(req.ServerVariables("HTTP_HOST")),
+				MO_PROTOCOL: String(req.ServerVariables("HTTPS")) == "off" ? "http://" : "https://"
+			}, cfg);
+			res.Charset = "utf-8";
+			M.Config.Global = cfg;
+			M.Status = "200 OK";
+			var _tag = _runtime.run();
+			_InitializePath(cfg);
+			
+			/*加载全局配置文件*/
+			if (IO.file.exists(cfg.MO_CORE + "Conf/Config.asp")) G = M.Config.Global = _wapper(IO.file.readAllScript(cfg.MO_CORE + "Conf/Config.asp"))();
+			_extend(G, cfg);
+			
+			/*加载Common库，核心内的Common库均加载*/
+			IO.directory.files(G.MO_CORE + "Common", function(file) {
+				if(file.name.slice(-4) == ".asp") _wapperfile(file.path);
+			});
+
+			/*加载require模块*/
+			require = _wappermodule(IO.file.readAllText(cfg.MO_CORE + "Library/Extend/lib/require.js"));
+			require.module._pathes = [c(G.MO_APP + "Library/Extend"), c(G.MO_CORE + "Library/Extend")];
+
+			/*加载fns模块*/
+			F = require("lib/fns.js");
+			if(!F){
+				ExceptionManager.put(0x213df, "F", "fns模块加载异常，系统将不可用。", E_ERROR);
+				return;
+			}
+			
+			/*加载IO模块*/
+			IO = require("lib/io.js");
+			if(!IO){
+				ExceptionManager.put(0x213df, "IO", "IO模块加载异常，系统将不可用。", E_ERROR);
+				return;
+			}
+			
+			/*自动创建*/
+			if (G.MO_AUTO_CREATE_APP !== false && !IO.directory.exists(G.MO_APP)) {
+				F.foreach([
+					"", "Controllers", "Cache/Compiled", "Cache/Model", "Views", "Conf", "Lang",
+					"Library/Extend", "Library/Assets", "Common"
+				], function(i, v) {
+					IO.directory.create(G.MO_APP + v);
+				});
+			}
+
+			/*加载应用配置*/
+			require(c(G.MO_APP + "Conf/Config.asp"), true, function(){
+				if(this.hasOwnProperty("MO_LIB_CNAMES")){
+					if(this.MO_LIB_CNAMES) _extend(G.MO_LIB_CNAMES, this.MO_LIB_CNAMES);
+					delete this.MO_LIB_CNAMES;
+				}
+				for(var k in cfg){
+					delete this[k];
+				}
+				_extend(G, this);
+			});
+
+			if (!G.MO_METHOD_CHAR) G.MO_METHOD_CHAR = "m";
+			if (!G.MO_ACTION_CHAR) G.MO_ACTION_CHAR = "a";
+			if (!G.MO_GROUP_CHAR) G.MO_GROUP_CHAR = "g";
+			
+			ExceptionManager.errorReporting(G.MO_ERROR_REPORTING);
+			
+			if (G.MO_CHARSET != "utf-8") res.Charset = G.MO_CHARSET;
+			if (IO.file.exists(G.MO_APP + "Common/Function.asp")) _wapperfile(G.MO_APP + "Common/Function.asp");
+			if (G.MO_IMPORT_COMMON_FILES != "") {
+				var files = G.MO_IMPORT_COMMON_FILES.split(";")
+				if (files.length <= 0) return;
+				for (var i = 0; i < files.length; i++) {
+					if (!files[i]) continue;
+					_wapperfile(G.MO_APP + "Common/" + files[i] + ".asp");
+				}
+			}
+			_start();
+			M.assign("VERSION", M.Version);
+			return true;
+		};
+		M.Terminate = function() {
+			var _tag = _runtime.run();
+			_end();
+			if (Model__ && Model__.dispose) Model__.dispose();
+			F.dispose();
+			_runtime.timelines.terminate = _runtime.ticks(_tag);
+			_debug();
+			_Assigns = null;
+			this.Config = null;
+			_Language = null;
+		};
+		function _parseRouteTo(url){
+			var mat = /^(.+?)(\?(.+))?$/.exec(url);
+			if(mat){
+				var gma = _RightCopy(["", "", ""], mat[1].split("/"));
+				F.get(G.MO_GROUP_CHAR, gma[0]);
+				F.get(G.MO_METHOD_CHAR, gma[1]);
+				F.get(G.MO_ACTION_CHAR, gma[2]);
+				F.get.fromURIString(mat[3]);
+			}
+		}
+		M.Route = function() {
+			var qs = req.QueryString + "", uri = "";
+			var mat = /^404\;http(s)?\:\/\/(.+?)\/(.*?)$/i.exec(qs);
+			if (mat != null){
+				G.MO_ROUTE_MODE = "404";
+				M.IsRewrite = true;
+				uri = "/" + mat[3];
+			}
+			if (G.MO_ROUTE_MODE == "404") {
+				if (F.server("HTTP_X_REWRITE_URL") != "") uri = F.server("HTTP_X_REWRITE_URL");
+			} else if (G.MO_ROUTE_MODE == "URL") {
+				uri = qs;
+				M.IsRewrite = true;
+				if (uri == "") return;
+			} else {
+				return;
+			}
+			if (G.MO_ROOT != "/" && uri.substr(0, G.MO_ROOT.length) == G.MO_ROOT) uri = uri.substr(G.MO_ROOT.length - 1);
+			if(G.MO_ROUTE_URL_EXT) {
+				uri = uri.replace(new RegExp("\\." + G.MO_ROUTE_URL_EXT + "$","i"), "");
+				if(uri.slice(0,1)=="/") uri = uri.substr(1);
+				if(uri.slice(-1)=="/") uri = uri.substr(0,uri.length-1);
+			}
+			if(!uri) return;
+			var Maps = G.MO_ROUTE_MAPS;
+			if (Maps && Maps.hasOwnProperty(uri)){
+				_parseRouteTo(Maps[uri]);
+				return;
+			}
+			var reqmethod = F.server("REQUEST_METHOD"), reston = G.MO_ROUTE_REST_ENABLED, RouteTo="";
+			var Rules = G.MO_ROUTE_RULES;
+			for (var i = 0; i < Rules.length; i++) {
+				var rule = Rules[i], lookfor = rule.LookFor;
+				if(!rule.Method) rule.Method = "GET";
+				if(typeof lookfor == "string") lookfor = _pathtoRegexp(lookfor, null, {strict:true});
+				if (lookfor.test(uri) && (!reston || reqmethod==rule.Method)) {
+					RouteTo = uri.replace(lookfor, rule.SendTo);
+					break;
+				}
+			}
+			if(RouteTo) _parseRouteTo(RouteTo);
+		};
+		M.display = function(template, extcachestr) {
+			res.Status = this.Status;
+			res.AddHeader("Content-Type", "text/html; charset=" + G.MO_CHARSET);
+			M.fetch(template, extcachestr);
+		};
+		M.fetch = function(template, extcachestr) {
+			M.Buffer = !(arguments.callee.caller == M.display);
+			if(!G.MO_TEMPLATE_ENGINE){
+				ExceptionManager.put(0x12edf, "Mo.fetch()", "未定义模板引擎！");
+				return "";
+			}
+			var _tag = _runtime.run();
+			if (!template || template == "") template = M.Action;
+			var html, cachename, OldHash, usecache = false,
+				scripts, cachepath = "";
+			if (G.MO_COMPILE_CACHE) {
+				cachename = M.Method + "^" + M.Action + "^" + F.string.replace(template, /\:/igm, "^");
+				if (extcachestr) cachename += "^" + extcachestr;
+				cachepath = F.mappath(G.MO_APP + "Cache/Compiled/" + cachename + ".asp");
+				if (IO.file.exists(cachepath)) {
+					usecache = true;
+					if (G.MO_COMPILE_CACHE_EXPIRED > 0) {
+						OldHash = F.fso.GetFile(cachepath).DateLastModified;
+						if (F.date.datediff("s", OldHash, new Date()) >= G.MO_COMPILE_CACHE_EXPIRED) usecache = false;
+					}
+					if (usecache) {
+						scripts = IO.file.readAllScript(cachepath, G.MO_CHARSET);
+					}
+				}
+			}
+			if (!usecache) {
+				html = _LoadTemplate(template);
+				if (html == "") return "";
+				if (!View) View = require(G.MO_TEMPLATE_ENGINE);
+				if (!View) {
+					ExceptionManager.put(0x12edf, "Mo.fetch()", "模板解析器加载失败！");
+					return "";
+				}
+				scripts = View.compile(html);
+				if (G.MO_COMPILE_CACHE) IO.file.writeAllText(cachepath, "\u003cscript language=\"jscript\" runat=\"server\"\u003e\r\n" + scripts + "\r\n\u003c/script\u003e", G.MO_CHARSET);
+			}
+			_runtime.timelines.compile = _runtime.ticks(_tag);
+			if (G.MO_DEBUG) {
+				_tag = _runtime.run();
+				scripts = ReCompileForDebug(scripts, -1);
+				_runtime.timelines.recompile = _runtime.ticks(_tag);
+			}
+			_tag = _runtime.run();
+			var wapper, content;
+			try {
+				wapper = new Function("$", "__filename", "__scripts", "__buffer", "__buffersize", scripts);
+			} catch (ex) {
+				ExceptionManager.put(ex.number, "Mo.fetch()", "已编译的模板代码包装错误：" + ex.description, E_ERROR);
+				return;
+			}
+			var filename = cachepath;
+			if (G.MO_DEBUG) filename += ";由模板[" + _ParseTemplatePath(template) + "." + G.MO_TEMPLATE_PERX + "]编译，请检查模板是否有语法错误或使用了未声明的变量。"
+			content = wapper(_Assigns, filename, G.MO_DEBUG ? scripts : "", M.Buffer, 1024);
+			if (G.MO_CACHE && G.MO_CACHE_DIR != "" && IO.directory.exists(G.MO_CACHE_DIR)) IO.file.writeAllText(F.mappath(G.MO_CACHE_DIR + _CacheFileName + ".cache"), content, G.MO_CHARSET);
+			_runtime.timelines.run1 = _runtime.ticks(_tag);
+			return content;
+		};
+		M.U = function(path, _parms, ext) {
+			var match = /^(.*?)(\?(.*?))?(\#(.*?))?(\@(.*?))?(\!)?$/igm.exec(path||"");
+			if (!match) return "";
+			F.object.toURIString.fn = 0;
+			var path = match[1],
+				parms = F.object.fromURIString(match[3]),
+				anchor = match[5],
+				domain = match[7],
+				paths = path.split("/"),
+				url = G.MO_PROTOCOL + (domain || G.MO_HOST) + G.MO_ROOT + G.MO_APP_ENTRY;
+			if (_parms) {
+				if (typeof _parms == "string") parms = F.object.fromURIString(_parms);
+				else if (typeof _parms == "object") parms = _parms;
+			}
+			if (match[8] == "!") url = G.MO_ROOT + G.MO_APP_ENTRY;
+			var format = ["?{0}={1}&{2}={3}&{4}={5}", "?{0}={1}&{2}={3}"];
+			if (G.MO_ROUTE_MODE == "404") format = ["{1}/{3}/{5}", "{1}/{3}"];
+			else if (G.MO_ROUTE_MODE == "URL") format = ["?/{1}/{3}/{5}", "?/{1}/{3}"];
+			if (paths.length == 3) url += F.format(format[0], G.MO_GROUP_CHAR, paths[0], G.MO_METHOD_CHAR, paths[1], G.MO_ACTION_CHAR, paths[2]);
+			else if (paths.length == 2) url += F.format(format[1], G.MO_METHOD_CHAR, paths[0], G.MO_ACTION_CHAR, paths[1]);
+			else if (paths.length == 1 && path != "") url += F.format(format[1], G.MO_METHOD_CHAR, M.Method, G.MO_ACTION_CHAR, paths[0]);
+			else url += F.format(format[1], G.MO_METHOD_CHAR, M.Method, G.MO_ACTION_CHAR, M.Action);
+			if (G.MO_ROUTE_MODE == "404" || G.MO_ROUTE_MODE == "URL") {
+				F.object.toURIString.split_char_1 = F.object.toURIString.split_char_2 = "/";
+				url += "/" + F.object.toURIString(parms);
+				F.object.toURIString.split_char_1 = "=";
+				F.object.toURIString.split_char_2 = "&";
+				if (ext) url += "." + ext;
+			} else {
+				url += "&" + F.object.toURIString(parms);
+			}
+			if (F.string.endsWith(url, "/") || F.string.endsWith(url, "&")) url = url.substr(0, url.length - 1);
+			if (anchor != "") url += "#" + anchor;
+			F.object.toURIString.fn = 1;
+			return url;
+		};
+		M.L = function(key) {
+			if (!G.MO_LANGUAGE) {
+				ExceptionManager.put(5, "Mo.L(key)", "未定义语言包", E_WARNING);
+				return "";
+			}
+			var lib = G.MO_LANGUAGE;
+			if (key.indexOf(".") > 0) {
+				lib = key.substr(0, key.indexOf("."));
+				key = key.substr(key.indexOf(".") + 1);
+			}
+			var cfg = null;
+			if (cfg = _LoadConfig(lib, "Lang")) {
+				return cfg[key];
+			} else {
+				ExceptionManager.put(3, "Mo.L(key)", "语言包[" + lib + "]无法加载,请检查语言包是否存在及正确", E_ERROR);
+			}
+		};
+		M.C = function(conf, value) {
+			var key = "";
+			if (conf.indexOf(".") > 0) {
+				key = conf.substr(conf.indexOf(".") + 1);
+				conf = conf.substr(0, conf.indexOf("."));
+				if (conf == "@") conf = "Global";
+			}
+			if (M.Config.hasOwnProperty(conf)) {
+				if (key != "" && value !== undefined) M.Config[conf][key] = value;
+				return (key == "" ? M.Config[conf] : M.Config[conf][key]);
+			}
+			var cfg = null;
+			if (cfg = _LoadConfig(conf)) {
+				M.Config[conf] = cfg;
+				if (key != "" && value !== undefined) M.Config[conf][key] = value;
+				return (key == "" ? M.Config[conf] : M.Config[conf][key]);
+			} else {
+				ExceptionManager.put(3, "Mo.C(conf,value)", "配置[" + conf + "]无法加载,请检查配置文件是否存在以及正确");
+			}
+		};
+		M.C.SaveAs = function(conf, data) {
+			if (!data) return;
+			var filepath = F.mappath(G.MO_APP + "Conf/" + conf + ".asp");
+			IO.file.writeAllText(filepath, "\u003cscript language=\"jscript\" runat=\"server\"\u003e\r\nreturn " + JSON.stringify(data) + ";\r\n\u003c/script\u003e", "utf-8");
+		};
+		M.C.Exists = function(conf) {
+			return IO.file.exists(G.MO_APP + "Conf/" + conf + ".asp");
+		};
+		M.A = function(ctrl) {
+			var filepath = F.mappath(G.MO_APP + "Controllers/" + ctrl + "Controller.asp");
+			if (!IO.file.exists(filepath)) filepath = F.mappath(G.MO_CORE + "Controllers/" + ctrl + "Controller.asp");
+			if (IO.file.exists(filepath)) {
+				var _controller;
+				if (G.MO_CONTROLLER_CNAMES && G.MO_CONTROLLER_CNAMES.hasOwnProperty(ctrl.toLowerCase())) ctrl = G.MO_CONTROLLER_CNAMES[ctrl.toLowerCase()];
+				if (_controller = _LoadController(filepath, ctrl)) {
+					return new _controller();
+				} else {
+					ExceptionManager.put(5, "Mo.A(ctrl)", "模块[" + ctrl + "]无法加载,请检查模块文件");
+				}
+			} else {
+				ExceptionManager.put(6, "Mo.A(ctrl)", "模块[" + ctrl + "]无法加载,请检查模块文件是否存在");
+			}
+		};
+		M.Run = function() {
+			var _tag = _runtime.run();
+			this.Method = F.get(G.MO_METHOD_CHAR);
+			this.Action = F.get(G.MO_ACTION_CHAR);
+			this.Group = F.get(G.MO_GROUP_CHAR);
+			if (!/^(\w+)$/i.test(this.Action)) this.Action = "Index";
+			if (!/^(\w+)$/i.test(this.Method)) this.Method = "Home";
+			if (!/^(\w+)$/i.test(this.Group)) this.Group = "";
+			if (this.Group != "") this.Group += "/";
+			if (G.MO_CONTROLLER_CNAMES && G.MO_CONTROLLER_CNAMES.hasOwnProperty(this.Method.toLowerCase())) this.Method = G.MO_CONTROLLER_CNAMES[this.Method.toLowerCase()];
+			if (G.MO_CACHE) {
+				_CacheFileName = MD5(F.server("URL") + F.get.toURIString() + "");
+				if (IO.file.exists(G.MO_CACHE_DIR + _CacheFileName + ".cache")) {
+					res.Write(IO.file.readAllText(F.mappath(G.MO_CACHE_DIR + _CacheFileName + ".cache"), G.MO_CHARSET));
+					return;
+				}
+			}
+			var ModelPath = G.MO_APP + "Controllers/" + this.Group + this.Method + "Controller.asp",
+				can_LoadController = true;
+			this.RealMethod = this.Method;
+			this.RealAction = this.Action;
+			if (!IO.file.exists(ModelPath)) {
+				ModelPath = G.MO_APP + "Controllers/" + this.Group + "EmptyController.asp";
+				this.RealMethod = "Empty";
+				if (!IO.file.exists(ModelPath)) {
+					ModelPath = G.MO_CORE + "Controllers/" + this.Group + this.Method + "Controller.asp";
+					this.RealMethod = this.Method;
+					if (!IO.file.exists(ModelPath)) {
+						ModelPath = G.MO_CORE + "Controllers/" + this.Group + "EmptyController.asp";
+						this.RealMethod = "Empty";
+						if (!IO.file.exists(ModelPath)) {
+							if (M.templateIsInApp(this.Action) || M.templateIsInCore(this.Action)) {
+								M.display(this.Action);
+								can_LoadController = false;
+							} else {
+								ExceptionManager.put(0x2dfc, this.RealMethod + "." + this.RealAction, "模块[" + this.Method + "]不存在");
+								return;
+							}
+						}
+					}
+				}
+			}
+			var _controller;
+			if (!(can_LoadController && (_controller = _LoadController(ModelPath, this.RealMethod)))) return;
+			if (_controller["__PRIVATE__"] === true) {
+				ExceptionManager.put(0x2dfc, this.RealMethod + "." + this.RealAction, "模块[" + this.Method + "]不存在");
+				return;
+			}
+			_runtime.timelines.load = _runtime.ticks(_tag);
+			var MC = new _controller(this.Action);
+			if (MC.__STATUS__ === true) {
+				var action_ = this.Action;
+				if (G.MO_ACTION_CASE_SENSITIVITY === false) action_ = action_.toLowerCase();
+				var fn = null,
+					args = [],
+					self = MC;
+
+				if (F.server("REQUEST_METHOD") == "POST" && MC[action_ + "_Post_"] && MC[action_ + "_Post_"]["__PRIVATE__"] !== true) {
+					fn = MC[action_ + "_Post_"];
+
+				} else if (MC[action_] && MC[action_]["__PRIVATE__"] !== true) {
+					fn = MC[action_];
+
+				} else if (G.MO_AUTO_DISPLAY && (M.templateIsInApp(this.Action) || M.templateIsInCore(this.Action))) {
+					self = M;
+					fn = M.display;
+					args = [this.Action];
+
+				} else {
+					if (MC["empty"] && MC["empty"]["__PRIVATE__"] !== true) {
+						M.RealAction = "empty";
+						fn = MC["empty"];
+						args = [this.Action];
+					} else {
+						ExceptionManager.put(0x3a8, this.RealMethod + "." + this.RealAction, "未定义相应" + this.Action + "或empty方法。");
+					}
+				}
+				if (G.MO_PARSEACTIONPARMS === true) args = _getfunctionParms(fn);
+				try {
+					fn && fn.apply(self, args);
+				} catch (ex) {
+					var _exception = new Exception(ex.number, this.RealMethod + "." + this.RealAction, ex.description);
+					if (_runtime.line > 0) {
+						_exception.lineNumber = _runtime.line;
+						_exception.filename = _runtime.file.replace(F.mappath("/"), "").replace(/\\/ig, "\/");
+						if (_runtime.debugLine > 0 && _runtime.scripts != "") {
+							_exception.traceCode = _runtime.scripts.split("\n")[_runtime.debugLine];
+						}
+					}
+					ExceptionManager.put(_exception);
+				}
+			}
+			MC.__destruct();
+			MC = null;
+		};
+		M.ModelCacheExists = function(name) {
+			if (name == "") return false;
+			return F.exists(G.MO_APP + "Cache/Model/" + name + ".cak");
+		};
+		M.ModelCacheSave = function(name, content) {
+			if (name == "") return false;
+			return IO.file.writeAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"), content, G.MO_CHARSET);
+		};
+		M.ModelCacheLoad = function(name) {
+			if (name == "") return "";
+			return IO.file.readAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"), G.MO_CHARSET);
+		};
+		M.ModelCacheDelete = function(name) {
+			if (name == "") return false;
+			return IO.file.del(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"));
+		};
+		M.ModelCacheClear = function() {
+			return IO.directory.clear(F.mappath(G.MO_APP + "Cache/Model"), function(f, isfile) {
+				if (isfile && f.name == ".mae") return false;
+			});
+		};
+		M.ClearCompiledCache = function() {
+			return IO.directory.clear(F.mappath(G.MO_APP + "Cache/Compiled"), function(f, isfile) {
+				if (isfile && f.name == ".mae") return false;
+			});
+		}
+		M.templateIsInApp = function(template) {
+			var vpath = _ParseTemplatePath(template),
+				path;
+			path = G.MO_APP + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
+			if (vpath.indexOf("@") > 0) path = G.MO_ROOT + vpath.substr(vpath.indexOf("@") + 1) + "/Views/" + vpath.substr(0, vpath.indexOf("@")) + "." + G.MO_TEMPLATE_PERX;
+			return IO.file.exists(path);
+		};
+		M.templateIsInCore = function(template) {
+			var vpath, path;
+			vpath = _ParseTemplatePath(template);
+			path = G.MO_CORE + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
+			return IO.file.exists(path);
+		};
+		M.assign = function(key, value) {
+			if (!/^(\w+)$/ig.test(key)) return ExceptionManager.put(0x2e4c, "Mo.assign", "Parameter 'key' is invalid.");
+			_Assigns[key] = value;
+		};
+		return M;
+	})();
+(function(){
+	/*延迟加载的模块，只有在程序里面调用相关方法的时候才加载，并且仅加载一次*/
+	var loaddelay = {
+		"base64" : ["e", "d", "encode", "decode", "toBinary", "fromBinary", "base64"], /*base64*/
+		"JSON" : [ "parse", "stringify", "create", "decodeStrict", "encodeUnicode", "assets/json.js"],/*JSON相关*/
+		"IController" : ["create", "IController@lib/dist.js"], /*控制器*/
+		"IClass" : ["create", "IClass@lib/dist.js"],/*类*/
+		"dump" : [null, "dump"],/*变量打印*/
+		"cookie=Cookie" : [null, "assets/cookie.js"],/*cookie*/
+		"Model__" : [null, "useCommand", "Debug", "setDefault", "setDefaultPK", "begin", "commit", "rollback", "getConnection", "dispose", "connect", "execute", "executeQuery", "Model__@lib/model.js"], /*数据库操作相关*/
+		"DataTable" : [null, "Model__.helper.DataTable@lib/model.js"],
+		"DataTableRow" : [null, "Model__.helper.DataTableRow@lib/model.js"],
+		"VBS" : ["ns","include","eval","require","getref","execute","run","assets/vbs.js"], /*vbs辅助*/
+		"Mpi" : ["downloadAndInstall", "Host", "setDefaultInstallDirectory", "download", "fetchPackagesList", "fetchPackage", "packageExists", "install", "assets/mpi.js"], /*Mpi*/
+		"Tar" : [null, "packFolder", "packFile", "unpack", "assets/tar.js"],
+		"md5=MD5" : [null, "md5@assets/md5.js"],
+		"md5_bytes=MD5Bytes" : [null, "md5_bytes@assets/md5.js"],
+		"Html" : ["ActionLink", "Form", "FormUpload", "FormEnd", "CheckBox", "DropDownList", "ListBox", "Hidden", "Password", "RadioButton", "TextArea", "TextBox", "assets/htmlhelper.js"]
+	};
+	var tag = Mo.Runtime.run();
+	for(var lib in loaddelay){
+		if(!loaddelay.hasOwnProperty(lib)) continue;
+		var library = loaddelay[lib], module = library.pop(), index = module.indexOf("@"), exports="", cname="", index2 = lib.indexOf("=");
+		if(index>0){
+			exports = "." + module.substr(0,index);
+			module = module.substr(index+1);
+		}
+		(new Function(lib + " = {};" ))();
+		if(index2>0) {
+			cname = lib.substr(index2+1);
+			lib = lib.substr(0, index2);
+		}
+		for(var i=0;i<library.length;i++){
+			var method = "." + library[i];
+			if(library[i]==null) method="";
+			var body = lib + method + " = function(){" + lib + " = require(\"" + module + "\")" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};";
+			(new Function(body))();
+		}
+		if(cname) (new Function(cname + " = " + lib + ";"))();
+	}
+})();
+var Encapsulate = Function.Create = function(len){
+	var args=[];for(var i=0;i<len;i++) args.push("arg" + i);
+	var _args = args.join(",");
+	return new Function(_args,"return new this(" + _args + ");");
+};
+var E_NONE = 0,
+	E_ERROR = 1,
+	E_NOTICE = 2,
+	E_WARNING = 4,
+	E_INFO = 8,
+	E_ALL = E_ERROR | E_NOTICE | E_WARNING | E_INFO;
+var ExceptionManager = (function() {
+	var b = {};
+	var c = [],
+		d = E_ALL,
+		j = {
+			1 : "red",
+			2 : "orange",
+			4 : "blue",
+			8 : "green"
+		};
+	var a = function(e) {
+		var f = "0000000" + e.toString(16).toUpperCase();
+		return f.substr(f.length - 8)
+	};
+	function h(num){
+		return num == 1 ? "E_ERROR" : (num == 2 ? "E_NOTICE" : (num == 4 ? "E_WARNING" : "E_INFO"));
+	}
+	b.put = function() {
+		var e = Array.prototype.slice.call(arguments, 0),
+			f = E_ERROR;
+		if (typeof e[e.length - 1] == "number") {
+			f = e.pop()
+		}
+		if (e.length == 1) {
+			if (e[0].constructor == Exception) {
+				c.push(e[0])
+			} else {
+				c.push(new Exception(e[0].number, "Microsoft.JScriptError", e[0].description, f))
+			}
+		} else {
+			if (e.length == 2) {
+				c.push(new Exception(e[0].number, e[1], e[0].description, f))
+			} else {
+				if (e.length == 3) {
+					c.push(new Exception(e[0], e[1], e[2], f))
+				}
+			}
+		}
+	};
+	b.putNotice = function() {
+		var e = Array.prototype.slice.call(arguments, 0);
+		e.push(E_NOTICE);
+		b.put.apply(null, e)
+	};
+	b.putWarning = function(e) {
+		var f = Array.prototype.slice.call(arguments, 0);
+		f.push(E_WARNING);
+		b.put.apply(null, f)
+	};
+	b.errorReporting = function(f) {
+		if(arguments.length==0) return d;
+		d = f
+	};
+	b.clear = function() {
+		while (c.length > 0) {
+			c.pop()
+		}
+	};
+	b.debug = function() {
+		if(c.length == 0) return "";
+		var g = "";
+		for (var f = 0; f < c.length; f++) {
+			var e = c[f];
+			if (e.level & d) {
+				g += F.format(
+					"[<b>0x{0:X8}</b>] <span style=\"color:" + j[e.level] + "\">{1}：{2} [{3}]</span>\r\n",
+					e.Number,
+					e.Source,
+					F.encodeHtml(e.Description),
+					h(e.level)
+				);
+				if(e.filename) g += "  文件：" + e.filename + "\r\n";
+				if(e.lineNumber>0) g += "  行号：" + e.lineNumber + "\r\n";
+				if(e.traceCode) g += "  源码：<span style=\"color:red\">" + e.traceCode + "</span>\r\n";
+			}
+		}
+		if(g=="") return "";
+		return "<pre style=\"font-family:'Courier New';font-size:12px; padding:8px; background-color:#f6f6f6;border:1px #ddd solid;border-radius:5px;line-height:18px;\">" + g +"</pre>";
+	};
+	b.debug2file = function() {
+		if(c.length == 0) return "";
+		var g = "";
+		for (var f = 0; f < c.length; f++) {
+			var e = c[f];
+			if (e.level & d) {
+				g += F.format("[{3}]{0}({4}.{5})：{1} [{2}]\r\n",e.Source, e.Description, h(e.level), F.formatdate(e.datetime, "yyyy-MM-dd HH:mm:ss.tttt"), Mo.Method, Mo.Action);
+				if(e.filename) g += "  文件：" + e.filename + "\r\n";
+				if(e.lineNumber>0) g += "  行号：" + e.lineNumber + "\r\n";
+				if(e.traceCode) g += "  源码：" + e.traceCode + "\r\n";
+			}
+		}
+		if(g=="") return;
+		if(Mo.Config.Global.MO_DEBUG_FILE){
+			IO.file.appendAllText(Mo.Config.Global.MO_DEBUG_FILE, g);
+		}
+	};
+	return b
+})();
+
+function Exception(b, c, a, d) {
+	this.level = d || E_ERROR;
+	this.levelString = "E_ERROR";
+	this.Number = b || 0;
+	if (this.Number < 0) {
+		this.Number =  this.Number + 0x100000000;
+	}
+	this.Source = c || "";
+	this.Message = a || "";
+	this.Description = a || "";
+	this.lineNumber = 0;
+	this.filename = "";
+	this.traceCode = "";
+	this.datetime = new Date();
+}
+
+
+var IO = (function() {
+	var c = function(d) {
+		if (typeof d != "string") {
+			return ""
+		}
+		if (d.substr(1,1) == ":") {
+			return d
+		}
+		return Server.MapPath(d)
+	};
+	var a = function(e, d) {
+		for (var f in d) {
+			if (d.hasOwnProperty(f)) {
+				e[f] = d[f]
+			}
+		}
+		return e
+	};
+	var b = (function() {
+		var d = {};
+		d.resolve = c;
+		d.is = function(p) {
+			if (p.length < 2) return false;
+			return p.substr(1, 1) == ":";
+		};
+		d.fso = new ActiveXObject("scripting.filesystemobject");
+		d.parent = function(p) {
+			return d.fso.GetParentFolderName(c(p));
+		};
+		d.absolute = function(path)
+		{
+			return d.fso.GetAbsolutePathName(c(path));
+		};
+		d.base = function(path)
+		{
+			return d.fso.GetBaseName(c(path));
+		};
+		d.parent = function(path)
+		{
+			return d.fso.GetParentFolderName(c(path));
+		};
+		d.build = function(path,name)
+		{
+			return d.fso.GetAbsolutePathName(d.fso.BuildPath(c(path),name));
+		};
+		d.stream = function(g, e) {
+			var f = new ActiveXObject("adodb.stream");
+			f.mode = g || 3;
+			f.type = e || 1;
+			return f
+		};
+		d.fps = [];
+		return d
+	})();
+	b.file = b.file || (function() {
+		var d = {};
+		d.exists = function(e) {
+			e = c(e);
+			return b.fso.fileexists(e)
+		};
+		d.readAllText = function(f, e) {
+			return (function(g) {
+				var h = b.file.read(g);
+				b.file.close(g);
+				return h
+			})(b.file.open(f, {
+				forText: true,
+				forRead: true,
+				encoding: e || "utf-8"
+			}))
+		};
+		d.readAllScript = function(g, f) {
+			var e = (function(h) {
+				var i = b.file.read(h);
+				b.file.close(h);
+				return i
+			})(b.file.open(g, {
+				forText: true,
+				forRead: true,
+				encoding: f || "utf-8"
+			}));
+			e = e.replace(new RegExp("^(\\s*)\\u003cscript(.+?)\\u003e(\\s*)", "i"), "").replace(new RegExp("(\\s*)\\u003c\\/s" + "cript\\u003e(\\s*)$", "i"), "");
+			return e
+		};
+		d.open = function(h, g) {
+			h = c(h);
+			var e = {
+				forAppend: false,
+				forText: true,
+				forRead: false,
+				encoding: "utf-8"
+			};
+			a(e, g || {});
+			var f = b.stream(3, e.forText ? 2 : 1);
+			if (e.forText) {
+				f.charset = e.encoding
+			}
+			f.open();
+			if (d.exists(h) && (e.forAppend || e.forRead)) {
+				f.loadfromfile(h);
+				if (e.forAppend) {
+					f.position = f.size
+				}
+			}
+			b.fps.push([f, h, e]);
+			return b.fps.length - 1
+		};
+		d.read = function(e, f) {
+			if (!b.fps[e]) {
+				ExceptionManager.put(11598, "io.file.read", "file resource id is invalid.");
+				return null
+			}
+			if (b.fps[e][2].forText) {
+				if (f) {
+					return b.fps[e][0].readText(f)
+				}
+				return b.fps[e][0].readText()
+			} else {
+				if (f) {
+					return b.fps[e][0].read(f)
+				}
+				return b.fps[e][0].read()
+			}
+		};
+		d.close = function(e) {
+			if (!b.fps[e]) {
+				ExceptionManager.put(11630, "io.file.close", "file resource id is invalid.");
+				return
+			}
+			b.fps[e][0].close()
+		};
+		return d
+	})();
+	b.directory = b.directory || (function() {
+		var d = {};
+		d.exists = function(e) {
+			return b.fso.folderexists(c(e))
+		};
+		d.files = function(path,callback)
+		{
+			if(!d.exists(path))
+			{
+				return [];
+			}
+			var files=[];
+			var fc = new Enumerator(b.fso.getFolder(c(path)).files);
+			var isFunc = (typeof callback == "function");
+			for (;!fc.atEnd(); fc.moveNext())
+			{
+				if(isFunc) callback(fc.item());
+				else files.push(fc.item().path);
+			}
+			return files;
+		};
+		return d
+	})();
+	return b
+})();

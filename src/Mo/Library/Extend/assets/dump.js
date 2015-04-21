@@ -1,1 +1,137 @@
-var dumpHelper__=function(a){var c="";for(var b=0;b<a;b++){c+="  "}return c};var dump__=function(d,c){if(c===undefined){c=1}if(d===undefined){return"undefined"}switch(typeof d){case"string":return'string("'+d+'")';case"number":return"number("+d.toString()+")";case"boolean":return"boolean("+d.toString()+")";case"date":return"date("+(new Date(d)).toString()+")";case"function":return"function"+d.toString().replace(/^function([^\(]+?)?(\((.*?)\))([\s\S]+)$/i,"$2")}if(d===null){return"NULL"}if(typeof d=="object"){if((d instanceof ActiveXObject)&&(typeof(d.Count)=="number")&&(typeof(d.Keys)=="unknown")&&(typeof(d.Items)=="unknown")&&(typeof(d.Key)=="unknown")&&(typeof(d.Item)=="unknown")){var b="dictionary{\r\n";F.each(d,function(e){b+=dumpHelper__(c)+"["+e+"] => "+dump__(this(e),c+1)+"\r\n"});b+=dumpHelper__(c-1)+"}";return b}if(d instanceof ActiveXObject){return"[ActiveXObject]"}if(d.constructor==Date){return"date("+d.toString()+")"}if(d.constructor==Array){var b="array("+d.length+"){\r\n";F.foreach(d,function(e){b+=dumpHelper__(c)+"["+e+"] => "+dump__(this[e],c+1)+"\r\n"});b+=dumpHelper__(c-1)+"}";return b}if(d.constructor==Object){var b="object{\r\n";F.foreach(d,function(e){b+=dumpHelper__(c)+"["+e+"] => "+dump__(this[e],c+1)+"\r\n"});b+=dumpHelper__(c-1)+"}";return b}if(d.toString()=="[object Object]"){if(d.constructor==DataTable){var b="DataTable{\r\n";b+=dumpHelper__(c)+"[pagesize] => "+dump__(d.pagesize,c+1)+",\r\n";b+=dumpHelper__(c)+"[recordcount] => "+dump__(d.recordcount,c+1)+",\r\n";b+=dumpHelper__(c)+"[currentpage] => "+dump__(d.currentpage,c+1)+",\r\n";b+=dumpHelper__(c)+"[LIST__] => "+dump__(d.LIST__,c+1)+"\r\n";b+=dumpHelper__(c-1)+"}";return b}if(d.constructor==DataTableRow){var b="DataTableRow{\r\n";b+=dumpHelper__(c)+"[pk] => "+dump__(d.pk,c+1)+",\r\n";b+=dumpHelper__(c)+"[table] => "+dump__(d.table,c+1)+"\r\n";b+=dumpHelper__(c-1)+"}";return b}var b="[object Object]{\r\n";F.foreach(d,function(e){b+=dumpHelper__(c)+"["+e+"] => "+dump__(this[e],c+1)+"\r\n"});F.foreach(d.constructor.prototype,function(e){b+=dumpHelper__(c)+"["+e+"] => "+dump__(this[e],c+1)+"\r\n"});b+=dumpHelper__(c-1)+"}";return b}}if(typeof d=="unknown"){try{if(d.constructor==VBArray){var b="array{\r\n";F.foreach((new VBArray(d)).toArray(),function(e){b+=dumpHelper__(c)+"["+e+"] => "+dump__(this[e],c+1)+"\r\n"});b+=dumpHelper__(c-1)+"}";return b}}catch(a){return"unknown("+d+")"}}return"unknown(object)"};var $dump=F.dump=function(c,a){var b=dump__(c,1);if(a===true){return b}F.echo("<pre>"+b+"</pre>")};F.post.dump=function(a){var b=dump__(F.post(),1);if(a===true){return b}F.echo(b)};F.get.dump=function(a){var b=dump__(F.get(),1);if(a===true){return b}F.echo(b)};F.session.dump=function(a){var b=("session{\n");b+=("  [Timeout] => "+dump__(Session.Timeout)+"\n");b+=("  [CodePage] => "+dump__(Session.CodePage)+"\n");b+=("  [LCID] => "+dump__(Session.LCID)+"\n");b+=("  [SessionID] => "+dump__(Session.SessionID)+"\n");b+=("  [Contents] => {\n");F.each(Session.Contents,function(d){var c=d;if(Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG){c=F.string.trimLeft(d,Mo.Config.Global.MO_APP_NAME+"_")}b+=("    ["+c+"] => "+dump__(Session.Contents(d))+"\n")});b+=("  }\n");b+=("}");if(a===true){return b}F.echo(b)};module.exports=$dump;
+﻿/*
+** File: dump.js
+** Usage: show variable detail
+** About: 
+**		support@mae.im
+*/
+
+var dumpHelper__ = function(l) {
+		var returnValue = "";
+		for (var i = 0; i < l; i++) returnValue += "  ";
+		return returnValue;
+	};
+var dump__ = function(parm, level) {
+		if (level === undefined) level = 1;
+		if (parm === undefined) return "undefined";
+		//constructor
+		switch (typeof parm) {
+		case "string":
+			return "string(\"" + parm + "\")";
+		case "number":
+			return "number(" + parm.toString() + ")";
+		case "boolean":
+			return "boolean(" + parm.toString() + ")";
+		case "date":
+			return "date(" + (new Date(parm)).toString() + ")";
+		case "function":
+			return "function" + parm.toString().replace(/^function([^\(]+?)?(\((.*?)\))([\s\S]+)$/i,"$2");
+		}
+		if (parm === null) return "NULL";
+		if (typeof parm == "object") {
+			if ((parm instanceof ActiveXObject) && (typeof(parm.Count) == "number") && (typeof(parm.Keys) == "unknown") && (typeof(parm.Items) == "unknown") && (typeof(parm.Key) == "unknown") && (typeof(parm.Item) == "unknown")) {
+				var returnValue = "dictionary{\r\n";
+				F.each(parm, function(i) {
+					returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this(i), level + 1) + "\r\n";
+				});
+				returnValue += dumpHelper__(level - 1) + "}";
+				return returnValue;
+			}
+			if (parm instanceof ActiveXObject){
+				return "[ActiveXObject]";
+			}
+			if (parm.constructor == Date) {
+				return "date(" + parm.toString() + ")";
+			}
+			if (parm.constructor == Array) {
+				var returnValue = "array(" + parm.length + "){\r\n";
+				F.foreach(parm, function(i) {
+					returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this[i], level + 1) + "\r\n";
+				});
+				returnValue += dumpHelper__(level - 1) + "}";
+				return returnValue;
+			}
+			if (parm.constructor == Object) {
+				var returnValue = "object{\r\n";
+				F.foreach(parm, function(i) {
+					returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this[i], level + 1) + "\r\n";
+				});
+				returnValue += dumpHelper__(level - 1) + "}";
+				return returnValue;
+			}
+			if (parm.toString() == "[object Object]") {
+				if (parm.constructor == DataTable) {
+					var returnValue = "DataTable{\r\n";
+					returnValue += dumpHelper__(level) + "[pagesize] => " + dump__(parm.pagesize, level + 1) + ",\r\n";
+					returnValue += dumpHelper__(level) + "[recordcount] => " + dump__(parm.recordcount, level + 1) + ",\r\n";
+					returnValue += dumpHelper__(level) + "[currentpage] => " + dump__(parm.currentpage, level + 1) + ",\r\n";
+					returnValue += dumpHelper__(level) + "[LIST__] => " + dump__(parm["LIST__"], level + 1) + "\r\n";
+					returnValue += dumpHelper__(level - 1) + "}";
+					return returnValue;
+				}
+				if (parm.constructor == DataTableRow) {
+					var returnValue = "DataTableRow{\r\n";
+					returnValue += dumpHelper__(level) + "[pk] => " + dump__(parm.pk, level + 1) + ",\r\n";
+					returnValue += dumpHelper__(level) + "[table] => " + dump__(parm.table, level + 1) + "\r\n";
+					returnValue += dumpHelper__(level - 1) + "}";
+					return returnValue;
+				}
+				var returnValue = "[object Object]{\r\n";
+				F.foreach(parm, function(i) {
+					returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this[i], level + 1) + "\r\n";
+				});
+				F.foreach(parm.constructor.prototype, function(i) {
+					returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this[i], level + 1) + "\r\n";
+				});
+				returnValue += dumpHelper__(level - 1) + "}";
+				return returnValue;
+			}
+		}
+		if (typeof parm == "unknown") {
+			try{
+				if (parm.constructor == VBArray) {
+					var returnValue = "array{\r\n";
+					F.foreach((new VBArray(parm)).toArray(), function(i) {
+						returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this[i], level + 1) + "\r\n";
+					});
+					returnValue += dumpHelper__(level - 1) + "}";
+					return returnValue;
+				}
+			}catch(ex){
+				return "unknown(" + parm + ")";
+			}
+		}
+		return "unknown(object)";
+	};
+var $dump = F.dump = function(parm, returnValue) {
+	var value = dump__(parm, 1);
+	if (returnValue === true) return value;
+	F.echo("<pre>" + value + "</pre>");
+};
+F.post.dump = function(returnValue) {
+	var dump = dump__(F.post(), 1);
+	if (returnValue === true) return dump;
+	F.echo(dump);
+};
+F.get.dump = function(returnValue) {
+	var dump = dump__(F.get(), 1);
+	if (returnValue === true) return dump;
+	F.echo(dump);
+};
+F.session.dump = function(returnValue) {
+	var dump = ("session{\n");
+	dump += ("  [Timeout] => " + dump__(Session.Timeout) + "\n");
+	dump += ("  [CodePage] => " + dump__(Session.CodePage) + "\n");
+	dump += ("  [LCID] => " + dump__(Session.LCID) + "\n");
+	dump += ("  [SessionID] => " + dump__(Session.SessionID) + "\n");
+	dump += ("  [Contents] => {\n");
+	F.each(Session.Contents, function(q) {
+		var nq = q;
+		if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) nq = F.string.trimLeft(q, Mo.Config.Global.MO_APP_NAME + "_");
+		dump += ("    [" + nq + "] => " + dump__(Session.Contents(q)) + "\n");
+	});
+	dump += ("  }\n");
+	dump += ("}");
+	if (returnValue === true) return dump;
+	F.echo(dump);
+}
+module.exports = $dump;

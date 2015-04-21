@@ -1,1 +1,77 @@
-var base64keyStr_="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";var encode_=function(c){var a="";var k,h,f="";var j,g,e,d="";var b=0;do{k=c[b++];h=c[b++];f=c[b++];j=k>>2;g=((k&3)<<4)|(h>>4);e=((h&15)<<2)|(f>>6);d=f&63;if(isNaN(h)){e=d=64}else{if(isNaN(f)){d=64}}a=a+base64keyStr_.charAt(j)+base64keyStr_.charAt(g)+base64keyStr_.charAt(e)+base64keyStr_.charAt(d);k=h=f="";j=g=e=d=""}while(b<c.length);return a};var decode_=function(c){var a=[];var k,h,f="";var j,g,e,d="";var b=0;do{j=base64keyStr_.indexOf(c.charAt(b++));if(j<0){continue}g=base64keyStr_.indexOf(c.charAt(b++));if(g<0){continue}e=base64keyStr_.indexOf(c.charAt(b++));if(e<0){continue}d=base64keyStr_.indexOf(c.charAt(b++));if(d<0){continue}k=(j<<2)|(g>>4);h=((g&15)<<4)|(e>>2);f=((e&3)<<6)|d;a.push(k);if(e!=64){a.push(h)}if(d!=64){a.push(f)}k=h=f="";j=g=e=d=""}while(b<c.length);return a};var $node=F.activex("MSXML2.DOMDocument",function(){this.loadXML('<?xml version="1.0" encoding="gb2312"?><root xmlns:dt="urn:schemas-microsoft-com:datatypes"><data dt:dt="bin.base64"></data></root>');return this.selectSingleNode("//root/data")}),$base64={};$base64.e=encode_;$base64.d=decode_;$base64.encode=function(a){if(typeof a=="string"){a=F.string.getByteArray(a)}return encode_(a)};$base64.decode=function(a){return F.string.fromByteArray(decode_(a))};$base64.toBinary=function(a){$node.text=a;return $node.nodeTypedValue};$base64.fromBinary=function(a){$node.nodeTypedValue=a;return $node.text};module.exports=$base64;
+var base64keyStr_ = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+var encode_ = function(Str) {
+		var output = "";
+		var chr1, chr2, chr3 = "";
+		var enc1, enc2, enc3, enc4 = "";
+		var i = 0;
+		do {
+			chr1 = Str[i++];
+			chr2 = Str[i++];
+			chr3 = Str[i++];
+			enc1 = chr1 >> 2;
+			enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+			enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+			enc4 = chr3 & 63;
+			if (isNaN(chr2)) {
+				enc3 = enc4 = 64;
+			} else if (isNaN(chr3)) {
+				enc4 = 64;
+			}
+			output = output + base64keyStr_.charAt(enc1) + base64keyStr_.charAt(enc2) + base64keyStr_.charAt(enc3) + base64keyStr_.charAt(enc4);
+			chr1 = chr2 = chr3 = "";
+			enc1 = enc2 = enc3 = enc4 = "";
+		} while (i < Str.length);
+		return output;
+	};
+var decode_ = function(Str) {
+		var output = [];
+		var chr1, chr2, chr3 = "";
+		var enc1, enc2, enc3, enc4 = "";
+		var i = 0;
+		do {
+			enc1 = base64keyStr_.indexOf(Str.charAt(i++));
+			if(enc1<0)continue;
+			enc2 = base64keyStr_.indexOf(Str.charAt(i++));
+			if(enc2<0)continue;
+			enc3 = base64keyStr_.indexOf(Str.charAt(i++));
+			if(enc3<0)continue;
+			enc4 = base64keyStr_.indexOf(Str.charAt(i++));
+			if(enc4<0)continue;
+			chr1 = (enc1 << 2) | (enc2 >> 4);
+			chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+			chr3 = ((enc3 & 3) << 6) | enc4;
+			output.push(chr1);
+			if (enc3 != 64) {
+				output.push(chr2);
+			}
+			if (enc4 != 64) {
+				output.push(chr3);
+			}
+			chr1 = chr2 = chr3 = "";
+			enc1 = enc2 = enc3 = enc4 = "";
+		} while (i < Str.length);
+		return output;
+	};
+var $node = F.activex("MSXML2.DOMDocument", function() {
+	this.loadXML("<?xml version=\"1.0\" encoding=\"gb2312\"?><root xmlns:dt=\"urn:schemas-microsoft-com:datatypes\"><data dt:dt=\"bin.base64\"></data></root>");
+	return this.selectSingleNode("//root/data");
+}),
+	$base64 = {};
+$base64.e = encode_;
+$base64.d = decode_;
+$base64.encode = function(Str) {
+	if (typeof Str == "string") Str = F.string.getByteArray(Str);
+	return encode_(Str);
+};
+$base64.decode = function(Str) {
+	return F.string.fromByteArray(decode_(Str));
+};
+$base64.toBinary = function(str) {
+	$node.text = str;
+	return $node.nodeTypedValue;
+};
+$base64.fromBinary = function(str) {
+	$node.nodeTypedValue = str;
+	return $node.text;
+};
+module.exports = $base64;
