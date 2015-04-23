@@ -816,7 +816,7 @@ var F, JSON, require, VBS, View, Model__,
 		"DataTableRow" : [null, "Model__.helper.DataTableRow@lib/model.js"],
 		"VBS" : ["ns","include","eval","require","getref","execute","run","assets/vbs.js"], /*vbs*/
 		"Mpi" : ["downloadAndInstall", "Host", "setDefaultInstallDirectory", "download", "fetchPackagesList", "fetchPackage", "packageExists", "install", "assets/mpi.js"], /*Mpi*/
-		"Tar" : [null, "packFolder", "packFile", "unpack", "assets/tar.js"],
+		"Tar" : [null, "setNames", "packFolder", "packFile", "unpack", "assets/tar.js"],
 		"md5=MD5" : [null, "md5@assets/md5.js"],
 		"md5_bytes=MD5Bytes" : [null, "md5_bytes@assets/md5.js"],
 		"Html" : ["ActionLink", "Form", "FormUpload", "FormEnd", "CheckBox", "DropDownList", "ListBox", "Hidden", "Password", "RadioButton", "TextArea", "TextBox", "assets/htmlhelper.js"],

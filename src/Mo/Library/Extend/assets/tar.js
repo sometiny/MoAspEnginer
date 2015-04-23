@@ -3,10 +3,7 @@
 ** tar package£¬Old-Style Archive Format
 */
 var string2buffer = F.string.getByteArray, buffer2string = F.string.fromByteArray;
-if(typeof GBK != "undefined"){
-	string2buffer = GBK.getByteArray;
-	buffer2string = GBK.getString;
-}
+
 function zipfolder(zip,path){
 	IO.directory.directories(path,function(f){
 		zipfolder(zip.folder(f.name),f.path);
@@ -129,11 +126,12 @@ function dogenerate(fp, name, files){
 		if(!files.hasOwnProperty(i)) continue;
 		var file = files[i];
 		if(typeof file == "string"){
-			var header = tarHeader(name + i, file, false);
-			header.generate();
+			var data = IO.file.readAllBytes(file),
+				header = tarHeader(name + i, file, false);
+			header.generate(IO.filesize);
 			IO.file.write(fp, IO.buffer2binary(header.data));
 			if(header.filesize>0){
-				IO.file.write(fp, IO.file.readAllBytes(header.file));
+				IO.file.write(fp, data);
 			}
 			var padding= header.filesize % 512;
 			if(padding>0){
@@ -143,13 +141,18 @@ function dogenerate(fp, name, files){
 			}
 		}else{
 			var header = tarHeader(name + i, "", true);
-			header.generate();
+			header.generate(0);
 			IO.file.write(fp, IO.buffer2binary(header.data));
 			dogenerate(fp, name + i + "\\", file);
 		}
 	}
 }
-
+$manager.setNames = function(){
+	if(typeof GBK != "undefined"){
+		string2buffer = GBK.getByteArray;
+		buffer2string = GBK.getString;
+	}
+};
 $manager.packFolder = function(path, target){
 	var zip = new $manager();
 	try{
@@ -190,6 +193,7 @@ $manager.unpack = function(srcfile,dest){
 	}
 	return true;
 };
+var ArrayPush = Array.prototype.push;
 var formatOtc = function(num, len){
 	var numstr = num.toString(8)+" ";
 	len = len || 12;
@@ -209,8 +213,8 @@ var parseOtc = function(ary){
 function push(src , dest){
 	for(var i=0 ;i<src.length;i++){
 		dest.checksum += src[i];
-		dest.data.push(src[i]);
 	}
+	ArrayPush.apply(dest.data, src);
 }
 function set(src, start, dest){
 	for(var i=0 ;i<src.length;i++){
@@ -230,29 +234,40 @@ var tarHeader = function(name, file, isdir) {
 	this.offset=0;
 	this.createdate=0;
 };
-tarHeader.prototype.generate = function(){
+var total=0;
+tarHeader.prototype.generate = function(filesize){
 	var filename_byt = string2buffer(this.name);
 	while(filename_byt.length>99) filename_byt.pop();
 	while(filename_byt.length<100) filename_byt.push(0);
 	push(filename_byt, this);
 	if(this.dir){
-		push([0x20,0x34], this);
+		ArrayPush.apply(this.data, [0x20,0x34]);
+		this.checksum += 84;
 	}else{
-		push([0x31,0x30], this);
+		ArrayPush.apply(this.data, [0x31,0x30]);
+		this.checksum += 97;
 	}
-	push([0x30,0x37,0x37,0x37,0x20,0, /*mode*/ 0x20,0x20,0x20,0x20,0x20,0x30,0x20,0,0x20,0x20,0x20,0x20,0x20,0x30,0x20,0], this); //uid,gid
+	ArrayPush.apply(this.data, [0x30,0x37,0x37,0x37,0x20,0, /*mode*/ 0x20,0x20,0x20,0x20,0x20,0x30,0x20,0,0x20,0x20,0x20,0x20,0x20,0x30,0x20,0]); //uid,gid
+	this.checksum += 725;
+	
 	var linkflag=0x35;
 	if(!this.dir) {
-		this.filesize = IO.file.get(this.file).size;
+		this.filesize = filesize;
 		linkflag = 0x30;
 	}
-	push(formatOtc(this.filesize), this); //size
+	push(formatOtc(filesize), this); //size
 	push(formatOtc(F.timespan(new Date())), this); //mtime
-	push([0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20], this); //checksum
-	push([linkflag], this); //linkflag
+	
+	ArrayPush.apply(this.data, [0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20]); //checksum
+	this.checksum += 256;
+	
+	this.data.push(linkflag);
+	this.checksum += linkflag;
+	
 	for(var i=0;i<355;i++) this.data.push(0);
 	set(formatOtc(this.checksum,7),148, this);
 	this.data[155] = 0;
 };
 module.exports = $manager;
 Tar = $manager;
+Tar.getTotal = function(){return total;};

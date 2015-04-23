@@ -72,6 +72,7 @@ var binary2string = function(src) {
 var $io = (function()
 {
 	var $Io = {};
+	$Io.filesize = 0;
 	$Io.is = function(path){if(path.length<2)return false; return path.substr(1,1)==":";};
 	$Io.fso = F.fso || F.activex("scripting.filesystemobject");
 	$Io.stream = function(mode,type)
@@ -292,6 +293,7 @@ $io.file = $io.file || (function()
 	};
 	$file.open = function(path,opt)
 	{
+		$io.filesize = 0;
 		path = F.mappath(path);
 		var cfg = 
 		{
@@ -310,6 +312,7 @@ $io.file = $io.file || (function()
 		if($file.exists(path) && (cfg.forAppend || cfg.forRead))
 		{
 			fp.loadfromfile(path);
+			$io.filesize = fp.size;
 			if(cfg.forAppend)
 			{
 				fp.position = fp.size;
