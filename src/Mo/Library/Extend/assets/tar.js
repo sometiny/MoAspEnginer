@@ -3,6 +3,10 @@
 ** tar package£¬Old-Style Archive Format
 */
 var string2buffer = F.string.getByteArray, buffer2string = F.string.fromByteArray;
+if(typeof GBK != "undefined"){
+	string2buffer = GBK.getByteArray;
+	buffer2string = GBK.getString;
+}
 function zipfolder(zip,path){
 	IO.directory.directories(path,function(f){
 		zipfolder(zip.folder(f.name),f.path);
@@ -128,7 +132,9 @@ function dogenerate(fp, name, files){
 			var header = tarHeader(name + i, file, false);
 			header.generate();
 			IO.file.write(fp, IO.buffer2binary(header.data));
-			IO.file.write(fp, IO.file.readAllBytes(header.file));
+			if(header.filesize>0){
+				IO.file.write(fp, IO.file.readAllBytes(header.file));
+			}
 			var padding= header.filesize % 512;
 			if(padding>0){
 				var pad = [];
@@ -177,6 +183,8 @@ $manager.unpack = function(srcfile,dest){
 			if(!IO.directory.exists(parentDir))IO.directory.create(parentDir);
 			if(file.filesize>0){
 				IO.file.writeAllBytes(destfile,file.data);
+			}else{
+				IO.file.writeAllText(destfile,"","iso-8859-1");
 			}
 		}
 	}
