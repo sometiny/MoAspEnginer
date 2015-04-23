@@ -1,4 +1,4 @@
-﻿/*
+/*
  ** File: Mo.js
  ** Usage: core code of MAE, don't change 'Mo' to other name.
  ** About:
@@ -57,7 +57,7 @@ var F, JSON, require, VBS, View, Model__,
 			if (vpath.indexOf("@") > 0) path = G.MO_ROOT + vpath.substr(vpath.indexOf("@") + 1) + "/Views/" + vpath.substr(0, vpath.indexOf("@")) + "." + G.MO_TEMPLATE_PERX;
 			if (!IO.file.exists(path)) path = G.MO_CORE + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
 			if (!IO.file.exists(path)) {
-				ExceptionManager.put(0x6300, "_LoadTemplate()", "模板[" + template + "]不存在", E_NOTICE);
+				ExceptionManager.put(0x6300, "_LoadTemplate()", "template '" + template + "' is not exists.", E_NOTICE);
 				return "";
 			}
 			var tempStr = IO.file.readAllText(F.mappath(path), G.MO_CHARSET);
@@ -116,9 +116,9 @@ var F, JSON, require, VBS, View, Model__,
 					Model__, M.C, M.L, G.MO_DEBUG ? ret : ""
 				);
 				if(_controller) return _controller && (_LoadController._controllers[ccname] = _controller);
-				ExceptionManager.put(0x8300, "_LoadController()", "加载控制器时出现错误，请检查是否已经定义相关控制器'" + controller + "'。");
+				ExceptionManager.put(0x8300, "_LoadController()", "can not load controller '" + controller + "', please ensure that if you have defined it.");
 			} catch (ex) {
-				ExceptionManager.put(ex.number, "_LoadController()", "加载控制器\"" + controller + "\"时出现错误:" + ex.description);
+				ExceptionManager.put(ex.number, "_LoadController()", "can not load controller '" + controller + "', error: " + ex.description);
 			}
 			return false;
 		};
@@ -140,9 +140,9 @@ var F, JSON, require, VBS, View, Model__,
 					Model__, M.C, M.L
 				);
 				return _asset && (new(_LoadAssets.assets[ccname] = _asset)());
-				ExceptionManager.put(0x8300, "_LoadAssets()", "加载asset[\"" + name + "\"]时出现错误，请检查是否已经定义相关Class");
+				ExceptionManager.put(0x8300, "_LoadAssets()", "can not load asset '" + name + "', please ensure that if you have defined it.");
 			} catch (ex) {
-				ExceptionManager.put(ex.number, "_LoadAssets()", "加载asset[\"" + name + "\"]时出现错误:" + ex.description);
+				ExceptionManager.put(ex.number, "_LoadAssets()", "can not load asset '" + name + "', error: " + ex.description);
 			}
 			return false;
 		};
@@ -260,19 +260,16 @@ var F, JSON, require, VBS, View, Model__,
 		};
 
 		var _debug = function() {
-			if(F.server("HTTP_X_REQUESTED_WITH").toLowerCase()=="xmlhttprequest"){
-				if(E_ERROR & ExceptionManager.errorReporting()) ExceptionManager.errorReporting(E_ERROR);
-			}
 			if (G.MO_DEBUG) {
-				ExceptionManager.put(0, "MO", "当前系统开启了DEBUG模式，正式上线后请关闭MO_DEBUG选项，并通过ERROR_REPORTING来显示指定级别异常。", E_WARNING);
+				ExceptionManager.put(0, "MO", "debug mode is enabled, please set 'MO_DEBUG' as false in production env, and set 'MO_ERROR_REPORTING' to show useful information.", E_WARNING);
 			}
 			if (!G.MO_COMPILE_CACHE) {
-				ExceptionManager.put(0, "MO", "当前系统未开启编译缓存，建议正式上线后开启编译缓存(MO_COMPILE_CACHE设置为true)。", E_WARNING);
+				ExceptionManager.put(0, "MO", "compile cache is not enabled, you should enable it in production env(set 'MO_COMPILE_CACHE' as true).", E_WARNING);
 			}
 			ExceptionManager.put(
 				0, "MO",
 				F.format(
-					"System：{7}MS > Initialize：{0}MS；Route：{1}MS；Controller：{2}MS（Load：{3}MS，Compile：{4}MS，DebugCompile：{5}MS，Execute：{6}MS）；Terminate：{8}MS。",
+					"System: {7}MS > Initialize: {0}MS; Route: {1}MS; Controller: {2}MS (Load: {3}MS, Compile: {4}MS, DebugCompile: {5}MS, Execute: {6}MS); Terminate: {8}MS.",
 					_runtime.timelines.initialize,
 					_runtime.timelines.route,
 					_runtime.timelines.run,
@@ -286,8 +283,14 @@ var F, JSON, require, VBS, View, Model__,
 			);
 			if (Model__ && Model__.debug) Model__.debug();
 			if(G.MO_DEBUG2FILE){
-				ExceptionManager.debug2file();
+				if(G.MO_DEBUG_FILE){
+					ExceptionManager.debug2file(G.MO_DEBUG_FILE);
+				}
 			}else{
+				if(F.server("HTTP_X_REQUESTED_WITH").toLowerCase()=="xmlhttprequest"){
+					if(E_ERROR & ExceptionManager.errorReporting()) ExceptionManager.errorReporting(E_ERROR);
+					else ExceptionManager.errorReporting(E_NONE);
+				}
 				F.echo(ExceptionManager.debug());
 			}
 		};
@@ -300,13 +303,13 @@ var F, JSON, require, VBS, View, Model__,
 		};
 		var _InitializePath = function(cfg) {
 			var url_ = String(req.ServerVariables("URL"));
-			if (cfg.MO_APP_NAME == "") _exit("未定义应用名称：MO_APP_NAME，请检查初始配置参数。")
+			if (cfg.MO_APP_NAME == "") _exit("please define application name, config-item 'MO_APP_NAME'.")
 			if (cfg.MO_ROOT == "") cfg.MO_ROOT = url_.substr(0, url_.lastIndexOf("/") + 1);
 			if (cfg.MO_APP == "") cfg.MO_APP = cfg.MO_ROOT + cfg.MO_APP_NAME + "/";
 			if (cfg.MO_CORE == "") cfg.MO_CORE = cfg.MO_ROOT + "Mo/";
 			if (cfg.MO_APP.slice(-1) != "/") cfg.MO_APP = cfg.MO_APP + "/";
 			if (cfg.MO_CORE.slice(-1) != "/") cfg.MO_CORE = cfg.MO_CORE + "/";
-			if (!IO.directory.exists(cfg.MO_CORE)) _exit("核心目录[" + cfg.MO_CORE + "]不存在，请检查初始配置参数。");
+			if (!IO.directory.exists(cfg.MO_CORE)) _exit("core directory '" + cfg.MO_CORE + "' is not exists.");
 			if (cfg.MO_APP_ENTRY == "") {
 				cfg.MO_APP_ENTRY = url_.substr(url_.lastIndexOf("/") + 1);
 				if (cfg.MO_APP_ENTRY.toLowerCase() == "default.asp") cfg.MO_APP_ENTRY = "";
@@ -327,11 +330,12 @@ var F, JSON, require, VBS, View, Model__,
 				if (G.MO_ROUTE_MODE) M.Route();
 				_runtime.timelines.route = _runtime.ticks(_tag);
 
-				_tag = _runtime.run();
-				M.Run();
-				_runtime.timelines.run = _runtime.ticks(_tag);
-
-				M.Terminate();
+				if(!G.MO_PLUGIN_MODE){
+					_tag = _runtime.run();
+					M.Run();
+					_runtime.timelines.run = _runtime.ticks(_tag);
+					M.Terminate();
+				}
 			},
 			G = {};
 		M.Runtime = _runtime;
@@ -368,34 +372,34 @@ var F, JSON, require, VBS, View, Model__,
 			var _tag = _runtime.run();
 			_InitializePath(cfg);
 			
-			/*加载全局配置文件*/
+			/*load global config*/
 			if (IO.file.exists(cfg.MO_CORE + "Conf/Config.asp")) G = M.Config.Global = _wapper(IO.file.readAllScript(cfg.MO_CORE + "Conf/Config.asp"))();
 			_extend(G, cfg);
 			
-			/*加载Common库，核心内的Common库均加载*/
+			/*load 'Common' modules*/
 			IO.directory.files(G.MO_CORE + "Common", function(file) {
 				if(file.name.slice(-4) == ".asp") _wapperfile(file.path);
 			});
 
-			/*加载require模块*/
+			/*load require module*/
 			require = _wappermodule(IO.file.readAllText(cfg.MO_CORE + "Library/Extend/lib/require.js"));
 			require.module._pathes = [c(G.MO_APP + "Library/Extend"), c(G.MO_CORE + "Library/Extend")];
 
-			/*加载fns模块*/
+			/*load fns module*/
 			F = require("lib/fns.js");
 			if(!F){
-				ExceptionManager.put(0x213df, "F", "fns模块加载异常，系统将不可用。", E_ERROR);
+				ExceptionManager.put(0x213df, "F", "can not load module 'fns', system will be shut down.", E_ERROR);
 				return;
 			}
 			
-			/*加载IO模块*/
+			/*load IO module*/
 			IO = require("lib/io.js");
 			if(!IO){
-				ExceptionManager.put(0x213df, "IO", "IO模块加载异常，系统将不可用。", E_ERROR);
+				ExceptionManager.put(0x213df, "IO", "can not load module 'IO', system will be shut down.", E_ERROR);
 				return;
 			}
 			
-			/*自动创建*/
+			/*auto-create*/
 			if (G.MO_AUTO_CREATE_APP !== false && !IO.directory.exists(G.MO_APP)) {
 				F.foreach([
 					"", "Controllers", "Cache/Compiled", "Cache/Model", "Views", "Conf", "Lang",
@@ -405,7 +409,7 @@ var F, JSON, require, VBS, View, Model__,
 				});
 			}
 
-			/*加载应用配置*/
+			/*load application config*/
 			require(c(G.MO_APP + "Conf/Config.asp"), true, function(){
 				if(this.hasOwnProperty("MO_LIB_CNAMES")){
 					if(this.MO_LIB_CNAMES) _extend(G.MO_LIB_CNAMES, this.MO_LIB_CNAMES);
@@ -508,7 +512,7 @@ var F, JSON, require, VBS, View, Model__,
 		M.fetch = function(template, extcachestr) {
 			M.Buffer = !(arguments.callee.caller == M.display);
 			if(!G.MO_TEMPLATE_ENGINE){
-				ExceptionManager.put(0x12edf, "Mo.fetch()", "未定义模板引擎！");
+				ExceptionManager.put(0x12edf, "Mo.fetch()", "please define any template engine.");
 				return "";
 			}
 			var _tag = _runtime.run();
@@ -535,7 +539,7 @@ var F, JSON, require, VBS, View, Model__,
 				if (html == "") return "";
 				if (!View) View = require(G.MO_TEMPLATE_ENGINE);
 				if (!View) {
-					ExceptionManager.put(0x12edf, "Mo.fetch()", "模板解析器加载失败！");
+					ExceptionManager.put(0x12edf, "Mo.fetch()", "can not load template engine.");
 					return "";
 				}
 				scripts = View.compile(html);
@@ -552,11 +556,11 @@ var F, JSON, require, VBS, View, Model__,
 			try {
 				wapper = new Function("$", "__filename", "__scripts", "__buffer", "__buffersize", scripts);
 			} catch (ex) {
-				ExceptionManager.put(ex.number, "Mo.fetch()", "已编译的模板代码包装错误：" + ex.description, E_ERROR);
+				ExceptionManager.put(ex.number, "Mo.fetch()", "find error when pack compiled template code: " + ex.description, E_ERROR);
 				return;
 			}
 			var filename = cachepath;
-			if (G.MO_DEBUG) filename += ";由模板[" + _ParseTemplatePath(template) + "." + G.MO_TEMPLATE_PERX + "]编译，请检查模板是否有语法错误或使用了未声明的变量。"
+			if (G.MO_DEBUG) filename += ";compiled by [" + _ParseTemplatePath(template) + "." + G.MO_TEMPLATE_PERX + "], please check if there are syntax error in template or use variable(s) that not be defined."
 			content = wapper(_Assigns, filename, G.MO_DEBUG ? scripts : "", M.Buffer, 1024);
 			if (G.MO_CACHE && G.MO_CACHE_DIR != "" && IO.directory.exists(G.MO_CACHE_DIR)) IO.file.writeAllText(F.mappath(G.MO_CACHE_DIR + _CacheFileName + ".cache"), content, G.MO_CHARSET);
 			_runtime.timelines.run1 = _runtime.ticks(_tag);
@@ -600,7 +604,7 @@ var F, JSON, require, VBS, View, Model__,
 		};
 		M.L = function(key) {
 			if (!G.MO_LANGUAGE) {
-				ExceptionManager.put(5, "Mo.L(key)", "未定义语言包", E_WARNING);
+				ExceptionManager.put(5, "Mo.L(key)", "please define language package.", E_WARNING);
 				return "";
 			}
 			var lib = G.MO_LANGUAGE;
@@ -612,7 +616,7 @@ var F, JSON, require, VBS, View, Model__,
 			if (cfg = _LoadConfig(lib, "Lang")) {
 				return cfg[key];
 			} else {
-				ExceptionManager.put(3, "Mo.L(key)", "语言包[" + lib + "]无法加载,请检查语言包是否存在及正确", E_ERROR);
+				ExceptionManager.put(3, "Mo.L(key)", "can not load language package '" + lib + "'.", E_ERROR);
 			}
 		};
 		M.C = function(conf, value) {
@@ -632,7 +636,7 @@ var F, JSON, require, VBS, View, Model__,
 				if (key != "" && value !== undefined) M.Config[conf][key] = value;
 				return (key == "" ? M.Config[conf] : M.Config[conf][key]);
 			} else {
-				ExceptionManager.put(3, "Mo.C(conf,value)", "配置[" + conf + "]无法加载,请检查配置文件是否存在以及正确");
+				ExceptionManager.put(3, "Mo.C(conf,value)", "can not load config '" + conf + "'.");
 			}
 		};
 		M.C.SaveAs = function(conf, data) {
@@ -652,10 +656,10 @@ var F, JSON, require, VBS, View, Model__,
 				if (_controller = _LoadController(filepath, ctrl)) {
 					return new _controller();
 				} else {
-					ExceptionManager.put(5, "Mo.A(ctrl)", "模块[" + ctrl + "]无法加载,请检查模块文件");
+					ExceptionManager.put(5, "Mo.A(ctrl)", "can not load controller '" + ctrl + "'.");
 				}
 			} else {
-				ExceptionManager.put(6, "Mo.A(ctrl)", "模块[" + ctrl + "]无法加载,请检查模块文件是否存在");
+				ExceptionManager.put(6, "Mo.A(ctrl)", "can not load controller '" + ctrl + "',please ensure you have define it.");
 			}
 		};
 		M.Run = function() {
@@ -693,7 +697,7 @@ var F, JSON, require, VBS, View, Model__,
 								M.display(this.Action);
 								can_LoadController = false;
 							} else {
-								ExceptionManager.put(0x2dfc, this.RealMethod + "." + this.RealAction, "模块[" + this.Method + "]不存在");
+								ExceptionManager.put(0x2dfc, this.RealMethod + "." + this.RealAction, "controller '" + this.Method + "' is not exists.");
 								return;
 							}
 						}
@@ -703,7 +707,7 @@ var F, JSON, require, VBS, View, Model__,
 			var _controller;
 			if (!(can_LoadController && (_controller = _LoadController(ModelPath, this.RealMethod)))) return;
 			if (_controller["__PRIVATE__"] === true) {
-				ExceptionManager.put(0x2dfc, this.RealMethod + "." + this.RealAction, "模块[" + this.Method + "]不存在");
+				ExceptionManager.put(0x2dfc, this.RealMethod + "." + this.RealAction, "controller '" + this.Method + "' is not exists.");
 				return;
 			}
 			_runtime.timelines.load = _runtime.ticks(_tag);
@@ -732,7 +736,7 @@ var F, JSON, require, VBS, View, Model__,
 						fn = MC["empty"];
 						args = [this.Action];
 					} else {
-						ExceptionManager.put(0x3a8, this.RealMethod + "." + this.RealAction, "未定义相应" + this.Action + "或empty方法。");
+						ExceptionManager.put(0x3a8, this.RealMethod + "." + this.RealAction, "please define '" + this.Action + "' or 'empty' method.");
 					}
 				}
 				if (G.MO_PARSEACTIONPARMS === true) args = _getfunctionParms(fn);
@@ -799,25 +803,29 @@ var F, JSON, require, VBS, View, Model__,
 		return M;
 	})();
 (function(){
-	/*延迟加载的模块，只有在程序里面调用相关方法的时候才加载，并且仅加载一次*/
+	/*delay load*/
 	var loaddelay = {
 		"base64" : ["e", "d", "encode", "decode", "toBinary", "fromBinary", "base64"], /*base64*/
-		"JSON" : [ "parse", "stringify", "create", "decodeStrict", "encodeUnicode", "assets/json.js"],/*JSON相关*/
-		"IController" : ["create", "IController@lib/dist.js"], /*控制器*/
-		"IClass" : ["create", "IClass@lib/dist.js"],/*类*/
-		"dump" : [null, "dump"],/*变量打印*/
+		"JSON" : ["parse", "stringify", "create", "decodeStrict", "encodeUnicode", "assets/json.js"],/*JSON*/
+		"IController" : ["create", "IController@lib/dist.js"], /*controller*/
+		"IClass" : ["create", "IClass@lib/dist.js"],/*class*/
+		"dump" : [null, "dump"],/*dump variables*/
 		"cookie=Cookie" : [null, "assets/cookie.js"],/*cookie*/
-		"Model__" : [null, "useCommand", "Debug", "setDefault", "setDefaultPK", "begin", "commit", "rollback", "getConnection", "dispose", "connect", "execute", "executeQuery", "Model__@lib/model.js"], /*数据库操作相关*/
+		"Model__" : [null, "useCommand", "Debug", "setDefault", "setDefaultPK", "begin", "commit", "rollback", "getConnection", "dispose", "connect", "execute", "executeQuery", "Model__@lib/model.js"], /*database*/
 		"DataTable" : [null, "Model__.helper.DataTable@lib/model.js"],
 		"DataTableRow" : [null, "Model__.helper.DataTableRow@lib/model.js"],
-		"VBS" : ["ns","include","eval","require","getref","execute","run","assets/vbs.js"], /*vbs辅助*/
+		"VBS" : ["ns","include","eval","require","getref","execute","run","assets/vbs.js"], /*vbs*/
 		"Mpi" : ["downloadAndInstall", "Host", "setDefaultInstallDirectory", "download", "fetchPackagesList", "fetchPackage", "packageExists", "install", "assets/mpi.js"], /*Mpi*/
 		"Tar" : [null, "packFolder", "packFile", "unpack", "assets/tar.js"],
 		"md5=MD5" : [null, "md5@assets/md5.js"],
 		"md5_bytes=MD5Bytes" : [null, "md5_bytes@assets/md5.js"],
-		"Html" : ["ActionLink", "Form", "FormUpload", "FormEnd", "CheckBox", "DropDownList", "ListBox", "Hidden", "Password", "RadioButton", "TextArea", "TextBox", "assets/htmlhelper.js"]
+		"Html" : ["ActionLink", "Form", "FormUpload", "FormEnd", "CheckBox", "DropDownList", "ListBox", "Hidden", "Password", "RadioButton", "TextArea", "TextBox", "assets/htmlhelper.js"],
+		"Utf8" : ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "utf8@encoding"],
+		"GBK" : ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "gbk@encoding"],
+		"Unicode" : ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "unicode@encoding"],
+		"Hex" : ["parse", "stringify", "hex@encoding"],
+		"Encoding" : ["encodeURIComponent", "encodeURI", "decodeURI", "encoding"]
 	};
-	var tag = Mo.Runtime.run();
 	for(var lib in loaddelay){
 		if(!loaddelay.hasOwnProperty(lib)) continue;
 		var library = loaddelay[lib], module = library.pop(), index = module.indexOf("@"), exports="", cname="", index2 = lib.indexOf("=");
@@ -850,7 +858,7 @@ var E_NONE = 0,
 	E_WARNING = 4,
 	E_INFO = 8,
 	E_ALL = E_ERROR | E_NOTICE | E_WARNING | E_INFO;
-var ExceptionManager = (function() {
+var MEM = ExceptionManager = (function() {
 	var b = {};
 	var c = [],
 		d = E_ALL,
@@ -863,6 +871,19 @@ var ExceptionManager = (function() {
 	var a = function(e) {
 		var f = "0000000" + e.toString(16).toUpperCase();
 		return f.substr(f.length - 8)
+	};
+	var fnum = function(e) {
+		if(e<10) return "0" + e;
+		return e;
+	};
+	var ft = function(e) {
+		return e.getFullYear() 
+		+ "-" + fnum(e.getMonth()+1) 
+		+ "-" + fnum(e.getDate()) 
+		+ " " + fnum(e.getHours()) 
+		+ ":" + fnum(e.getMinutes()) 
+		+ ":" + fnum(e.getSeconds()) 
+		+ "." + e.getMilliseconds();
 	};
 	function h(num){
 		return num == 1 ? "E_ERROR" : (num == 2 ? "E_NOTICE" : (num == 4 ? "E_WARNING" : "E_INFO"));
@@ -914,37 +935,29 @@ var ExceptionManager = (function() {
 		for (var f = 0; f < c.length; f++) {
 			var e = c[f];
 			if (e.level & d) {
-				g += F.format(
-					"[<b>0x{0:X8}</b>] <span style=\"color:" + j[e.level] + "\">{1}：{2} [{3}]</span>\r\n",
-					e.Number,
-					e.Source,
-					F.encodeHtml(e.Description),
-					h(e.level)
-				);
-				if(e.filename) g += "  文件：" + e.filename + "\r\n";
-				if(e.lineNumber>0) g += "  行号：" + e.lineNumber + "\r\n";
-				if(e.traceCode) g += "  源码：<span style=\"color:red\">" + e.traceCode + "</span>\r\n";
+				g += "[<b>0x" + a(e.Number) + "</b>] <span style=\"color:" + j[e.level] + "\">" + e.Source + ": " + Server.HTMLEncode(e.Description) + " [" + h(e.level) + "]</span>\r\n";
+				if(e.filename) g += "  File: " + e.filename + "\r\n";
+				if(e.lineNumber>0) g += "  Line: " + e.lineNumber + "\r\n";
+				if(e.traceCode) g += "  Code: <span style=\"color:red\">" + e.traceCode + "</span>\r\n";
 			}
 		}
 		if(g=="") return "";
 		return "<pre style=\"font-family:'Courier New';font-size:12px; padding:8px; background-color:#f6f6f6;border:1px #ddd solid;border-radius:5px;line-height:18px;\">" + g +"</pre>";
 	};
-	b.debug2file = function() {
+	b.debug2file = function(file) {
 		if(c.length == 0) return "";
 		var g = "";
 		for (var f = 0; f < c.length; f++) {
 			var e = c[f];
 			if (e.level & d) {
-				g += F.format("[{3}]{0}({4}.{5})：{1} [{2}]\r\n",e.Source, e.Description, h(e.level), F.formatdate(e.datetime, "yyyy-MM-dd HH:mm:ss.tttt"), Mo.Method, Mo.Action);
-				if(e.filename) g += "  文件：" + e.filename + "\r\n";
-				if(e.lineNumber>0) g += "  行号：" + e.lineNumber + "\r\n";
-				if(e.traceCode) g += "  源码：" + e.traceCode + "\r\n";
+				g += "[" + ft(e.datetime) + "][" + Mo.Method + "." + Mo.Action + "]" + e.Source + ": " + e.Description + " [" + h(e.level) + "]\r\n";
+				if(e.filename) g += "  File: " + e.filename + "\r\n";
+				if(e.lineNumber>0) g += "  Line: " + e.lineNumber + "\r\n";
+				if(e.traceCode) g += "  Code: " + e.traceCode + "\r\n";
 			}
 		}
 		if(g=="") return;
-		if(Mo.Config.Global.MO_DEBUG_FILE){
-			IO.file.appendAllText(Mo.Config.Global.MO_DEBUG_FILE, g);
-		}
+		IO.file.appendAllText(file, g + "\r\n");
 	};
 	return b
 })();

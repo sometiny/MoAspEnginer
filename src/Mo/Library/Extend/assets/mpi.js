@@ -46,24 +46,12 @@ function _install(pkg, idy, update){
 	if(!IO.directory.exists(_installDirectory)){
 		update = false;
 	}
-	var pkgtype = Mpi.packageExists2("jszip") ? "jszip" : (Mpi.packageExists2("assets/tar") ? "tar" : "none");
-	if(pkgtype=="none"){
-		Mpi.message = "can not find any method to unpack.";
-		return false;
-	}
 	var zipdata, JSZip, zip;
 	try{
 		var packagepath = IO.build(Mpi.PATH.CACHE,F.format("{0}@{1}.zip",pkg.name,pkg.version));
-		if(pkgtype == "tar"){
-			JSZip = require("assets/tar");
-			zip = new JSZip(packagepath);
-			IO.file.del(packagepath);
-		}else{
-			JSZip = require(pkgtype);
-			zipdata = IO.file.readAllBytes(packagepath);
-			IO.file.del(packagepath);
-			zip = new JSZip(base64.fromBinary(zipdata), {base64:true});
-		}
+		JSZip = require("assets/tar");
+		zip = new JSZip(packagepath);
+		IO.file.del(packagepath);
 	}catch(ex){
 		Mpi.message = ex.description;
 		return false;
@@ -94,7 +82,7 @@ function _install(pkg, idy, update){
 		}else{
 			var parentDir=IO.parent(dest);
 			if(!IO.directory.exists(parentDir)) IO.directory.create(parentDir);
-			IO.file.writeAllBytes(dest,pkgtype == "jszip" ? base64.toBinary(base64.e(file._data.getContent())) : file.data);
+			IO.file.writeAllBytes(dest, file.data);
 			unziped.push("F~" + dest);
 		}
 	}
@@ -185,15 +173,7 @@ Mpi.setDefaultInstallDirectory = function(dest){
  * @return {Boolean} return true if download successfully, otherwise false;
  */
 Mpi.download = function(pkg){
-	var pkgtype = Mpi.packageExists2("jszip") ? "" : (Mpi.packageExists2("assets/tar") ? "tar" : "none");
-	if(pkgtype == "none"){ 
-		Mpi.message = "can not find any method to unpack.";
-		return false;
-	}
-	var type = "";
-	if(pkgtype == "tar") type = "tar";
-	else if (pkgtype == "xmlpkg") type = "xml";
-	return _saveBinary(F.string.format("http://{0}/?/mpi/package/download/{1}/{2}", MPIHost, pkg.name, pkgtype),IO.build(Mpi.PATH.CACHE,F.format("{0}@{1}.zip",pkg.name,pkg.version)));
+	return _saveBinary(F.string.format("http://{0}/?/mpi/package/download/{1}/tar", MPIHost, pkg.name),IO.build(Mpi.PATH.CACHE,F.format("{0}@{1}.zip",pkg.name,pkg.version)));
 };
 
 /**

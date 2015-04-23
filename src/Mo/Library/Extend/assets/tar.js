@@ -2,7 +2,7 @@
 /*
 ** tar package£¬Old-Style Archive Format
 */
-
+var string2buffer = F.string.getByteArray, buffer2string = F.string.fromByteArray;
 function zipfolder(zip,path){
 	IO.directory.directories(path,function(f){
 		zipfolder(zip.folder(f.name),f.path);
@@ -41,14 +41,14 @@ $manager.prototype.generate = function(path, output){
 	dogenerate(fp, "", this.files);
 	var ending = [];
 	for(var i=0;i<1024;i++) ending.push(0);
-	IO.file.write(fp, base64.toBinary(base64.e(ending)));
+	IO.file.write(fp, IO.buffer2binary(ending));
 	if(!output){
 		IO.file.flush(fp);
 		IO.file.close(fp);
 		return true
 	}else{
 		IO.file.seek(fp, 0);
-		var data = base64.d(base64.fromBinary(IO.file.read(fp)));
+		var data = IO.binary2buffer(IO.file.read(fp));
 		IO.file.close(fp);
 		return data;
 	}
@@ -62,7 +62,7 @@ $manager.prototype.load = function(files){
 	var fp = IO.file.open(files, {forRead : true, forText : false});
 	this.loader.fp = fp;
 	IO.file.seek(fp, size-1024);
-	var ending = base64.d(base64.fromBinary(IO.file.read(fp))),filechecksum=0;
+	var ending = IO.binary2buffer(IO.file.read(fp)),filechecksum=0;
 	for(var i=0;i<1024;i++){
 		filechecksum += ending[i];
 	}
@@ -86,7 +86,7 @@ $manager.prototype.read = function(fn){
 	if(this.loader.fp<0) return false;
 	var fp = this.loader.fp;
 	IO.file.seek(fp, this.loader.offset);
-	var header = base64.d(base64.fromBinary(IO.file.read(fp,512)));
+	var header = IO.binary2buffer(IO.file.read(fp,512));
 	if(header.length<512){
 		return false;
 	}
@@ -94,7 +94,7 @@ $manager.prototype.read = function(fn){
 	var checksum_new=0;
 	this.loader.offset+=512;
 	var filename = header.slice(0, 100);
-	filename = F.string.fromByteArray(filename);
+	filename = buffer2string(filename);
 	var linkflag = header[156];
 	var headerobj = new tarHeader(filename, '', linkflag == 0x35);
 	var size = parseOtc(header.slice(124, 136));
@@ -127,18 +127,18 @@ function dogenerate(fp, name, files){
 		if(typeof file == "string"){
 			var header = tarHeader(name + i, file, false);
 			header.generate();
-			IO.file.write(fp, base64.toBinary(base64.e(header.data)));
+			IO.file.write(fp, IO.buffer2binary(header.data));
 			IO.file.write(fp, IO.file.readAllBytes(header.file));
 			var padding= header.filesize % 512;
 			if(padding>0){
 				var pad = [];
 				for(var i=0;i<512-padding;i++) pad.push(0);
-				IO.file.write(fp, base64.toBinary(base64.e(pad)));
+				IO.file.write(fp, IO.buffer2binary(pad));
 			}
 		}else{
 			var header = tarHeader(name + i, "", true);
 			header.generate();
-			IO.file.write(fp, base64.toBinary(base64.e(header.data)));
+			IO.file.write(fp, IO.buffer2binary(header.data));
 			dogenerate(fp, name + i + "\\", file);
 		}
 	}
@@ -175,7 +175,9 @@ $manager.unpack = function(srcfile,dest){
 		}else{
 			var destfile = IO.build(dest,file.name),parentDir=IO.parent(destfile);
 			if(!IO.directory.exists(parentDir))IO.directory.create(parentDir);
-			IO.file.writeAllBytes(destfile,file.data);
+			if(file.filesize>0){
+				IO.file.writeAllBytes(destfile,file.data);
+			}
 		}
 	}
 	return true;
@@ -186,7 +188,7 @@ var formatOtc = function(num, len){
 	while(numstr.length < len){
 		numstr = " " + numstr;
 	}
-	return F.string.getByteArray(numstr);
+	return string2buffer(numstr);
 };
 var parseOtc = function(ary){
 	ary.pop();
@@ -194,7 +196,7 @@ var parseOtc = function(ary){
 	while(ary[i]==0x20){
 		ary.shift();
 	}
-	return parseInt(F.string.fromByteArray(ary),8);
+	return parseInt(buffer2string(ary),8);
 };
 function push(src , dest){
 	for(var i=0 ;i<src.length;i++){
@@ -221,7 +223,7 @@ var tarHeader = function(name, file, isdir) {
 	this.createdate=0;
 };
 tarHeader.prototype.generate = function(){
-	var filename_byt = F.string.getByteArray(this.name);
+	var filename_byt = string2buffer(this.name);
 	while(filename_byt.length>99) filename_byt.pop();
 	while(filename_byt.length<100) filename_byt.push(0);
 	push(filename_byt, this);
@@ -245,3 +247,4 @@ tarHeader.prototype.generate = function(){
 	this.data[155] = 0;
 };
 module.exports = $manager;
+Tar = $manager;

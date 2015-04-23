@@ -8,7 +8,6 @@ var VBS = {
 	_cache:{}
 };
 try{
-	//为了一些必要的功能，不得不调用部分VBS的东西
     var objScrCtl = F.activex("MSScriptControl.ScriptControl");
     objScrCtl.Language = "VBScript";
     objScrCtl.AddObject("F", F);
@@ -21,7 +20,6 @@ try{
     	"end function\r\n"
     );
     
-    /*如下仅仅是利用VBS扩展功能*/
     (function(ScrCtl){
 	    VBS.ctrl=ScrCtl;
    		VBS.eval = function(script){
@@ -70,7 +68,7 @@ try{
 	    	}
 	    	if(!pathinfo || !IO.file.exists(pathinfo))
 		    {
-				ExceptionManager.put(0x00002CD, "VBS.include(lib)","待加载的类库'" + lib + "'不存在。");
+				ExceptionManager.put(0x00002CD, "VBS.include(lib)","library '" + lib + "'is not exists.");
 			    return false;
 		    }
 			if(!VBS._cache.hasOwnProperty(lib)){

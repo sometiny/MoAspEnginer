@@ -1,0 +1,19 @@
+﻿{
+	"name" : "encoding",
+	"version" : "1.0.0",
+	"description" : "提供Unicode、GBK、UTF-8编码的支持。",
+	"keywords" : ["encoding", "Unicode", "GBK", "UTF-8"],
+	"homepage" : "http://mpi.thinkasp.cn/?/mpi/package/info/encoding",
+	"license" : "GPLv3",
+	"author" : 
+	{
+		"name" : "Anlige",
+		"email" : "zhanghuiguoanlige@126.com",
+		"url" : "http://m.thinkasp.cn/"
+	},
+	"files" : [
+		"index.js",
+		"codepage/*"
+	],
+	"main" : "encoding"
+}

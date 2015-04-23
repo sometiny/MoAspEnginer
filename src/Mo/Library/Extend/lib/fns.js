@@ -398,7 +398,7 @@ _.formatdate = function(dt, fs) {
 			else{
 				dt = Date.parse(dt);
 				if(!dt){
-					ExceptionManager.put(0x3456,"F.formatdate","输入日期格式错误，无法解析");
+					ExceptionManager.put(0x3456,"F.formatdate","date string format error, parse failed.");
 					return "";
 				}
 			}

@@ -3,7 +3,7 @@ var encode_ = function(Str) {
 		var output = "";
 		var chr1, chr2, chr3 = "";
 		var enc1, enc2, enc3, enc4 = "";
-		var i = 0;
+		var i = 0, l = Str.length;
 		do {
 			chr1 = Str[i++];
 			chr2 = Str[i++];
@@ -20,14 +20,14 @@ var encode_ = function(Str) {
 			output = output + base64keyStr_.charAt(enc1) + base64keyStr_.charAt(enc2) + base64keyStr_.charAt(enc3) + base64keyStr_.charAt(enc4);
 			chr1 = chr2 = chr3 = "";
 			enc1 = enc2 = enc3 = enc4 = "";
-		} while (i < Str.length);
+		} while (i < l);
 		return output;
 	};
 var decode_ = function(Str) {
 		var output = [];
 		var chr1, chr2, chr3 = "";
 		var enc1, enc2, enc3, enc4 = "";
-		var i = 0;
+		var i = 0, l = Str.length;
 		do {
 			enc1 = base64keyStr_.indexOf(Str.charAt(i++));
 			if(enc1<0)continue;
@@ -49,7 +49,7 @@ var decode_ = function(Str) {
 			}
 			chr1 = chr2 = chr3 = "";
 			enc1 = enc2 = enc3 = enc4 = "";
-		} while (i < Str.length);
+		} while (i < l);
 		return output;
 	};
 var $node = F.activex("MSXML2.DOMDocument", function() {
