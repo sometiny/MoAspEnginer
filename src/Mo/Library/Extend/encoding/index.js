@@ -213,9 +213,10 @@ module.exports = (function(){
 			return ret;
 		};
 		$utf8.getByteArray = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			var i=0,c,ret=[];
-			while(i<u.length){
+			while(i<_len){
 				c = u.charCodeAt(i);
 				if(c<0x7f) ret.push(c);
 				else{
@@ -229,9 +230,10 @@ module.exports = (function(){
 			return String.fromCharCode.apply(null,$utf8.getByteArray(u));
 		};
 		$utf8.toString = function(u){
-			if(u.length<=0)return "";
+			var _len = u.length;
+			if(_len<=0)return "";
 			var i=0,c,ret="";
-			while(i<u.length){
+			while(i<_len){
 				if(u[i]<0x7f) ret+=String.fromCharCode(u[i]);
 				else{
 					ret+=String.fromCharCode(utf8tou(u[i]));
@@ -241,9 +243,10 @@ module.exports = (function(){
 			return ret;			
 		};
 		$utf8.getString = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			var i=0,c,ret="";
-			while(i<u.length){
+			while(i<_len){
 				var word = bytestoword(u,i);
 				ret+=String.fromCharCode(utf8tou(word[1]));
 				i+=word[0];
@@ -303,10 +306,11 @@ module.exports = (function(){
 			return ret;
 		};
 		$gbk.getWordArray = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			if(!opencp())return [];
 			var i=0,c,ret=[];
-			while(i<u.length){
+			while(i<_len){
 				c = u.charCodeAt(i);
 				if(c<0x7f) ret.push(c);
 				else{
@@ -319,10 +323,11 @@ module.exports = (function(){
 			return ret;
 		};
 		$gbk.getByteArray = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			if(!opencp())return [];
 			var i=0,c,ret=[];
-			while(i<u.length){
+			while(i<_len){
 				c = u.charCodeAt(i);
 				if(c<0x7f) ret.push(c);
 				else ret = ret.concat(u2g(c)); 
@@ -332,9 +337,10 @@ module.exports = (function(){
 			return ret;
 		};
 		$gbk.bytesToWords = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			var i=0,c,ret=[];
-			while(i<u.length){
+			while(i<_len){
 				c = u[i];
 				if(c<=0x7f)ret.push(c);
 				else{
@@ -349,10 +355,11 @@ module.exports = (function(){
 			return String.fromCharCode.apply(null,$gbk.getByteArray(u));
 		};
 		$gbk.toString = function(bytes){
-			if(bytes.length<=0)return "";
+			var _len = bytes.length;
+			if(_len<=0)return "";
 			if(!opencp("g2u"))return "";
 			var ret="",i=0;
-			while(i<bytes.length){
+			while(i<_len){
 				if(bytes[i]<0x7f) ret+=String.fromCharCode(bytes[i]);
 				else{
 					var u = g2u(bytes[i]);
@@ -364,10 +371,11 @@ module.exports = (function(){
 			return ret;
 		};
 		$gbk.getString = function(u){
-			if(u.length<=0)return "";
+			var _len = u.length;
+			if(_len<=0)return "";
 			var i=0,c,ret="";
 			if(!opencp("g2u"))return "";
-			while(i<u.length){
+			while(i<_len){
 				c = u[i];
 				if(c<=0x7f)ret+=String.fromCharCode(c);
 				else{
@@ -385,17 +393,19 @@ module.exports = (function(){
 	$enc.unicode = $enc.unicode || (function(){
 		var $unicode={};
 		$unicode.getWordArray = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			var i=0,c,ret=[];
-			while(i<u.length){
+			while(i<_len){
 				ret.push(u.charCodeAt(i++));
 			}
 			return ret;
 		};
 		$unicode.getByteArray = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			var i=0,c,ret=[];
-			while(i<u.length){
+			while(i<_len){
 				c=u.charCodeAt(i++);
 				ret.push( c & 0xff);
 				ret.push( (c>>8) & 0xff); /*Little-Endian*/
@@ -403,9 +413,10 @@ module.exports = (function(){
 			return ret;
 		};
 		$unicode.bytesToWords = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			var i=0,c,ret=[];
-			while(i<u.length-1){
+			while(i<_len-1){
 				ret.push( (u[i+1]<<8) +u[i]); /*Little-Endian*/
 				i+=2;
 			}
@@ -415,17 +426,19 @@ module.exports = (function(){
 			return String.fromCharCode.apply(null,$unicode.getByteArray(u));
 		};
 		$unicode.toString = function(u){
-			if(u.length<=0)return "";
+			var _len = u.length;
+			if(_len<=0)return "";
 			var i=0,c,ret="";
-			while(i<u.length){
+			while(i<_len){
 				ret+=String.fromCharCode(u[i++]);
 			}
 			return ret;
 		};
 		$unicode.getString = function(u){
-			if(u.length<=0)return "";
+			var _len = u.length;
+			if(_len<=0)return "";
 			var i=0,c,ret="";
-			while(i<u.length-1){
+			while(i<_len-1){
 				ret+=String.fromCharCode((u[i+1]<<8) +u[i]); /*Little-Endian*/
 				i+=2;
 			}

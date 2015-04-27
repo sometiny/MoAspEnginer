@@ -195,9 +195,9 @@ $manager.unpack = function(srcfile,dest){
 };
 var ArrayPush = Array.prototype.push;
 var formatOtc = function(num, len){
-	var numstr = num.toString(8)+" ";
+	var numstr = num.toString(8)+" ", _len = numstr.length;
 	len = len || 12;
-	while(numstr.length < len){
+	while(_len++ < len){
 		numstr = " " + numstr;
 	}
 	return string2buffer(numstr);
@@ -211,13 +211,15 @@ var parseOtc = function(ary){
 	return parseInt(buffer2string(ary),8);
 };
 function push(src , dest){
-	for(var i=0 ;i<src.length;i++){
+	var _len = src.length;
+	for(var i=0 ;i<_len;i++){
 		dest.checksum += src[i];
 	}
 	ArrayPush.apply(dest.data, src);
 }
 function set(src, start, dest){
-	for(var i=0 ;i<src.length;i++){
+	var _len = src.length;
+	for(var i=0 ;i<_len;i++){
 		dest.data[start+i] = src[i];
 	}
 }

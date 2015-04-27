@@ -67,15 +67,16 @@ DataTable.prototype.__AddDataSet__ = function(rs,pagesize){
 	if(rs.state == 0){ExceptionManager.put(new Exception(0,"DataTable.__AddDataSet__(rs,pagesize)","Recordset's state is 'closed'."));return;}
 	try{
 		if(pagesize == undefined)pagesize = -1;
-		var ps = rs.AbsolutePosition;
-		var k = 0;
+		var ps = rs.AbsolutePosition, k = 0, fcount=0;
+		if(!rs.eof) fcount = rs.fields.Count;
 		while(!rs.eof && (k < pagesize || pagesize == -1)){
 			k++;
-			var tmp__ = new Object();
-			for(var i = 0;i < rs.fields.count;i++){
-				tmp__[rs.fields(i).Name] = rs.fields(i).value;
+			var r = {}, fields = rs.fields, field;
+			for(var i = 0;i < fcount;i++){
+				field = fields(i);
+				r[field.Name] = field.value;
 			}
-			this.LIST__.push(tmp__);
+			this.LIST__.push(r);
 			rs.MoveNext();
 		}
 		try{
@@ -109,8 +110,9 @@ DataTable.prototype.read = function(name){
 DataTable.prototype.each = function(callback){
 	if(typeof callback == "string")callback = (function(format){return function(r){F.echo(F.format(format,r));};})(callback);
 	if(typeof callback != "function")return;
-	for(var i = 0;i < this['LIST__'].length;i++){
-		callback.call(this,this['LIST__'][i],i);
+	var  _list = this['LIST__'],_len = _list.length;
+	for(var i = 0;i < _len;i++){
+		callback.call(this,_list[i],i);
 	}
 }
 

@@ -59,8 +59,9 @@ MoAspEnginerView.prototype.parse = function() {
 	this.parsePreCombine();
 	if (G.MO_TAG_LIB != "") {
 		var libs = G.MO_TAG_LIB.split(","),
-			lib, closetag, tagcontent;
-		for (var i = 0; i < libs.length; i++) {
+			lib, closetag, tagcontent,
+			_len = libs.length;
+		for (var i = 0; i < _len; i++) {
 			lib = libs[i];
 			closetag = true;
 			tagcontent = "";
@@ -172,8 +173,8 @@ MoAspEnginerView.prototype.parseArguments = function($2){
 	$2 = replacementter($2, "\\\"", "\\\"", function(v){
 		return "\"" + v.replace(/\,/ig,"`--DOTTED--`") +"\"";
 	},null);
-	var args = $2.split(","), argresult="", lastpart="";
-	for(var i=0;i<args.length;i++){
+	var args = $2.split(","), argresult="", lastpart="", _len = args.length;
+	for(var i=0;i<_len;i++){
 		if(args[i] == "{{k}}") argresult += args[i] + ",";
 		else{
 			args[i] = args[i].replace(/`--DOTTED--`/ig,",");
@@ -267,7 +268,8 @@ MoAspEnginerView.prototype.parsePage = function() {
 //****************************************************
 MoAspEnginerView.prototype.getLoops = function(name) {
 	if (name.constructor == Array) {
-		for (var i = 0; i < name.length; i++) {
+		var _len = name.length;
+		for (var i = 0; i < _len; i++) {
 			this.getLoops(name[i]);
 		}
 		return;
@@ -455,7 +457,8 @@ MoAspEnginerView.prototype.parseExpressionComponent = function(compare) {
 //****************************************************
 MoAspEnginerView.prototype.parseCompare = function(tag) {
 	if (tag.constructor == Array) {
-		for (var i = 0; i < tag.length; i++) {
+		var _len = tag.length;
+		for (var i = 0; i < _len; i++) {
 			this.parseCompare(tag[i]);
 		}
 		return;
@@ -527,7 +530,8 @@ MoAspEnginerView.prototype.parseSource = function() {
 //****************************************************
 MoAspEnginerView.prototype.parseVari = function(chars) {
 	if (chars.constructor == Array) {
-		for (var i = 0; i < chars.length; i++) {
+		var _len = chars.length;
+		for (var i = 0; i < _len; i++) {
 			this.parseVari(chars[i]);
 		}
 		return;

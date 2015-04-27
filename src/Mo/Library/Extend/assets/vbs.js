@@ -38,18 +38,18 @@ try{
 	   		return ScrCtl.eval("GetRef(\"" + func + "\")");
    		};
 	    VBS.run = function(){
-		    var args = [];for(var i = 0;i < arguments.length;i++)args.push("args" + i);var args_ = args.join(",");
+		    var args = [],_len = arguments.length;for(var i = 0;i < _len;i++)args.push("args" + i);var args_ = args.join(",");
 		    var result = (new Function(args_,"return this.Run(" + args_ + ");")).apply(ScrCtl,arguments);
 		    return result;
 	    };
 	    VBS.require = function(name){
 		    return (function(args){
-			    var obj = ScrCtl.eval("new " + name);
-			    if(args.length>0 && args.length % 2==0){
-				    for(var i=0;i<args.length-1;i++){
+			    var obj = ScrCtl.eval("new " + name), _len = args.length;
+			    if(_len>0 && _len % 2==0){
+				    for(var i=0;i<_len-1;i++){
 					    obj[args[i]]=args[++i];
 				    }
-			    }else if(args.length==1 && typeof args[0]=="object"){
+			    }else if(_len==1 && typeof args[0]=="object"){
 				    for(var i in args[0]){
 					    if(!args[0].hasOwnProperty(i))continue;
 					    obj[i]=args[0][i];

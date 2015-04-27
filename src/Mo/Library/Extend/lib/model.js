@@ -288,8 +288,8 @@ __Model__.prototype.cache = function(name){
 };
 
 __Model__.prototype.field = function(){
-	var _fields="";
-	for(var i=0;i<arguments.length;i++){
+	var _fields="", _len = arguments.length;
+	for(var i=0;i<_len;i++){
 		_fields += arguments[i] + ",";
 	}
 	if(_fields!="")_fields=_fields.substr(0,_fields.length-1);
@@ -300,9 +300,10 @@ __Model__.prototype.field = function(){
 
 __Model__.prototype.where = function(where){
 	if(where == undefined)return this;
-	if(arguments.length <= 0)return this;
+	var _len = arguments.length;
+	if(_len <= 0)return this;
 	var strwhere = "("+arguments[0]+")",sp = "";
-	for(var i = 1;i < arguments.length;i++){
+	for(var i = 1;i < _len;i++){
 		sp = arguments[i].substr(0,1);
 		strwhere =	"(" + strwhere + (sp == "|"?" or ":" and ") + (sp == "|" ?  arguments[i].substr(1):arguments[i]) +")";
 	}

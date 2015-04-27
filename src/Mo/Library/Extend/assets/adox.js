@@ -72,8 +72,9 @@ var _table = function(obj) {
 	table.columns = function(name) {
 		if (_columns == null) {
 			_columns = {};
-			for (var i = 0; i < __table.Columns.Count; i++) {
-				_columns[__table.Columns[i].Name] = __table.Columns[i];
+			var __Columns = __table.Columns, count=__Columns.Count;
+			for (var i = 0; i < count; i++) {
+				_columns[__Columns[i].Name] = __Columns[i];
 			}
 		}
 		if (_columns.hasOwnProperty(name)) return _columns[name];

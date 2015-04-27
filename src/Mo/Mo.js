@@ -204,8 +204,8 @@ var F, JSON, require, VBS, View, Model__,
 		};
 		var _start = function() {
 			if (G.MO_PRE_LIB != "") {
-				var libs = G.MO_PRE_LIB.split(",");
-				for (var i = 0; i < libs.length; i++) {
+				var libs = G.MO_PRE_LIB.split(","), _len = libs.length;
+				for (var i = 0; i < _len; i++) {
 					var asset = _LoadAssets(libs[i]);
 					if (asset) {
 						asset.Index();
@@ -217,8 +217,8 @@ var F, JSON, require, VBS, View, Model__,
 
 		var _end = function() {
 			if (G.MO_END_LIB != "") {
-				var libs = G.MO_END_LIB.split(",");
-				for (var i = 0; i < libs.length; i++) {
+				var libs = G.MO_END_LIB.split(","), _len = libs.length;
+				for (var i = 0; i < _len; i++) {
 					var asset = _LoadAssets(libs[i]);
 					if (asset) {
 						asset.Index();
@@ -295,8 +295,8 @@ var F, JSON, require, VBS, View, Model__,
 			}
 		};
 		var _getfunctionParms = function(fn) {
-			var _parms = fn.toString().replace(/^function(.*?)\((.*?)\)([\s\S]+)$/, "$2").replace(/\s/igm, "").split(",");
-			for (var i = 0; i < _parms.length; i++) {
+			var _parms = fn.toString().replace(/^function(.*?)\((.*?)\)([\s\S]+)$/, "$2").replace(/\s/igm, "").split(","), _len = _parms.length;
+			for (var i = 0; i < _len; i++) {
 				_parms[i] = F.get(_parms[i]);
 			}
 			return _parms;
@@ -430,9 +430,9 @@ var F, JSON, require, VBS, View, Model__,
 			if (G.MO_CHARSET != "utf-8") res.Charset = G.MO_CHARSET;
 			if (IO.file.exists(G.MO_APP + "Common/Function.asp")) _wapperfile(G.MO_APP + "Common/Function.asp");
 			if (G.MO_IMPORT_COMMON_FILES != "") {
-				var files = G.MO_IMPORT_COMMON_FILES.split(";")
-				if (files.length <= 0) return;
-				for (var i = 0; i < files.length; i++) {
+				var files = G.MO_IMPORT_COMMON_FILES.split(";"), _len = files.length;
+				if (_len <= 0) return;
+				for (var i = 0; i < _len; i++) {
 					if (!files[i]) continue;
 					_wapperfile(G.MO_APP + "Common/" + files[i] + ".asp");
 				}
@@ -492,8 +492,8 @@ var F, JSON, require, VBS, View, Model__,
 				return;
 			}
 			var reqmethod = F.server("REQUEST_METHOD"), reston = G.MO_ROUTE_REST_ENABLED, RouteTo="";
-			var Rules = G.MO_ROUTE_RULES;
-			for (var i = 0; i < Rules.length; i++) {
+			var Rules = G.MO_ROUTE_RULES, _len = Rules.length;
+			for (var i = 0; i < _len; i++) {
 				var rule = Rules[i], lookfor = rule.LookFor;
 				if(!rule.Method) rule.Method = "GET";
 				if(typeof lookfor == "string") lookfor = _pathtoRegexp(lookfor, null, {strict:true});
@@ -838,7 +838,8 @@ var F, JSON, require, VBS, View, Model__,
 			cname = lib.substr(index2+1);
 			lib = lib.substr(0, index2);
 		}
-		for(var i=0;i<library.length;i++){
+		var _len = library.length;
+		for(var i=0;i<_len;i++){
 			var method = "." + library[i];
 			if(library[i]==null) method="";
 			var body = lib + method + " = function(){" + lib + " = require(\"" + module + "\")" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};";
@@ -930,9 +931,9 @@ var MEM = ExceptionManager = (function() {
 		}
 	};
 	b.debug = function() {
-		if(c.length == 0) return "";
-		var g = "";
-		for (var f = 0; f < c.length; f++) {
+		var g = "", _len = c.length;
+		if(_len == 0) return "";
+		for (var f = 0; f < _len; f++) {
 			var e = c[f];
 			if (e.level & d) {
 				g += "[<b>0x" + a(e.Number) + "</b>] <span style=\"color:" + j[e.level] + "\">" + e.Source + ": " + Server.HTMLEncode(e.Description) + " [" + h(e.level) + "]</span>\r\n";
@@ -945,9 +946,9 @@ var MEM = ExceptionManager = (function() {
 		return "<pre style=\"font-family:'Courier New';font-size:12px; padding:8px; background-color:#f6f6f6;border:1px #ddd solid;border-radius:5px;line-height:18px;\">" + g +"</pre>";
 	};
 	b.debug2file = function(file) {
-		if(c.length == 0) return "";
-		var g = "";
-		for (var f = 0; f < c.length; f++) {
+		var g = "", _len = c.length;
+		if(_len == 0) return "";
+		for (var f = 0; f < _len; f++) {
 			var e = c[f];
 			if (e.level & d) {
 				g += "[" + ft(e.datetime) + "][" + Mo.Method + "." + Mo.Action + "]" + e.Source + ": " + e.Description + " [" + h(e.level) + "]\r\n";
