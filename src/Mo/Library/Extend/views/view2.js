@@ -409,9 +409,9 @@ MoAspEnginerView.prototype.parseExpressionComponent = function(compare) {
 	F.string.matches(compare, /\b(and|or|group)\=(\"|\')(.+?)(\2)/igm, function($0, $1, $2, $3) {
 		if ($1 == "and" || $1 == "or") {
 			var v_ = $3,
-				varmatches = /^(.+?)((\s)(\+|\-|\*|\/|%|\<\<|\>\>|\>\>\>|\+\=|\-\=|\*\=|\/\=|\||\&|\&\&|\|\|)(\s)([\d\.e\+]+))?(\s)(gt|lt|ngt|nlt|eq|neq)(\s)(.+?)$/i.exec(v_);
+				varmatches = /^(.+?)((?:\s*)(\+|\-|\*|\/|%|\<\<|\>\>|\>\>\>|\+\=|\-\=|\*\=|\/\=|\||\&|\&\&|\|\|)(?:\s*)([\d\.e\+]+))?(?:\s*)(gt|lt|ngt|nlt|eq|neq)(?:\s*)(.+?)$/i.exec(v_);
 			if (varmatches) {
-				var vv_ = varmatches[10];
+				var vv_ = varmatches[6];
 				if (expression != "") expression += " " + ($1 == "and" ? "&&" : "||") + " ";
 				if (vv_ == "Empty") {
 					var vari = this.parseAssign(varmatches[1]);
@@ -420,12 +420,12 @@ MoAspEnginerView.prototype.parseExpressionComponent = function(compare) {
 				} else {
 					expression += this.parseAssign(varmatches[1]);
 					if (varmatches[2] != "") expression += varmatches[2];
-					if (varmatches[8] == "gt") expression += " > ";
-					if (varmatches[8] == "lt") expression += " < ";
-					if (varmatches[8] == "ngt") expression += " <= ";
-					if (varmatches[8] == "nlt") expression += " >= ";
-					if (varmatches[8] == "eq") expression += " == ";
-					if (varmatches[8] == "neq") expression += " != ";
+					if (varmatches[5] == "gt") expression += " > ";
+					if (varmatches[5] == "lt") expression += " < ";
+					if (varmatches[5] == "ngt") expression += " <= ";
+					if (varmatches[5] == "nlt") expression += " >= ";
+					if (varmatches[5] == "eq") expression += " == ";
+					if (varmatches[5] == "neq") expression += " != ";
 					if (checkassign(vv_)) {
 						vv_ = this.parseAssign(vv_);
 					}
@@ -547,10 +547,10 @@ MoAspEnginerView.prototype.parseVari = function(chars) {
 MoAspEnginerView.prototype.parseAssign = function(key) {
 	var k = key,
 		v, m_, ms_, l, c, cf, kn;
-	var ms_ = /^([\w\.]+?)((\s)(\+|\-|\*|\/|%|\<\<|\>\>|\>\>\>|\+\=|\-\=|\*\=|\/\=|\||\&|\&\&|\|\|)(\s)([\d\.e\+]+))?(\:(.+?))?$/i.exec(key);
+	var ms_ = /^([\w\.]+?)((?:\s*)(\+|\-|\*|\/|%|\<\<|\>\>|\>\>\>|\+\=|\-\=|\*\=|\/\=|\||\&|\&\&|\|\|)(?:\s*)([\d\.e\+]+))?(?:\s*)(\:(.+?))?(\s*?)$/i.exec(key);
 	if (ms_) {
 		l = ms_[1];
-		c = ms_[8];
+		c = ms_[6];
 		if (c == "") {
 			var rv = "";
 			if (l.indexOf(".") <= 0) {
