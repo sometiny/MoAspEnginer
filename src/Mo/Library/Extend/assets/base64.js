@@ -5,7 +5,7 @@ var encode_ = function(Str) {
 	var chr1, chr2, chr3 = "";
 	var enc1, enc2, enc3, enc4 = "";
 	var i = 0, l = Str.length, l2 = l - l % 3;
-	do {
+	while(i < l2) {
 		chr1 = Str[i++];
 		chr2 = Str[i++];
 		chr3 = Str[i++];
@@ -14,7 +14,7 @@ var encode_ = function(Str) {
 		enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
 		enc4 = chr3 & 63;
 		output += map_num2char[enc1] + map_num2char[enc2] + map_num2char[enc3] + map_num2char[enc4];
-	} while (i < l2);
+	}
 	if(l - l2 == 2){
 		chr1 = Str[i++];
 		chr2 = Str[i++];
@@ -26,13 +26,14 @@ var encode_ = function(Str) {
 	return output;
 };
 var decode_ = function(Str) {
+	Str = Str.replace(/\s/g,'');
 	if(Str=="") return [];
 	var output = [];
 	var chr1, chr2, chr3 = "";
 	var enc1, enc2, enc3, enc4 = "";
 	var i = 0, l = Str.length, l2 = l;
 	if(Str.slice(-1)=="=") l2 = l-4;
-	do {
+	while (i < l2) {
 		enc1 = map_char2num[Str.charCodeAt(i++)];
 		enc2 = map_char2num[Str.charCodeAt(i++)];
 		enc3 = map_char2num[Str.charCodeAt(i++)];
@@ -41,7 +42,7 @@ var decode_ = function(Str) {
 		chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
 		chr3 = ((enc3 & 3) << 6) | enc4;
 		output.push(chr1,chr2,chr3);
-	} while (i < l2);
+	} ;
 	if(l != l2){
 		enc1 = map_char2num[Str.charCodeAt(i++)];
 		enc2 = map_char2num[Str.charCodeAt(i++)];

@@ -132,20 +132,20 @@ module.exports = (function(){
 			else if(u<=0x07FF){
 				a = 0xc0 | (u >> 6);
 				b = 0x80 | (u & 0x3f);
-				return (a<<8)+b;
+				return (a<<8) | b;
 			}
 			else if(u<=0xFFFF){
 				a = 0xe0 | (u >> 12);
 				b = 0x80 | ((u >> 6) & 0x3f);
 				c = 0x80 | (u & 0x3f);
-				return (a<<16)+(b<<8)+c;
+				return (a<<16) | (b<<8) | c;
 			}
 			else if(u<=0x10FFFF){
 				a = 0xf0 | (u >> 18);
 				b = 0x80 | ((u >> 12) & 0x3f);
 				c = 0x80 | ((u >> 6) & 0x3f);
 				d = 0x80 | (u & 0x3f);
-				var ret = (a<<24)+(b<<16)+(c<<8)+d;
+				var ret = (a<<24) | (b<<16) | (c<<8) | d;
 				if(ret<0)ret+=0x100000000;
 				return ret;
 			}else return 0;
@@ -156,20 +156,20 @@ module.exports = (function(){
 			else if(u<=0xdfbf) {
 				a = (u >> 8) & 0x1f;
 				b = u & 0x3f;
-				return (a << 6) + b;
+				return (a << 6) | b;
 			}
 			else if(u<=0xefbfbf) {
 				a = (u >> 16) & 0xf;
 				b = (u >> 8) & 0x3f;
 				c = u & 0x3f;
-				return (a << 12) + (b << 6) + c;
+				return (a << 12) | (b << 6) | c;
 			}
 			else if(u<=0xf48fbfbf) {
 				a = (u >>> 24) & 0x7;
 				b = (u >> 16) & 0x3f;
 				c = (u >> 8) & 0x3f;
 				d = u & 0x3f;
-				return (a << 18) + (b << 12) + (c << 6) + d;
+				return (a << 18) | (b << 12) | (c << 6) | d;
 			}
 			else return 0;
 		};
@@ -177,13 +177,13 @@ module.exports = (function(){
 			var c = u[i],ret=[1,c];
 			if(c<=0x7f)ret[1]=c;
 			else if(c<=0xDF){
-				ret[1]=(c << 8) + u[i+1];
+				ret[1]=(c << 8) | u[i+1];
 				ret[0]=2;
 			}else if(c<=0xEF){
-				ret[1]=(c << 16) + (u[i+1] << 8) + u[i+2];
+				ret[1]=(c << 16) | (u[i+1] << 8) | u[i+2];
 				ret[0]=3;
 			}else if(c<=0xF7){
-				ret[1]=(c << 24) + (u[i+1] << 16) + (u[i+2] << 8) + u[i+3];
+				ret[1]=(c << 24) | (u[i+1] << 16) | (u[i+2] << 8) | u[i+3];
 				ret[0]=4;
 			}
 			return ret;	
@@ -263,9 +263,9 @@ module.exports = (function(){
 			else if(u>0x9FA5)
 			{
 				if(u<0xFF01||u>0xFF61)return 0;
-				offset=u-0xFF01+0x9FA6-0x4E00;
+				offset=u-0xad5b;
 			}  
-			CP.gbk.stream.u2g.position=offset*2;
+			CP.gbk.stream.u2g.position=(offset << 1);
 			return IO.binary2buffer(CP.gbk.stream.u2g.read(2));
 		};
 		var g2u=function(g){
@@ -273,7 +273,7 @@ module.exports = (function(){
 			ch -= 0x81;
 			cl -= 0x40;
 			if(ch<=0x7d && cl<=0xbe){
-				CP.gbk.stream.g2u.position=(ch*0xbf+cl)*2;
+				CP.gbk.stream.g2u.position=((ch*0xbf+cl) << 1);
 				return IO.binary2buffer(CP.gbk.stream.g2u.read(2));
 			}else{
 				return [0x1f,0xff];
@@ -315,7 +315,7 @@ module.exports = (function(){
 				if(c<0x7f) ret.push(c);
 				else{
 					var g=u2g(c);
-					ret.push((g[0]<<8) + g[1]);
+					ret.push((g[0]<<8) | g[1]);
 				}
 				i++;
 			}
@@ -344,7 +344,7 @@ module.exports = (function(){
 				c = u[i];
 				if(c<=0x7f)ret.push(c);
 				else{
-					ret.push((c << 8) + u[i+1]);
+					ret.push((c << 8) | u[i+1]);
 					i++;
 				}
 				i++;
@@ -363,7 +363,7 @@ module.exports = (function(){
 				if(bytes[i]<0x7f) ret+=String.fromCharCode(bytes[i]);
 				else{
 					var u = g2u(bytes[i]);
-					ret+=String.fromCharCode((u[1]<<8)+u[0]);
+					ret+=String.fromCharCode((u[1]<<8) | u[0]);
 				}
 				i++;
 			}
@@ -379,8 +379,8 @@ module.exports = (function(){
 				c = u[i];
 				if(c<=0x7f)ret+=String.fromCharCode(c);
 				else{
-					var b = g2u((c << 8) + u[i+1]);
-					ret+=String.fromCharCode((b[1]<<8)+b[0]);
+					var b = g2u((c << 8) | u[i+1]);
+					ret+=String.fromCharCode((b[1]<<8) | b[0]);
 					i++;
 				}
 				i++;
@@ -417,7 +417,7 @@ module.exports = (function(){
 			if(_len<=0)return [];
 			var i=0,c,ret=[];
 			while(i<_len-1){
-				ret.push( (u[i+1]<<8) +u[i]); /*Little-Endian*/
+				ret.push( (u[i+1]<<8) | u[i]); /*Little-Endian*/
 				i+=2;
 			}
 			return ret;
@@ -439,7 +439,7 @@ module.exports = (function(){
 			if(_len<=0)return "";
 			var i=0,c,ret="";
 			while(i<_len-1){
-				ret+=String.fromCharCode((u[i+1]<<8) +u[i]); /*Little-Endian*/
+				ret+=String.fromCharCode((u[i+1]<<8) | u[i]); /*Little-Endian*/
 				i+=2;
 			}
 			return ret;
