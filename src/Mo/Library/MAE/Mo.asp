@@ -1,4 +1,5 @@
 ﻿<!--#include file="Mo.Function.asp"-->
+<script language="vbscript" runat="server" src="Mo.VBS.vbs"></script>
 <script language="jscript" runat="server">
 /*
 ** File: Mo.asp
@@ -626,112 +627,7 @@ var IO, JSON, require, ROOT = Server.Mappath("/"), Mo = Mo || (function(){
 	M.dump = function(){
 		F.dump(this.Assigns);
 	}
-	M.loadVBSHelper = function(){
-		try{
-			//为了一些必要的功能，不得不调用部分VBS的东西
-		    var objScrCtl = F.activex("MSScriptControl.ScriptControl");
-		    objScrCtl.Language = "VBScript";
-		    objScrCtl.AddObject("Model__",Model__);
-		    objScrCtl.AddObject("F",F);
-		    objScrCtl.AddObject("Mo",M);
-		    objScrCtl.AddObject("Request",Request);
-
-		    //用于获取查询影响行数的必要的vbs方法
-		    objScrCtl.ExecuteStatement(
-			    "function RecordsAffected(byref conn,byval sqlstring)\r\n" +
-			    "	conn.execute sqlstring,RecordsAffected\r\n" +
-			    "end function\r\n" +
-			    "set Model__.RecordsAffected=GetRef(\"RecordsAffected\")\r\n"
-		    );
-		    objScrCtl.ExecuteStatement(
-		    	"function RecordsAffectedCmd_(byref opt)\r\n" +
-		    	"	dim RecordsAffectedvar\r\n" +
-		    	"	if opt.withQuery then\r\n" +
-		    	"		set opt.dataset = opt.cmdobj.execute(RecordsAffectedvar)\r\n" +
-		    	"		opt.affectedRows = RecordsAffectedvar\r\n" +
-		    	"	else\r\n" +
-		    	"		opt.cmdobj.execute RecordsAffectedvar\r\n" +
-		    	"		opt.affectedRows = RecordsAffectedvar\r\n" +
-		    	"	end if\r\n" +
-		    	"end function\r\n" +
-		    	"set Model__.RecordsAffectedCmd_=GetRef(\"RecordsAffectedCmd_\")"
-		    );
-		    objScrCtl.ExecuteStatement(
-		    	"function charcodeb(b)\r\n" +
-		    	"	charcodeb = ascb(b)\r\n" +
-		    	"end function\r\n"
-		    );
-		    
-		    /*如下仅仅是利用VBS扩展功能*/
-		    (function(ScrCtl){
-			    F.vbs.ctrl=ScrCtl;
-		   		F.vbs.eval = function(script){
-			   		return ScrCtl.eval(script);
-		   		};
-		   		F.vbs.execute = function(script){
-			   		ScrCtl.ExecuteStatement(script);
-		   		};
-		   		F.vbs.ascb = function(b){
-			   		return ScrCtl.Run("charcodeb",b);
-		   		};
-		   		F.vbs.ns = function(name,value){
-			   		ScrCtl.AddObject(name,value);
-		   		};
-			    F.vbs.run = function(){
-				    var args = [];for(var i = 0;i < arguments.length;i++)args.push("args" + i);var args_ = args.join(",");
-				    return (new Function(args_,"return this.Run(" + args_ + ");")).apply(ScrCtl,arguments);
-			    };
-			    F.vbs.require = function(name){
-				    return (function(args){
-					    var obj = ScrCtl.eval("new " + name);
-					    if(args.length>0 && args.length % 2==0){
-						    for(var i=0;i<args.length-1;i++){
-							    obj[args[i]]=args[++i];
-						    }
-					    }else if(args.length==1 && typeof args[0]=="object"){
-						    for(var i in args[0]){
-							    if(!args[0].hasOwnProperty(i))continue;
-							    obj[i]=args[0][i];
-						    }
-					    }
-					    return obj;
-					})(Array.prototype.slice.call(arguments,1));
-			    };
-			    F.vbs.include = function(lib){
-				    if(!/^([\w\.\/]+)$/.test(lib)){
-						ExceptionManager.put(0x00003CD,"F.vbs.include(lib)","Parameter 'lib' is invalid.");
-					    return false;
-				    }
-					if(!M.Librarys.hasOwnProperty("vbs-"+lib)){
-					    var pathinfo = G.MO_APP + "Library/Extend/" + lib + ".vbs";
-					    if(!F.exists(pathinfo)) pathinfo = G.MO_CORE + "Library/Extend/" + lib + ".vbs";
-					    if(!F.exists(pathinfo))
-					    {
-							ExceptionManager.put(0x00002CD, "F.vbs.include(lib)","待加载的类库'" + lib + "'不存在。");
-						    return false;
-					    }else{
-						    var ret = IO.file.readAllText(F.mappath(pathinfo));
-							F.vbs.ctrl.error.clear();
-							F.vbs.execute(ret);
-							if(F.vbs.ctrl.error.number != 0){ 
-								ExceptionManager.put(F.vbs.ctrl.error.number,"F.vbs.include(lib)",F.vbs.ctrl.error.description);
-								F.vbs.ctrl.error.clear();
-								return false;
-							}else{
-								M.Librarys["vbs-" + lib]="vbs";
-								return true;
-							}
-					    }
-				    }else{
-					   return true; 
-				    }
-			    };
-		    })(objScrCtl);
-		    objScrCtl = null;
-	    }catch(ex){
-		    ExceptionManager.put(ex,"Mo.loadVBSHelper");
-	    }
-	};
+	M.loadVBSHelper = function(){};
 	return M;
 })();
 </script>

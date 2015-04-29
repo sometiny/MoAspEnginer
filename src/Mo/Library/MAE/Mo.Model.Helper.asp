@@ -122,8 +122,8 @@ var ModelHelper={
 		var conn = this.base;
 		var table_named_field_name="TABLE_NAME";
 		var rs =null;
-		if(this.cfg.DB_Type=="ACCESS") rs=conn.openSchema(20,F.vbs.eval("Array(Empty,Empty,Empty,\"Table\")"));
-		if(this.cfg.DB_Type=="MSSQL") rs=conn.openSchema(20,F.vbs.eval("Array(\"" + this.cfg.DB_Name + "\",Empty,Empty,\"Table\")"));
+		if(this.cfg.DB_Type=="ACCESS") rs=conn.openSchema(20,VBS_eval("Array(Empty,Empty,Empty,\"Table\")"));
+		if(this.cfg.DB_Type=="MSSQL") rs=conn.openSchema(20,VBS_eval("Array(\"" + this.cfg.DB_Name + "\",Empty,Empty,\"Table\")"));
 		if(this.cfg.DB_Type=="SQLITE"){
 			rs = conn.execute("select * from sqlite_master where type = 'table'");
 			table_named_field_name = "name";
@@ -144,8 +144,8 @@ var ModelHelper={
 	GetColumns:function(tablename){
 		var conn = this.base;
 		var rs =null;
-		if(this.cfg.DB_Type=="ACCESS") rs = conn.openSchema(4,F.vbs.eval("Array(Empty,Empty,\"" + tablename + "\")"));
-		if(this.cfg.DB_Type=="MSSQL") rs = conn.openSchema(4,F.vbs.eval("Array(\"" + this.cfg.DB_Name + "\",\"" + (this.cfg.DB_Owner||"dbo") + "\",\"" + tablename + "\")"));
+		if(this.cfg.DB_Type=="ACCESS") rs = conn.openSchema(4,VBS_eval("Array(Empty,Empty,\"" + tablename + "\")"));
+		if(this.cfg.DB_Type=="MSSQL") rs = conn.openSchema(4,VBS_eval("Array(\"" + this.cfg.DB_Name + "\",\"" + (this.cfg.DB_Owner||"dbo") + "\",\"" + tablename + "\")"));
 		if(this.cfg.DB_Type=="SQLITE")rs = conn.execute("PRAGMA table_info(" + tablename + ")");
 		if(this.cfg.DB_Type=="MYSQL")rs = conn.execute("show columns from `" + tablename + "`");
 		if(rs==null)return null;

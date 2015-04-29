@@ -1,4 +1,5 @@
-﻿<!--#include file="Mo/Library/MAE/Mo.asp"-->
+﻿<%@Language="JSCRIPT" CodePage="65001"%>
+<!--#include file="Mo/Library/MAE/Mo.asp"-->
 <script language="jscript" runat="server">
 /*
 ** File: default.asp

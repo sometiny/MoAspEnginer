@@ -20,11 +20,13 @@ function $qqwry(ip){
 	//如果有自己的纯真ip库，可以调用F.exports.qqwry.opt方法，设置path值为你的qqwry.dat的路径即可。
 	if(!IO.file.exists(cfg.path)) return {code:500,msg:"无法打开IP数据库。"};
 	if(!F.exports.encoding)F.require("encoding");
-	if(!F.vbs.include("vbs/qqwry")) return;
-	var $base = F.vbs.require("QQWry","UseCode",true,"QQWryFile",cfg.path),
+	if(!VBS_include("vbs/qqwry")) return;
+	var $base = VBS_require("QQWry"),
 		location="",
 		address="";
 	try{
+		$base.UseCode = true;
+		$base.QQWryFile = cfg.path;
 		$base.QQWry(ip);
 		location = $base.Country;
 		address  = $base.LocalStr;

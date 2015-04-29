@@ -174,6 +174,8 @@ Model__.RecordsAffectedCmd = function(cmd,withQuery){
 Model__.RecordsAffectedCmd_ = function(opt){
 	return Model__.RecordsAffectedCmd(opt.cmd,opt.withQuery);
 };
+Model__.RecordsAffected = VBS_getref("RecordsAffected");
+Model__.RecordsAffectedCmd_ = VBS_getref("RecordsAffectedCmd_");
 
 function __Model__(tablename,pk,cfg,tablePrex){
 	cfg = cfg ||Model__.defaultDBConf;

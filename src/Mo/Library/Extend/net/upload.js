@@ -41,17 +41,14 @@ var cfg_f = {
 	OnError : function(exception){},
 	OnSucceed : function(fileCount,fileArray){}
 };
-function $fileManager(){
-	
-};
-$fileManager.fn = $fileManager.prototype;
-$fileManager.fn.addFile = function(formname){
+UploadManager = {};
+UploadManager.addFile = function(formname){
 	var $item = new $fileItem();
 	$item.FormName = formname;
 	$upload.files.push($item);
 	return $item;
 };
-$fileManager.fn.addForm = function(key,value){
+UploadManager.addForm = function(key,value){
 	if(F.post.exists(key))F.post(key,F.post(key) + ", " + value);
 	else F.post(key,value);
 };
@@ -91,9 +88,8 @@ function $upload(cfg_){
 	var $g={};
 	F.extend($g, cfg, cfg_);
 	$upload.$cfg = $g;
-	if(!F.vbs.include("vbs/upload")) return;
-	F.vbs.ns("UploadManager",new $fileManager());
-	var $base = F.vbs.require("upload");
+	if(!VBS_include("vbs/upload")) return;
+	var $base = VBS_require("upload");
 	$upload.$base = $base;
 	$base.AllowMaxSize = $g.AllowMaxSize;
 	$base.AllowFileTypes = $g.AllowFileTypes;
