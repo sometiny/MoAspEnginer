@@ -1,5 +1,5 @@
 <%@Language="JSCRIPT" CodePage="65001"%>
-<script language="jscript" runat="server" src="Mo/Mo.js"></script>
+<!--#include file="Mo/Mo.asp"-->
 <script language="jscript" runat="server">
 /*
 ** File: default.asp

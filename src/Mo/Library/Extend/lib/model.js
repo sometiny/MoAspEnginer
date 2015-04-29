@@ -193,28 +193,9 @@ Model__.RecordsAffectedCmd = function(cmd,withQuery){
 Model__.RecordsAffectedCmd_ = function(opt){
 	return Model__.RecordsAffectedCmd(opt.cmd,opt.withQuery);
 };
-if (VBS && Mo.Config.Global.MO_LOAD_VBSHELPER) {
-    //用于获取查询影响行数的必要的vbs方法
-    VBS.execute(
-	    "function RecordsAffected(byref conn,byval sqlstring)\r\n" +
-	    "	conn.execute sqlstring,RecordsAffected\r\n" +
-	    "end function"
-    );
-    VBS.execute(
-    	"function RecordsAffectedCmd_(byref opt)\r\n" +
-    	"	dim RecordsAffectedvar\r\n" +
-    	"	if opt.withQuery then\r\n" +
-    	"		set opt.dataset = opt.cmdobj.execute(RecordsAffectedvar)\r\n" +
-    	"		opt.affectedRows = RecordsAffectedvar\r\n" +
-    	"	else\r\n" +
-    	"		opt.cmdobj.execute RecordsAffectedvar\r\n" +
-    	"		opt.affectedRows = RecordsAffectedvar\r\n" +
-    	"	end if\r\n" +
-    	"end function"
-    );
-	Model__.RecordsAffected = VBS.getref("RecordsAffected");//(function(obj){ return function(){return Function.prototype.apply.apply(obj, [obj,arguments])};})(VBS.getref("RecordsAffected"));
-	Model__.RecordsAffectedCmd_ = VBS.getref("RecordsAffectedCmd_");
-}
+//用于获取查询影响行数的必要的vbs方法
+Model__.RecordsAffected = VBS_getref("RecordsAffected");//(function(obj){ return function(){return Function.prototype.apply.apply(obj, [obj,arguments])};})(VBS.getref("RecordsAffected"));
+Model__.RecordsAffectedCmd_ = VBS_getref("RecordsAffectedCmd_");
 function __Model__(tablename,pk,cfg,tablePrex){
 	cfg = cfg ||Model__.defaultDBConf;
 	this.usecache = false;
