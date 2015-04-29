@@ -154,12 +154,7 @@ Model__.execute = function(sql,cfg){
 	try{
 		return Model__.RecordsAffected(Model__.getConnection(cfg),sql);
 	}catch(ex){
-		if(VBS && VBS.ctrl.error.number != 0){
-			ExceptionManager.put(VBS.ctrl.error.number,"__Model__.execute(sql[,cfg])",VBS.ctrl.error.description);
-			VBS.ctrl.error.clear();
-		}else{
-			ExceptionManager.put(new Exception(ex.number,"__Model__.execute(sql[,cfg])",ex.message));
-		}
+		ExceptionManager.put(new Exception(ex.number,"__Model__.execute(sql[,cfg])",ex.message));
 	}
 };
 Model__.executeQuery = function(sql,cfg){
@@ -168,12 +163,7 @@ Model__.executeQuery = function(sql,cfg){
 	try{
 		return new DataTable(Model__.getConnection(cfg).execute(sql));
 	}catch(ex){
-		if(VBS && VBS.ctrl.error.number != 0){
-			ExceptionManager.put(VBS.ctrl.error.number,"__Model__.executeQuery(sql[,cfg])",VBS.ctrl.error.description);
-			VBS.ctrl.error.clear();
-		}else{
-			ExceptionManager.put(new Exception(ex.number,"__Model__.executeQuery(sql[,cfg])",ex.message));
-		}
+		ExceptionManager.put(new Exception(ex.number,"__Model__.executeQuery(sql[,cfg])",ex.message));
 	}
 };
 Model__.RecordsAffected = function(conn,sqlstring){
@@ -427,12 +417,7 @@ __Model__.prototype.exec = function(manager){
 		}
 		if(Model__.allowDebug)AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 	}catch(ex){
-		if(VBS && VBS.ctrl.error.number != 0){
-			ExceptionManager.put(VBS.ctrl.error.number,"__Model__.exec(manager)",VBS.ctrl.error.description);
-			VBS.ctrl.error.clear();
-		}else{
-			ExceptionManager.put(ex.number,"__Model__.exec(manager)",ex.message);
-		}
+		ExceptionManager.put(ex.number,"__Model__.exec(manager)",ex.message);
 	}
 	return this;
 }
@@ -482,12 +467,7 @@ __Model__.prototype.query = function(){
 				return this;
 			}
 		}catch(ex){
-			if(VBS && VBS.ctrl.error.number != 0){
-				ExceptionManager.put(VBS.ctrl.error.number,"__Model__.query(args)",VBS.ctrl.error.description);
-				VBS.ctrl.error.clear();
-			}else{
-				ExceptionManager.put(ex.number,"__Model__.query(args)",ex.message);
-			}
+			ExceptionManager.put(ex.number,"__Model__.query(args)",ex.message);
 			return this;
 		}
 	}
