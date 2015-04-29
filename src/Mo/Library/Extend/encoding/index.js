@@ -39,21 +39,6 @@ module.exports = (function(){
 	_SPEC.S1 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'()";/*for URIComponent*/
 	_SPEC.S2 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'();/?:@&=+$,#";/*for URI*/
 	var $enc={};
-	$enc.wordtobytes = function(u){
-		if(u>0xffffffff)return [];
-		else if(u>0xffffff) {
-			return [u >>> 24,(u >> 16) & 0xff,(u >> 8) & 0xff,u & 0xff];
-		}
-		else if(u>0xffff) {
-			return [u >> 16,(u >> 8) & 0xff,u & 0xff];
-		}
-		else if(u>0xff) {
-			return [u >> 8,u & 0xff];
-		}
-		else{
-			return [u];
-		}
-	};
 	$enc.encodeURIComponent = function(string,enc){
 		return $enc.encode(string,enc,"S1");
 	};
@@ -63,8 +48,8 @@ module.exports = (function(){
 	$enc.decode = function(string,enc){
 		enc = (enc || "utf-8").toUpperCase();
 		var $encoding = $enc[enc=="UTF-8"?"utf8":"gbk"];
-		var i=0,c,ret=[];
-		while(i<string.length){
+		var i=0,c,ret=[], _len = string.length;
+		while(i<_len){
 			c = string.substr(i,1);
 			if(c=="%" && /^%([0-9a-z]{2})$/i.test(string.substr(i,3))){
 				ret.push(parseInt("0x"+string.substr(i+1,2)));
@@ -79,8 +64,8 @@ module.exports = (function(){
 	$enc.encode = function(string,enc,t){
 		enc = (enc || "utf-8").toUpperCase();
 		t = (t || "S1").toUpperCase();
-		var ret="", i=0, c, chr, bytes = $enc[enc=="UTF-8"?"utf8":"gbk"].getWordArray(string);
-		while(i<bytes.length){
+		var ret="", i=0, c, chr, bytes = $enc[enc=="UTF-8"?"utf8":"gbk"].getWordArray(string), _len = bytes.length;
+		while(i<_len){
 			c = bytes[i++];
 			if(c<=0x7f){
 				chr = String.fromCharCode(c);
@@ -103,16 +88,16 @@ module.exports = (function(){
 				ExceptionManager.put(new Exception(0xb0a2,"encoding.hex.parse","invalid input string."));
 				return [];
 			}
-			var i=0,c,ret=[];
-			while(i<string.length-1){
+			var i=0,c,ret=[], _len = string.length;
+			while(i<_len-1){
 				ret.push(parseInt(string.substr(i,2),16));
 				i+=2;
 			}
 			return ret;
 		};
 		$hex.stringify = function(bytes){
-			var ret="",c,v,i=0;
-			while(i<bytes.length){
+			var ret="",c,v,i=0, _len=bytes.length;
+			while(i<_len){
 				v = bytes[i++];
 				if(v>255){
 					ExceptionManager.put(new Exception(0xb0a3,"encoding.hex.stringify","invalid input array, item value is bigger than 255."));
@@ -220,7 +205,14 @@ module.exports = (function(){
 				c = u.charCodeAt(i);
 				if(c<0x7f) ret.push(c);
 				else{
-					ret = ret.concat($enc.wordtobytes(utoutf8(c)));
+					var word = utoutf8(c);
+					if(word>0xffffff) {
+						ret.push(u >>> 24,(u >> 16) & 0xff,(u >> 8) & 0xff,u & 0xff);
+					}else if(word>0xffff){
+						ret.push(word >> 16,(word >> 8) & 0xff,word & 0xff);
+					}else if(word>0xff){
+						ret.push(word >> 8,word & 0xff);
+					}
 				}
 				i++;
 			}
