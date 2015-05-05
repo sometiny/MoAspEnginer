@@ -447,7 +447,7 @@ _.date = function(srcDate) {
 _.date.timezone = new Date().getTimezoneOffset() / 60;
 _.date.parse = function(srcDate) {
 	if (typeof srcDate == "string") {
-		srcDate = srcDate.replace(/(\-|\s|\:|\.)0/ig, "$1");
+		srcDate = srcDate.replace(/(\-|\s|\:|\.)0(\d)/ig, "$1$2");
 		var match = /^(\d{4})\-(\d{1,2})\-(\d{1,2})( (\d{1,2})\:(\d{1,2})(\:(\d{1,2}))?(\.(\d{1,3}))?)?$/.exec(srcDate);
 		if (match) {
 			try {

@@ -186,7 +186,6 @@ MoAspEnginerView.prototype.parseArguments = function($2) {
 	}, null);
 	var args = $2.split(","),
 		argresult = "",
-		lastpart = "",
 		_len = args.length;
 	for (var i = 0; i < _len; i++) {
 		if (args[i] == "{{k}}") argresult += args[i] + ",";
@@ -264,7 +263,6 @@ MoAspEnginerView.prototype.parsePage = function() {
 			var attrs = readAttrs__($1);
 			if (attrs["for"]) {
 				var loopname = attrs["for"],
-					varloopname = loopname.replace(/\./ig, "_"),
 					pageurl = attrs["url"] || "",
 					func = attrs["function"] || "CreatePageList";
 				this.Content = F.replace(this.Content, $0, "{?MoAsp __Mo__.Echo(" + func + "(\"" + pageurl + "\"," + loopname + ".recordcount," + loopname + ".pagesize," + loopname + ".currentpage)); MoAsp?}");
@@ -654,8 +652,7 @@ MoAspEnginerView.prototype.parseAssign = function(key) {
 MoAspEnginerView.prototype.parseFormatVari = function(format) {
 	if (format == "") return "";
 	var func = format,
-		vars = "",
-		ret = "";
+		vars = "";
 	var mc = /^(.+?)\=(.+)$/.exec(func);
 	if (!mc) mc = /^(.+?)\((.+)\)$/.exec(func);
 	if (mc) {

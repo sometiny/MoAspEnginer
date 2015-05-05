@@ -33,7 +33,7 @@ function MoAspEnginerView(withwapper) {
 	this.assigns="";
 }
 MoAspEnginerView.compile = function(content){
-	var _view = new MoAspEnginerView();
+	var _view = new MoAspEnginerView(true);
 	_view.setContent(content).parse();
 	return _view.Content;
 };
@@ -173,7 +173,7 @@ MoAspEnginerView.prototype.parseArguments = function($2){
 	$2 = replacementter($2, "\\\"", "\\\"", function(v){
 		return "\"" + v.replace(/\,/ig,"`--DOTTED--`") +"\"";
 	},null);
-	var args = $2.split(","), argresult="", lastpart="", _len = args.length;
+	var args = $2.split(","), argresult="", _len = args.length;
 	for(var i=0;i<_len;i++){
 		if(args[i] == "{{k}}") argresult += args[i] + ",";
 		else{
@@ -316,11 +316,11 @@ MoAspEnginerView.prototype.parseFor = function() {
 		var attrs = readAttrs__($1);
 		if (attrs["name"]) {
 			var loopname = attrs["name"],
-				varloopname = loopname.replace(/\./ig,"_")
+				varloopname = loopname.replace(/\./ig,"_"),
 				keyname = attrs.key||"key",
 				keyvaluename = attrs.value||"value";
 			var content = new MoAspEnginerView(false).setContent($2.replace(/--movbcrlf--/igm,"\r\n")).parse().Content.replace(new RegExp("\\$\\[\"(" + keyname + "|" + keyvaluename + ")\"\\]","igm"),"$1").replace(/\\r\\n$/igm,"");
-			vbscript = "{?MoAsp var D__" + varloopname + "=" + this.parseAssign(loopname) + ";\r\nfor(var " + keyname + "=0;" + keyname + "<D__" + varloopname + ".length;" + keyname + "++){\r\nvar " + keyvaluename + "=D__" + varloopname + "[" + keyname + "];\r\nMoAsp?}\r\n{?MoAsp " + content + " MoAsp?}\r\n{?MoAsp }\r\n MoAsp?}";
+			var vbscript = "{?MoAsp var D__" + varloopname + "=" + this.parseAssign(loopname) + ";\r\nfor(var " + keyname + "=0;" + keyname + "<D__" + varloopname + ".length;" + keyname + "++){\r\nvar " + keyvaluename + "=D__" + varloopname + "[" + keyname + "];\r\nMoAsp?}\r\n{?MoAsp " + content + " MoAsp?}\r\n{?MoAsp }\r\n MoAsp?}";
 			this.Content = F.replace(this.Content, $0, vbscript);
 		}
 	},this);
@@ -350,11 +350,11 @@ MoAspEnginerView.prototype.parseForeach = function() {
 		var attrs = readAttrs__($1);
 		if (attrs["name"]) {
 			var loopname = attrs["name"],
-				varloopname = loopname.replace(/\./ig,"_")
+				varloopname = loopname.replace(/\./ig,"_"),
 				keyname = attrs.key||"key",
 				keyvaluename = attrs.value||"value";
 			var content = new MoAspEnginerView(false).setContent($2.replace(/--movbcrlf--/igm,"\r\n")).parse().Content.replace(new RegExp("\\$\\[\"(" + keyname + "|" + keyvaluename + ")\"\\]","igm"),"$1").replace(/\\r\\n$/igm,"");
-			vbscript = "{?MoAsp var D__" + varloopname + "=" + this.parseAssign(loopname) + ";\r\nfor(var " + keyname + " in D__" + varloopname + "){\r\nif(!D__" + varloopname + ".hasOwnProperty(" + keyname + "))continue;\r\nvar " + keyvaluename + "=D__" + varloopname + "[" + keyname + "];\r\nMoAsp?}\r\n{?MoAsp " + content + " MoAsp?}\r\n{?MoAsp }\r\n MoAsp?}";
+			var vbscript = "{?MoAsp var D__" + varloopname + "=" + this.parseAssign(loopname) + ";\r\nfor(var " + keyname + " in D__" + varloopname + "){\r\nif(!D__" + varloopname + ".hasOwnProperty(" + keyname + "))continue;\r\nvar " + keyvaluename + "=D__" + varloopname + "[" + keyname + "];\r\nMoAsp?}\r\n{?MoAsp " + content + " MoAsp?}\r\n{?MoAsp }\r\n MoAsp?}";
 			this.Content = F.replace(this.Content, $0, vbscript);
 		}
 	},this);
