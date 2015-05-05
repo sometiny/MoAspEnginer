@@ -1,14 +1,18 @@
-<script language="vbscript" runat="server" src="VBS.vbs"></script>
-<script language="jscript" runat="server">
-	/*
+/*
  ** File: Mo.js
  ** Usage: core code of MAE, don't change 'Mo' to other name.
  ** About:
  **		support@mae.im
  */
-var defaultConfig={}, define = function(name,value){
-	defaultConfig[name.toUpperCase()] = value;
-};
+var 
+	defaultConfig={}, 
+	define = function(name,value){
+		defaultConfig[name.toUpperCase()] = value;
+	},
+	__events__ = {
+		"ondispose": []
+	}
+;
 var F, JSON, require, VBS, View, Model__,
 	req = Request,
 	res = Response,
@@ -341,7 +345,7 @@ var F, JSON, require, VBS, View, Model__,
 			},
 			G = {};
 		M.Runtime = _runtime;
-		M.Version = "MoAspEnginer 3.0";
+		M.Version = "MoAspEnginer 3.1";
 		M.Config = {};
 		M.IsRewrite = false;
 		M.Action = "";
@@ -354,6 +358,19 @@ var F, JSON, require, VBS, View, Model__,
 		M.LoadAssets = _LoadAssets;
 		M.Debug = function() {
 			_runtime.log.apply(null, arguments)
+		};
+		M.addEventListener = function(name, callback){
+			if(!__events__.hasOwnProperty(name)) __events__[name] = [];
+			var event = __events__[name];
+			callback.GUID = event.length;
+			event.push(callback);
+		};
+		M.removeEventListener = function(name, callback){
+			if(!__events__.hasOwnProperty(name)) return;
+			var event = __events__[name];
+			for(var i=0;i<event.length;i++){
+				if(event[i].GUID == callback.GUID) event[i]=null;
+			}
 		};
 		M.Initialize = function(cfg) {
 			if (!cfg || typeof cfg != "object") cfg = {
@@ -446,8 +463,14 @@ var F, JSON, require, VBS, View, Model__,
 		M.Terminate = function() {
 			var _tag = _runtime.run();
 			_end();
-			if (Model__ && Model__.dispose) Model__.dispose();
-			F.dispose();
+			var events = __events__["ondispose"], _len, event;
+			if(events){
+				_len = events.length;
+				for(var i=0;i<_len;i++){
+					event = events[i];
+					if(event) event.call(M);
+				}
+			}
 			_runtime.timelines.terminate = _runtime.ticks(_tag);
 			_debug();
 			_Assigns = null;
@@ -813,10 +836,10 @@ var F, JSON, require, VBS, View, Model__,
 		"IClass" : ["create", "IClass@lib/dist.js"],/*class*/
 		"dump" : [null, "dump"],/*dump variables*/
 		"cookie=Cookie" : [null, "assets/cookie.js"],/*cookie*/
-		"Model__" : [null, "useCommand", "Debug", "setDefault", "setDefaultPK", "begin", "commit", "rollback", "getConnection", "connect", "execute", "executeQuery", "Model__@lib/model.js"], /*database*/
+		"Model__" : [null, "useCommand", "Debug", "setDefault", "setDefaultPK", "begin", "commit", "rollback", "getConnection", "dispose", "connect", "execute", "executeQuery", "Model__@lib/model.js"], /*database*/
 		"DataTable" : [null, "Model__.helper.DataTable@lib/model.js"],
 		"DataTableRow" : [null, "Model__.helper.DataTableRow@lib/model.js"],
-		/*"VBS" : ["ns","include","eval","require","getref","execute","run","assets/vbs.js"],*/ /*vbs*/
+		"VBS" : ["ns","include","eval","require","getref","execute","run","assets/vbs.js"], /*vbs*/
 		"Mpi" : ["downloadAndInstall", "Host", "setDefaultInstallDirectory", "download", "fetchPackagesList", "fetchPackage", "packageExists", "install", "assets/mpi.js"], /*Mpi*/
 		"Tar" : [null, "setNames", "packFolder", "packFile", "unpack", "assets/tar.js"],
 		"md5=MD5" : [null, "md5@assets/md5.js"],
@@ -1140,4 +1163,3 @@ var IO = (function() {
 	})();
 	return b
 })();
-</script>

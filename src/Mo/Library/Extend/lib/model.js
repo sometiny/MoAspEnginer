@@ -154,7 +154,12 @@ Model__.execute = function(sql,cfg){
 	try{
 		return Model__.RecordsAffected(Model__.getConnection(cfg),sql);
 	}catch(ex){
-		ExceptionManager.put(new Exception(ex.number,"__Model__.execute(sql[,cfg])",ex.message));
+		if(VBS && VBS.ctrl.error.number != 0){
+			ExceptionManager.put(VBS.ctrl.error.number,"__Model__.execute(sql[,cfg])",VBS.ctrl.error.description);
+			VBS.ctrl.error.clear();
+		}else{
+			ExceptionManager.put(new Exception(ex.number,"__Model__.execute(sql[,cfg])",ex.message));
+		}
 	}
 };
 Model__.executeQuery = function(sql,cfg){
@@ -163,7 +168,12 @@ Model__.executeQuery = function(sql,cfg){
 	try{
 		return new DataTable(Model__.getConnection(cfg).execute(sql));
 	}catch(ex){
-		ExceptionManager.put(new Exception(ex.number,"__Model__.executeQuery(sql[,cfg])",ex.message));
+		if(VBS && VBS.ctrl.error.number != 0){
+			ExceptionManager.put(VBS.ctrl.error.number,"__Model__.executeQuery(sql[,cfg])",VBS.ctrl.error.description);
+			VBS.ctrl.error.clear();
+		}else{
+			ExceptionManager.put(new Exception(ex.number,"__Model__.executeQuery(sql[,cfg])",ex.message));
+		}
 	}
 };
 Model__.RecordsAffected = function(conn,sqlstring){
@@ -183,9 +193,28 @@ Model__.RecordsAffectedCmd = function(cmd,withQuery){
 Model__.RecordsAffectedCmd_ = function(opt){
 	return Model__.RecordsAffectedCmd(opt.cmd,opt.withQuery);
 };
-//用于获取查询影响行数的必要的vbs方法
-Model__.RecordsAffected = VBS_getref("RecordsAffected");//(function(obj){ return function(){return Function.prototype.apply.apply(obj, [obj,arguments])};})(VBS.getref("RecordsAffected"));
-Model__.RecordsAffectedCmd_ = VBS_getref("RecordsAffectedCmd_");
+if (VBS && Mo.Config.Global.MO_LOAD_VBSHELPER) {
+    //用于获取查询影响行数的必要的vbs方法
+    VBS.execute(
+	    "function RecordsAffected(byref conn,byval sqlstring)\r\n" +
+	    "	conn.execute sqlstring,RecordsAffected\r\n" +
+	    "end function"
+    );
+    VBS.execute(
+    	"function RecordsAffectedCmd_(byref opt)\r\n" +
+    	"	dim RecordsAffectedvar\r\n" +
+    	"	if opt.withQuery then\r\n" +
+    	"		set opt.dataset = opt.cmdobj.execute(RecordsAffectedvar)\r\n" +
+    	"		opt.affectedRows = RecordsAffectedvar\r\n" +
+    	"	else\r\n" +
+    	"		opt.cmdobj.execute RecordsAffectedvar\r\n" +
+    	"		opt.affectedRows = RecordsAffectedvar\r\n" +
+    	"	end if\r\n" +
+    	"end function"
+    );
+	Model__.RecordsAffected = VBS.getref("RecordsAffected");//(function(obj){ return function(){return Function.prototype.apply.apply(obj, [obj,arguments])};})(VBS.getref("RecordsAffected"));
+	Model__.RecordsAffectedCmd_ = VBS.getref("RecordsAffectedCmd_");
+}
 function __Model__(tablename,pk,cfg,tablePrex){
 	cfg = cfg ||Model__.defaultDBConf;
 	this.usecache = false;
@@ -417,7 +446,12 @@ __Model__.prototype.exec = function(manager){
 		}
 		if(Model__.allowDebug)AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 	}catch(ex){
-		ExceptionManager.put(ex.number,"__Model__.exec(manager)",ex.message);
+		if(VBS && VBS.ctrl.error.number != 0){
+			ExceptionManager.put(VBS.ctrl.error.number,"__Model__.exec(manager)",VBS.ctrl.error.description);
+			VBS.ctrl.error.clear();
+		}else{
+			ExceptionManager.put(ex.number,"__Model__.exec(manager)",ex.message);
+		}
 	}
 	return this;
 }
@@ -467,7 +501,12 @@ __Model__.prototype.query = function(){
 				return this;
 			}
 		}catch(ex){
-			ExceptionManager.put(ex.number,"__Model__.query(args)",ex.message);
+			if(VBS && VBS.ctrl.error.number != 0){
+				ExceptionManager.put(VBS.ctrl.error.number,"__Model__.query(args)",VBS.ctrl.error.description);
+				VBS.ctrl.error.clear();
+			}else{
+				ExceptionManager.put(ex.number,"__Model__.query(args)",ex.message);
+			}
 			return this;
 		}
 	}
@@ -673,5 +712,6 @@ __Model__.prototype.parseData = function(table){
 	}
 	return [fields.join(","),values.join(","),update.join(","),cmd];
 };
+Mo.addEventListener("ondispose", Model__.dispose);
 exports.Model__ = Model__;
 exports.__Model__ = __Model__;

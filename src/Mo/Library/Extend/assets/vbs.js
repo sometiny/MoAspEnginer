@@ -19,8 +19,10 @@ try{
     	"	charcodeb = ascb(b)\r\n" +
     	"end function\r\n"
     );
-    
     (function(ScrCtl){
+	    Mo.addEventListener("ondispose", function(){
+		    ScrCtl.Reset();
+	    });
 	    VBS.ctrl=ScrCtl;
    		VBS.eval = function(script){
 	   		return ScrCtl.eval(script);
