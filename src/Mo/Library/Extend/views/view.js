@@ -410,7 +410,7 @@ MoAspEnginerView.prototype.parseExpressionComponent = function(compare) {
 	F.string.matches(compare, /\b(and|or|group)\=(\"|\')(.+?)(\2)/igm ,function($0,$1,$2,$3){
 		if ($1 == "and" || $1 == "or") {
 			var v_ = $3,
-				varmatches = /^(.+?)((\s*)(\+|\-|\*|\/|%|\<\<|\>\>|\>\>\>|\+\=|\-\=|\*\=|\/\=|\||\&|\&\&|\|\|)(\s*)([\d\.e\+]+))?(\s*)(gt|lt|ngt|nlt|eq|neq)(\s*)(.+?)((\s)as(\s)(bool|number|money|date|assign))?$/i.exec(v_);
+				varmatches = /^(.+?)((\s*)(\+|\-|\*|\/|%|\<\<|\>\>|\>\>\>|\+\=|\-\=|\*\=|\/\=|\||\&|\&\&|\|\|)(\s*)([\d\.e\+]+))?(\s+)(gt|lt|ngt|nlt|eq|neq)(\s+)(.+?)((\s)as(\s)(bool|number|money|date|assign))?$/i.exec(v_);
 			if (varmatches) {
 				var quto = "\"",
 					vv_ = varmatches[10];

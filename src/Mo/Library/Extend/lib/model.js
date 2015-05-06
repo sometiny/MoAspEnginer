@@ -253,7 +253,8 @@ function __Model__(tablename,pk,cfg,tablePrex){
 		this.query("USE " + this.base.cfg["DB_Name"]);
 		this.base.mysqlUsed = true;
 	}
-	this.table = (tablePrex || (this.base.cfg["DB_TABLE_PERX"] || Mo.Config.Global.MO_TABLE_PERX))+this.table;
+	this.tablePrex = (tablePrex || (this.base.cfg["DB_TABLE_PERX"] || Mo.Config.Global.MO_TABLE_PERX));
+	this.table = this.tablePrex + this.table;
 	this.tableWithNoSplitChar = this.table;
 	if(this.base.useCommand){
 		var schema = {}, schemaname = "SCHMEA-" + cfg;
@@ -410,9 +411,9 @@ __Model__.prototype.join = function(table,jointype){
 	jointype = jointype ||"inner";
 	jointype = jointype.replace(" join","");
 	if(table.indexOf(" ") > 0){
-		this.strjoin += " " + jointype + " join " + this.base.splitChars[0] + Mo.Config.Global.MO_TABLE_PERX + table.substr(0,table.indexOf(" ")) + this.base.splitChars[1] +" "+table.substr(table.indexOf(" ")+1);
+		this.strjoin += " " + jointype + " join " + this.base.splitChars[0] + this.tablePrex + table.substr(0,table.indexOf(" ")) + this.base.splitChars[1] +" "+table.substr(table.indexOf(" ")+1);
 	}else{
-		this.strjoin += " " + jointype + " join "  + this.base.splitChars[0] + Mo.Config.Global.MO_TABLE_PERX + table + this.base.splitChars[1];
+		this.strjoin += " " + jointype + " join "  + this.base.splitChars[0] + this.tablePrex + table + this.base.splitChars[1];
 	}
 	this.joinlevel += "(";
 	return this;
