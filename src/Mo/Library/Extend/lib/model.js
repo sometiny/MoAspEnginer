@@ -37,6 +37,9 @@ Model__.lastRows = -1;
 Model__.useCommand = function(value){
 	UseCommand = !!value;
 };
+Model__.cmd = function(cmd, type, cfg){
+	return new _helper.CMDManager(cmd, Model__.getConnection(cfg), type, 1);
+};
 Model__.setDefault = function(dbConf){
 	Model__.defaultDBConf = dbConf || "DB";
 };
@@ -97,6 +100,7 @@ Model__.Debug = function(allowDebug){
 	Model__.allowDebug = !!allowDebug;
 };
 Model__.connect = function(cfg){
+	cfg = cfg || Model__.defaultDBConf;
 	var cfg_=null;
 	var base = null;
 	if(Connections.hasOwnProperty(cfg)){
@@ -180,18 +184,9 @@ Model__.RecordsAffected = function(conn,sqlstring){
 	conn.execute(sqlstring);
 	return -1;
 };
-Model__.RecordsAffectedCmd = function(cmd,withQuery){
-	var RecordsAffectedvar = -1;
-	if(withQuery){
-		Model__.lastRows = RecordsAffectedvar;
-		return cmd.execute();
-	}else{
-		cmd.execute();
-		Model__.lastRows = RecordsAffectedvar;
-	}
-};
 Model__.RecordsAffectedCmd_ = function(opt){
-	return Model__.RecordsAffectedCmd(opt.cmd,opt.withQuery);
+	opt.dataset = opt.cmdobj.execute();
+	opt.affectedRows = -1;
 };
 if (VBS && Mo.Config.Global.MO_LOAD_VBSHELPER) {
     //用于获取查询影响行数的必要的vbs方法
@@ -203,19 +198,15 @@ if (VBS && Mo.Config.Global.MO_LOAD_VBSHELPER) {
     VBS.execute(
     	"function RecordsAffectedCmd_(byref opt)\r\n" +
     	"	dim RecordsAffectedvar\r\n" +
-    	"	if opt.withQuery then\r\n" +
-    	"		set opt.dataset = opt.cmdobj.execute(RecordsAffectedvar)\r\n" +
-    	"		opt.affectedRows = RecordsAffectedvar\r\n" +
-    	"	else\r\n" +
-    	"		opt.cmdobj.execute RecordsAffectedvar\r\n" +
-    	"		opt.affectedRows = RecordsAffectedvar\r\n" +
-    	"	end if\r\n" +
+    	"	set opt.dataset = opt.cmdobj.execute(RecordsAffectedvar)\r\n" +
+    	"	opt.affectedRows = RecordsAffectedvar\r\n" +
     	"end function"
     );
 	Model__.RecordsAffected = VBS.getref("RecordsAffected");//(function(obj){ return function(){return Function.prototype.apply.apply(obj, [obj,arguments])};})(VBS.getref("RecordsAffected"));
 	Model__.RecordsAffectedCmd_ = VBS.getref("RecordsAffectedCmd_");
 }
 function __Model__(tablename,pk,cfg,tablePrex){
+	Model__.lastRows = -1;
 	cfg = cfg ||Model__.defaultDBConf;
 	this.usecache = false;
 	this.cachename = "";

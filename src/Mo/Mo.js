@@ -736,7 +736,13 @@ var F, JSON, require, VBS, View, Model__,
 				return;
 			}
 			_runtime.timelines.load = _runtime.ticks(_tag);
-			var MC = new _controller(this.Action);
+			var MC = null;
+			try{
+				MC = new _controller(this.Action);
+			}catch(ex){
+				ExceptionManager.put(0x3a9, this.RealMethod + "." + this.RealAction, "controller '" + this.Method + "' initialize failed: " + ex.description + ".");
+				return;
+			}
 			if (MC.__STATUS__ === true) {
 				var action_ = this.Action;
 				if (G.MO_ACTION_CASE_SENSITIVITY === false) action_ = action_.toLowerCase();
@@ -836,7 +842,7 @@ var F, JSON, require, VBS, View, Model__,
 		"IClass" : ["create", "IClass@lib/dist.js"],/*class*/
 		"dump" : [null, "dump"],/*dump variables*/
 		"cookie=Cookie" : [null, "assets/cookie.js"],/*cookie*/
-		"Model__" : [null, "useCommand", "Debug", "setDefault", "setDefaultPK", "begin", "commit", "rollback", "getConnection", "dispose", "connect", "execute", "executeQuery", "Model__@lib/model.js"], /*database*/
+		"Model__" : [null, "cmd", "useCommand", "Debug", "setDefault", "setDefaultPK", "begin", "commit", "rollback", "getConnection", "dispose", "connect", "execute", "executeQuery", "Model__@lib/model.js"], /*database*/
 		"DataTable" : [null, "Model__.helper.DataTable@lib/model.js"],
 		"DataTableRow" : [null, "Model__.helper.DataTableRow@lib/model.js"],
 		"VBS" : ["ns","include","eval","require","getref","execute","run","assets/vbs.js"], /*vbs*/
