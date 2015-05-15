@@ -919,7 +919,8 @@ var E_NONE = 0,
 	E_NOTICE = 2,
 	E_WARNING = 4,
 	E_INFO = 8,
-	E_ALL = E_ERROR | E_NOTICE | E_WARNING | E_INFO;
+	E_MODEL = 16,
+	E_ALL = E_ERROR | E_NOTICE | E_WARNING | E_INFO | E_MODEL;
 var MEM = ExceptionManager = (function() {
 	var b = {};
 	var c = [],
@@ -928,7 +929,8 @@ var MEM = ExceptionManager = (function() {
 			1 : "red",
 			2 : "orange",
 			4 : "blue",
-			8 : "green"
+			8 : "green",
+			16 : "green"
 		};
 	var a = function(e) {
 		var f = "0000000" + e.toString(16).toUpperCase();
@@ -953,7 +955,7 @@ var MEM = ExceptionManager = (function() {
 		+ "." + fnum2(e.getMilliseconds());
 	};
 	function h(num){
-		return num == 1 ? "E_ERROR" : (num == 2 ? "E_NOTICE" : (num == 4 ? "E_WARNING" : "E_INFO"));
+		return num == 1 ? "E_ERROR" : (num == 2 ? "E_NOTICE" : (num == 4 ? "E_WARNING" : (num == 8 ? "E_INFO" : "E_MODEL")));
 	}
 	b.put = function() {
 		var e = Array.prototype.slice.call(arguments, 0),

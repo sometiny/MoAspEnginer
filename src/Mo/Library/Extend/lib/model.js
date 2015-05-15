@@ -33,6 +33,7 @@ Model__.helper = _helper;
 Model__.defaultDBConf = "DB";
 Model__.defaultPK = "id";
 Model__.allowDebug = false;
+if(MEM.errorReporting() & E_MODEL) Model__.allowDebug = true;
 Model__.lastRows = -1;
 Model__.useCommand = function(value){
 	UseCommand = !!value;
@@ -93,7 +94,7 @@ Model__.dispose = function(){
 
 Model__.debug = function(){
 	for(var i = 0;i < Debugs.length;i++){
-		ExceptionManager.put((i+1) | 0xdb000000, "DBLOG", Debugs[i], E_INFO);
+		ExceptionManager.put((i+1) | 0xdb000000, "DBLOG", Debugs[i], E_MODEL);
 	}
 };
 Model__.Debug = function(allowDebug){
