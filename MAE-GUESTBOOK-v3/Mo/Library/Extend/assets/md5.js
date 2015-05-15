@@ -117,7 +117,8 @@ var $md5_bytes = function(e) {
 		K = 4023233417;
 		E = 2562383102;
 		B = 271733878;
-		for (w = 0; w < m.length; w += 16) {
+		var _len = m.length;
+		for (w = 0; w < _len; w += 16) {
 			y = L;
 			f = K;
 			l = E;

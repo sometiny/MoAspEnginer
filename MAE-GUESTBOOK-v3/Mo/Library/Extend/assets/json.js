@@ -9,10 +9,10 @@
 		if (str == "") {
 			return ""
 		}
-		var i, j, aL1, aL2, c, p, ret = "";
+		var i, j, aL1, aL2, c, p, ret = "", _len = str.length;
 		aL1 = Array(34, 92, 47, 8, 12, 10, 13, 9);
 		aL2 = Array(34, 92, 47, 98, 102, 110, 114, 116);
-		for (i = 0; i < str.length; i++) {
+		for (i = 0; i < _len; i++) {
 			p = true;
 			c = str.substr(i, 1);
 			for (j = 0; j <= 7; j++) {
@@ -150,7 +150,8 @@
 			}
 			else if (Object.prototype.toString.apply(src) === "[object Array]") {
 				xml+="<" + name + " data-type=\"list\">";
-				for(var i=0;i<src.length;i++){
+				var _len = src.length;
+				for(var i=0;i<_len;i++){
 					xml+=json2xml(src[i],"list");
 				}
 				xml+="</" + name + ">";

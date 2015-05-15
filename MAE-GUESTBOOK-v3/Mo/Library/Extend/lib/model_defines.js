@@ -67,15 +67,16 @@ DataTable.prototype.__AddDataSet__ = function(rs,pagesize){
 	if(rs.state == 0){ExceptionManager.put(new Exception(0,"DataTable.__AddDataSet__(rs,pagesize)","Recordset's state is 'closed'."));return;}
 	try{
 		if(pagesize == undefined)pagesize = -1;
-		var ps = rs.AbsolutePosition;
-		var k = 0;
+		var ps = rs.AbsolutePosition, k = 0, fcount=0;
+		if(!rs.eof) fcount = rs.fields.Count;
 		while(!rs.eof && (k < pagesize || pagesize == -1)){
 			k++;
-			var tmp__ = new Object();
-			for(var i = 0;i < rs.fields.count;i++){
-				tmp__[rs.fields(i).Name] = rs.fields(i).value;
+			var r = {}, fields = rs.fields, field;
+			for(var i = 0;i < fcount;i++){
+				field = fields(i);
+				r[field.Name] = field.value;
 			}
-			this.LIST__.push(tmp__);
+			this.LIST__.push(r);
 			rs.MoveNext();
 		}
 		try{
@@ -109,8 +110,9 @@ DataTable.prototype.read = function(name){
 DataTable.prototype.each = function(callback){
 	if(typeof callback == "string")callback = (function(format){return function(r){F.echo(F.format(format,r));};})(callback);
 	if(typeof callback != "function")return;
-	for(var i = 0;i < this['LIST__'].length;i++){
-		callback.call(this,this['LIST__'][i],i);
+	var  _list = this['LIST__'],_len = _list.length;
+	for(var i = 0;i < _len;i++){
+		callback.call(this,_list[i],i);
 	}
 }
 
@@ -434,12 +436,17 @@ var ModelHelper={
 		return obj;
 	}
 };
-function ModelCMDManager(cmd,model,ct){
+function ModelCMDManager(cmd,model,ct, modeltype){
+	if(modeltype!==1)modeltype=0;
 	this.cmd = cmd ||"";
 	this.model = model || null;
 	this.parms_={};
 	this.cmdobj=F.activex("ADODB.Command");
-	this.cmdobj.ActiveConnection=model.getConnection();
+	if(modeltype==0){
+		this.cmdobj.ActiveConnection=this.model.getConnection();
+	}else{
+		this.cmdobj.ActiveConnection=this.model;
+	}
 	this.cmdobj.CommandType=ct||4;
     this.cmdobj.Prepared = true;
     this.withQuery=true;
@@ -449,6 +456,39 @@ function ModelCMDManager(cmd,model,ct){
     this.dataset = null;
     this.affectedRows = -1;
 }
+ModelCMDManager.prototype.parms = function(){
+	var _this = this;
+	return {
+		"int" : function(value){
+			_this.add_parm_input_int(value);
+			return this;
+		},
+		"varchar" : function(value){
+			_this.add_parm_input_varchar(value);
+			return this;
+		},
+		"bigint" : function(value){
+			_this.add_parm_input_bigint(value)
+			return this;
+		},
+		"input" : function(value, t, size){
+			_this.add_parm_input(value, t, size);
+			return this;
+		},
+		"output" : function(t,size,totalp){
+			_this.add_parm_output(t,size,totalp);
+			return this;
+		},
+		"ret" : function(t,size){
+			if(t===undefined){
+				return _this.getparm("@RETURN");
+			}else{
+				_this.add_parm_return();
+				return this;
+			}
+		}
+	};
+};
 ModelCMDManager.New = function(cmd,model,ct){return new ModelCMDManager(cmd,model,ct);};
 ModelCMDManager.prototype.addParm = function(name,value,direction){
 	this.parms_[name] = this.cmdobj.CreateParameter(name);
@@ -545,7 +585,16 @@ ModelCMDManager.prototype.exec = function(){
 		if(!this.parms_.hasOwnProperty(i))continue;
 		this.cmdobj.Parameters.Append(this.parms_[i]);
 	}
-	Model__.RecordsAffectedCmd_(this);
+	try{
+		Model__.RecordsAffectedCmd_(this);
+	}catch(ex){
+		if(VBS && VBS.ctrl.error.number != 0){
+			ExceptionManager.put(VBS.ctrl.error.number,"ModelCMDManager.exec()",VBS.ctrl.error.description);
+			VBS.ctrl.error.clear();
+		}else{
+			ExceptionManager.put(new Exception(ex.number,"ModelCMDManager.exec()",ex.message));
+		}
+	}
 	return this.dataset;
 };
 ModelCMDManager.prototype.next = function(ps){
