@@ -46,8 +46,13 @@ var F, JSON, require, VBS, View, Model__,
 			}
 			return src;
 		};
-
-		var _LoadTemplate = function(template) {
+		var _LoadTemplate = function(template){
+			var template = __LoadTemplate(template);
+			template = template.replace(/<selection name\=("|')(\w+)\1(\s*)\/>/ig, "");
+			template = template.replace(/<selection name\=("|')(\w+)\1(\s*)>([\s\S]*?)<\/selection>/ig, "$4");
+			return template;
+		};
+		var __LoadTemplate = function(template) {
 			var templatelist, vpath, path, templatelist2;
 			templatelist = template.split(":");
 			if (templatelist.length == 1) {
@@ -63,14 +68,32 @@ var F, JSON, require, VBS, View, Model__,
 			if (vpath.indexOf("@") > 0) path = G.MO_ROOT + vpath.substr(vpath.indexOf("@") + 1) + "/Views/" + vpath.substr(0, vpath.indexOf("@")) + "." + G.MO_TEMPLATE_PERX;
 			if (!IO.file.exists(path)) path = G.MO_CORE + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
 			if (!IO.file.exists(path)) {
-				ExceptionManager.put(0x6300, "_LoadTemplate()", "template '" + template + "' is not exists.", E_NOTICE);
+				ExceptionManager.put(0x6300, "__LoadTemplate()", "template '" + template + "' is not exists.", E_NOTICE);
 				return "";
 			}
-			var tempStr = IO.file.readAllText(F.mappath(path), G.MO_CHARSET);
-			var regexp = new RegExp("<include file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "igm");
-			var Matches = F.string.matches(tempStr, regexp, function($0, $1) {
+			var tempStr = IO.file.readAllText(F.mappath(path), G.MO_CHARSET),
+				masterexp = new RegExp("^<extend file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "i"),
+				includeexp = new RegExp("<include file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "igm");
+
+			var match = masterexp.exec(tempStr), master, callback;
+			if(match){
+				templatelist2 = _RightCopy(templatelist, match[1].split(":"));
+				master = __LoadTemplate(templatelist2.join(":"));
+				callback = function($0,$1,$2,$3,$4){
+					var reg = new RegExp("<selection name\\=(\"|')" + $2 + "\\1>([\\s\\S]*?)<\\/selection>","igm");
+					var m = reg.exec(tempStr);
+					if(m){
+						master = F.replace(master,$0,m[0].replace("<super />",$4||""));
+						//master = F.replace(master,"<super />",$4||"");
+					}
+				};
+				F.string.matches(master, /<selection name\=("|')(\w+)\1(\s*)\/>/ig, callback);
+				F.string.matches(master, /<selection name\=("|')(\w+)\1(\s*)>([\s\S]*?)<\/selection>/ig, callback);
+				tempStr = master.replace(match[0], "");
+			}
+			F.string.matches(tempStr, includeexp, function($0, $1) {
 				templatelist2 = _RightCopy(templatelist, $1.split(":"));
-				tempStr = F.replace(tempStr, $0, _LoadTemplate(templatelist2.join(":")));
+				tempStr = F.replace(tempStr, $0, __LoadTemplate(templatelist2.join(":")));
 			});
 			return tempStr;
 		};
@@ -288,16 +311,18 @@ var F, JSON, require, VBS, View, Model__,
 				), E_INFO
 			);
 			if (Model__ && Model__.debug) Model__.debug();
-			if(G.MO_DEBUG2FILE){
+			if(G.MO_DEBUG2FILE || G.MO_DEBUG_MODE == "FILE"){
 				if(G.MO_DEBUG_FILE){
 					ExceptionManager.debug2file(G.MO_DEBUG_FILE);
 				}
+			}else if(G.MO_DEBUG_MODE == "SESSION"){
+				ExceptionManager.debug2session();
 			}else{
-				if(F.server("HTTP_X_REQUESTED_WITH").toLowerCase()=="xmlhttprequest"){
+				if(String(Request.ServerVariables("HTTP_X_REQUESTED_WITH")).toLowerCase()=="xmlhttprequest"){
 					if(E_ERROR & ExceptionManager.errorReporting()) ExceptionManager.errorReporting(E_ERROR);
 					else ExceptionManager.errorReporting(E_NONE);
 				}
-				F.echo(ExceptionManager.debug());
+				Response.Write(ExceptionManager.debug());
 			}
 		};
 		var _getfunctionParms = function(fn) {
@@ -307,6 +332,18 @@ var F, JSON, require, VBS, View, Model__,
 			}
 			return _parms;
 		};
+		var _catchException = function(ex){
+			var _exception = new Exception(ex.number, M.RealMethod + "." + M.RealAction, ex.description);
+			if (_runtime.line > 0) {
+				_exception.lineNumber = _runtime.line;
+				_exception.filename = _runtime.file.replace(F.mappath("/"), "").replace(/\\/ig, "\/");
+				if (_runtime.debugLine > 0 && _runtime.scripts != "") {
+					_exception.traceCode = _runtime.scripts.split("\n")[_runtime.debugLine];
+				}
+			}
+			ExceptionManager.put(_exception);			
+		}
+		
 		var _InitializePath = function(cfg) {
 			var url_ = String(req.ServerVariables("URL"));
 			if (cfg.MO_APP_NAME == "") _exit("please define application name, config-item 'MO_APP_NAME'.")
@@ -356,6 +393,7 @@ var F, JSON, require, VBS, View, Model__,
 		M.Status = "";
 		M.Buffer = false;
 		M.LoadAssets = _LoadAssets;
+		M.IsPost = String(Request.ServerVariables("REQUEST_METHOD")) == "POST" || String(Request.ServerVariables("CONTENT_TYPE")) != "";
 		M.Debug = function() {
 			_runtime.log.apply(null, arguments)
 		};
@@ -740,7 +778,7 @@ var F, JSON, require, VBS, View, Model__,
 			try{
 				MC = new _controller(this.Action);
 			}catch(ex){
-				ExceptionManager.put(0x3a9, this.RealMethod + "." + this.RealAction, "controller '" + this.Method + "' initialize failed: " + ex.description + ".");
+				_catchException({number:0x3a9,description:"controller '" + this.Method + "' initialize failed: " + ex.description + "."});
 				return;
 			}
 			if (MC.__STATUS__ === true) {
@@ -774,15 +812,7 @@ var F, JSON, require, VBS, View, Model__,
 				try {
 					fn && fn.apply(self, args);
 				} catch (ex) {
-					var _exception = new Exception(ex.number, this.RealMethod + "." + this.RealAction, ex.description);
-					if (_runtime.line > 0) {
-						_exception.lineNumber = _runtime.line;
-						_exception.filename = _runtime.file.replace(F.mappath("/"), "").replace(/\\/ig, "\/");
-						if (_runtime.debugLine > 0 && _runtime.scripts != "") {
-							_exception.traceCode = _runtime.scripts.split("\n")[_runtime.debugLine];
-						}
-					}
-					ExceptionManager.put(_exception);
+					_catchException(ex);
 				}
 			}
 			MC.__destruct();
@@ -908,6 +938,11 @@ var MEM = ExceptionManager = (function() {
 		if(e<10) return "0" + e;
 		return e;
 	};
+	var fnum2 = function(e) {
+		if(e<10) return "00" + e;
+		if(e<100) return "0" + e;
+		return e;
+	};
 	var ft = function(e) {
 		return e.getFullYear() 
 		+ "-" + fnum(e.getMonth()+1) 
@@ -915,7 +950,7 @@ var MEM = ExceptionManager = (function() {
 		+ " " + fnum(e.getHours()) 
 		+ ":" + fnum(e.getMinutes()) 
 		+ ":" + fnum(e.getSeconds()) 
-		+ "." + e.getMilliseconds();
+		+ "." + fnum2(e.getMilliseconds());
 	};
 	function h(num){
 		return num == 1 ? "E_ERROR" : (num == 2 ? "E_NOTICE" : (num == 4 ? "E_WARNING" : "E_INFO"));
@@ -990,6 +1025,51 @@ var MEM = ExceptionManager = (function() {
 		}
 		if(g=="") return;
 		IO.file.appendAllText(file, g + "\r\n");
+	};
+	b.debug2session = function() {
+		var g = [], _len = c.length, key = "MO_DEBUGS_CACHE";
+		if(_len == 0);
+		for (var f = 0; f < _len; f++) {
+			var e = c[f];
+			if (e.level & d) {
+				g.push({
+					"number" : a(e.Number),
+					"datetime" : ft(e.datetime),
+					"method" : Mo.Method,
+					"action" : Mo.Action,
+					"source" : e.Source,
+					"message" : e.Description,
+					"level" : h(e.level),
+					"filename" : e.filename,
+					"linenumber" : e.lineNumber,
+					"code" : e.traceCode
+				});
+			}
+		}
+		if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
+		if(g.length>0){
+			var debugs = Session(key), data;
+			if(debugs){
+				debugs = debugs.substr(0,debugs.length-1) + "," + JSON.stringify(g).substr(1);
+				if(debugs.length>2048){
+					var data = JSON.parse(debugs);
+					while(data.length>50)data.shift();
+					debugs = JSON.stringify(data);
+				}
+				Session(key) = debugs;
+			}else{
+				Session(key) = JSON.stringify(g);
+			}
+		}
+	};
+	b.fromSession = function(){
+		d = 0;
+		var key = "MO_DEBUGS_CACHE";
+		if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
+		var debugs = Session(key);
+		Session.Contents.Remove(key);
+		if(!debugs) return "[]";
+		return debugs;
 	};
 	return b
 })();
