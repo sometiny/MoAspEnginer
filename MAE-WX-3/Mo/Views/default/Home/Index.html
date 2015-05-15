@@ -1,0 +1,77 @@
+﻿<!--
+because i don't define Index action in HomeController, i fetch this template file directly.
+it means that i can build a website without any Controller. 
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="Mo,Asp,MoAspEnginer,JScript.Blog,MoBlog,艾恩" />
+    <meta name="description" content="基于JScript的ASP开源MVC框架-MoAspEnginer。A JScript-based MVC framework for ASP." />
+    <title>MoAspEnginer-{$VERSION}！</title>
+    <style type="text/css">
+		.clearfix:after {content:"\0020"; display: block; height: 0;clear: both; visibility: hidden; }
+		.clearfix {zoom: 1;} 
+		.clear{clear:both;}
+	    body{padding:0;margin:0; text-align: center;font-family: "Consolas", "Monaco", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;}
+	    ul,li{ list-style: none;padding: 0; margin: 0;}
+	    .wapper {margin:20px auto; width:800px;text-align:left}
+	    .wapper .title {width:100%;text-align:center;font-weight:bold;font-size:24px;padding:10px 0; color:orange; text-shadow:1px 1px 1px rgba(0,0,0,0.3)}
+	    .orange{color:orange; font-weight:bold}
+	    li{padding:10px 5px 0 5px;line-height:18px; font-size:12px; border-bottom:1px dotted #eee; width:390px; float: left;}
+	    li.doubleheight{height:36px;line-height:26px; }
+	    a{color:orange;}
+	</style>
+	<script type="text/javascript">
+		window.onload=function(){
+			var lis = document.getElementsByTagName("li");
+			for(var i=0;i<lis.length;i++){
+				if(i%2==0){
+					lis[i].innerHTML = lis[i].innerHTML.replace(/(\w+)/igm,"<span class=\"orange\">$1</span>");
+					lis[i].style.cssText = "text-align:right";
+				}else{
+					lis[i].style.cssText="color:#999;text-align:left";
+				}
+			}
+		};
+	</script>
+</head>
+<body>
+	<div class="wapper">
+		<div class="title">{$VERSION}！</div>
+		<ul class="clearfix">
+			<li>一款基于JScript的ASP开源MVC框架。</li>
+			<li>A JScript-based MVC framework for ASP.</li>
+			<li>单文件入口。</li>
+			<li>Single entry point.</li>
+			<li>HTML代码和程序的真正分离。</li>
+			<li>A real MVC.</li>
+			<li>模板编译ASP代码。</li>
+			<li>Combine template file to ASP(JScript) code.</li>
+			<li>支持类库扩展以及模板自定义标签扩展。</li>
+			<li>Support Library and Tag extend.</li>
+			<li>支持多种数据库，默认支持ACCESS、MSSQL、MYSQL、SQLITE，可自定义其他类型数据库。</li>
+			<li class="doubleheight">Support Muti-Type-Databases.</li>
+			<li>支持多数据库操作。</li>
+			<li>Support Muti-Databases-Operate.</li>
+			<li class="doubleheight">支持表单验证，HTTP请求数据可直接用来更新数据库。</li>
+			<li>FormValidatee is supported, and Http Post data can be used for insert or update table record(s).</li>
+			<li>提供HttpRequest，HttpUpload，Soap，OAUTH2.0。</li>
+			<li>"HttpRequest，HttpUpload，Soap，OAUTH2.0" are supported.</li>
+			<li>提供CryptoJS模块，包括AES/DES/RC4/Rabbit/pbkdf2/ripemd160等算法。</li>
+			<li class="doubleheight">CryptoJS is supported.</li>
+			<li class="doubleheight">内置Json解析和构建。</li>
+			<li>Json2 is built-in.You can use it to parse or stringify Json data.</li>
+			<li>支持多种伪静态方式，包括404、URL、isapi_URLRewrite，完全自定义的Rewrite配置。</li>
+			<li>URLRewrite is Supported(404 Error Page, URL Route,ISAPI_URIRewrite).</li>
+			<li class="doubleheight">支持类库缓存，编译缓存，HTML缓存，数据库Model缓存。</li>
+			<li>Library Cache, Combined File Cache, HTML Cache and Model Cache.</li>
+			<li>资源统一管理，统一销毁，使您专心于业务逻辑处理。</li>
+			<li>You can pay much more attention on you business.</li>
+			<li>换一种ASP的开发方式！！！</li>
+			<li>Get your ASP!!!</li>
+		</ul>
+		<div class="title"><a href="{$$MO_ROOT}?m=Home&a=Home">示例(Demos)</a></div>
+	</div>
+</body>
+</html>

@@ -40,7 +40,8 @@ Module.prototype.compile = function(){
 		if(typeof factory == "function"){
 			var result; 
 			if(_required){
-				for(var i=0;i<_required.length;i++){
+				var _len = _required.length;
+				for(var i=0;i<_len;i++){
 					_required[i]=require(_required[i]);
 				}
 				result= factory.apply(null,_required);
@@ -55,7 +56,7 @@ Module.prototype.compile = function(){
 	define.cmd={};
 	var content = IO.file.readAllText(this.filename);
 	if(this.aspfile){
-		content = content.replace(/^(\s*)\<script(.+?)\>/i,"").replace(/\<\/script\>(\s*)$/i,"");
+		content = content.replace(/^(\s*)\u003cscript(.+?)\u003e/i,"").replace(/\u003c\/script\u003e(\s*)$/i,"");
 	}
 	var candebug=false;
 	if(Mo.Config.Global.MO_DEBUG && content.indexOf("/*debug*/") === 0){
@@ -79,8 +80,8 @@ Module._load = function(name, parent, aspfile, callback){
 		if(Mo.Config.Global.MO_LIB_CNAMES){
 			name = Mo.Config.Global.MO_LIB_CNAMES[name] || name;
 		}
-		var paths = parent ? parent.loadpaths() : Module._pathes;
-		for(var i=0;i<paths.length;i++){
+		var paths = parent ? parent.loadpaths() : Module._pathes, _len = paths.length;
+		for(var i=0;i<_len;i++){
 			var filename = IO.build(paths[i],name);
 			if(!IO.file.exists(filename)){
 				filename += ".js";
@@ -133,4 +134,4 @@ function require(name, arg1, arg2){
 	return Module._load(name, null, !!arg1, arg2);
 };
 require.module = Module;
-return require;
+module.exports = require;

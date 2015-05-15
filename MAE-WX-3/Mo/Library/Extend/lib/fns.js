@@ -398,7 +398,7 @@ _.formatdate = function(dt, fs) {
 			else{
 				dt = Date.parse(dt);
 				if(!dt){
-					ExceptionManager.put(0x3456,"F.formatdate","输入日期格式错误，无法解析");
+					ExceptionManager.put(0x3456,"F.formatdate","date string format error, parse failed.");
 					return "";
 				}
 			}
@@ -447,7 +447,7 @@ _.date = function(srcDate) {
 _.date.timezone = new Date().getTimezoneOffset() / 60;
 _.date.parse = function(srcDate) {
 	if (typeof srcDate == "string") {
-		srcDate = srcDate.replace(/(\-|\s|\:|\.)0/ig, "$1");
+		srcDate = srcDate.replace(/(\-|\s|\:|\.)0(\d)/ig, "$1$2");
 		var match = /^(\d{4})\-(\d{1,2})\-(\d{1,2})( (\d{1,2})\:(\d{1,2})(\:(\d{1,2}))?(\.(\d{1,3}))?)?$/.exec(srcDate);
 		if (match) {
 			try {
@@ -805,8 +805,8 @@ _.string.fromBinary = function(bin, charset) {
 _.string.getByteArray = function(string) {
 	if (string == "") return [];
 	var enc = _.encode(string);
-	var byteArray = [];
-	for (var i = 0; i < enc.length; i++) {
+	var byteArray = [], _len = enc.length;
+	for (var i = 0; i < _len; i++) {
 		if (enc.substr(i, 1) == "%") {
 			byteArray.push(parseInt(enc.substr(i + 1, 2), 16));
 			i += 2;
@@ -817,11 +817,12 @@ _.string.getByteArray = function(string) {
 	return byteArray;
 };
 _.string.fromByteArray = function(byteArray) {
-	if (byteArray.constructor != Array || byteArray.length <= 0) return "";
-	var string = "";
-	for (var i = 0; i < byteArray.length; i++) {
-		if(byteArray[i]<=0) break;
-		string += "%" + byteArray[i].toString(16);
+	var string = "", _len = byteArray.length, _bit = 0;
+	if (byteArray.constructor != Array || _len <= 0) return "";
+	for (var i = 0; i < _len; i++) {
+		_bit = byteArray[i];
+		if(_bit<=0) break;
+		string += "%" + _bit.toString(16);
 	}
 	return _.decode(string);
 };
@@ -830,9 +831,9 @@ _.object = {};
 _.object.sort = function(src, asc) {
 	_.sortable.data__ = _.object.keys(src);
 	_.sortable.sort(asc);
-	var new_ = {};
-	for (var i = 0; i < _.sortable.data__.length; i++) {
-		new_[_.sortable.data__[i]] = src[_.sortable.data__[i]];
+	var new_ = {}, _data = _.sortable.data__, _len = _data.length;
+	for (var i = 0; i < _len; i++) {
+		new_[_data[i]] = src[_data[i]];
 	}
 	return new_;
 };
@@ -889,8 +890,8 @@ _.object.toURIString = function(src, charset) {
 };
 _.object.fromURIString = function(src) {
 	var obj={};
-	var ucs = src.split(_.object.toURIString.split_char_2);
-	for (var i = 0; i < ucs.length; i++) {
+	var ucs = src.split(_.object.toURIString.split_char_2), _len = ucs.length;
+	for (var i = 0; i < _len; i++) {
 		if (ucs[i].indexOf(_.object.toURIString.split_char_1) > 0) {
 			obj[_.decode(ucs[i].substr(0, ucs[i].indexOf(_.object.toURIString.split_char_1)))] = _.decode(_.string.trimLeft(ucs[i].substr(ucs[i].indexOf(_.object.toURIString.split_char_1)), _.object.toURIString.split_char_1));
 		}
@@ -958,8 +959,8 @@ var postinit__ = function() {
 			_postinited_ = true;
 		}
 	};
-var mthods = ["get", "post", "session", "all"];
-for(var i = 0; i < mthods.length; i++){
+var mthods = ["get", "post", "session", "all"], _len = mthods.length;
+for(var i = 0; i < _len; i++){
 	(function(v){
 		_[v].exp = function(key, exp, option) {
 			return _.string.exp(_[v](key), exp, option);
@@ -991,7 +992,8 @@ for(var i = 0; i < mthods.length; i++){
 	})(mthods[i]);
 }
 mthods = ["int", "dbl", "bool"];
-for(var i = 0; i < mthods.length; i++){
+_len = mthods.length;
+for(var i = 0; i < _len; i++){
 	(function(v){
 		_.all[v] = function(key, default_, islist) {
 			if (_.get.exists(key)) return _.get[v](key, default_, islist);
@@ -1081,8 +1083,8 @@ _.post.values = function() {
 	return _.object.values(_post_);
 };
 _.get.fromURIString = function(src) {
-	var ucs = src.split(_.object.toURIString.split_char_2);
-	for (var i = 0; i < ucs.length; i++) {
+	var ucs = src.split(_.object.toURIString.split_char_2), _len = ucs.length;
+	for (var i = 0; i < _len; i++) {
 		if (ucs[i].indexOf(_.object.toURIString.split_char_1) > 0) {
 			_get_[_.decode(ucs[i].substr(0, ucs[i].indexOf(_.object.toURIString.split_char_1)))] = _.decode(_.string.trimLeft(ucs[i].substr(ucs[i].indexOf(_.object.toURIString.split_char_1)), _.object.toURIString.split_char_1));
 		}
@@ -1090,8 +1092,8 @@ _.get.fromURIString = function(src) {
 };
 _.post.fromURIString = function(src) {
 	postinit__();
-	var ucs = src.split(_.object.toURIString.split_char_2);
-	for (var i = 0; i < ucs.length; i++) {
+	var ucs = src.split(_.object.toURIString.split_char_2), _len = ucs.length;
+	for (var i = 0; i < _len; i++) {
 		if (ucs[i].indexOf(_.object.toURIString.split_char_1) > 0) {
 			var key = _.decode(ucs[i].substr(0, ucs[i].indexOf(_.object.toURIString.split_char_1))),
 				value = _.decode(_.string.trimLeft(ucs[i].substr(ucs[i].indexOf(_.object.toURIString.split_char_1)), _.object.toURIString.split_char_1));
@@ -1187,4 +1189,5 @@ _.foreach({
 });
 _.timer.ticks = _.timer.stop;
 init();
+Mo.addEventListener("ondispose", _.dispose);
 module.exports = _;

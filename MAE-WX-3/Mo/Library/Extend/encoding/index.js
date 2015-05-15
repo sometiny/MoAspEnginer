@@ -34,27 +34,11 @@
 ** About: 
 **		support@mae.im
 */
-var base64 = require("base64");
 module.exports = (function(){
 	var _SPEC={};
 	_SPEC.S1 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'()";/*for URIComponent*/
 	_SPEC.S2 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'();/?:@&=+$,#";/*for URI*/
 	var $enc={};
-	$enc.wordtobytes = function(u){
-		if(u>0xffffffff)return [];
-		else if(u>0xffffff) {
-			return [u >>> 24,(u >> 16) & 0xff,(u >> 8) & 0xff,u & 0xff];
-		}
-		else if(u>0xffff) {
-			return [u >> 16,(u >> 8) & 0xff,u & 0xff];
-		}
-		else if(u>0xff) {
-			return [u >> 8,u & 0xff];
-		}
-		else{
-			return [u];
-		}
-	};
 	$enc.encodeURIComponent = function(string,enc){
 		return $enc.encode(string,enc,"S1");
 	};
@@ -64,8 +48,8 @@ module.exports = (function(){
 	$enc.decode = function(string,enc){
 		enc = (enc || "utf-8").toUpperCase();
 		var $encoding = $enc[enc=="UTF-8"?"utf8":"gbk"];
-		var i=0,c,ret=[];
-		while(i<string.length){
+		var i=0,c,ret=[], _len = string.length;
+		while(i<_len){
 			c = string.substr(i,1);
 			if(c=="%" && /^%([0-9a-z]{2})$/i.test(string.substr(i,3))){
 				ret.push(parseInt("0x"+string.substr(i+1,2)));
@@ -80,8 +64,8 @@ module.exports = (function(){
 	$enc.encode = function(string,enc,t){
 		enc = (enc || "utf-8").toUpperCase();
 		t = (t || "S1").toUpperCase();
-		var ret="", i=0, c, chr, bytes = $enc[enc=="UTF-8"?"utf8":"gbk"].getWordArray(string);
-		while(i<bytes.length){
+		var ret="", i=0, c, chr, bytes = $enc[enc=="UTF-8"?"utf8":"gbk"].getWordArray(string), _len = bytes.length;
+		while(i<_len){
 			c = bytes[i++];
 			if(c<=0x7f){
 				chr = String.fromCharCode(c);
@@ -104,16 +88,16 @@ module.exports = (function(){
 				ExceptionManager.put(new Exception(0xb0a2,"encoding.hex.parse","invalid input string."));
 				return [];
 			}
-			var i=0,c,ret=[];
-			while(i<string.length-1){
+			var i=0,c,ret=[], _len = string.length;
+			while(i<_len-1){
 				ret.push(parseInt(string.substr(i,2),16));
 				i+=2;
 			}
 			return ret;
 		};
 		$hex.stringify = function(bytes){
-			var ret="",c,v,i=0;
-			while(i<bytes.length){
+			var ret="",c,v,i=0, _len=bytes.length;
+			while(i<_len){
 				v = bytes[i++];
 				if(v>255){
 					ExceptionManager.put(new Exception(0xb0a3,"encoding.hex.stringify","invalid input array, item value is bigger than 255."));
@@ -133,20 +117,20 @@ module.exports = (function(){
 			else if(u<=0x07FF){
 				a = 0xc0 | (u >> 6);
 				b = 0x80 | (u & 0x3f);
-				return (a<<8)+b;
+				return (a<<8) | b;
 			}
 			else if(u<=0xFFFF){
 				a = 0xe0 | (u >> 12);
 				b = 0x80 | ((u >> 6) & 0x3f);
 				c = 0x80 | (u & 0x3f);
-				return (a<<16)+(b<<8)+c;
+				return (a<<16) | (b<<8) | c;
 			}
 			else if(u<=0x10FFFF){
 				a = 0xf0 | (u >> 18);
 				b = 0x80 | ((u >> 12) & 0x3f);
 				c = 0x80 | ((u >> 6) & 0x3f);
 				d = 0x80 | (u & 0x3f);
-				var ret = (a<<24)+(b<<16)+(c<<8)+d;
+				var ret = (a<<24) | (b<<16) | (c<<8) | d;
 				if(ret<0)ret+=0x100000000;
 				return ret;
 			}else return 0;
@@ -157,20 +141,20 @@ module.exports = (function(){
 			else if(u<=0xdfbf) {
 				a = (u >> 8) & 0x1f;
 				b = u & 0x3f;
-				return (a << 6) + b;
+				return (a << 6) | b;
 			}
 			else if(u<=0xefbfbf) {
 				a = (u >> 16) & 0xf;
 				b = (u >> 8) & 0x3f;
 				c = u & 0x3f;
-				return (a << 12) + (b << 6) + c;
+				return (a << 12) | (b << 6) | c;
 			}
 			else if(u<=0xf48fbfbf) {
 				a = (u >>> 24) & 0x7;
 				b = (u >> 16) & 0x3f;
 				c = (u >> 8) & 0x3f;
 				d = u & 0x3f;
-				return (a << 18) + (b << 12) + (c << 6) + d;
+				return (a << 18) | (b << 12) | (c << 6) | d;
 			}
 			else return 0;
 		};
@@ -178,13 +162,13 @@ module.exports = (function(){
 			var c = u[i],ret=[1,c];
 			if(c<=0x7f)ret[1]=c;
 			else if(c<=0xDF){
-				ret[1]=(c << 8) + u[i+1];
+				ret[1]=(c << 8) | u[i+1];
 				ret[0]=2;
 			}else if(c<=0xEF){
-				ret[1]=(c << 16) + (u[i+1] << 8) + u[i+2];
+				ret[1]=(c << 16) | (u[i+1] << 8) | u[i+2];
 				ret[0]=3;
 			}else if(c<=0xF7){
-				ret[1]=(c << 24) + (u[i+1] << 16) + (u[i+2] << 8) + u[i+3];
+				ret[1]=(c << 24) | (u[i+1] << 16) | (u[i+2] << 8) | u[i+3];
 				ret[0]=4;
 			}
 			return ret;	
@@ -214,13 +198,21 @@ module.exports = (function(){
 			return ret;
 		};
 		$utf8.getByteArray = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			var i=0,c,ret=[];
-			while(i<u.length){
+			while(i<_len){
 				c = u.charCodeAt(i);
 				if(c<0x7f) ret.push(c);
 				else{
-					ret = ret.concat($enc.wordtobytes(utoutf8(c)));
+					var word = utoutf8(c);
+					if(word>0xffffff) {
+						ret.push(u >>> 24,(u >> 16) & 0xff,(u >> 8) & 0xff,u & 0xff);
+					}else if(word>0xffff){
+						ret.push(word >> 16,(word >> 8) & 0xff,word & 0xff);
+					}else if(word>0xff){
+						ret.push(word >> 8,word & 0xff);
+					}
 				}
 				i++;
 			}
@@ -230,9 +222,10 @@ module.exports = (function(){
 			return String.fromCharCode.apply(null,$utf8.getByteArray(u));
 		};
 		$utf8.toString = function(u){
-			if(u.length<=0)return "";
+			var _len = u.length;
+			if(_len<=0)return "";
 			var i=0,c,ret="";
-			while(i<u.length){
+			while(i<_len){
 				if(u[i]<0x7f) ret+=String.fromCharCode(u[i]);
 				else{
 					ret+=String.fromCharCode(utf8tou(u[i]));
@@ -242,9 +235,10 @@ module.exports = (function(){
 			return ret;			
 		};
 		$utf8.getString = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			var i=0,c,ret="";
-			while(i<u.length){
+			while(i<_len){
 				var word = bytestoword(u,i);
 				ret+=String.fromCharCode(utf8tou(word[1]));
 				i+=word[0];
@@ -261,18 +255,18 @@ module.exports = (function(){
 			else if(u>0x9FA5)
 			{
 				if(u<0xFF01||u>0xFF61)return 0;
-				offset=u-0xFF01+0x9FA6-0x4E00;
+				offset=u-0xad5b;
 			}  
-			CP.gbk.stream.u2g.position=offset*2;
-			return base64.d(base64.fromBinary(CP.gbk.stream.u2g.read(2)));
+			CP.gbk.stream.u2g.position=(offset << 1);
+			return IO.binary2buffer(CP.gbk.stream.u2g.read(2));
 		};
 		var g2u=function(g){
 			var offset, ch = g >> 8, cl = g & 0xff;
 			ch -= 0x81;
 			cl -= 0x40;
 			if(ch<=0x7d && cl<=0xbe){
-				CP.gbk.stream.g2u.position=(ch*0xbf+cl)*2;
-				return base64.d(base64.fromBinary(CP.gbk.stream.g2u.read(2)));
+				CP.gbk.stream.g2u.position=((ch*0xbf+cl) << 1);
+				return IO.binary2buffer(CP.gbk.stream.g2u.read(2));
 			}else{
 				return [0x1f,0xff];
 			}
@@ -304,15 +298,16 @@ module.exports = (function(){
 			return ret;
 		};
 		$gbk.getWordArray = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			if(!opencp())return [];
 			var i=0,c,ret=[];
-			while(i<u.length){
+			while(i<_len){
 				c = u.charCodeAt(i);
 				if(c<0x7f) ret.push(c);
 				else{
 					var g=u2g(c);
-					ret.push((g[0]<<8) + g[1]);
+					ret.push((g[0]<<8) | g[1]);
 				}
 				i++;
 			}
@@ -320,10 +315,11 @@ module.exports = (function(){
 			return ret;
 		};
 		$gbk.getByteArray = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			if(!opencp())return [];
 			var i=0,c,ret=[];
-			while(i<u.length){
+			while(i<_len){
 				c = u.charCodeAt(i);
 				if(c<0x7f) ret.push(c);
 				else ret = ret.concat(u2g(c)); 
@@ -333,13 +329,14 @@ module.exports = (function(){
 			return ret;
 		};
 		$gbk.bytesToWords = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			var i=0,c,ret=[];
-			while(i<u.length){
+			while(i<_len){
 				c = u[i];
 				if(c<=0x7f)ret.push(c);
 				else{
-					ret.push((c << 8) + u[i+1]);
+					ret.push((c << 8) | u[i+1]);
 					i++;
 				}
 				i++;
@@ -350,14 +347,15 @@ module.exports = (function(){
 			return String.fromCharCode.apply(null,$gbk.getByteArray(u));
 		};
 		$gbk.toString = function(bytes){
-			if(bytes.length<=0)return "";
+			var _len = bytes.length;
+			if(_len<=0)return "";
 			if(!opencp("g2u"))return "";
 			var ret="",i=0;
-			while(i<bytes.length){
+			while(i<_len){
 				if(bytes[i]<0x7f) ret+=String.fromCharCode(bytes[i]);
 				else{
 					var u = g2u(bytes[i]);
-					ret+=String.fromCharCode((u[1]<<8)+u[0]);
+					ret+=String.fromCharCode((u[1]<<8) | u[0]);
 				}
 				i++;
 			}
@@ -365,15 +363,16 @@ module.exports = (function(){
 			return ret;
 		};
 		$gbk.getString = function(u){
-			if(u.length<=0)return "";
+			var _len = u.length;
+			if(_len<=0)return "";
 			var i=0,c,ret="";
 			if(!opencp("g2u"))return "";
-			while(i<u.length){
+			while(i<_len){
 				c = u[i];
 				if(c<=0x7f)ret+=String.fromCharCode(c);
 				else{
-					var b = g2u((c << 8) + u[i+1]);
-					ret+=String.fromCharCode((b[1]<<8)+b[0]);
+					var b = g2u((c << 8) | u[i+1]);
+					ret+=String.fromCharCode((b[1]<<8) | b[0]);
 					i++;
 				}
 				i++;
@@ -386,17 +385,19 @@ module.exports = (function(){
 	$enc.unicode = $enc.unicode || (function(){
 		var $unicode={};
 		$unicode.getWordArray = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			var i=0,c,ret=[];
-			while(i<u.length){
+			while(i<_len){
 				ret.push(u.charCodeAt(i++));
 			}
 			return ret;
 		};
 		$unicode.getByteArray = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			var i=0,c,ret=[];
-			while(i<u.length){
+			while(i<_len){
 				c=u.charCodeAt(i++);
 				ret.push( c & 0xff);
 				ret.push( (c>>8) & 0xff); /*Little-Endian*/
@@ -404,10 +405,11 @@ module.exports = (function(){
 			return ret;
 		};
 		$unicode.bytesToWords = function(u){
-			if(u.length<=0)return [];
+			var _len = u.length;
+			if(_len<=0)return [];
 			var i=0,c,ret=[];
-			while(i<u.length-1){
-				ret.push( (u[i+1]<<8) +u[i]); /*Little-Endian*/
+			while(i<_len-1){
+				ret.push( (u[i+1]<<8) | u[i]); /*Little-Endian*/
 				i+=2;
 			}
 			return ret;
@@ -416,18 +418,20 @@ module.exports = (function(){
 			return String.fromCharCode.apply(null,$unicode.getByteArray(u));
 		};
 		$unicode.toString = function(u){
-			if(u.length<=0)return "";
+			var _len = u.length;
+			if(_len<=0)return "";
 			var i=0,c,ret="";
-			while(i<u.length){
+			while(i<_len){
 				ret+=String.fromCharCode(u[i++]);
 			}
 			return ret;
 		};
 		$unicode.getString = function(u){
-			if(u.length<=0)return "";
+			var _len = u.length;
+			if(_len<=0)return "";
 			var i=0,c,ret="";
-			while(i<u.length-1){
-				ret+=String.fromCharCode((u[i+1]<<8) +u[i]); /*Little-Endian*/
+			while(i<_len-1){
+				ret+=String.fromCharCode((u[i+1]<<8) | u[i]); /*Little-Endian*/
 				i+=2;
 			}
 			return ret;
@@ -442,3 +446,8 @@ module.exports = (function(){
 	$enc.unicode.getWords = $enc.unicode.getWordArray;
 	return $enc;
 })();
+Utf8 = module.exports.utf8;
+GBK = module.exports.gbk;
+Unicode = module.exports.unicode;
+Hex = module.exports.hex;
+Encoding = module.exports.encoding;

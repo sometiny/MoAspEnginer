@@ -28,7 +28,8 @@ var MPIHost = "mpi.thinkasp.cn",
  * @param {idy} install-path;
  * @return {Boolean} return true if package was installed successfully, otherwise false;
  */
-function _install(pkg, idy){
+function _install(pkg, idy, update){
+	update = !!update;
 	if(typeof pkg != "object"){
 		Mpi.message = "package error.";
 		return false;
@@ -38,31 +39,25 @@ function _install(pkg, idy){
 		return false;
 	}
 	var _installDirectory = IO.build(idy, pkg.name);
-	if(IO.directory.exists(_installDirectory)){
+	if(!update && IO.directory.exists(_installDirectory)){
 		Mpi.message = "package is exists.";
 		return false;
 	}
-	var pkgtype = Mpi.packageExists("jszip") ? "jszip" : (Mpi.packageExists("assets/tar") ? "tar" : (Mpi.packageExists("xmlpkg") ? "xmlpkg" : "none"));
-	if(pkgtype=="none"){
-		Mpi.message = "can not find any method to unpack.";
-		return false;
+	if(!IO.directory.exists(_installDirectory)){
+		update = false;
 	}
 	var zipdata, JSZip, zip;
 	try{
 		var packagepath = IO.build(Mpi.PATH.CACHE,F.format("{0}@{1}.zip",pkg.name,pkg.version));
-		zipdata = IO.file[pkgtype == "jszip" ? "readAllBytes" : "readAllText"](packagepath);
-		if(pkgtype == "tar"){
-			JSZip = require("assets/tar");
-			zip = new JSZip(packagepath);
-			IO.file.del(packagepath);
-		}else{
-			JSZip = require(pkgtype);
-			IO.file.del(packagepath);
-			zip = new JSZip(pkgtype == "jszip" ? base64.fromBinary(zipdata) : zipdata, {base64:true});
-		}
+		JSZip = require("assets/tar");
+		zip = new JSZip(packagepath);
+		IO.file.del(packagepath);
 	}catch(ex){
 		Mpi.message = ex.description;
 		return false;
+	}
+	if(update){
+		IO.directory.clear(_installDirectory);
 	}
 	var files = zip.files, unziped = [];
 	for(var i in files){
@@ -87,7 +82,7 @@ function _install(pkg, idy){
 		}else{
 			var parentDir=IO.parent(dest);
 			if(!IO.directory.exists(parentDir)) IO.directory.create(parentDir);
-			IO.file.writeAllBytes(dest,pkgtype == "jszip" ? base64.toBinary(base64.e(file._data.getContent())) : file.data);
+			IO.file.writeAllBytes(dest, file.data);
 			unziped.push("F~" + dest);
 		}
 	}
@@ -178,15 +173,7 @@ Mpi.setDefaultInstallDirectory = function(dest){
  * @return {Boolean} return true if download successfully, otherwise false;
  */
 Mpi.download = function(pkg){
-	var pkgtype = Mpi.packageExists("jszip") ? "" : (Mpi.packageExists("assets/tar") ? "tar" : (Mpi.packageExists("xmlpkg") ? "xmlpkg" : "none"));
-	if(pkgtype == "none"){ 
-		Mpi.message = "can not find any method to unpack.";
-		return false;
-	}
-	var type = "";
-	if(pkgtype == "tar") type = "tar";
-	else if (pkgtype == "xmlpkg") type = "xml";
-	return _saveBinary(F.string.format("http://{0}/?/mpi/package/download/{1}/{2}", MPIHost, pkg.name, pkgtype),IO.build(Mpi.PATH.CACHE,F.format("{0}@{1}.zip",pkg.name,pkg.version)));
+	return _saveBinary(F.string.format("http://{0}/?/mpi/package/download/{1}/tar", MPIHost, pkg.name),IO.build(Mpi.PATH.CACHE,F.format("{0}@{1}.zip",pkg.name,pkg.version)));
 };
 
 /**
@@ -206,18 +193,37 @@ Mpi.fetchPackage = function(pkg){
 	return _fetchJson(F.string.format("http://{0}/?/mpi/package/info/{1}/fetch", MPIHost, pkg))
 };
 
-/**
- * ensure if package has been installed.
- * @param {package} package object;
- * @return {Boolean} return true if package is exists, otherwise false;
- */
-Mpi.packageExists = function(pkg){
+Mpi.packageExists2 = function(pkg){
 	if(typeof pkg=="string") pkg = {name : pkg}
 	if(!pkg.name || !/^([\w\.\-]+)$/ig.test(pkg.name)){
 		Mpi.message = "package name format error.";
 		return true;
 	}
 	return IO.directory.exists(IO.build(Mpi.PATH.APP,pkg.name)) || IO.directory.exists(IO.build(Mpi.PATH.CORE,pkg.name)) || IO.file.exists(IO.build(Mpi.PATH.APP,pkg.name)) || IO.file.exists(IO.build(Mpi.PATH.CORE,pkg.name));
+}
+/**
+ * ensure if package has been installed.
+ * @param {package} package object;
+ * @return {Boolean} return true if package is exists, otherwise false;
+ */
+Mpi.packageExists = function(pkg){
+	Mpi.message = "";
+	if(typeof pkg=="string") pkg = {name : pkg, version: "1.0.0.0"}
+	if(!pkg.name || !/^([\w\.\-]+)$/ig.test(pkg.name)){
+		Mpi.message = "package name format error.";
+		return null;
+	}
+	var pkgdirectory=IO.build(installDirectory,pkg.name),filename=IO.build(pkgdirectory, "package.json") ;
+	if(IO.directory.exists(pkgdirectory)){
+		if(IO.file.exists(filename)){
+			try{
+				return JSON.parse(IO.file.readAllText(filename));
+			}catch(ex){Mpi.message = "package.json format error.";}
+		}else{
+			Mpi.message = "package.json is not exists.";
+		}
+	}
+	return null;
 };
 Mpi.checkDependencies = function(pkg){
 	if(!pkg) return false;
@@ -241,8 +247,9 @@ Mpi.checkDependencies = function(pkg){
  * @return {Boolean} return true if install successfully, otherwise false;
  */
 Mpi.install = function(pkg, option){
-	var idy = option ? (option.dir || Mpi.PATH[option.path]) : installDirectory;
-	return _install(pkg, idy);
+	option = option || {};
+	var idy = option.dir || Mpi.PATH[option.path] || installDirectory;
+	return _install(pkg, idy, option.update);
 };
 
 /**
@@ -252,10 +259,6 @@ Mpi.install = function(pkg, option){
  * @return {Boolean} return true if install successfully, otherwise false;
  */
 Mpi.downloadAndInstall = function(pkgname,option){
-	if(Mpi.packageExists(pkgname)){
-		Mpi.message = Mpi.message || "package is exists.";
-		return false;
-	}
 	var pkg = Mpi.fetchPackage(pkgname);
 	if(!Mpi.checkDependencies(pkg)) return false;
 	if(!Mpi.download(pkg)) return false;
