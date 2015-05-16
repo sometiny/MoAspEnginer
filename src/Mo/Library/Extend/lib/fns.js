@@ -326,9 +326,12 @@ _.redirect = function(url, msg) {
 	Response.End();
 };
 _["goto"] = function(url, msg) {
-	if (msg === undefined) msg = "";
-	msg = msg + "";
-	_.echo("<s" + "cript type=\"text/javascript\">" + (msg ? ("alert(decodeURIComponent(\"" + _.encode(msg) + "\"));") : "") + "window.location=decodeURIComponent(\"" + _.encode(url) + "\");</s" + "cript>");
+	if (msg === undefined){
+		Response.Status = "302 Object Moved";
+		Response.AddHeader("Location", url);
+		return;
+	}
+	Response.Write('\u003cscript type="text/javascript"\u003ealert(decodeURIComponent("' + _.encode(msg) + '"));window.location = decodeURIComponent("' + _.encode(url) + '");\u003c/script\u003e');
 };
 _.initialize = function(name) {
 	if (typeof name == "string") name = eval(name);
