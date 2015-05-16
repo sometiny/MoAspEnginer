@@ -1,6 +1,7 @@
 ﻿<script language="jscript" runat="server">
 return {
 	MO_DEBUG: false,
+	MO_DEBUG_MODE : "DIRECT",
 	MO_COMPILE_CACHE: true,
 	MO_TAG_LIB : "ontag",
 	MO_TEMPLATE_ENGINE : "views/view.js",
