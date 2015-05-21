@@ -382,7 +382,7 @@ var F, JSON, require, VBS, View, Model__,
 			},
 			G = {};
 		M.Runtime = _runtime;
-		M.Version = "MoAspEnginer 3.1";
+		M.Version = "MoAspEnginer 3.1.1";
 		M.Config = {};
 		M.IsRewrite = false;
 		M.Action = "";
@@ -730,9 +730,9 @@ var F, JSON, require, VBS, View, Model__,
 			this.Method = F.get(G.MO_METHOD_CHAR);
 			this.Action = F.get(G.MO_ACTION_CHAR);
 			this.Group = F.get(G.MO_GROUP_CHAR);
-			if (!/^(\w+)$/i.test(this.Action)) this.Action = "Index";
-			if (!/^(\w+)$/i.test(this.Method)) this.Method = "Home";
-			if (!/^(\w+)$/i.test(this.Group)) this.Group = "";
+			(!/^(\w+)$/i.test(this.Action)) && (this.Action = "Index");
+			(!/^(\w+)$/i.test(this.Method)) && (this.Method = "Home");
+			(!/^(\w+)$/i.test(this.Group)) && (this.Group = "");
 			if (this.Group != "") this.Group += "/";
 			if (G.MO_CONTROLLER_CNAMES && G.MO_CONTROLLER_CNAMES.hasOwnProperty(this.Method.toLowerCase())) this.Method = G.MO_CONTROLLER_CNAMES[this.Method.toLowerCase()];
 			if (G.MO_CACHE) {
@@ -954,6 +954,12 @@ var MEM = ExceptionManager = (function() {
 		+ ":" + fnum(e.getSeconds()) 
 		+ "." + fnum2(e.getMilliseconds());
 	};
+	var ft2 = function(e) {
+		return fnum(e.getHours()) 
+		+ ":" + fnum(e.getMinutes()) 
+		+ ":" + fnum(e.getSeconds()) 
+		+ "." + fnum2(e.getMilliseconds());
+	};
 	function h(num){
 		return num == 1 ? "E_ERROR" : (num == 2 ? "E_NOTICE" : (num == 4 ? "E_WARNING" : (num == 8 ? "E_INFO" : "E_MODEL")));
 	}
@@ -1036,7 +1042,7 @@ var MEM = ExceptionManager = (function() {
 			if (e.level & d) {
 				g.push({
 					"number" : a(e.Number),
-					"datetime" : ft(e.datetime),
+					"datetime" : ft2(e.datetime),
 					"method" : Mo.Method,
 					"action" : Mo.Action,
 					"source" : e.Source,

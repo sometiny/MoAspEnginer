@@ -21,20 +21,19 @@ var _post_ = null,
 	_included_ = {},
 	_post_map_ = null;
 var init = function() {
-	var e = new Enumerator(Request.QueryString);
+	var e = new Enumerator(Request.QueryString), q, v;
 	for (; !e.atEnd(); e.moveNext()) {
-		var q = e.item();
-		_get_[q] = String(Request.QueryString(q));
+		q = e.item(); v = String(Request.QueryString(q));
+		v && (_get_[q] = v);
 	}
 	
 	e = new Enumerator(Request.ServerVariables);
 	for (; !e.atEnd(); e.moveNext()) {
-		var q = e.item();
-		var v = String(Request.ServerVariables(q));
+		q = e.item(); v = String(Request.ServerVariables(q));
 		if (q == "URL" && v.indexOf("?") > 0) v = v.substr(0, v.indexOf("?"));
 		_server_[q] = v;
 	}
-	};
+};
 var _ = {};
 _.TEXT = {
 	BR: 1,
@@ -43,7 +42,6 @@ _.TEXT = {
 	NLBR: 1 | 2,
 	FILE: 8
 };
-_.exports = {};
 _.has = function(obj, key) {
 	return obj.hasOwnProperty(key);
 };
@@ -78,8 +76,8 @@ _.random = function(minValue, maxValue) {
 	return parseInt(Math.random() * (maxValue - minValue + 1)) + minValue;
 };
 _.guid = function(format) {
-	format = format || "D"; //NDBP
-	var typelib = _.activex("scriptlet.typelib")
+	format = format || "D";
+	var typelib = _.activex("scriptlet.typelib");
 	var returnValue = typelib.Guid.replace(/^\{(.+?)\}([\s\S]*)$/i,"$1");
 	switch (format.toUpperCase()) {
 	case "B":
@@ -94,12 +92,11 @@ _.guid = function(format) {
 	return returnValue;
 };
 _.mappath = function(path) {
-	if(typeof path != "string") return "";
 	if (path.substr(1,1) == ":") return path;
 	return Server.MapPath(path);
 };
 _.activex = function(classid, fn) {
-	var $o = null;
+	var $o = null, returnValue;
 	try {
 		$o = Server.CreateObject(classid);
 		_activex_.push($o);
@@ -107,9 +104,8 @@ _.activex = function(classid, fn) {
 		return null;
 	}
 	if (typeof fn == "function"){
-		var returnValue = fn.apply($o, [].slice.apply(arguments).slice(2));
-		if(returnValue===undefined)return $o;
-		return returnValue;
+		returnValue = fn.apply($o, [].slice.apply(arguments).slice(2));
+		if(returnValue!==undefined)return returnValue;
 	}
 	return $o;
 };
@@ -124,7 +120,7 @@ _.activex.enabled = function(classid) {
 _.json = function(src, globalvar) {
 	var cglobal = false;
 	try {
-		if (typeof globalvar == "string" && /^([0-9a-z]+)$/igm.test(globalvar)) {
+		if (typeof globalvar == "string" && /^(\w+)$/.test(globalvar)) {
 			cglobal = true;
 			(new Function(globalvar + " = " + src + ";"))();
 		} else {
@@ -648,11 +644,11 @@ _.timer = {};
 _.timer.start = null;
 _.timer.end = null;
 _.timer.run = function() {
-	this.start = new Date();
+	this.start = +new Date();
 	return this.start;
 };
 _.timer.stop = function(start) {
-	this.end = new Date();
+	this.end = +new Date();
 	return this.end - (start || this.start);
 };
 
