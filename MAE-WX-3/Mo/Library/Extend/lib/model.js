@@ -20,7 +20,7 @@ var Debugs = [],
 			if(to === undefined) to = Debugs.length-1;
 			Debugs[to] = Debugs[to] + log;
 		}
-	};
+	},ALLOWDEBUG = false;
 
 var _helper = require("model_defines.js");
 var DataTable = _helper.DataTable;
@@ -33,7 +33,7 @@ Model__.helper = _helper;
 Model__.defaultDBConf = "DB";
 Model__.defaultPK = "id";
 Model__.allowDebug = false;
-if(MEM.errorReporting() & E_MODEL) Model__.allowDebug = true;
+if(MEM.errorReporting() & E_MODEL) ALLOWDEBUG = true;
 Model__.lastRows = -1;
 Model__.useCommand = function(value){
 	UseCommand = !!value;
@@ -79,11 +79,11 @@ Model__.dispose = function(){
 		if(!Connections.hasOwnProperty(cfg))continue;
 		var M = Connections[cfg];
 		try{
-			var fp = F.timer.run();
-			M.base.close();
-			if(Model__.allowDebug)PutDebug("database(" + cfg +") disconnected.[time taken:" + F.timer.stop(fp) + "MS]");
+			ALLOWDEBUG && F.timer.run();
+			if(M.base.state == 1)M.base.close();
+			ALLOWDEBUG && PutDebug("database(" + cfg +") disconnected.[time taken:" + F.timer.stop() + "MS]");
 		}catch(ex){
-			PutDebug("database(" + cfg +") disconnect failed:" + ex.message);
+			ALLOWDEBUG && PutDebug("database(" + cfg +") disconnect failed:" + ex.message);
 		}
 		M.base = null;
 		M = null;
@@ -98,12 +98,11 @@ Model__.debug = function(){
 	}
 };
 Model__.Debug = function(allowDebug){
-	Model__.allowDebug = !!allowDebug;
+	ALLOWDEBUG = !!allowDebug;
 };
 Model__.connect = function(cfg){
 	cfg = cfg || Model__.defaultDBConf;
-	var cfg_=null;
-	var base = null;
+	var cfg_=null,base = null, type;
 	if(Connections.hasOwnProperty(cfg)){
 		base = Connections[cfg].base;
 		if(base.state == 1)return true;
@@ -111,44 +110,45 @@ Model__.connect = function(cfg){
 	}else{
 		cfg_ = Mo.Config.Global["MO_DATABASE_" + cfg];
 		if(!cfg_){
-			ExceptionManager.put(new Exception(0xdb001234,"Model__.connect","can not find database config(" + cfg +").check it?"));
+			ALLOWDEBUG && PutDebug("can not find database config(" + cfg +").check it?");
 			return false;
 		}
+		type = cfg_["DB_Type"];
 		base = F.activex.connection();
-		Connections[cfg]={
+		var conn = Connections[cfg]={
 			name:cfg,
 			cfg:cfg_,
 			base:base,
 			mysqlUsed:false,
 			useCommand:UseCommand,
-			splitChars:["[","]"]
+			splitChars:["[","]"],
+			driver : {}
 		};
-		var connectionstring = _helper.Helper.GetConnectionString.call(cfg_);
-		if(connectionstring==""){
-			PutDebug("database(" + cfg +") connect failed:do not support '" + cfg_["DB_Type"] + "' database type.");
-			Model__.debug();
-			return false;
-		}
-		base.connectionstring=connectionstring;
-	}
-	try{
-		F.timer.run();
-		if(Model__.allowDebug)PutDebug("connect to database(" + cfg +"):" + base.connectionString);
-		base.open();
-		if(Model__.allowDebug)PutDebug("database(" + cfg +") connect successfully.(time taken:" + F.timer.stop() + "MS)");
-
-		if(!(cfg_["DB_Type"] == "ACCESS" || cfg_["DB_Type"] == "MSSQL" || !Mo.Config.Global.MO_LOAD_VBSHELPER)){
-			Connections[cfg].useCommand = false;
-		}
-		if(cfg_["DB_Type"] == "MYSQL"){
+		if(type == "MYSQL"){
 			Connections[cfg].splitChars = ["`","`"];
 		}
 		else if((cfg_["DB_Splitchars"] instanceof Array) && cfg_["DB_Splitchars"].length == 2){
 			Connections[cfg].splitChars = cfg_["DB_Splitchars"];
 		}
+		if(type != "ACCESS"){
+			var driver = require("./drivers/" + type + ".js");
+			if(!driver){
+				ALLOWDEBUG && PutDebug("database(" + cfg +") can not load driver '" + type + "'.");
+				return false;
+			}else{
+				conn.driver = driver;
+				if(driver.initialize) driver.initialize(_helper, conn);
+			}
+		}
+		base.connectionstring = (conn.driver.GetConnectionString || _helper.Helper.GetConnectionString).call(cfg_);
+	}
+	try{
+		ALLOWDEBUG && F.timer.run() && PutDebug("connecting database(" + cfg + ") ...");
+		base.open();
+		ALLOWDEBUG && PutDebug("database(" + cfg +") connect successfully.(time taken:" + F.timer.stop() + "MS)");
 		return true;
 	}catch(ex){
-		PutDebug("database(" + cfg +") connect failed:" + ex.message);
+		ALLOWDEBUG && PutDebug("database(" + cfg +") connect failed:" + ex.message);
 		return false;
 	}
 	return false;
@@ -159,12 +159,7 @@ Model__.execute = function(sql,cfg){
 	try{
 		return Model__.RecordsAffected(Model__.getConnection(cfg),sql);
 	}catch(ex){
-		if(VBS && VBS.ctrl.error.number != 0){
-			ExceptionManager.put(VBS.ctrl.error.number,"__Model__.execute(sql[,cfg])",VBS.ctrl.error.description);
-			VBS.ctrl.error.clear();
-		}else{
-			ExceptionManager.put(new Exception(ex.number,"__Model__.execute(sql[,cfg])",ex.message));
-		}
+		_catchException("__Model__.execute(sql[,cfg])", ex);
 	}
 };
 Model__.executeQuery = function(sql,cfg){
@@ -173,38 +168,31 @@ Model__.executeQuery = function(sql,cfg){
 	try{
 		return new DataTable(Model__.getConnection(cfg).execute(sql));
 	}catch(ex){
-		if(VBS && VBS.ctrl.error.number != 0){
-			ExceptionManager.put(VBS.ctrl.error.number,"__Model__.executeQuery(sql[,cfg])",VBS.ctrl.error.description);
-			VBS.ctrl.error.clear();
-		}else{
-			ExceptionManager.put(new Exception(ex.number,"__Model__.executeQuery(sql[,cfg])",ex.message));
-		}
+		_catchException("__Model__.executeQuery(sql[,cfg])", ex);
 	}
 };
 Model__.RecordsAffected = function(conn,sqlstring){
 	conn.execute(sqlstring);
 	return -1;
 };
-Model__.RecordsAffectedCmd_ = function(opt){
+Model__.RecordsAffectedCmd = function(opt){
 	opt.dataset = opt.cmdobj.execute();
 	opt.affectedRows = -1;
 };
 if (VBS && Mo.Config.Global.MO_LOAD_VBSHELPER) {
-    //用于获取查询影响行数的必要的vbs方法
     VBS.execute(
 	    "function RecordsAffected(byref conn,byval sqlstring)\r\n" +
 	    "	conn.execute sqlstring,RecordsAffected\r\n" +
-	    "end function"
-    );
-    VBS.execute(
-    	"function RecordsAffectedCmd_(byref opt)\r\n" +
+	    "end function\r\n" +
+    	"function RecordsAffectedCmd(byref opt)\r\n" +
     	"	dim RecordsAffectedvar\r\n" +
     	"	set opt.dataset = opt.cmdobj.execute(RecordsAffectedvar)\r\n" +
     	"	opt.affectedRows = RecordsAffectedvar\r\n" +
+    	"	set RecordsAffectedCmd = opt\r\n" +
     	"end function"
     );
-	Model__.RecordsAffected = VBS.getref("RecordsAffected");//(function(obj){ return function(){return Function.prototype.apply.apply(obj, [obj,arguments])};})(VBS.getref("RecordsAffected"));
-	Model__.RecordsAffectedCmd_ = VBS.getref("RecordsAffectedCmd_");
+	Model__.RecordsAffected = VBS.getref("RecordsAffected");
+	Model__.RecordsAffectedCmd = VBS.getref("RecordsAffectedCmd");
 }
 function __Model__(tablename,pk,cfg,tablePrex){
 	Model__.lastRows = -1;
@@ -241,28 +229,30 @@ function __Model__(tablename,pk,cfg,tablePrex){
 	this.connection = null;
 	if(!Model__.connect(cfg)) return;
 	this.base = Connections[cfg];
-	if(this.base.cfg["DB_Type"] == "MYSQL" && !this.base.mysqlUsed){
-		this.query("USE " + this.base.cfg["DB_Name"]);
-		this.base.mysqlUsed = true;
-	}
+	this.type = this.base.cfg["DB_Type"];
 	this.tablePrex = (tablePrex || (this.base.cfg["DB_TABLE_PERX"] || Mo.Config.Global.MO_TABLE_PERX));
 	this.table = this.tablePrex + this.table;
 	this.tableWithNoSplitChar = this.table;
-	if(this.base.useCommand){
+	if(this.type != "OTHER"){
 		var schema = {}, schemaname = "SCHMEA-" + cfg;
-		if(Mo.C.Exists(schemaname)) schema = Mo.C(schemaname);
-		this.base.cfg["DB_Schema"]=schema;
+		if(!this.base.cfg["DB_Schema"]){
+			if(Mo.C.Exists(schemaname)) schema = Mo.C(schemaname);
+			this.base.cfg["DB_Schema"]=schema;
+		}
 		if(!this.base.cfg["DB_Schema"][this.table]){
-			this.base.cfg["DB_Schema"][this.table] = _helper.Helper.GetColumns.call(this.base,this.table);
+			this.base.cfg["DB_Schema"][this.table] = (this.base.driver.GetColumns || _helper.Helper.GetColumns).call(this.base,this.table);
 			Mo.C.SaveAs(schemaname, schema);
 		}
 	}
-	if(this.base.cfg["DB_Type"] == "MSSQL"){
-		this.table = this.base.splitChars[0] + this.base.cfg["DB_Name"] +this.base.splitChars[1] + "." + this.base.splitChars[0] + (this.base.cfg["DB_Owner"] || "dbo") +this.base.splitChars[1] + "." + this.base.splitChars[0] + this.table+this.base.splitChars[1];
+	this.sp1 = this.base.splitChars[0];
+	this.sp2 = this.base.splitChars[1];
+	if(this.type == "MSSQL"){
+		this.table = this.sp1 + this.base.cfg["DB_Name"] +this.sp2 + "." + this.sp1 + (this.base.cfg["DB_Owner"] || "dbo") +this.sp2 + "." + this.sp1 + this.table+this.sp2;
 	}else{
-		this.table = this.base.splitChars[0] + this.table+this.base.splitChars[1];
+		this.table = this.sp1 + this.table+this.sp2;
 	}
 	this.connection = this.base.base;
+	this.parms = [];
 }
 
 __Model__.prototype.getConnection = function(){
@@ -306,20 +296,57 @@ __Model__.prototype.where = function(where){
 	return this;
 };
 
+__Model__.prototype.iwhere = function(){
+	if(arguments.length == 0)return this;
+	var args = Array.prototype.slice.call(arguments),  where = args.shift();
+	var index=where.indexOf("?"),count=0;
+	while(index>=0){
+		where = where.substr(0,index) + ("{" + (count++) + "}") + where.substr(index+1);
+		index = where.indexOf("?");
+	}
+	this.strwhere = where;
+	this.usecommmand = true;
+	this.parms = [];
+	var _len = args.length, arg, type, parm;
+	if(_len != count){
+		MEM.put(new Exception(0xdb00e123,"__Model__.iwhere(where[,arg1,...,argn])","arguments can not match 'where clause'"));
+		return this;
+	}
+	this.parameters.apply(this, args);
+	return this;
+};
+__Model__.prototype.parameters = function(){
+	var _len = arguments.length, arg, type, parm;
+	for(var i=0;i<_len;i++){
+		arg = arguments[i];
+		type = typeof arg;
+		if(type == "number") {
+			parm = {'type' : DBTYPE_I4, 'value' : arg, 'subtype' : 'number'};
+			this.parms.push(parm);
+			if(Math.floor(arg) != arg){
+				parm['type'] = DBTYPE_R4;
+			}
+		}
+		else if(type == "string") this.parms.push({'type' : VARCHAR, 'value' : arg, 'size' : 50, 'subtype' : 'string'});
+		else if(type == "object"){ this.parms.push(arg); arg.subtype = typeof arg.value; };
+	}
+	return this;
+};
 __Model__.prototype.orderby = function(orderby){
 	if(typeof orderby == "object"){
 		this.strorderby = "";
-		var _this = this;
-		F.foreach(orderby,function(k,v){
-			_this.strorderby += _this.base.splitChars[0] + k + _this.base.splitChars[1]+" " + v+",";
-		});
-		this.strorderby = F.string.trim(this.strorderby,",");
+		for(var k in orderby){
+			if(!orderby.hasOwnProperty(k)) continue;
+			this.strorderby += this.sp1 + k + this.sp2+" " + orderby[k] +",";
+		}
+		if(this.strorderby!="")this.strorderby = this.strorderby.substr(0,this.strorderby.length-1);
 	} else this.strorderby = F.string.trim(orderby || "");
 	if(this.strorderby != "" && this.strorderby.indexOf(",") < 0){
 		if(this.strorderby.indexOf(" ") < 0)this.strorderby = this.strorderby +" ASC";
-		if(F.string.startWith(this.strorderby.toLowerCase(),this.pk.toLowerCase()) 
-		|| F.string.startWith(this.strorderby.toLowerCase(),this.strcname.toLowerCase()+"."+this.pk.toLowerCase())
-		|| F.string.startWith(this.strorderby.toLowerCase(),this.table.toLowerCase()+"."+this.pk.toLowerCase())){
+		var sbl = this.strorderby.toLowerCase(), pkl = this.pk.toLowerCase();
+		if(F.string.startWith(sbl, pkl) 
+		|| F.string.startWith(sbl, this.strcname.toLowerCase() + "." + pkl)
+		|| F.string.startWith(sbl, this.table.toLowerCase() + "." + pkl)){
 			this.isonlypkorder = true;
 			this.onlypkorder = F.string.trim(this.strorderby.substr(this.strorderby.indexOf(" ")+1));
 		}
@@ -344,68 +371,51 @@ __Model__.prototype.limit = function(page,limit,pagekey,pagekeyorder){
 	return this;
 };
 
-__Model__.prototype.max = function(filed){
-	var k = filed || this.pk;
-	k = this.base.splitChars[0] + k + this.base.splitChars[1];
-	if(this.base.cfg["DB_Type"] == "MSSQL"){
-		return this.query("select isnull(max(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
-	}else if(this.base.cfg["DB_Type"] == "MYSQL" || this.base.cfg["DB_Type"] == "SQLITE"){
-		return this.query("select IFNULL(max(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
-	}
-	return this.query("select iif(isnull(max(" + k + ")),0,max(" + k + ")) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
+__Model__.prototype.max = function(field){
+	var k = field || this.pk;
+	k = this.sp1 + k + this.sp2;
+	return (this.base.driver.Max || _helper.Helper.Max).call(this, k);
 };
 
-__Model__.prototype.min = function(filed){
-	var k = filed || this.pk;
-	k = this.base.splitChars[0] + k + this.base.splitChars[1];
-	if(this.base.cfg["DB_Type"] == "MSSQL"){
-		return this.query("select isnull(min(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
-	}else if(this.base.cfg["DB_Type"] == "MYSQL" || this.base.cfg["DB_Type"] == "SQLITE"){
-		return this.query("select IFNULL(min(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
-	}
-	return this.query("select iif(isnull(min(" + k + ")),0,min(" + k + ")) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
+__Model__.prototype.min = function(field){
+	var k = field || this.pk;
+	k = this.sp1 + k + this.sp2;
+	return (this.base.driver.Min || _helper.Helper.Min).call(this, k);
 };
 
-__Model__.prototype.count = function(filed){
-	var k = filed || this.pk;
-	if(k != "*")k = this.base.splitChars[0] + k + this.base.splitChars[1];
+__Model__.prototype.count = function(field){
+	var k = field || this.pk;
+	if(k != "*")k = this.sp1 + k + this.sp2;
 	return this.query("select count(" + k + ") from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
 };
 
-__Model__.prototype.sum = function(filed){
-	var k = filed || this.pk;
-	k = this.base.splitChars[0] + k + this.base.splitChars[1];
-	if(this.base.cfg["DB_Type"] == "MSSQL"){
-		return this.query("select isnull(sum(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
-	}else if(this.base.cfg["DB_Type"] == "MYSQL" || this.base.cfg["DB_Type"] == "SQLITE"){
-		return this.query("select IFNULL(sum(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
-	}
-	return this.query("select iif(isnull(sum(" + k + ")),0,sum(" + k + ")) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
+__Model__.prototype.sum = function(field){
+	var k = field || this.pk;
+	k = this.sp1 + k + this.sp2;
+	return (this.base.driver.Sum || _helper.Helper.Sum).call(this, k);
 };
 
 __Model__.prototype.increase = function(name,n){
-	name = this.base.splitChars[0] + name + this.base.splitChars[1];
-	n = n || 1;
-	n = parseInt(n)
+	name = this.sp1 + name + this.sp2;
+	(n===undefined) && (n = 1);
 	this.query("update " + this.table + " set " + name + " = " + name + " + (" + n + ")" + (this.strwhere != ""?(" where " + this.strwhere):""));
 	return this;
 };
 
 __Model__.prototype.toogle = function(name,n){
-	name = this.base.splitChars[0] + name + this.base.splitChars[1];
-	n = n || 1;
-	n = parseInt(n)
+	name = this.sp1 + name + this.sp2;
+	(n===undefined) && (n = 1);
 	this.query("update " + this.table + " set " + name + " = " + n + " - " + name + " " + (this.strwhere != ""?(" where " + this.strwhere):""));
 	return this;
 };
 
 __Model__.prototype.join = function(table,jointype){
-	jointype = jointype ||"inner";
-	jointype = jointype.replace(" join","");
-	if(table.indexOf(" ") > 0){
-		this.strjoin += " " + jointype + " join " + this.base.splitChars[0] + this.tablePrex + table.substr(0,table.indexOf(" ")) + this.base.splitChars[1] +" "+table.substr(table.indexOf(" ")+1);
+	var type = (jointype || "inner").replace(" join",""),
+		indx = table.indexOf(" ");
+	if(indx > 0){
+		this.strjoin += " " + type + " join " + this.sp1 + this.tablePrex + table.substr(0, indx) + this.sp2 +" "+table.substr(indx + 1);
 	}else{
-		this.strjoin += " " + jointype + " join "  + this.base.splitChars[0] + this.tablePrex + table + this.base.splitChars[1];
+		this.strjoin += " " + type + " join "  + this.sp1 + this.tablePrex + table + this.sp2;
 	}
 	this.joinlevel += "(";
 	return this;
@@ -414,7 +424,6 @@ __Model__.prototype.join = function(table,jointype){
 __Model__.prototype.on = function(str){
 	str = str || "";
 	this.strjoin += " on " + str +")";
-	this.strjoin = F.string.trim(this.strjoin);
 	return this;
 };
 
@@ -427,9 +436,9 @@ __Model__.prototype.createCommandManager = function(cmd,ct){
 	return new _helper.CMDManager(cmd,this,ct);
 };
 __Model__.prototype.exec = function(manager){
+	var fp;
 	try{
-		var fp = F.timer.run() - 0;
-		if(Model__.allowDebug)PutDebug(manager.cmd+",");
+		ALLOWDEBUG && (fp = F.timer.run()) && PutDebug(manager.cmd+",");
 		if(manager.withQuery){
 			this.rs__ = manager.exec();
 			this.fetch();
@@ -437,14 +446,10 @@ __Model__.prototype.exec = function(manager){
 		}else{
 			manager.exec();
 		}
-		if(Model__.allowDebug)AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
+		ALLOWDEBUG && AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 	}catch(ex){
-		if(VBS && VBS.ctrl.error.number != 0){
-			ExceptionManager.put(VBS.ctrl.error.number,"__Model__.exec(manager)",VBS.ctrl.error.description);
-			VBS.ctrl.error.clear();
-		}else{
-			ExceptionManager.put(ex.number,"__Model__.exec(manager)",ex.message);
-		}
+		ALLOWDEBUG && AppendDebug("[UNFINISHED],[#" + fp + "]");
+		_catchException("__Model__.exec(manager)", ex);
 	}
 	return this;
 }
@@ -460,12 +465,7 @@ __Model__.prototype.find = function(Id){
 	}
 	return null;
 };
-__Model__.prototype.select = function(callback,enablePromise){
-	if(F.exports.promise && (enablePromise===true || callback===true)){
-		var p= new F.exports.promise();
-		p.resolve(this.query().fetch());
-		return p;
-	}
+__Model__.prototype.select = function(callback){
 	if(typeof callback == "function") return this.query().fetch().each(callback);
 	return this.query().fetch();
 };
@@ -478,32 +478,26 @@ __Model__.prototype.query = function(){
 	if(arguments.length >= 1){
 		try{
 			if(arguments.length == 2 && arguments[1] === true){
-				fp = F.timer.run() - 0;
-				if(Model__.allowDebug)PutDebug(arguments[0]+",");
+				ALLOWDEBUG && (fp = F.timer.run()) && PutDebug(arguments[0]+",");
 				var rs_ = this.connection.execute(arguments[0]);
-				if(Model__.allowDebug)AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
+				ALLOWDEBUG && AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 				return rs_;
 			}else if(arguments.length == 2 && (typeof arguments[1] == "string")){
 				this.sql= arguments[0];
 				this.countsql = arguments[1];
 			}else{
-				fp = F.timer.run() - 0;
-				if(Model__.allowDebug)PutDebug(arguments[0]+",");
-				Model__.lastRows = Model__.RecordsAffected(this.connection,arguments[0]);
-				if(Model__.allowDebug)AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
+				ALLOWDEBUG && (fp = F.timer.run()) && PutDebug(arguments[0]+",");
+				Model__.lastRows = _executeCommand.call(this, arguments[0]).affectedRows;
+				ALLOWDEBUG && AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 				return this;
 			}
 		}catch(ex){
-			if(VBS && VBS.ctrl.error.number != 0){
-				ExceptionManager.put(VBS.ctrl.error.number,"__Model__.query(args)",VBS.ctrl.error.description);
-				VBS.ctrl.error.clear();
-			}else{
-				ExceptionManager.put(ex.number,"__Model__.query(args)",ex.message);
-			}
+			ALLOWDEBUG && AppendDebug("[UNFINISHED],[#" + fp + "]");
+			_catchException("__Model__.query(args0,...," + (arguments.length-1) + ")", ex);
 			return this;
 		}
 	}
-	if(this.sql == "") _helper.Helper.GetSqls.call(this);
+	if(this.sql == "") (this.base.driver.GetSqls || _helper.Helper.GetSqls).call(this);
 	if(Mo.Config.Global.MO_MODEL_CACHE && this.usecache){
 		if(this.cachename == "")this.cachename = F.md5(this.sql);
 		if(Mo.ModelCacheExists(this.cachename)){
@@ -517,36 +511,36 @@ __Model__.prototype.query = function(){
 	}
 	try{
 		if(this.countsql != ""){
-			fp = F.timer.run() - 0;
-			if(Model__.allowDebug)PutDebug(this.countsql+",");
-			this.rc = this.connection.execute(this.countsql)(0).value;
-			if(Model__.allowDebug)AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
+			ALLOWDEBUG && (fp = F.timer.run()) && PutDebug(this.countsql+",");
+			this.rc = _executeCommand.call(this, this.countsql).dataset(0).value;
+			ALLOWDEBUG && AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 		}
-		fp = F.timer.run() - 0;
-		if(Model__.allowDebug)PutDebug(this.sql+",");
-		this.rs__ = new ActiveXObject("adodb.recordset");
-		this.rs__.open(this.sql,this.connection,1,1);
+		ALLOWDEBUG && (fp = F.timer.run()) && PutDebug(this.sql+",");
+		this.rs__ = _executeCommand.call(this, this.sql).dataset;
 		if(this.countsql == "")this.rc = this.rs__.recordcount;
-		if(Model__.allowDebug)AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
+		ALLOWDEBUG && AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 	}catch(ex){
-		ExceptionManager.put(new Exception(ex.number,"__Model__.query(args)",ex.message));
+		ALLOWDEBUG && AppendDebug("[UNFINISHED],[#" + fp + "]");
+		_catchException("__Model__.query()", ex);
 	}
 	return this;
 };
-
 __Model__.prototype.fetch = function(){
+	var limit = this.strlimit;
 	if(this.object_cache != null){
 		this.object_cache.reset();
 		return this.object_cache;
 	}
-	if(this.strlimit != -1 && this.rc > 0){
-		this.rs__.pagesize = this.strlimit;
-		if(this.pagekeyorder == "")this.rs__.absolutepage = this.strpage;
+	if(limit != -1 && this.rc > 0){
+		this.rs__.pagesize = limit;
+		if(this.pagekeyorder == ""){
+			this.rs__.Move((this.strpage-1) * limit);
+		}
 	}
-	this.object_cache = new DataTable(this.rs__,this.strlimit);
+	this.object_cache = new DataTable(this.rs__,limit);
 	try{this.rs__.close();}catch(ex){}
 	this.rs__ = null;
-	this.object_cache.pagesize = this.strlimit;
+	this.object_cache.pagesize = limit;
 	this.object_cache.recordcount = this.rc;
 	this.object_cache.currentpage = this.strpage;
 	if(Mo.Config.Global.MO_MODEL_CACHE && this.usecache){
@@ -601,20 +595,12 @@ __Model__.prototype.Insert = __Model__.prototype.insert = function(){
 			}
 		}
 	}
-	if(arguments.length > 0 && arguments.length % 2 == 0) data = DataTableRow.apply(null, arguments);
-	if(data == null) data = (new DataTableRow()).fromPost(this.pk);
-	var d_ = this.parseData(data["table"]);
-	if(d_[0] != "" && d_[1] != ""){
-		var commander = d_[3];
-		if(commander != null){
-			commander.withQuery = false;
-			commander.cmd = "insert into " + this.table + "(" + d_[0] + ") values(" + d_[1] + ")";
-			this.exec(commander);
-			Model__.lastRows = commander.affectedRows;
-		}else{
-			this.query("insert into " + this.table + "(" + d_[0] + ") values(" + d_[1] + ")");
-		}
+	if(arguments.length > 0 && arguments.length % 2 == 0){
+		data = DataTableRow.apply(null, arguments);
 	}
+	if(data == null) data = (new DataTableRow()).fromPost(this.pk);
+	var d_ = _parseData.call(this, data["table"]);
+	if(d_[0] != "" && d_[1] != "") this.query("insert into " + this.table + "(" + d_[0] + ") values(" + d_[1] + ")");
 	return this;
 };
 
@@ -632,25 +618,17 @@ __Model__.prototype.Update = __Model__.prototype.update = function(){
 			return this;
 		}
 	}
-	if(arguments.length > 0 && arguments.length % 2 == 0) data = DataTableRow.apply(null, arguments);
+	if(arguments.length > 0 && arguments.length % 2 == 0){
+		data = DataTableRow.apply(null, arguments);
+	}
 	if(data == null){
 		data = (new DataTableRow()).fromPost(this.pk);
 		if(this.strwhere == "" && data.pk != ""){
-			this.strwhere = this.base.splitChars[0] +this.pk + this.base.splitChars[1] + " = " + data.pk;
+			this.strwhere = this.sp1 +this.pk + this.sp2 + " = " + data.pk;
 		}
 	}
-	var d_ = this.parseData(data["table"]);
-	if(d_[2] != ""){
-		var commander = d_[3];
-		if(commander != null){
-			commander.withQuery = false;
-			commander.cmd = "update " + this.table + " set " + d_[2] + (this.strwhere != ""?(" where " + this.strwhere):"");
-			this.exec(commander);
-			Model__.lastRows = commander.affectedRows;
-		}else{
-			this.query("update " + this.table + " set " + d_[2] + (this.strwhere != ""?(" where " + this.strwhere):""));
-		}
-	}
+	var d_ = _parseData.call(this, data["table"]);
+	if(d_[2] != "")this.query("update " + this.table + " set " + d_[2] + (this.strwhere != ""?(" where " + this.strwhere):""));
 	return this;
 };
 
@@ -672,39 +650,95 @@ __Model__.prototype.dispose = function(){
 	}
 	return this;
 };
-
-__Model__.prototype.parseData = function(table){
-	var fields = [],values = [],update = [], schema = null, fieldsList = ((this.fields == "" || this.fields == "*") ? "" : ("," + this.fields + ","));
-	var cmd = null;
+function _executeCommand(sql){
+	var cmdobj=F.activex("ADODB.Command"), parm, _len, prm, res, regexp = /\{(\d+)\}/ig, count=0;
+	cmdobj.ActiveConnection = this.connection;
+	cmdobj.CommandType = 1;
+    cmdobj.Prepared = true;
+    if(this.parms){
+	    _len = this.parms.length;
+	    while(res = regexp.exec(sql)){
+		    parm = this.parms[parseInt(res[1])];
+		    if(parm){
+			    prm = cmdobj.CreateParameter("@parms" + (count++));
+			    prm.Value = parm.value;
+			    prm.Direction = 1;
+			    prm.Type = parm.type;
+			    if(parm.hasOwnProperty("size")) prm.Size = parm.size;
+			    if(parm.hasOwnProperty("precision")) prm.Precision = parm.precision;
+			    if(parm.hasOwnProperty("scale")) prm.NumericScale = parm.scale;
+		    	cmdobj.Parameters.Append(prm);
+		    }
+	    }
+	    sql = sql.replace(/\{(\d+)\}/ig, "?");
+	}
+	cmdobj.CommandText = sql;
+    return Model__.RecordsAffectedCmd({cmdobj : cmdobj, affectedRows : -1, dataset : null});
+};
+function _catchException(src, ex){
+	if(VBS && VBS.ctrl.error.number != 0){
+		//ExceptionManager.put(VBS.ctrl.error.number,"__Model__.query(args)",VBS.ctrl.error.description);
+		ALLOWDEBUG && PutDebug("<" + src + ":" + VBS.ctrl.error.description +">");
+		VBS.ctrl.error.clear();
+	}else{
+		//ExceptionManager.put(new Exception(ex.number,"__Model__.query(args)",ex.message));
+		ALLOWDEBUG && PutDebug("<" + src + ":" + ex.message +">");
+	}	
+}
+function _parseData(table){
+	var fields = [],values = [],update = [], schema = null, fieldsList = ((this.fields == "" || this.fields == "*") ? "" : ("," + this.fields + ",")), hasFieldsList = fieldsList!="", ori_value;
+	var cmd = null, name="",withCommand=false;
 	if(this.base.useCommand && this.base.cfg["DB_Schema"] && this.base.cfg["DB_Schema"][this.tableWithNoSplitChar]) 
 	{
-		cmd = this.createCommandManager("",_helper.Helper.Enums.CommandType.TEXT);
 		schema = this.base.cfg["DB_Schema"][this.tableWithNoSplitChar];
+		withCommand = true;
 	}
 	for(var i in table){
 		if(!table.hasOwnProperty(i))continue;
-		if(table[i]["value"] === undefined)continue;
-		if(fieldsList!="" && fieldsList.indexOf("," + i + ",")<0) continue;
-		fields.push(this.base.splitChars[0]+i+this.base.splitChars[1]);
-		var v = table[i]["value"];
-		if(cmd != null){
-			values.push("?");
-			update.push(this.base.splitChars[0]+i+this.base.splitChars[1] + "=?");
-			var parm = cmd.addParm("@"+i,v);
+		ori_value = table[i]["value"];
+		if(ori_value === undefined)continue;
+		if(hasFieldsList && fieldsList.indexOf("," + i + ",")<0) continue;
+		fields.push(this.sp1+i+this.sp2);
+		var v = ori_value;
+		if(withCommand){
+			name = "{"+(this.parms.length)+"}";
+			values.push(name);
+			update.push(this.sp1+i+this.sp2 + " = " + name);
 			var tableschema = schema[i];
-			parm.Type = tableschema["DATA_TYPE"];
-			if(tableschema["NUMERIC_PRECISION"] != null)parm.Precision = tableschema["NUMERIC_PRECISION"];
-			if(tableschema["CHARACTER_MAXIMUM_LENGTH"] != null)parm.Size = tableschema["CHARACTER_MAXIMUM_LENGTH"];
-			if(tableschema["NUMERIC_SCALE"] != null)parm.Scale = tableschema["NUMERIC_SCALE"];
+			var parm = {value : v, type : tableschema["DATA_TYPE"]};
+			this.parms.push(parm);
+			if(tableschema["NUMERIC_PRECISION"] != null)parm.precision = tableschema["NUMERIC_PRECISION"];
+			if(tableschema["CHARACTER_MAXIMUM_LENGTH"] != null)parm.size = v.length;
+			if(tableschema["NUMERIC_SCALE"] != null)parm.scale = tableschema["NUMERIC_SCALE"];
 		}else{
-			if(table[i]["type"] != "exp" && (typeof table[i]["value"] == "string")) v = ("'" + table[i]["value"].replace(/\'/igm,"''") + "'").replace(/\0/ig,"");
 			if(v===null) v = "null";
-			values.push(v);
-			update.push(this.base.splitChars[0]+i+this.base.splitChars[1]+"=" + v);
+			if(this.base.useCommand && ori_value!==null){
+				name = "{"+this.parms.length+"}";
+				values.push(name);
+				update.push(this.sp1+i+this.sp2+" = " + name);
+				this.parms.push(parseValAsPrm(v));
+			}else{
+				if(typeof ori_value == "string") v = ("'" + v.replace(/\'/igm,"''") + "'").replace(/\0/ig,"");
+				values.push(v);
+				update.push(this.sp1+i+this.sp2+" = " + v);
+			}
 		}
 	}
-	return [fields.join(","),values.join(","),update.join(","),cmd];
+	return [fields.join(","),values.join(","),update.join(",")];
 };
+function parseValAsPrm(arg){
+	var type = typeof arg, parm = null;
+	if(type == "number") {
+		parm = {'type' : DBTYPE_I4, 'value' : arg, 'subtype' : 'number'};
+		if(Math.floor(arg) != arg){
+			parm['type'] = DBTYPE_R4;
+		}
+		return parm;
+	}
+	if(type == "string") return {'type' : VARCHAR, 'value' : arg, 'size' : arg.length, 'subtype' : 'string'};
+	if(type == "object"){ arg.subtype = typeof arg.value; return arg;}
+	return parm;
+}
 Mo.addEventListener("ondispose", Model__.dispose);
 exports.Model__ = Model__;
 exports.__Model__ = __Model__;

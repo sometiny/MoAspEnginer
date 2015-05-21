@@ -255,186 +255,84 @@ DataTableRow.prototype.data = function(name){
 	}
 	return obj;
 };
-var ModelHelper={
-	Enums:{
-		ParameterDirection:{
-			INPUT:1,INPUTOUTPUT:3,OUTPUT:2,RETURNVALUE:4
-		},
-		DataType:{
-			ARRAY:0x2000,DBTYPE_I8:20,DBTYPE_BYTES:128,DBTYPE_BOOL:11,DBTYPE_BSTR:8,DBTYPE_HCHAPTER:136,DBTYPE_STR:129,DBTYPE_CY:6,DBTYPE_DATE:7,DBTYPE_DBDATE:133,
-			DBTYPE_DBTIME:134,DBTYPE_DBTIMESTAMP:135,DBTYPE_DECIMAL:14,DBTYPE_R8:5,DBTYPE_EMPTY:0,DBTYPE_ERROR:10,DBTYPE_FILETIME:64,DBTYPE_GUID:72,DBTYPE_IDISPATCH:9,
-			DBTYPE_I4:3,DBTYPE_IUNKNOWN:13,LONGVARBINARY:205,LONGVARCHAR:201,LONGVARWCHAR:203,DBTYPE_NUMERIC:131,DBTYPE_PROP_VARIANT:138,DBTYPE_R4:4,DBTYPE_I2:2,DBTYPE_I1:16,
-			DBTYPE_UI8:21,DBTYPE_UI4:19,DBTYPE_UI2:18,DBTYPE_UI1:17,DBTYPE_UDT:132,VARBINARY:204,VARCHAR:200,DBTYPE_VARIANT:12,VARNUMERIC:139,VARWCHAR:202,DBTYPE_WSTR:130
-		},
-		CommandType:{
-			UNSPECIFIED:-1,TEXT:1,TABLE:2,STOREDPROC:4,UNKNOWN:8,FILE:256,TABLEDIRECT:512
-		}
-	},
-	GetConnectionString:function(){
-		var connectionstring = "";
-		if(this["DB_Type"]=="OTHER" || (this.hasOwnProperty("DB_Connectionstring") && this["DB_Connectionstring"]!="")){
-			connectionstring = F.format(this["DB_Connectionstring"],this["DB_Server"],this["DB_Username"],this["DB_Password"],this["DB_Name"],F.mappath(this["DB_Path"]));
-		}else if(this["DB_Type"]=="ACCESS"){
-			connectionstring = "provider=microsoft.jet.oledb.4.0; data source=" + F.mappath(this["DB_Path"]);
-		}else if(this["DB_Type"]=="MSSQL"){
-			connectionstring = F.format("provider=sqloledb.1;Persist Security Info=false;data source={0};User ID={1};pwd={2};Initial Catalog={3}",this["DB_Server"],this["DB_Username"],this["DB_Password"],this["DB_Name"]);
-		}else if(this["DB_Type"]=="SQLITE"){
-			connectionstring = "DRIVER={SQLite3 ODBC Driver};Database=" + F.mappath(this["DB_Path"]);
-		}else if(this["DB_Type"]=="MYSQL"){
-			var DB_Server = this["DB_Server"], DB_Host=DB_Server, DB_Port = 3306;
-			if(DB_Host.indexOf(",")>0){
-				DB_Host = DB_Server.substr(0,DB_Server.indexOf(","));
-				DB_Port = DB_Server.substr(DB_Server.indexOf(",")+1);
-			}
-			connectionstring = F.format("DRIVER={mysql odbc " + (this["DB_Version"]||"3.51") + " driver};SERVER={0};PORT={4};USER={1};PASSWORD={2}",DB_Host,this["DB_Username"],this["DB_Password"],this["DB_Name"],DB_Port);
-		}
-		return connectionstring;
-	},
-	GetSqls:function(){
-		var where_="",order_="",where2_="",groupby="",join="",on="",cname="";
-		if(this.strwhere!=""){
-			where_=" where " + this.strwhere + "";
-			if(this.strpage>1 && this.strlimit!=-1)where2_=" and (" + this.strwhere + ")";
-		}
-		if(this.strgroupby!="") groupby=" group by " + this.strgroupby;
-		if(this.strjoin!="")join=" " + this.strjoin + " ";
-		if(this.strcname!="")cname = " " + this.strcname+" ";
-		if (this.strorderby!="") order_=" order by " + this.strorderby;
-		if(this.pagekeyorder=="" || this.strlimit==-1){
-			this.sql="select " + this.fields + " from " + this.joinlevel + this.table + cname + join + where_ + groupby+ order_;
-			if(this.base.cfg["DB_Type"]=="MYSQL")this.countsql = "select count(" + (this.strcname==""?this.table:this.strcname) + "." + this.pk + ") from " + this.joinlevel + this.table + cname + join + where_ + groupby;
-		}else{
-			this.countsql = "select count(" + (this.strcname==""?this.table:this.strcname) + "." + this.pk + ") from " + this.joinlevel + this.table + cname + join + where_ + groupby;
-			this.sql = ModelHelper.GetSqlByTypes.apply(this,[cname,join,on,where_,groupby,order_]);
-		}
-	},
-	GetSqlByTypes:function(cname,join,on,where_,groupby,order_){
-		if(this.base.cfg.DB_Type=="MSSQL")return ModelHelper.GetSqlsForMSSQL.apply(this,arguments);
-		if(this.base.cfg.DB_Type=="MYSQL")return ModelHelper.GetSqlsForMysql.apply(this,arguments);
-		if(this.base.cfg.DB_Type=="SQLITE")return ModelHelper.GetSqlsForMysql.apply(this,arguments);
-		return ModelHelper.GetSqlsForAccess.apply(this,arguments);
-	},
-	GetSqlsForAccess:function(cname,join,on,where_,groupby,order_){
-		var sql;
-		if(this.isonlypkorder && this.ballowOnlyPKOrder){
-			if(this.strpage>1){
-				var c="<",d="min";
-				if(this.onlypkorder.toLowerCase()=="asc") {c=">";d="max";}
-				where_ +=" " + (where_!=""?"and":"where") + " " + (this.strcname==""?this.table:this.strcname) + "." + this.pagekey + c + " (select " + d + "(" + this.pagekey + ") from (select top " + this.strlimit * (this.strpage-1) + " " + (this.strcname==""?this.table:this.strcname) + "." + this.pagekey + " from " +this.joinlevel + this.table + cname + join + where_ + groupby+ order_ +") as mo_p_tmp)";
-			}
-			sql="select top " + this.strlimit + " " + this.fields + " from " + this.joinlevel + this.table + cname + join + where_ + groupby+ order_;
-		}else{
-			if(this.strpage>1)where_ +=" " + (where_!=""?"and":"where") + " " + (this.strcname==""?this.table:this.strcname) + "." + this.pagekey + " not in(select top " + this.strlimit * (this.strpage-1) + " " + (this.strcname==""?this.table:this.strcname) + "." + this.pagekey + " from " +this.joinlevel + this.table + cname + join + where_ + groupby+ order_ +")"	;
-			sql="select top " + this.strlimit + " " + this.fields + " from " + this.joinlevel + this.table + cname + join + where_ + groupby+ order_;		
-		}
-		return sql;
-	},
-	GetSqlsForMSSQL:function(cname,join,on,where_,groupby,order_){
-		if(this.base.cfg.DB_Version==2012){
-			return "select " + this.fields + " from " + this.joinlevel + this.table + cname + join + where_ + groupby+ order_ +" OFFSET " + (this.strlimit * (this.strpage-1) +1) + " ROWS FETCH NEXT " + this.strlimit + " ROWS ONLY";
-		}
-		else if(this.base.cfg.DB_Version>=2005){
-			return "select * from (select " + this.fields + ",ROW_NUMBER() OVER (" + order_ + ") AS ROWID_ from " + this.joinlevel + this.table + cname + join + where_ + groupby +") AS tmp_table_1 where ROWID_ BETWEEN " + (this.strlimit * (this.strpage-1) +1) + " and " + (this.strlimit * this.strpage);
-		}
-		var sql;
-		if(this.isonlypkorder && this.ballowOnlyPKOrder){
-			if(this.strpage>1){
-				var c="<",d="min";
-				if(this.onlypkorder.toLowerCase()=="asc") {c=">";d="max";}
-				where_ +=" " + (where_!=""?"and":"where") + " " + (this.strcname==""?this.table:this.strcname) + "." + this.pagekey + c + " (select " + d + "(" + this.pagekey + ") from (select top " + this.strlimit * (this.strpage-1) + " " + (this.strcname==""?this.table:this.strcname) + "." + this.pagekey + " from " +this.joinlevel + this.table + cname + join + where_ + groupby+ order_ +") as mo_p_tmp)";
-			}
-			sql="select top " + this.strlimit + " " + this.fields + " from " + this.joinlevel + this.table + cname + join + where_ + groupby+ order_;
-		}else{
-			if(this.strpage>1)where_ +=" " + (where_!=""?"and":"where") + " " + (this.strcname==""?this.table:this.strcname) + "." + this.pagekey + " not in(select top " + this.strlimit * (this.strpage-1) + " " + (this.strcname==""?this.table:this.strcname) + "." + this.pagekey + " from " +this.joinlevel + this.table + cname + join + where_ + groupby+ order_ +")"	;
-			sql="select top " + this.strlimit + " " + this.fields + " from " + this.joinlevel + this.table + cname + join + where_ + groupby+ order_;		
-		}
-		return sql;
-	},
-	GetSqlsForMysql:function(cname,join,on,where_,groupby,order_){
-		if(this.isonlypkorder && this.ballowOnlyPKOrder){
-			if(this.strpage>1){
-				var c="<=";
-				if(this.onlypkorder.toLowerCase()=="asc") c=">=";
-				sql="select " + this.fields + " from " + this.joinlevel + this.table + cname + join + where_ + (where_!=""?" and ":" where ") + this.table +"." + this.pk + c
-				+ "(select " + (this.strcname==""?this.table:this.strcname) +"." + this.pk + " from " + this.joinlevel + this.table + join + where_+ groupby+ order_ + " limit " + this.strlimit * (this.strpage-1) + ",1)"
-				+ groupby+ order_ +" limit " + this.strlimit + "";
-			}else{
-				sql="select " + this.fields + " from " + this.joinlevel + this.table + cname + join + where_ + groupby+ order_ +" limit 0," + this.strlimit + "";
-			}
-		}else{
-			sql="select " + this.fields + " from " + this.joinlevel + this.table + cname + join + where_ + groupby+ order_ +" limit " + this.strlimit * (this.strpage-1) + "," + this.strlimit + "";
-		}
-		return sql;
-	},
-	GetTables:function(){
-		//http://support.microsoft.com/kb/186246/zh-cn
-		var conn = this.base;
-		var table_named_field_name="TABLE_NAME";
-		var rs =null;
-		if(this.cfg.DB_Type=="ACCESS") rs=conn.openSchema(20,VBS.eval("Array(Empty,Empty,Empty,\"Table\")"));
-		if(this.cfg.DB_Type=="MSSQL") rs=conn.openSchema(20,VBS.eval("Array(\"" + this.cfg.DB_Name + "\",Empty,Empty,\"Table\")"));
-		if(this.cfg.DB_Type=="SQLITE"){
-			rs = conn.execute("select * from sqlite_master where type = 'table'");
-			table_named_field_name = "name";
-		}
-		if(this.cfg.DB_Type=="MYSQL"){
-			rs = conn.execute("show tables");
-			table_named_field_name = "Tables_in_public";
-		}
-		if(rs==null)return null;
-		var obj={},i=0;
-		while(!rs.eof){
-			var tablename = rs(table_named_field_name).Value;
-			obj[tablename]=ModelHelper.GetColumns.call(this,tablename)
-			rs.movenext();
-		}
-		return obj;
-	},
-	GetColumns:function(tablename){
-		var conn = this.base;
-		var rs =null;
-		if(this.cfg.DB_Type=="ACCESS") rs = conn.openSchema(4,VBS.eval("Array(Empty,Empty,\"" + tablename + "\")"));
-		if(this.cfg.DB_Type=="MSSQL") rs = conn.openSchema(4,VBS.eval("Array(\"" + this.cfg.DB_Name + "\",\"" + (this.cfg.DB_Owner||"dbo") + "\",\"" + tablename + "\")"));
-		if(this.cfg.DB_Type=="SQLITE")rs = conn.execute("PRAGMA table_info(" + tablename + ")");
-		if(this.cfg.DB_Type=="MYSQL")rs = conn.execute("show columns from `" + tablename + "`");
-		if(rs==null)return null;
-		var obj={},i=0;
-		while(!rs.eof){
-			if(this.cfg.DB_Type=="SQLITE"){
-				obj[rs("name").Value]={
-					"DATA_TYPE":rs.fields("type").Value,
-					"IS_NULLABLE":rs.fields("notnull").Value==0,
-					"IS_PK":rs.fields("pk").Value==1,
-					"COLUMN_DEFAULT":rs.fields("dflt_value").Value
-				};				
-			}else if(this.cfg.DB_Type=="MYSQL"){
-				obj[rs("Field").Value]={
-					"DATA_TYPE":rs.fields("Type").Value,
-					"IS_NULLABLE":rs.fields("Null").Value=="YES",
-					"IS_PK":rs.fields("Key").Value=="PRI",
-					"COLUMN_DEFAULT":rs.fields("Default").Value
-				};				
-			}else{
-				var cname=rs("COLUMN_NAME").Value;
-				obj[cname]={
-					"DATA_TYPE":rs.fields("DATA_TYPE").Value,
-					"COLUMN_FLAGS":rs.fields("COLUMN_FLAGS").Value,
-					"IS_NULLABLE":rs.fields("IS_NULLABLE").Value,
-					"COLUMN_DEFAULT":rs.fields("COLUMN_DEFAULT").Value,
-					"NUMERIC_PRECISION":rs.fields("NUMERIC_PRECISION").Value,
-					"NUMERIC_SCALE":rs.fields("NUMERIC_SCALE").Value,
-					"CHARACTER_MAXIMUM_LENGTH":rs.fields("CHARACTER_MAXIMUM_LENGTH").Value
-				};
-				if(obj[cname].DATA_TYPE==130){
-					if(obj[cname].COLUMN_FLAGS>>7 ==1){
-						obj[cname].CHARACTER_MAXIMUM_LENGTH=1024000;
-					}
-				}
-			}
-			rs.movenext();
-		}
-		return obj;
+/*var DataType = {"adEmpty" : 0,"adTinyInt" : 16,"adSmallInt" : 2,"adInteger" : 3,"adBigInt" : 20,"adUnsignedTinyInt" : 17,"adUnsignedSmallInt" : 18,"adUnsignedInt" : 19,"adUnsignedBigInt" : 21,"adSingle" : 4,"adDouble" : 5,"adCurrency" : 6,"adDecimal" : 14,"adNumeric" : 131,"adBoolean" : 11,"adError" : 10,"adUserDefined" : 132,"adVariant" : 12,"adIDispatch" : 9,"adIUnknown" : 13,"adGUID" : 72,"adDate" : 7,"adDBDate" : 133,"adDBTime" : 134,"adDBTimeStamp" : 135,"adBSTR" : 8,"adChar" : 129,"adVarChar" : 200,"adLongVarChar" : 201,"adWChar" : 130,"adVarWChar" : 202,"adLongVarWChar" : 203,"adBinary" : 128,"adVarBinary" : 204,"adLongVarBinary" : 205,"adChapter" : 136,"adFileTime" : 64,"adPropVariant" : 138,"adVarNumeric" : 139,"adArray" : 0x2000}*/
+var Driver={};
+Driver.Enums = {};
+Driver.Enums.ParameterDirection = {INPUT:1,INPUTOUTPUT:3,OUTPUT:2,RETURNVALUE:4};
+var DataTypes = Driver.Enums.DataType = {
+	ARRAY:0x2000,DBTYPE_I8:20,DBTYPE_BYTES:128,DBTYPE_BOOL:11,DBTYPE_BSTR:8,DBTYPE_HCHAPTER:136,DBTYPE_STR:129,DBTYPE_CY:6,DBTYPE_DATE:7,DBTYPE_DBDATE:133,
+	DBTYPE_DBTIME:134,DBTYPE_DBTIMESTAMP:135,DBTYPE_DECIMAL:14,DBTYPE_R8:5,DBTYPE_EMPTY:0,DBTYPE_ERROR:10,DBTYPE_FILETIME:64,DBTYPE_GUID:72,DBTYPE_IDISPATCH:9,
+	DBTYPE_I4:3,DBTYPE_IUNKNOWN:13,LONGVARBINARY:205,LONGVARCHAR:201,LONGVARWCHAR:203,DBTYPE_NUMERIC:131,DBTYPE_PROP_VARIANT:138,DBTYPE_R4:4,DBTYPE_I2:2,DBTYPE_I1:16,
+	DBTYPE_UI8:21,DBTYPE_UI4:19,DBTYPE_UI2:18,DBTYPE_UI1:17,DBTYPE_UDT:132,VARBINARY:204,VARCHAR:200,DBTYPE_VARIANT:12,VARNUMERIC:139,VARWCHAR:202,DBTYPE_WSTR:130
+};
+Driver.Enums.CommandType = {UNSPECIFIED:-1,TEXT:1,TABLE:2,STOREDPROC:4,UNKNOWN:8,FILE:256,TABLEDIRECT:512};
+for(var n in DataTypes){
+	if(!DataTypes.hasOwnProperty(n)) continue;
+	eval(n + " = " + DataTypes[n]);
+}
+Driver.GetConnectionString = function(){
+	return "provider=microsoft.jet.oledb.4.0; data source=" + F.mappath(this["DB_Path"]) + (this["DB_Password"] ? (";Persist Security Info=False;Jet OLEDB:Database Password=" + this["DB_Password"]) : "");
+};
+Driver.GetSqls = function(){
+	var where_="",order_="",where2_="",groupby="",join="",on="",cname="";
+	if(this.strwhere!=""){
+		where_=" where " + this.strwhere + "";
+		if(this.strpage>1 && this.strlimit!=-1)where2_=" and (" + this.strwhere + ")";
 	}
+	if(this.strgroupby!="") groupby=" group by " + this.strgroupby;
+	if(this.strjoin!="")join=" " + this.strjoin + " ";
+	if(this.strcname!="")cname = " " + this.strcname+" ";
+	if (this.strorderby!="") order_=" order by " + this.strorderby;
+	this.countsql = "select count(*) from " + this.joinlevel + this.table + cname + join + where_ + groupby;
+	if(this.pagekeyorder=="" || this.strlimit==-1){
+		this.sql="select " + this.fields + " from " + this.joinlevel + this.table + cname + join + where_ + groupby+ order_;
+	}else{
+		var sql, table = this.table, prex = (this.strcname==""?table:this.strcname);
+		if(this.isonlypkorder && this.ballowOnlyPKOrder){
+			if(this.strpage>1){
+				var c="<",d="min";
+				if(this.onlypkorder.toLowerCase()=="asc") {c=">";d="max";}
+				where_ +=" " + (where_!=""?"and":"where") + " " + prex + "." + this.pagekey + c + " (select " + d + "(" + this.pagekey + ") from (select top " + this.strlimit * (this.strpage-1) + " " + prex + "." + this.pagekey + " from " +this.joinlevel + table + cname + join + where_ + groupby+ order_ +") as mo_p_tmp)";
+			}
+			this.sql="select top " + this.strlimit + " " + this.fields + " from " + this.joinlevel + table + cname + join + where_ + groupby+ order_;
+		}else{
+			if(this.strpage>1)where_ +=" " + (where_!=""?"and":"where") + " " + prex + "." + this.pagekey + " not in(select top " + this.strlimit * (this.strpage-1) + " " + prex + "." + this.pagekey + " from " +this.joinlevel + table + cname + join + where_ + groupby+ order_ +")"	;
+			this.sql="select top " + this.strlimit + " " + this.fields + " from " + this.joinlevel + table + cname + join + where_ + groupby+ order_;		
+		}
+	}
+};
+Driver.GetColumns = function(tablename){
+	var conn = this.base;
+	var rs = conn.openSchema(4,VBS.eval("Array(Empty,Empty,\"" + tablename + "\")"));
+	if(rs==null)return null;
+	var obj={},i=0, typed, sch;
+	while(!rs.eof){
+		var cname=rs("COLUMN_NAME").Value;
+		obj[cname]={
+			"DATA_TYPE":rs.fields("DATA_TYPE").Value,
+			"COLUMN_FLAGS":rs.fields("COLUMN_FLAGS").Value,
+			"IS_NULLABLE":rs.fields("IS_NULLABLE").Value,
+			"NUMERIC_PRECISION":rs.fields("NUMERIC_PRECISION").Value,
+			"NUMERIC_SCALE":rs.fields("NUMERIC_SCALE").Value,
+			"CHARACTER_MAXIMUM_LENGTH":rs.fields("CHARACTER_MAXIMUM_LENGTH").Value
+		};
+		if(obj[cname].DATA_TYPE==130){
+			if(obj[cname].COLUMN_FLAGS>>7 ==1){
+				obj[cname].CHARACTER_MAXIMUM_LENGTH=1024000;
+			}
+		}
+		rs.movenext();
+	}
+	return obj;
+};
+Driver.Max = function(k){
+	return this.query("select iif(isnull(max(" + k + ")),0,max(" + k + ")) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;
+};
+Driver.Min = function(k){
+	return this.query("select iif(isnull(min(" + k + ")),0,min(" + k + ")) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
+};
+Driver.Sum = function(k){
+	return this.query("select iif(isnull(sum(" + k + ")),0,sum(" + k + ")) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
 };
 function ModelCMDManager(cmd,model,ct, modeltype){
 	if(modeltype!==1)modeltype=0;
@@ -497,7 +395,7 @@ ModelCMDManager.prototype.addParm = function(name,value,direction){
 	return this.parms_[name];
 };
 ModelCMDManager.prototype.addInput = function(name,value,t,size){
-	this.parms_[name] = this.cmdobj.CreateParameter(name, t, ModelHelper.Enums.ParameterDirection.INPUT, size, value);
+	this.parms_[name] = this.cmdobj.CreateParameter(name, t, Driver.Enums.ParameterDirection.INPUT, size, value);
 	return this.parms_[name];
 };
 /*new method*/
@@ -506,7 +404,7 @@ ModelCMDManager.prototype.add_parm_input = function(value,t,size){
 };
 
 ModelCMDManager.prototype.addInputInt = function(name,value){
-	return this.addInput(name,value,ModelHelper.Enums.DataType.DBTYPE_I4,4);
+	return this.addInput(name,value,Driver.Enums.DataType.DBTYPE_I4,4);
 };
 /*new method*/
 ModelCMDManager.prototype.add_parm_input_int = function(value){
@@ -514,7 +412,7 @@ ModelCMDManager.prototype.add_parm_input_int = function(value){
 };
 
 ModelCMDManager.prototype.addInputBigInt = function(name,value){
-	return this.addInput(name,value,ModelHelper.Enums.DataType.DBTYPE_I8,8);
+	return this.addInput(name,value,Driver.Enums.DataType.DBTYPE_I8,8);
 };
 /*new method*/
 ModelCMDManager.prototype.add_parm_input_bigint = function(value){
@@ -522,7 +420,7 @@ ModelCMDManager.prototype.add_parm_input_bigint = function(value){
 };
 
 ModelCMDManager.prototype.addInputVarchar = function(name,value,size){
-	return this.addInput(name,value,ModelHelper.Enums.DataType.VARCHAR,size||50);
+	return this.addInput(name,value,Driver.Enums.DataType.VARCHAR,size||50);
 };
 /*new method*/
 ModelCMDManager.prototype.add_parm_input_varchar = function(value,size){
@@ -530,7 +428,7 @@ ModelCMDManager.prototype.add_parm_input_varchar = function(value,size){
 };
 
 ModelCMDManager.prototype.addOutput = function(name,t,size){
-	this.parms_[name] = this.cmdobj.CreateParameter(name, t, ModelHelper.Enums.ParameterDirection.OUTPUT, size);
+	this.parms_[name] = this.cmdobj.CreateParameter(name, t, Driver.Enums.ParameterDirection.OUTPUT, size);
 	return this.parms_[name];
 };
 /*new method*/
@@ -544,7 +442,7 @@ ModelCMDManager.prototype.add_parm_output = function(t,size,totalp){
 };
 
 ModelCMDManager.prototype.addReturn = function(name,t,size){
-	this.parms_[name] = this.cmdobj.CreateParameter(name, t, ModelHelper.Enums.ParameterDirection.RETURNVALUE, size);
+	this.parms_[name] = this.cmdobj.CreateParameter(name, t, Driver.Enums.ParameterDirection.RETURNVALUE, size);
 	return this.parms_[name];
 };
 /*new method*/
@@ -586,7 +484,7 @@ ModelCMDManager.prototype.exec = function(){
 		this.cmdobj.Parameters.Append(this.parms_[i]);
 	}
 	try{
-		Model__.RecordsAffectedCmd_(this);
+		Model__.RecordsAffectedCmd(this);
 	}catch(ex){
 		if(VBS && VBS.ctrl.error.number != 0){
 			ExceptionManager.put(VBS.ctrl.error.number,"ModelCMDManager.exec()",VBS.ctrl.error.description);
@@ -610,7 +508,7 @@ ModelCMDManager.prototype.fetch = function(ps){
 		return dt;
 	}
 };
-exports.Helper = ModelHelper;
+exports.Helper = Driver;
 exports.CMDManager = ModelCMDManager;
 exports.DataTable = DataTable;
 exports.DataTableRow = DataTableRow;
