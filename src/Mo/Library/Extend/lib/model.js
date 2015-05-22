@@ -233,7 +233,7 @@ function __Model__(tablename,pk,cfg,tablePrex){
 	this.tablePrex = (tablePrex || (this.base.cfg["DB_TABLE_PERX"] || Mo.Config.Global.MO_TABLE_PERX));
 	this.table = this.tablePrex + this.table;
 	this.tableWithNoSplitChar = this.table;
-	if(this.type != "OTHER"){
+	if(this.base.useCommand && this.type != "OTHER"){
 		var schema = {}, schemaname = "SCHMEA-" + cfg;
 		if(!this.base.cfg["DB_Schema"]){
 			if(Mo.C.Exists(schemaname)) schema = Mo.C(schemaname);
@@ -305,7 +305,6 @@ __Model__.prototype.iwhere = function(){
 		index = where.indexOf("?");
 	}
 	this.strwhere = where;
-	this.usecommmand = true;
 	this.parms = [];
 	var _len = args.length, arg, type, parm;
 	if(_len != count){
