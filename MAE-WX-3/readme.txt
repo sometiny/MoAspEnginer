@@ -8,4 +8,4 @@
 1、处理代码在AppWx/Controller/DelegateController.asp中，这里面有嘎详细的说明；
 2、其他接口代码在AppWx/Controller/ServicesController.asp；
 3、完美支持微信AES加解密；
-4、欢迎支持MAE框架(http://m.thinkasp.cn)。
+4、欢迎支持MAE框架 @ http://m.thinkasp.cn
