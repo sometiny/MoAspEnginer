@@ -890,7 +890,8 @@ var F, JSON, require, VBS, View, Model__,
 		"GBK" : ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "gbk@encoding"],
 		"Unicode" : ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "unicode@encoding"],
 		"Hex" : ["parse", "stringify", "hex@encoding"],
-		"Encoding" : ["encodeURIComponent", "encodeURI", "decodeURI", "encoding"]
+		"Encoding" : ["encodeURIComponent", "encodeURI", "decodeURI", "encoding"],
+		"Crc32" : [null, "assets/crc32.js"]
 	};
 	for(var lib in loaddelay){
 		if(!loaddelay.hasOwnProperty(lib)) continue;
