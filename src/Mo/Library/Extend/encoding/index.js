@@ -38,6 +38,37 @@ module.exports = (function(){
 	var _SPEC={};
 	_SPEC.S1 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'()";/*for URIComponent*/
 	_SPEC.S2 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'();/?:@&=+$,#";/*for URI*/
+	var getByteArray = function(src, charset, bomsize){
+		return IO.binary2buffer(F.activex("ADODB.STREAM", function(data, cs,bs){
+			var byts;
+			this.Mode = 3;
+			this.Type = 2;
+			this.CharSet = cs || "utf-8";
+			this.Open();
+			this.WriteText(data);
+			this.Position = 0;
+			this.Type = 1;
+			this.Position = bs;
+			byts = this.Read();
+			this.Close();
+			return byts;
+		},src, charset, bomsize || 0));
+	};
+	var getString = function(src, charset){
+		return F.activex("ADODB.STREAM", function(data, cs){
+			var byts;
+			this.Mode = 3;
+			this.Type = 1;
+			this.Open();
+			this.Write(data);
+			this.Position = 0;
+			this.Type = 2;
+			this.CharSet = cs || "utf-8";
+			byts = this.ReadText();
+			this.Close();
+			return byts;
+		},IO.buffer2binary(src), charset);
+	};
 	var $enc={};
 	$enc.encodeURIComponent = function(string,enc){
 		return $enc.encode(string,enc,"S1");
@@ -248,85 +279,12 @@ module.exports = (function(){
 		return $utf8;
 	})();
 	$enc.gbk = $enc.gbk || (function(){
-		var CP = {gbk:{filepath:{u2g: (typeof __DIR__=="string" ? __DIR__ : __dirname) + "\\codepage\\UtoG.sys", g2u: (typeof __DIR__=="string" ? __DIR__ : __dirname) + "\\codepage\\GtoU.sys"},stream:{u2g:null,g2u:null}}};
-		var u2g=function(u){
-			var offset,ret=[];
-			if(u<=0X9FA5)offset=u-0x4E00;
-			else if(u>0x9FA5)
-			{
-				if(u<0xFF01||u>0xFF61)return 0;
-				offset=u-0xad5b;
-			}  
-			CP.gbk.stream.u2g.position=(offset << 1);
-			return IO.binary2buffer(CP.gbk.stream.u2g.read(2));
-		};
-		var g2u=function(g){
-			var offset, ch = g >> 8, cl = g & 0xff;
-			ch -= 0x81;
-			cl -= 0x40;
-			if(ch<=0x7d && cl<=0xbe){
-				CP.gbk.stream.g2u.position=((ch*0xbf+cl) << 1);
-				return IO.binary2buffer(CP.gbk.stream.g2u.read(2));
-			}else{
-				return [0x1f,0xff];
-			}
-		};
-		var opencp = function(cp){
-			cp = cp || "u2g";
-			if(!IO.file.exists(CP.gbk.filepath[cp])){
-				ExceptionManager.put(new Exception(0xb0a1,"encoding.gbk.[opencp]","codepage file is not exists."));
-				return false;
-			}
-			CP.gbk.stream[cp] = F.activex("ADODB.STREAM",function(file){
-				this.Type = 1;
-				this.Mode = 3;
-				this.open();
-				this.LoadFromFile(file);
-			},CP.gbk.filepath[cp]);
-			return true;	
-		};
-		var closecp = function(cp){
-			cp = cp || "u2g";
-			CP.gbk.stream[cp].close();
-			CP.gbk.stream[cp]=null;
-		};
 		var $gbk={};
-		$gbk.Test = function(u){
-			opencp();
-			var ret = u2g(u.charCodeAt(0));
-			closecp();
-			return ret;
-		};
 		$gbk.getWordArray = function(u){
-			var _len = u.length;
-			if(_len<=0)return [];
-			if(!opencp())return [];
-			var i=0,c,ret=[];
-			while(i<_len){
-				c = u.charCodeAt(i);
-				if(c<0x7f) ret.push(c);
-				else{
-					var g=u2g(c);
-					ret.push((g[0]<<8) | g[1]);
-				}
-				i++;
-			}
-			closecp();
-			return ret;
+			return $gbk.bytesToWords($gbk.getByteArray(u));
 		};
 		$gbk.getByteArray = function(u){
-			var _len = u.length;
-			if(_len<=0)return [];
-			if(!opencp())return [];
-			var i=0,c,ret=[];
-			while(i<_len){
-				c = u.charCodeAt(i);
-				if(c<0x7f) ret.push(c);
-				else ret = ret.concat(u2g(c)); 
-				i++;
-			}
-			closecp();
-			return ret;
+			return getByteArray(u, "gbk");
 		};
 		$gbk.bytesToWords = function(u){
 			var _len = u.length;
@@ -348,37 +306,21 @@ module.exports = (function(){
 		};
 		$gbk.toString = function(bytes){
 			var _len = bytes.length;
-			if(_len<=0)return "";
-			if(!opencp("g2u"))return "";
-			var ret="",i=0;
+			if(_len<=0)return [];
+			var u=[], c, i=0;
 			while(i<_len){
-				if(bytes[i]<0x7f) ret+=String.fromCharCode(bytes[i]);
+				c = bytes[i];
+				if(c<=0x7f) u.push(c);
 				else{
-					var u = g2u(bytes[i]);
-					ret+=String.fromCharCode((u[1]<<8) | u[0]);
+					u.push(c>>8);
+					u.push(c & 0xff);
 				}
 				i++;
 			}
-			closecp("g2u");
-			return ret;
+			return getString(u,"gbk");
 		};
 		$gbk.getString = function(u){
-			var _len = u.length;
-			if(_len<=0)return "";
-			var i=0,c,ret="";
-			if(!opencp("g2u"))return "";
-			while(i<_len){
-				c = u[i];
-				if(c<=0x7f)ret+=String.fromCharCode(c);
-				else{
-					var b = g2u((c << 8) | u[i+1]);
-					ret+=String.fromCharCode((b[1]<<8) | b[0]);
-					i++;
-				}
-				i++;
-			}
-			closecp("g2u");
-			return ret;
+			return getString(u,"gbk");
 		};
 		return $gbk;
 	})();

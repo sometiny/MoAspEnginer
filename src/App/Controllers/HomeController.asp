@@ -23,10 +23,10 @@ HomeController.extend("Home", function(){
 	this.assign("data",data); //只有DataTable对象才能用于loop，DataTable对象常由Model自动生成，这里手动构造
 	this.assign("age",24);
 	this.assign("jsobject",{
-		a:1,
-		b:2,
-		c:3,
-		d:4
+		a:"1",
+		b:"2",
+		c:"3",
+		d:"4"
 	});
 	F.get("name",1);
 	F.post("name",2);

@@ -209,8 +209,9 @@ var ArrayPush = Array.prototype.push;
 var formatOtc = function(num, len){
 	var numstr = num.toString(8)+" ", _len = numstr.length;
 	len = len || 12;
-	while(_len++ < len){
+	while(_len < len){
 		numstr = " " + numstr;
+		_len++;
 	}
 	return string2buffer(numstr);
 };
@@ -259,7 +260,7 @@ var tarHeader = function(name, file, isdir) {
 };
 var total=0;
 tarHeader.prototype.generate = function(filesize){
-	var filename_byt = string2buffer(this.name),prefix=[], _len = filename_byt.length;
+	var filename_byt = string2buffer(this.name),prefix=[], _len = filename_byt.length, createdate,Header = this.data;
 	if(_len>99){
 		var _index = this.name.indexOf("\\"), last=0, chrcode, counts=0;
 		if(_index>0){
@@ -278,15 +279,15 @@ tarHeader.prototype.generate = function(filesize){
 	while(filename_byt.length<100) filename_byt.push(0);
 	push(filename_byt, this);
 	if(this.dir){
-		ArrayPush.apply(this.data, [0x20,0x34]);
+		ArrayPush.apply(Header, [0x20,0x34]);
 		this.checksum += 84;
-		this.createdate = new Date();
+		createdate = +new Date();
 	}else{
-		ArrayPush.apply(this.data, [0x31,0x30]);
+		ArrayPush.apply(Header, [0x31,0x30]);
 		this.checksum += 97;
-		this.createdate = new Date(+IO.file.get(this.file).DateLastModified);
+		createdate = +new Date(+IO.file.get(this.file).DateLastModified);
 	}
-	ArrayPush.apply(this.data, [0x30,0x37,0x37,0x37,0x20,0, /*mode*/ 0x20,0x20,0x20,0x20,0x20,0x30,0x20,0,0x20,0x20,0x20,0x20,0x20,0x30,0x20,0]); //uid,gid
+	ArrayPush.apply(Header, [0x30,0x37,0x37,0x37,0x20,0, /*mode*/ 0x20,0x20,0x20,0x20,0x20,0x30,0x20,0,0x20,0x20,0x20,0x20,0x20,0x30,0x20,0]); //uid,gid
 	this.checksum += 725;
 	
 	var linkflag=0x35;
@@ -295,24 +296,24 @@ tarHeader.prototype.generate = function(filesize){
 		linkflag = 0x30;
 	}
 	push(formatOtc(filesize), this); //size
-	push(formatOtc(F.timespan(this.createdate)), this); //mtime
+	push(formatOtc((createdate - createdate % 1000)/1000), this); //mtime
 	
-	ArrayPush.apply(this.data, [0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20]); //checksum
+	ArrayPush.apply(Header, [0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20]); //checksum
 	this.checksum += 256;
 	
-	this.data.push(linkflag); //linkflah
+	Header.push(linkflag); //linkflah
 	this.checksum += linkflag;
-	for(var i=0;i<100;i++) this.data.push(0); //linkname
+	for(var i=0;i<100;i++) Header.push(0); //linkname
 	
-	push(string2buffer("ustar"), this); //magic
-	push([0,0x30,0x30], this); //version
+	ArrayPush.apply(Header, [0x75,0x73,0x74,0x61,0x72,0,0x30,0x30]); //magic //version
+	this.checksum += 655;
 	
-	for(var i=0;i<80;i++) this.data.push(0); //uname, gname,devmajor, devminor
+	for(var i=0;i<80;i++) Header.push(0); //uname, gname,devmajor, devminor
 	push(prefix, this); //prefix
-	for(var i=0;i<167-prefix.length;i++) this.data.push(0); //prefix ending and pad
+	for(var i=0;i<167-prefix.length;i++) Header.push(0); //prefix ending and pad
 	
 	set(formatOtc(this.checksum,7),148, this); //set checksum
-	this.data[155] = 0;
+	Header[155] = 0;
 };
 module.exports = $manager;
 Tar = $manager;
