@@ -386,6 +386,17 @@ module.exports = (function(){
 	$enc.utf8.getWords = $enc.utf8.getWordArray;
 	$enc.unicode.getBytes = $enc.unicode.getByteArray;
 	$enc.unicode.getWords = $enc.unicode.getWordArray;
+	$enc.getEncoding = function(name, bom){
+		if($enc.hasOwnProperty(name)) return $enc[name];
+		var $encoding = $enc[name] = {};
+		$encoding.getByteArray = $encoding.getBytes = function(u){
+			return getByteArray(u, name ,bom);
+		};
+		$encoding.getString = function(u){
+			return getString(u, name);
+		};
+		return $encoding;
+	};
 	return $enc;
 })();
 Utf8 = module.exports.utf8;

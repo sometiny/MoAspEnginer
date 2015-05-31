@@ -12,8 +12,7 @@
 		"url" : "http://m.thinkasp.cn/"
 	},
 	"files" : [
-		"index.js",
-		"codepage/*"
+		"index.js"
 	],
 	"main" : "encoding"
 }

@@ -866,7 +866,7 @@ var F, JSON, require, VBS, View, Model__,
 (function(){
 	/*delay load*/
 	var loaddelay = {
-		"base64=Base64" : ["e", "d", "encode", "decode", "toBinary", "fromBinary", "base64"], /*base64*/
+		"base64=Base64" : ["e", "d", "encode", "decode", "toBinary", "fromBinary", "setNames", "base64"], /*base64*/
 		"JSON" : ["parse", "stringify", "create", "decodeStrict", "encodeUnicode", "assets/json.js"],/*JSON*/
 		"IController" : ["create", "IController@lib/dist.js"], /*controller*/
 		"IClass" : ["create", "IClass@lib/dist.js"],/*class*/
@@ -890,7 +890,7 @@ var F, JSON, require, VBS, View, Model__,
 		"GBK" : ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "gbk@encoding"],
 		"Unicode" : ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "unicode@encoding"],
 		"Hex" : ["parse", "stringify", "hex@encoding"],
-		"Encoding" : ["encodeURIComponent", "encodeURI", "decodeURI", "encoding"],
+		"Encoding" : ["encodeURIComponent", "encodeURI", "decodeURI", "getEncoding", "encoding"],
 		"Crc32" : [null, "assets/crc32.js"]
 	};
 	for(var lib in loaddelay){
@@ -909,8 +909,7 @@ var F, JSON, require, VBS, View, Model__,
 		for(var i=0;i<_len;i++){
 			var method = "." + library[i];
 			if(library[i]==null) method="";
-			var body = lib + method + " = function(){" + lib + " = require(\"" + module + "\")" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};";
-			(new Function(body))();
+			(new Function(lib + method + " = function(){" + lib + " = require(\"" + module + "\")" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};"))();
 		}
 		if(cname) (new Function(cname + " = " + lib + ";"))();
 	}
