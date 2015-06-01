@@ -891,7 +891,9 @@ var F, JSON, require, VBS, View, Model__,
 		"Unicode" : ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "unicode@encoding"],
 		"Hex" : ["parse", "stringify", "hex@encoding"],
 		"Encoding" : ["encodeURIComponent", "encodeURI", "decodeURI", "getEncoding", "encoding"],
-		"Crc32" : [null, "assets/crc32.js"]
+		"Crc32" : [null, "assets/crc32.js"],
+		"Safecode" : [null, "Safecode@safecode"],
+		"BmpImage" : [null, "BmpImage@safecode"]
 	};
 	for(var lib in loaddelay){
 		if(!loaddelay.hasOwnProperty(lib)) continue;

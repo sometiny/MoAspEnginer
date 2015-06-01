@@ -46,6 +46,7 @@
 				timer = window.setTimeout(start, 3000)
 			},
 			function(status, text){
+				var child = box.firstChild;
 				createheader(new Date(), child);
 				createerror("服务器错误：" + status, child);
 				timer = window.setTimeout(start, 3000)
