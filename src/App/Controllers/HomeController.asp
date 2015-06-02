@@ -3,6 +3,9 @@ HomeController = IController.create();
 HomeController.extend("Index", function(){
 	this.display("Index");
 });
+HomeController.extend("Safecode", function(name){
+	Safecode("sessionname", {length:4, padding:5, odd:3, font:'yahei'});
+});
 HomeController.extend("Home", function(){
 	this.assign("title","MAE");
 	this.assign("name",null);

@@ -243,6 +243,11 @@
                     我{$age}岁了!!!!
             </switch>
         </td></tr>
+        <tr>
+            <td>验证码</td>
+            <td>Safecode("sessionname", {length:4, padding:5, odd:3, font:'yahei'});</td>
+            <td><img src="?a=Safecode" onclick="this.src='?a=Safecode&r=' + Math.random()" style="cursor:pointer" /> *点击刷新</td>
+        </tr>
     </tbody>
 </table>
 <include file="foot.html" />
