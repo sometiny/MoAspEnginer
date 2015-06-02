@@ -10,26 +10,24 @@ function $safecode(sessionKey,opt){
 		odd : 0,
 		padding : 0,
 		data : "",
-		size:10,
 		bit : 24,
 		font:"songti",
-		bgColor:0xffffff,
-		wave:false
+		bgColor:0xffffff
 	};
 	F.extend(cfg,opt||{});
-	Response.Buffer = true;
+	Response.Buffer = false;
 	Response.Expires = -1;
 	Response.AddHeader("Pragma", "no-cache");
 	Response.AddHeader("cache-ctrol", "no-cache");
 	Response.ContentType = "Image/bmp";
-	var I, ii, iii,
+	var 
 		bgColor=cfg.bgColor,
 		vNumberData=[],
 		vCode=[], 
 		vCodes="",
 		fontdata = IO.file.readAllText(__dirname + "\\fonts\\" + cfg.font + ".font"),
 		cCode = (new Function("Font",fontdata))(vNumberData) || "0123456789aAcCeEmMnNrRsSuUvVwWxXzZjJbBdDfFhHkKtTgGpPqQyY＋－×÷＝+-/= .", index, achar;
-	cfg.size = Math.sqrt(vNumberData[0].length);
+		
 	if(cfg.data==""){
 		for(var i=0;i<=cfg.length-1;i++){
 			index = F.random(0,55);
@@ -51,8 +49,7 @@ function $safecode(sessionKey,opt){
 	var padding = cfg.padding,
 		width=0,
 		height=0,
-		image = null,
-		size = cfg.size;
+		image = null;
 
 	for(var i=0;i<vCode.length;i++){
 		width += vCode[i].width;
@@ -60,16 +57,13 @@ function $safecode(sessionKey,opt){
 	}
 	image = bmpImage(width + padding*2,height + padding*2,cfg.bit)
 	image.setBgColor(0xffffff, cfg.odd);
-	var s2 = size / 2, s4 = size/4, drawed=0, x=0,y=0;
+	var drawed=0, x=0,y=0, w=0, h=0;
 	for(var i=0;i<vCode.length;i++){
-		achar = vCode[i];
-		x = drawed + padding + Math.floor(Math.random() * s2 - s4);
-		y = padding + Math.floor(Math.random() * s2 - s4);
-		image.drawChar2(x, y, achar.data, achar.width, achar.height);
-		drawed+=achar.width;
+		achar = vCode[i]; w = achar.width; h = achar.height; x = drawed + padding + Math.floor(Math.random() * (w / 2) - (w/4)); y = padding + Math.floor(Math.random() * (h / 2) - (h/4));
+		image.Char2(x, y, achar.data, w, h);
+		drawed += w;
 	}
-	F.echo(IO.buffer2binary(image.getHeaderBuffer()),F.TEXT.BIN);
-	F.echo(IO.buffer2binary(image.getBodyBuffer()),F.TEXT.BIN);
+	image.flush();
 	return vCodes;
 }
 //=====================================================================
@@ -139,35 +133,68 @@ var bmpImage = function(width,height,bit){
 		_pixWidth = 0,
 		_this = {},
 		_header = byteArrayOutputStream();
-		
-	_this.drawPixel = function(x, y, pixel) {
-		var q = (height-y-1) * _pixWidth + x * 3;
+
+	_this.Width = _width;
+	_this.Height = _height;
+	_this.Pixel = function(x, y, pixel) {
+		var q = (height-y-1) * _pixWidth + x * _bitn;
 		_data[q] = pixel & 0xff;
 		_data[q + 1] = (pixel >>>8) & 0xff;
 		_data[q + 2] = (pixel >>>16) & 0xff;
 		if(_bitn==4) _data[q + 3] = (pixel >>>24) & 0xff;
 	};
-	_this.drawPixel2 = function(x, y, r,g,b, a) {
-		var q = (height-y-1) * _pixWidth + x * 3;
+	_this.Pixel2 = function(x, y, r,g,b, a) {
+		var q = (height-y-1) * _pixWidth + x * _bitn;
 		_data[q] = b;
 		_data[q + 1] = g;
 		_data[q + 2] = r;
 		if(_bitn==4) _data[q + 3] = a;
 	};
-	_this.drawChar = function(x, y, data) {
+	_this.Char = function(x, y, data) {
 		var w = Math.sqrt(data.length), num = 0;
 		for(var i =0;i<w;i++){
 			for(var j=0;j<w;j++){
-				((num = data[j * w + i]) != -1) && _this.drawPixel(x+i, y+j, num);
+				((num = data[j * w + i]) != -1) && _this.Pixel(x+i, y+j, num);
 			}
 		}
 	};
-	_this.drawChar2 = function(x, y, data, w, h) {
+	_this.Char2 = function(x, y, data, w, h) {
 		var num = 0;
 		for(var j=0;j<h;j++){
 			for(var i =0;i<w;i++){
-				((num = data[ j * w + i]) != -1) && _this.drawPixel(x+i, y+j, num);
+				((num = data[ j * w + i]) != -1) && _this.Pixel(x+i, y+j, num);
 			}
+		}
+	};
+	_this.Rectangle = function(x, y, w , h, color) {
+		for(var i=0;i<w;i++){
+			_this.Pixel(x+i,y,color);
+			_this.Pixel(x+i,y+h-1,color);
+		}
+		for(var i=0;i<h;i++){
+			_this.Pixel(x,y + i,color);
+			_this.Pixel(x+w-1,y+i,color);
+		}
+	};
+	_this.Line = function(x1, y1, x2, y2, color){
+		if(x1==x2){
+			for(var i=y1;i<=y2;i++){
+				_this.Pixel(x1,i,color);
+			}
+			return;
+		}
+		if(y1==y2){
+			for(var i=x1;i<=x2;i++){
+				_this.Pixel(i,y1,color);
+			}
+			return;
+		}
+		var radius = (y2-y1) / (x2-x1);
+		var fn = function(x){
+			return radius * (x-x1) + y1;
+		}
+		for(var i=x1;i<=x2;i++){
+			_this.Pixel(i,Math.round(fn(i)),color);
 		}
 	};
 	_this.writeHeader = function() {
@@ -189,9 +216,9 @@ var bmpImage = function(width,height,bit){
 		for(var i=0;i<_width;i++){
 			for(var j=0;j<_height;j++){
 				if(Math.random() * 100 < nosie){
-					_this.drawPixel2(i, j, Math.floor(Math.random() * 128), Math.floor(Math.random() * 128), Math.floor(Math.random() * 128), a);
+					_this.Pixel2(i, j, Math.floor(Math.random() * 128), Math.floor(Math.random() * 128), Math.floor(Math.random() * 128), a);
 				}else{
-					_this.drawPixel2(i, j, r, g, b, a);
+					_this.Pixel2(i, j, r, g, b, a);
 				}
 			}
 		}
@@ -204,6 +231,10 @@ var bmpImage = function(width,height,bit){
 	};
 	_this.getBodyBuffer = function(){
 		return _data;
+	};
+	_this.flush = function(){
+		F.echo(IO.buffer2binary(_this.getHeaderBuffer()),F.TEXT.BIN);
+		F.echo(IO.buffer2binary(_this.getBodyBuffer()),F.TEXT.BIN);
 	};
 	_this.writeHeader();
 	return _this;
