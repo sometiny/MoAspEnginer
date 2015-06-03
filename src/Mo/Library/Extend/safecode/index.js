@@ -26,7 +26,8 @@ function $safecode(sessionKey,opt){
 		vCode=[], 
 		vCodes="",
 		fontdata = IO.file.readAllText(__dirname + "\\fonts\\" + cfg.font + ".font"),
-		cCode = (new Function("Font",fontdata))(vNumberData) || "0123456789aAcCeEmMnNrRsSuUvVwWxXzZjJbBdDfFhHkKtTgGpPqQyY＋－×÷＝+-/= .", index, achar;
+		cCode = (new Function("Font",fontdata))(vNumberData) || "0123456789aAcCeEmMnNrRsSuUvVwWxXzZjJbBdDfFhHkKtTgGpPqQyY ＋－×÷＝+-/=.", index, achar,
+		wordcount = cCode.indexOf(" ");
 		
 	if(cfg.data==""){
 		for(var i=0;i<=cfg.length-1;i++){
@@ -57,9 +58,11 @@ function $safecode(sessionKey,opt){
 	}
 	image = bmpImage(width + padding*2,height + padding*2,cfg.bit)
 	image.setBgColor(0xffffff, cfg.odd);
-	var drawed=0, x=0,y=0, w=0, h=0;
+	var drawed=0, x=0,y=0, w=0, h=0,wave=false;
 	for(var i=0;i<vCode.length;i++){
-		achar = vCode[i]; w = achar.width; h = achar.height; x = drawed + padding + Math.floor(Math.random() * (w / 2) - (w/4)); y = padding + Math.floor(Math.random() * (h / 2) - (h/4));
+		achar = vCode[i]; w = achar.width; h = achar.height; 
+		x = drawed + padding + (wave?(Math.floor(Math.random() * (w / 2) - (w/4))):0); 
+		y = padding + (wave?(Math.floor(Math.random() * (h / 2) - (h/4))):0);
 		image.Char2(x, y, achar.data, w, h);
 		drawed += w;
 	}
