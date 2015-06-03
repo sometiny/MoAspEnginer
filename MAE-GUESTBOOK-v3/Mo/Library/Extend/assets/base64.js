@@ -59,15 +59,16 @@ var $node = F.activex("MSXML2.DOMDocument", function() {
 	this.loadXML("<?xml version=\"1.0\" encoding=\"gb2312\"?><root xmlns:dt=\"urn:schemas-microsoft-com:datatypes\"><data dt:dt=\"bin.base64\"></data></root>");
 	return this.selectSingleNode("//root/data");
 }),
-	$base64 = {};
+	$base64 = {}, $encoding = Utf8;
 $base64.e = encode_;
 $base64.d = decode_;
+$base64.setNames = function(enc){$encoding = enc;};
 $base64.encode = function(Str) {
-	if (typeof Str == "string") Str = F.string.getByteArray(Str);
+	if (typeof Str == "string") Str = $encoding.getByteArray(Str);
 	return encode_(Str);
 };
 $base64.decode = function(Str) {
-	return F.string.fromByteArray(decode_(Str));
+	return $encoding.getString(decode_(Str));
 };
 $base64.toBinary = function(str) {
 	$node.text = str;

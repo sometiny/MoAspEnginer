@@ -527,7 +527,7 @@ MoAspEnginerView.prototype.parseVari = function(chars) {
 		return;
 	}
 	this.Content = replacementter(this.Content, "\\{\\$" + chars, "\\}", function($1, $2) {
-		$1 = $1.replace(/\\(\{|\})/ig, "$1");
+		$2 = $2.replace(/\\/ig, "");
 		var assigned = this.parseAssign($1);
 		if ($2 == "{$#") {
 			return "\" + " + assigned + " + \"";

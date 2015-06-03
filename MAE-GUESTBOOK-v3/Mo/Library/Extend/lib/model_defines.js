@@ -34,6 +34,10 @@ DataTable.prototype.fromArray = function(obj,pagesize){
 	return this;
 };
 
+DataTable.prototype.getArray = function(){
+	return this.LIST__;
+};
+
 DataTable.prototype.getState = function(dateformat){
 	if(dateformat == undefined) dateformat = "yyyy-MM-dd HH:mm:ss";
 	var returnValue = "{";

@@ -866,7 +866,7 @@ var F, JSON, require, VBS, View, Model__,
 (function(){
 	/*delay load*/
 	var loaddelay = {
-		"base64" : ["e", "d", "encode", "decode", "toBinary", "fromBinary", "base64"], /*base64*/
+		"base64=Base64" : ["e", "d", "encode", "decode", "toBinary", "fromBinary", "setNames", "base64"], /*base64*/
 		"JSON" : ["parse", "stringify", "create", "decodeStrict", "encodeUnicode", "assets/json.js"],/*JSON*/
 		"IController" : ["create", "IController@lib/dist.js"], /*controller*/
 		"IClass" : ["create", "IClass@lib/dist.js"],/*class*/
@@ -880,12 +880,20 @@ var F, JSON, require, VBS, View, Model__,
 		"Tar" : [null, "setNames", "packFolder", "packFile", "unpack", "assets/tar.js"],
 		"md5=MD5" : [null, "md5@assets/md5.js"],
 		"md5_bytes=MD5Bytes" : [null, "md5_bytes@assets/md5.js"],
+		"HMACMD5" : [null, "HMACMD5@assets/md5.js"],
+		"SHA1" : [null, "SHA1@assets/sha1.js"],
+		"HMACSHA1" : [null, "HMACSHA1@assets/sha1.js"],
+		"SHA256" : [null, "SHA256@assets/sha256.js"],
+		"HMACSHA256" : [null, "HMACSHA256@assets/sha256.js"],
 		"Html" : ["ActionLink", "Form", "FormUpload", "FormEnd", "CheckBox", "DropDownList", "ListBox", "Hidden", "Password", "RadioButton", "TextArea", "TextBox", "assets/htmlhelper.js"],
 		"Utf8" : ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "utf8@encoding"],
 		"GBK" : ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "gbk@encoding"],
 		"Unicode" : ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "unicode@encoding"],
 		"Hex" : ["parse", "stringify", "hex@encoding"],
-		"Encoding" : ["encodeURIComponent", "encodeURI", "decodeURI", "encoding"]
+		"Encoding" : ["encodeURIComponent", "encodeURI", "decodeURI", "getEncoding", "encoding"],
+		"Crc32" : [null, "assets/crc32.js"],
+		"Safecode" : [null, "Safecode@safecode"],
+		"BmpImage" : [null, "BmpImage@safecode"]
 	};
 	for(var lib in loaddelay){
 		if(!loaddelay.hasOwnProperty(lib)) continue;
@@ -903,12 +911,28 @@ var F, JSON, require, VBS, View, Model__,
 		for(var i=0;i<_len;i++){
 			var method = "." + library[i];
 			if(library[i]==null) method="";
-			var body = lib + method + " = function(){" + lib + " = require(\"" + module + "\")" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};";
-			(new Function(body))();
+			(new Function(lib + method + " = function(){" + lib + " = require(\"" + module + "\")" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};"))();
 		}
 		if(cname) (new Function(cname + " = " + lib + ";"))();
 	}
 })();
+var HMAC = function(algorithm, blocksize, data, key, ra){
+	var ipad = [],
+		opad = [];
+	if (typeof data == "string") data = Utf8.getByteArray(data);
+	if (typeof key == "string") key = Utf8.getByteArray(key);
+	if (key.length > blocksize) key = algorithm(key, true);
+	while (key.length < blocksize) {
+		key.push(0);
+	}
+	for (var i = 0; i < blocksize; i++) {
+		ipad[i] = key[i] ^ 0x36;
+		opad[i] = key[i] ^ 0x5c;
+	}
+	data = algorithm(ipad.concat(data), true);
+	data = opad.concat(data);
+	return algorithm(data, ra === true);
+};
 var Encapsulate = Function.Create = function(len){
 	var args=[];for(var i=0;i<len;i++) args.push("arg" + i);
 	var _args = args.join(",");

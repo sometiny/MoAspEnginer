@@ -71,8 +71,8 @@ LoginController.extend("logout",function(){
 
 /*生成验证码*/
 LoginController.extend("code",function(){
-	var safecode = require("safecode");
-	safecode("wx_session_code");
+	//var safecode = require("safecode");
+	Safecode("wx_session_code");
 });
 LoginController.extend("empty",function(a){
 	F.goto("?m=" + Mo.Method + "&error=1&msg=" + F.encode("不支持的方法：" + a + "。"));

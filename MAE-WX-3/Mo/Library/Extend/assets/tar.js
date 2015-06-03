@@ -2,7 +2,7 @@
 /*
 ** tar package£¬Old-Style Archive Format
 */
-var string2buffer = F.string.getByteArray, buffer2string = F.string.fromByteArray;
+var string2buffer = Utf8.getByteArray, buffer2string = Utf8.getString;
 
 function zipfolder(zip,path){
 	IO.directory.directories(path,function(f){
@@ -26,7 +26,20 @@ function $manager(files, options){
 		this.files = files || {};
 	}
 }
-
+var OUTPUTS = [
+	function(fp){
+		IO.file.flush(fp);
+		return true
+	},
+	function(fp){
+		IO.file.seek(fp, 0);
+		return IO.binary2buffer(IO.file.read(fp));
+	},
+	function(fp){
+		IO.file.seek(fp, 0);
+		return IO.file.read(fp);
+	}
+];
 $manager.helper = zipfolder;
 $manager.prototype.folder = function(name){
 	this.files[name] = {};
@@ -38,21 +51,15 @@ $manager.prototype.file = function(name, path){
 };
 $manager.prototype.generate = function(path, output){
 	var fp = IO.file.open(path, {forText : false});
-	output = !!output;
+	if(output===undefined) output = 0;
+	if(output!=0 && output!=1 && output!=2) output = 0;
 	dogenerate(fp, "", this.files);
 	var ending = [];
 	for(var i=0;i<1024;i++) ending.push(0);
 	IO.file.write(fp, IO.buffer2binary(ending));
-	if(!output){
-		IO.file.flush(fp);
-		IO.file.close(fp);
-		return true
-	}else{
-		IO.file.seek(fp, 0);
-		var data = IO.binary2buffer(IO.file.read(fp));
-		IO.file.close(fp);
-		return data;
-	}
+	var result = OUTPUTS[output](fp);
+	IO.file.close(fp);
+	return result;
 };
 $manager.prototype.load = function(files){
 	var size = IO.file.get(files).size, offset = 0;
@@ -94,10 +101,15 @@ $manager.prototype.read = function(fn){
 	if(header[0]==0) return false;
 	var checksum_new=0;
 	this.loader.offset+=512;
-	var filename = header.slice(0, 100);
+	var filename = readstringbuffer(header,0, 100);
 	filename = buffer2string(filename);
+	var prefix = readstringbuffer(header,345, 500)
+	prefix = buffer2string(prefix);
+	if(prefix.length>0){
+		if(prefix.substr(prefix.length-1)!="\\") prefix += "\\";
+	}
 	var linkflag = header[156];
-	var headerobj = new tarHeader(filename, '', linkflag == 0x35);
+	var headerobj = new tarHeader(prefix+filename, '', linkflag == 0x35);
 	var size = parseOtc(header.slice(124, 136));
 	headerobj.filesize = size;
 	headerobj.offset = this.loader.offset;
@@ -153,11 +165,11 @@ $manager.setNames = function(){
 		buffer2string = GBK.getString;
 	}
 };
-$manager.packFolder = function(path, target){
+$manager.packFolder = function(path, target, output){
 	var zip = new $manager();
 	try{
 		zipfolder(zip,path);
-		return zip.generate(target);
+		return zip.generate(target, output);
 	}catch(ex){
 		return false;
 	}
@@ -168,7 +180,7 @@ $manager.packFile = function(file, target, option){
 	var zip = new $manager();
 	try{
 		zip.file(filename,file);
-		return zip.generate(target);
+		return zip.generate(target, option.output);
 	}catch(ex){
 		return false;
 	}
@@ -197,10 +209,20 @@ var ArrayPush = Array.prototype.push;
 var formatOtc = function(num, len){
 	var numstr = num.toString(8)+" ", _len = numstr.length;
 	len = len || 12;
-	while(_len++ < len){
+	while(_len < len){
 		numstr = " " + numstr;
+		_len++;
 	}
 	return string2buffer(numstr);
+};
+var readstringbuffer = function(buffer, start, end){
+	var buff=[],chr=0;
+	for(var i=start;i<end;i++){
+		chr = buffer[i];
+		if(chr==0) break;
+		buff.push(chr);
+	}
+	return buff;
 };
 var parseOtc = function(ary){
 	ary.pop();
@@ -238,18 +260,34 @@ var tarHeader = function(name, file, isdir) {
 };
 var total=0;
 tarHeader.prototype.generate = function(filesize){
-	var filename_byt = string2buffer(this.name);
-	while(filename_byt.length>99) filename_byt.pop();
+	var filename_byt = string2buffer(this.name),prefix=[], _len = filename_byt.length, createdate,Header = this.data;
+	if(_len>99){
+		var _index = this.name.indexOf("\\"), last=0, chrcode, counts=0;
+		if(_index>0){
+			for(var i=_len-1;i>=0;i--){
+				if(filename_byt[i]==0x5c && i<155) {
+					last = i;
+					break;
+				}
+			}
+			prefix = filename_byt.slice(0,last)
+			filename_byt = filename_byt.slice(last+1);
+		}else{
+			filename_byt = filename_byt.slice(_len-99);
+		}
+	}
 	while(filename_byt.length<100) filename_byt.push(0);
 	push(filename_byt, this);
 	if(this.dir){
-		ArrayPush.apply(this.data, [0x20,0x34]);
+		ArrayPush.apply(Header, [0x20,0x34]);
 		this.checksum += 84;
+		createdate = +new Date();
 	}else{
-		ArrayPush.apply(this.data, [0x31,0x30]);
+		ArrayPush.apply(Header, [0x31,0x30]);
 		this.checksum += 97;
+		createdate = +new Date(+IO.file.get(this.file).DateLastModified);
 	}
-	ArrayPush.apply(this.data, [0x30,0x37,0x37,0x37,0x20,0, /*mode*/ 0x20,0x20,0x20,0x20,0x20,0x30,0x20,0,0x20,0x20,0x20,0x20,0x20,0x30,0x20,0]); //uid,gid
+	ArrayPush.apply(Header, [0x30,0x37,0x37,0x37,0x20,0, /*mode*/ 0x20,0x20,0x20,0x20,0x20,0x30,0x20,0,0x20,0x20,0x20,0x20,0x20,0x30,0x20,0]); //uid,gid
 	this.checksum += 725;
 	
 	var linkflag=0x35;
@@ -258,17 +296,24 @@ tarHeader.prototype.generate = function(filesize){
 		linkflag = 0x30;
 	}
 	push(formatOtc(filesize), this); //size
-	push(formatOtc(F.timespan(new Date())), this); //mtime
+	push(formatOtc((createdate - createdate % 1000)/1000), this); //mtime
 	
-	ArrayPush.apply(this.data, [0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20]); //checksum
+	ArrayPush.apply(Header, [0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20]); //checksum
 	this.checksum += 256;
 	
-	this.data.push(linkflag);
+	Header.push(linkflag); //linkflah
 	this.checksum += linkflag;
+	for(var i=0;i<100;i++) Header.push(0); //linkname
 	
-	for(var i=0;i<355;i++) this.data.push(0);
-	set(formatOtc(this.checksum,7),148, this);
-	this.data[155] = 0;
+	ArrayPush.apply(Header, [0x75,0x73,0x74,0x61,0x72,0,0x30,0x30]); //magic //version
+	this.checksum += 655;
+	
+	for(var i=0;i<80;i++) Header.push(0); //uname, gname,devmajor, devminor
+	push(prefix, this); //prefix
+	for(var i=0;i<167-prefix.length;i++) Header.push(0); //prefix ending and pad
+	
+	set(formatOtc(this.checksum,7),148, this); //set checksum
+	Header[155] = 0;
 };
 module.exports = $manager;
 Tar = $manager;
