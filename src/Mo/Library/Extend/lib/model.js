@@ -114,6 +114,10 @@ Model__.connect = function(cfg){
 			return false;
 		}
 		type = cfg_["DB_Type"];
+		if(!type){
+			ALLOWDEBUG && PutDebug("please define 'DB_Type' for database(" + cfg +").");
+			return false;
+		}
 		base = F.activex.connection();
 		var conn = Connections[cfg]={
 			name:cfg,
