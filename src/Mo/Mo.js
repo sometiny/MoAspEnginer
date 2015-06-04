@@ -455,16 +455,19 @@ var F, JSON, require, VBS, View, Model__,
 			}
 
 			/*load application config*/
-			require(c(G.MO_APP + "Conf/Config.asp"), true, function() {
-				if (this.hasOwnProperty("MO_LIB_CNAMES")) {
-					if (this.MO_LIB_CNAMES) _extend(G.MO_LIB_CNAMES, this.MO_LIB_CNAMES);
-					delete this.MO_LIB_CNAMES;
-				}
-				for (var k in cfg) {
-					delete this[k];
-				}
-				_extend(G, this);
-			});
+			var app_config=G.MO_APP + "Conf/Config.asp";
+			if(IO.file.exists(app_config)){
+				require(c(app_config), true, function() {
+					if (this.hasOwnProperty("MO_LIB_CNAMES")) {
+						if (this.MO_LIB_CNAMES) _extend(G.MO_LIB_CNAMES, this.MO_LIB_CNAMES);
+						delete this.MO_LIB_CNAMES;
+					}
+					for (var k in cfg) {
+						delete this[k];
+					}
+					_extend(G, this);
+				});
+			}
 
 			if (!G.MO_METHOD_CHAR) G.MO_METHOD_CHAR = "m";
 			if (!G.MO_ACTION_CHAR) G.MO_ACTION_CHAR = "a";
