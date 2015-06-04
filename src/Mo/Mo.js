@@ -444,7 +444,6 @@ var F, JSON, require, VBS, View, Model__,
 				ExceptionManager.put(0x213df, "IO", "can not load module 'IO', system will be shut down.", E_ERROR);
 				return;
 			}
-
 			/*auto-create*/
 			if (G.MO_AUTO_CREATE_APP !== false && !IO.directory.exists(G.MO_APP)) {
 				F.foreach([
@@ -503,7 +502,7 @@ var F, JSON, require, VBS, View, Model__,
 			_runtime.timelines.terminate = _runtime.ticks(_tag);
 			_debug();
 			_Assigns = null;
-			this.Config = null;
+			M.Config = null;
 			_Language = null;
 		};
 
@@ -567,7 +566,7 @@ var F, JSON, require, VBS, View, Model__,
 			if (RouteTo) _parseRouteTo(RouteTo);
 		};
 		M.display = function(template, extcachestr) {
-			res.Status = this.Status;
+			res.Status = M.Status;
 			res.AddHeader("Content-Type", "text/html; charset=" + G.MO_CHARSET);
 			M.fetch(template, extcachestr);
 		};
@@ -727,14 +726,14 @@ var F, JSON, require, VBS, View, Model__,
 		};
 		M.Run = function() {
 			var _tag = _runtime.run();
-			this.Method = F.get(G.MO_METHOD_CHAR);
-			this.Action = F.get(G.MO_ACTION_CHAR);
-			this.Group = F.get(G.MO_GROUP_CHAR);
-			(!/^(\w+)$/i.test(this.Action)) && (this.Action = "Index");
-			(!/^(\w+)$/i.test(this.Method)) && (this.Method = "Home");
-			(!/^(\w+)$/i.test(this.Group)) && (this.Group = "");
-			if (this.Group != "") this.Group += "/";
-			if (G.MO_CONTROLLER_CNAMES && G.MO_CONTROLLER_CNAMES.hasOwnProperty(this.Method.toLowerCase())) this.Method = G.MO_CONTROLLER_CNAMES[this.Method.toLowerCase()];
+			M.Method = F.get(G.MO_METHOD_CHAR);
+			M.Action = F.get(G.MO_ACTION_CHAR);
+			M.Group = F.get(G.MO_GROUP_CHAR);
+			(!/^(\w+)$/i.test(M.Action)) && (M.Action = "Index");
+			(!/^(\w+)$/i.test(M.Method)) && (M.Method = "Home");
+			(!/^(\w+)$/i.test(M.Group)) && (M.Group = "");
+			if (M.Group != "") M.Group += "/";
+			if (G.MO_CONTROLLER_CNAMES && G.MO_CONTROLLER_CNAMES.hasOwnProperty(M.Method.toLowerCase())) M.Method = G.MO_CONTROLLER_CNAMES[M.Method.toLowerCase()];
 			if (G.MO_CACHE) {
 				_CacheFileName = MD5(F.server("URL") + F.get.toURIString() + "");
 				if (IO.file.exists(G.MO_CACHE_DIR + _CacheFileName + ".cache")) {
@@ -742,25 +741,25 @@ var F, JSON, require, VBS, View, Model__,
 					return;
 				}
 			}
-			var ModelPath = G.MO_APP + "Controllers/" + this.Group + this.Method + "Controller.asp",
+			var ModelPath = G.MO_APP + "Controllers/" + M.Group + M.Method + "Controller.asp",
 				can_LoadController = true;
-			this.RealMethod = this.Method;
-			this.RealAction = this.Action;
+			M.RealMethod = M.Method;
+			M.RealAction = M.Action;
 			if (!IO.file.exists(ModelPath)) {
-				ModelPath = G.MO_APP + "Controllers/" + this.Group + "EmptyController.asp";
-				this.RealMethod = "Empty";
+				ModelPath = G.MO_APP + "Controllers/" + M.Group + "EmptyController.asp";
+				M.RealMethod = "Empty";
 				if (!IO.file.exists(ModelPath)) {
-					ModelPath = G.MO_CORE + "Controllers/" + this.Group + this.Method + "Controller.asp";
-					this.RealMethod = this.Method;
+					ModelPath = G.MO_CORE + "Controllers/" + M.Group + M.Method + "Controller.asp";
+					M.RealMethod = M.Method;
 					if (!IO.file.exists(ModelPath)) {
-						ModelPath = G.MO_CORE + "Controllers/" + this.Group + "EmptyController.asp";
-						this.RealMethod = "Empty";
+						ModelPath = G.MO_CORE + "Controllers/" + M.Group + "EmptyController.asp";
+						M.RealMethod = "Empty";
 						if (!IO.file.exists(ModelPath)) {
-							if (M.templateIsInApp(this.Action) || M.templateIsInCore(this.Action)) {
-								M.display(this.Action);
+							if (M.templateIsInApp(M.Action) || M.templateIsInCore(M.Action)) {
+								M.display(M.Action);
 								can_LoadController = false;
 							} else {
-								ExceptionManager.put(0x2dfc, this.RealMethod + "." + this.RealAction, "controller '" + this.Method + "' is not exists.");
+								ExceptionManager.put(0x2dfc, M.RealMethod + "." + M.RealAction, "controller '" + M.Method + "' is not exists.");
 								return;
 							}
 						}
@@ -768,24 +767,24 @@ var F, JSON, require, VBS, View, Model__,
 				}
 			}
 			var _controller;
-			if (!(can_LoadController && (_controller = _LoadController(ModelPath, this.RealMethod)))) return;
+			if (!(can_LoadController && (_controller = _LoadController(ModelPath, M.RealMethod)))) return;
 			if (_controller["__PRIVATE__"] === true) {
-				ExceptionManager.put(0x2dfc, this.RealMethod + "." + this.RealAction, "controller '" + this.Method + "' is not exists.");
+				ExceptionManager.put(0x2dfc, M.RealMethod + "." + M.RealAction, "controller '" + M.Method + "' is not exists.");
 				return;
 			}
 			_runtime.timelines.load = _runtime.ticks(_tag);
 			var MC = null;
 			try {
-				MC = new _controller(this.Action);
+				MC = new _controller(M.Action);
 			} catch (ex) {
 				_catchException({
 					number: 0x3a9,
-					description: "controller '" + this.Method + "' initialize failed: " + ex.description + "."
+					description: "controller '" + M.Method + "' initialize failed: " + ex.description + "."
 				});
 				return;
 			}
 			if (MC.__STATUS__ === true) {
-				var action_ = this.Action;
+				var action_ = M.Action;
 				if (G.MO_ACTION_CASE_SENSITIVITY === false) action_ = action_.toLowerCase();
 				var fn = null,
 					args = [],
@@ -797,18 +796,18 @@ var F, JSON, require, VBS, View, Model__,
 				} else if (MC[action_] && MC[action_]["__PRIVATE__"] !== true) {
 					fn = MC[action_];
 
-				} else if (G.MO_AUTO_DISPLAY && (M.templateIsInApp(this.Action) || M.templateIsInCore(this.Action))) {
+				} else if (G.MO_AUTO_DISPLAY && (M.templateIsInApp(M.Action) || M.templateIsInCore(M.Action))) {
 					self = M;
 					fn = M.display;
-					args = [this.Action];
+					args = [M.Action];
 
 				} else {
 					if (MC["empty"] && MC["empty"]["__PRIVATE__"] !== true) {
 						M.RealAction = "empty";
 						fn = MC["empty"];
-						args = [this.Action];
+						args = [M.Action];
 					} else {
-						ExceptionManager.put(0x3a8, this.RealMethod + "." + this.RealAction, "please define '" + this.Action + "' or 'empty' method.");
+						ExceptionManager.put(0x3a8, M.RealMethod + "." + M.RealAction, "please define '" + M.Action + "' or 'empty' method.");
 					}
 				}
 				if (G.MO_PARSEACTIONPARMS === true) args = _getfunctionParms(fn);
@@ -865,7 +864,7 @@ var F, JSON, require, VBS, View, Model__,
 			_Assigns[key] = value;
 		};
 		return M;
-	})();
+	})(), shutdown = Mo.Terminate;
 (function() {
 	var loaddelay = {
 		"base64=Base64": ["e", "d", "encode", "decode", "toBinary", "fromBinary", "setNames", "base64"],
