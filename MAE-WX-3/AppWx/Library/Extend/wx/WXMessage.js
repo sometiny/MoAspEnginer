@@ -1,9 +1,8 @@
-var SHA1 = require("sha1").SHA1;
 var httprequest = require("net/http/request");
-var Encoding = require("encoding");
 var CryptoJS = require("CryptoJS");
-var WXConf = Mo.C("@.WX");
-function WXMessage(){
+var BitConverter = CryptoJS.enc.BitConverter;
+function WXMessage(conf){
+	this.Cfg = conf ||{};
 	this.SignManager={
 		token:"",
 		timestamp:"",
@@ -84,19 +83,19 @@ WXMessage.prototype.basic = function(){
 	}
 };
 WXMessage.prototype.encrypt = function(){
-	var key_byte = base64.d(WXConf.aeskey+"=");
+	var key_byte = Base64.d(this.Cfg.aeskey+"=");
 	CryptoJS.require.AES().Format.Hex();
 	this.Ori.Reply = this.Reply;
-	var src = Encoding.utf8.getByteArray(this.Reply);
+	var src = Utf8.getByteArray(this.Reply);
 	this.MessageLength = src.length;
 	var data = [];
 	for(var i=0;i<16;i++) data.push(parseInt(Math.random()*125)+64);
-	data = data.concat(CryptoJS.enc.BitConverter.FromInt32(this.MessageLength)).concat(src).concat(Encoding.utf8.getByteArray(this.AppID));
+	data = data.concat(BitConverter.FromInt32(this.MessageLength)).concat(src).concat(Utf8.getByteArray(this.AppID));
 	var msg_encrypt = CryptoJS.AES.encrypt(
-		CryptoJS.enc.BitConverter.ToWordArray(data),
-		CryptoJS.enc.BitConverter.ToWordArray(key_byte),
+		BitConverter.ToWordArray(data),
+		BitConverter.ToWordArray(key_byte),
 		{ 
-	    	iv: CryptoJS.enc.BitConverter.ToWordArray(key_byte.slice(0,16)),
+	    	iv: BitConverter.ToWordArray(key_byte.slice(0,16)),
 		    padding:this.Padding
     	}
     ).toString();
@@ -121,33 +120,22 @@ WXMessage.prototype.decrypt = function(msg_encrypt,msg_signature){
 		this.Exception = "msg_signature verify failed.";
 		return false;
 	}
-	var key_byte = base64.d(WXConf.aeskey+"=");
+	var key_byte = Base64.d(this.Cfg.aeskey+"=");
 	CryptoJS.require.AES().Format.Hex();
-	var result_byte=CryptoJS.enc.BitConverter.FromWordArray(
-		CryptoJS.AES.decrypt(
-			CryptoJS.lib.CipherParams.create(
-				{
-					ciphertext: CryptoJS.enc.Hex.parse(
-						Encoding.hex.stringify(
-							base64.d(msg_encrypt)
-						)
-					),
-					blockSize:8
-				}
-			), 
-			CryptoJS.enc.BitConverter.ToWordArray(key_byte),
+	var result_byte=BitConverter.FromWordArray(
+		CryptoJS.AES.decrypt(msg_encrypt, 
+			BitConverter.ToWordArray(key_byte),
 			{ 
-		    	iv: CryptoJS.enc.BitConverter.ToWordArray(key_byte.slice(0,16)),
-		    	format:CryptoJS.format.Hex,
+		    	iv: BitConverter.ToWordArray(key_byte.slice(0,16)),
 		    	padding:this.Padding
 	    	}
 	    )
 	);
-	this.MessageLength = CryptoJS.enc.BitConverter.ToInt32(result_byte,16);
+	this.MessageLength = BitConverter.ToInt32(result_byte,16);
 	this.Ori.Message = this.Message;
 	this.Random = result_byte.slice(0,16);
-	this.Message = Encoding.utf8.toString(Encoding.utf8.bytesToWords(result_byte.slice(20,20+this.MessageLength)));
-	this.AppID = Encoding.utf8.toString(Encoding.utf8.bytesToWords(result_byte.slice(20+this.MessageLength)));
+	this.Message = Utf8.getString(result_byte.slice(20,20+this.MessageLength));
+	this.AppID = Utf8.getString(result_byte.slice(20+this.MessageLength));
 	return true;
 };
 WXMessage.prototype.loadRequest = function(requeststr){
