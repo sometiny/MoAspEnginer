@@ -513,13 +513,26 @@ __Model__.prototype.query = function(){
 		}
 	}
 	try{
+		var has_parms = this.parms.length>0;
+		if(!has_parms){
+			if(this.pagekeyorder == "") this.countsql = "";
+		}
+		if(this.strlimit == -1) this.countsql = "";
 		if(this.countsql != ""){
 			ALLOWDEBUG && (fp = F.timer.run()) && PutDebug(this.countsql+",");
-			this.rc = _executeCommand.call(this, this.countsql).dataset(0).value;
+			if(has_parms){
+				this.rc = _executeCommand.call(this, this.countsql).dataset(0).value;
+			}else{
+				this.rc = _executeQueryWithReturn.call(this, this.countsql, 0);
+			}
 			ALLOWDEBUG && AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 		}
 		ALLOWDEBUG && (fp = F.timer.run()) && PutDebug(this.sql+",");
-		this.rs__ = _executeCommand.call(this, this.sql).dataset;
+		if(has_parms){
+			this.rs__ = _executeCommand.call(this, this.sql).dataset;
+		}else{
+			this.rs__ = _executeQuery.call(this, this.sql);
+		}
 		if(this.countsql == "")this.rc = this.rs__.recordcount;
 		ALLOWDEBUG && AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 	}catch(ex){
@@ -537,7 +550,11 @@ __Model__.prototype.fetch = function(){
 	if(limit != -1 && this.rc > 0){
 		this.rs__.pagesize = limit;
 		if(this.pagekeyorder == ""){
-			this.rs__.Move((this.strpage-1) * limit);
+			if(this.parms.length > 0){
+				this.rs__.Move((this.strpage-1) * limit);
+			}else{
+				this.rs__.AbsolutePage = this.strpage;
+			}
 		}
 	}
 	this.object_cache = new DataTable(this.rs__,limit);
@@ -678,6 +695,14 @@ function _executeCommand(sql){
 	cmdobj.CommandText = sql;
     return Model__.RecordsAffectedCmd({cmdobj : cmdobj, affectedRows : -1, dataset : null});
 };
+function _executeQuery(sql){
+	var cmdobj=F.activex("ADODB.Recordset");
+	cmdobj.open(sql, this.connection, 1, 1);
+	return cmdobj;
+}
+function _executeQueryWithReturn(sql,index){
+	return this.connection.execute(sql)(index).value;
+}
 function _catchException(src, ex){
 	if(VBS && VBS.ctrl.error.number != 0){
 		//ExceptionManager.put(VBS.ctrl.error.number,"__Model__.query(args)",VBS.ctrl.error.description);
