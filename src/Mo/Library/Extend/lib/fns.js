@@ -1173,7 +1173,7 @@ _.random.initialize = function(seeds, length) {
 	for (var i = 0; i < length; i++) {
 		returnValue += seeds.substr(_.random(0, seeds.length - 1), 1);
 	}
-	return new String(returnValue);
+	return returnValue;
 };
 _.foreach({
 	"number": "123456789012345678901234567890",

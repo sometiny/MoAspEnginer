@@ -361,7 +361,14 @@ __Model__.prototype.groupby = function(groupby){
 	this.strgroupby = groupby || "";
 	return this;
 };
-
+__Model__.prototype.set_pagekey = function(key){
+	this.pagekey = key;
+	return this;
+};
+__Model__.prototype.set_pagekey_order = function(){
+	this.pagekeyorder = "";
+	return this;
+};
 __Model__.prototype.limit = function(page,limit,pagekey,pagekeyorder){
 	this.strlimit = limit || - 1;
 	this.strpage = page || 1;
@@ -375,15 +382,11 @@ __Model__.prototype.limit = function(page,limit,pagekey,pagekeyorder){
 };
 
 __Model__.prototype.max = function(field){
-	var k = field || this.pk;
-	k = this.sp1 + k + this.sp2;
-	return (this.base.driver.Max || _helper.Helper.Max).call(this, k);
+	return _helper.Helper.Max.call(this, this.sp1 + (field || this.pk) + this.sp2);
 };
 
 __Model__.prototype.min = function(field){
-	var k = field || this.pk;
-	k = this.sp1 + k + this.sp2;
-	return (this.base.driver.Min || _helper.Helper.Min).call(this, k);
+	return _helper.Helper.Min.call(this, this.sp1 + (field || this.pk) + this.sp2);
 };
 
 __Model__.prototype.count = function(field){
@@ -393,9 +396,7 @@ __Model__.prototype.count = function(field){
 };
 
 __Model__.prototype.sum = function(field){
-	var k = field || this.pk;
-	k = this.sp1 + k + this.sp2;
-	return (this.base.driver.Sum || _helper.Helper.Sum).call(this, k);
+	return _helper.Helper.Sum.call(this, this.sp1 + (field || this.pk) + this.sp2);
 };
 
 __Model__.prototype.increase = function(name,n){
@@ -425,14 +426,12 @@ __Model__.prototype.join = function(table,jointype){
 };
 
 __Model__.prototype.on = function(str){
-	str = str || "";
-	this.strjoin += " on " + str +")";
+	this.strjoin += " on " + (str || "") +")";
 	return this;
 };
 
 __Model__.prototype.cname = function(str){
-	str = str || "";
-	this.strcname = str;
+	this.strcname = str || "";
 	return this;
 };
 __Model__.prototype.createCommandManager = function(cmd,ct){
@@ -460,11 +459,11 @@ __Model__.prototype.exec = function(manager){
 __Model__.prototype.find = function(Id){
 	if(!isNaN(Id))
 	{
-		return this.where(this.pk + " = " + Id).select().read();
+		return this.where(this.pk + " = " + Id).query().fetch_one();
 	}
 	else if(arguments.length>0)
 	{
-		return __Model__.prototype.where.apply(this,arguments).select().read();
+		return __Model__.prototype.where.apply(this,arguments).query().fetch_one();
 	}
 	return null;
 };
@@ -474,7 +473,8 @@ __Model__.prototype.select = function(callback){
 };
 __Model__.prototype.query = function(){
 	if(!this.base) return this;
-	var fp = 0;
+	var fp = 0,
+		has_parms = this.parms.length>0;
 	this.sql = "";
 	this.countsql = "";
 	this.dispose();
@@ -490,7 +490,11 @@ __Model__.prototype.query = function(){
 				this.countsql = arguments[1];
 			}else{
 				ALLOWDEBUG && (fp = F.timer.run()) && PutDebug(arguments[0]+",");
-				Model__.lastRows = _executeCommand.call(this, arguments[0]).affectedRows;
+				if(has_parms){
+					Model__.lastRows = _executeCommand.call(this, arguments[0]).affectedRows;
+				}else{
+					Model__.lastRows = Model__.RecordsAffected(this.connection, arguments[0]);
+				}
 				ALLOWDEBUG && AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 				return this;
 			}
@@ -513,7 +517,6 @@ __Model__.prototype.query = function(){
 		}
 	}
 	try{
-		var has_parms = this.parms.length>0;
 		if(!has_parms){
 			if(this.pagekeyorder == "") this.countsql = "";
 		}
@@ -541,6 +544,18 @@ __Model__.prototype.query = function(){
 	}
 	return this;
 };
+__Model__.prototype.fetch_one = function(){
+	var rs = this.rs__;
+	if(!rs || (rs.eof && rs.bof)) {rs = null;return null;}
+	var returnValue = {}, fields = rs.Fields, fields_len = fields.Count, field=null;
+	for(var i=0;i<fields_len;i++){
+		field = fields(i);
+		returnValue[field.Name] = field.Value;
+	}
+	try{rs.close();}catch(ex){}finally{rs=null;this.rs__ = null;fields=null;field=null;}
+	return returnValue;
+};
+
 __Model__.prototype.fetch = function(){
 	var limit = this.strlimit;
 	if(this.object_cache != null){
@@ -715,40 +730,41 @@ function _catchException(src, ex){
 }
 function _parseData(table){
 	var fields = [],values = [],update = [], schema = null, fieldsList = ((this.fields == "" || this.fields == "*") ? "" : ("," + this.fields + ",")), hasFieldsList = fieldsList!="", ori_value;
-	var cmd = null, name="",withCommand=false;
-	if(this.base.useCommand && this.base.cfg["DB_Schema"] && this.base.cfg["DB_Schema"][this.tableWithNoSplitChar]) 
+	var name="", parms = this.parms, has_parms = parms.length>0, usecommand = this.base.useCommand, sp1 = this.sp1, sp2 = this.sp2, toString = Object.prototype.toString;
+	if(has_parms) usecommand = true;
+	if(usecommand && this.base.cfg["DB_Schema"] && this.base.cfg["DB_Schema"][this.tableWithNoSplitChar]) 
 	{
 		schema = this.base.cfg["DB_Schema"][this.tableWithNoSplitChar];
-		withCommand = true;
 	}
 	for(var i in table){
 		if(!table.hasOwnProperty(i))continue;
 		ori_value = table[i]["value"];
 		if(ori_value === undefined)continue;
 		if(hasFieldsList && fieldsList.indexOf("," + i + ",")<0) continue;
-		fields.push(this.sp1+i+this.sp2);
+		fields.push(sp1 + i + sp2);
 		var v = ori_value;
-		if(withCommand){
-			name = "{"+(this.parms.length)+"}";
+		if(schema){
+			name = "{"+(parms.length)+"}";
 			values.push(name);
-			update.push(this.sp1+i+this.sp2 + " = " + name);
+			update.push(sp1 + i + sp2 + " = " + name);
 			var tableschema = schema[i];
 			var parm = {value : v, type : tableschema["DATA_TYPE"]};
-			this.parms.push(parm);
+			parms.push(parm);
 			if(tableschema["NUMERIC_PRECISION"] != null)parm.precision = tableschema["NUMERIC_PRECISION"];
 			if(tableschema["CHARACTER_MAXIMUM_LENGTH"] != null)parm.size = v.length;
 			if(tableschema["NUMERIC_SCALE"] != null)parm.scale = tableschema["NUMERIC_SCALE"];
 		}else{
 			if(v===null) v = "null";
-			if(this.base.useCommand && ori_value!==null){
-				name = "{"+this.parms.length+"}";
+			if(usecommand && ori_value!==null){
+				name = "{"+parms.length+"}";
 				values.push(name);
-				update.push(this.sp1+i+this.sp2+" = " + name);
-				this.parms.push(parseValAsPrm(v));
+				update.push(sp1 + i + sp2 + " = " + name);
+				parms.push(parseValAsPrm(v));
 			}else{
 				if(typeof ori_value == "string") v = ("'" + v.replace(/\'/igm,"''") + "'").replace(/\0/ig,"");
+				else if(typeof ori_value == "object") v =  toString.call(v);
 				values.push(v);
-				update.push(this.sp1+i+this.sp2+" = " + v);
+				update.push(sp1 + i + sp2 + " = " + v);
 			}
 		}
 	}

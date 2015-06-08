@@ -70,15 +70,6 @@ Driver.GetColumns = function(tablename){
 	}
 	return obj;
 };
-Driver.Max = function(k){
-	return this.query("select isnull(max(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;
-};
-Driver.Min = function(k){
-	return this.query("select isnull(min(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;
-};
-Driver.Sum = function(k){
-	return this.query("select isnull(sum(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;
-};
 Driver.initialize = function(Helper, Conn){
 	
 };
