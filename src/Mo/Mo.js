@@ -71,7 +71,7 @@ var F, JSON, require, VBS, View, Model__,
 				ExceptionManager.put(0x6300, "__LoadTemplate()", "template '" + template + "' is not exists.", E_NOTICE);
 				return "";
 			}
-			var tempStr = IO.file.readAllText(F.mappath(path), G.MO_CHARSET),
+			var tempStr = IO.file.readAllText(F.mappath(path)),
 				masterexp = new RegExp("^<extend file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "i"),
 				includeexp = new RegExp("<include file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "igm");
 
@@ -136,7 +136,7 @@ var F, JSON, require, VBS, View, Model__,
 			if (_LoadController._controllers.hasOwnProperty(ccname)) return _LoadController._controllers[ccname];
 			try {
 				path = F.mappath(path);
-				var ret = IO.file.readAllScript(path, G.MO_CHARSET);
+				var ret = IO.file.readAllScript(path);
 				if (G.MO_DEBUG) {
 					ret = ReCompileForDebug(ret);
 				}
@@ -162,7 +162,7 @@ var F, JSON, require, VBS, View, Model__,
 			if (!IO.file.exists(path)) path = F.mappath(G.MO_CORE + "Library/Assets/" + name + ".asp");
 			if (!IO.file.exists(path)) return false;
 
-			var ret = IO.file.readAllScript(path, G.MO_CHARSET);
+			var ret = IO.file.readAllScript(path);
 			ret = "var " + name + ";\r\n" + ret + "\r\n return " + name + ";";
 			try {
 				var _asset = (new Function("__filename", "__dirname", "M", "C", "L", ret))(
@@ -475,7 +475,7 @@ var F, JSON, require, VBS, View, Model__,
 
 			ExceptionManager.errorReporting(G.MO_ERROR_REPORTING);
 
-			if (G.MO_CHARSET != "utf-8") res.Charset = G.MO_CHARSET;
+			if (G.MO_CHARSET != "UTF-8") res.Charset = G.MO_CHARSET;
 			if (IO.file.exists(G.MO_APP + "Common/Function.asp")) _wapperfile(G.MO_APP + "Common/Function.asp");
 			if (G.MO_IMPORT_COMMON_FILES != "") {
 				var files = G.MO_IMPORT_COMMON_FILES.split(";"),
@@ -595,7 +595,7 @@ var F, JSON, require, VBS, View, Model__,
 						if (F.date.datediff("s", OldHash, new Date()) >= G.MO_COMPILE_CACHE_EXPIRED) usecache = false;
 					}
 					if (usecache) {
-						scripts = IO.file.readAllScript(cachepath, G.MO_CHARSET);
+						scripts = IO.file.readAllScript(cachepath);
 					}
 				}
 			}
@@ -608,7 +608,7 @@ var F, JSON, require, VBS, View, Model__,
 					return "";
 				}
 				scripts = View.compile(html);
-				if (G.MO_COMPILE_CACHE) IO.file.writeAllText(cachepath, "\u003cscript language=\"jscript\" runat=\"server\"\u003e\r\n" + scripts + "\r\n\u003c/script\u003e", G.MO_CHARSET);
+				if (G.MO_COMPILE_CACHE) IO.file.writeAllText(cachepath, "\u003cscript language=\"jscript\" runat=\"server\"\u003e\r\n" + scripts + "\r\n\u003c/script\u003e");
 			}
 			_runtime.timelines.compile = _runtime.ticks(_tag);
 			if (G.MO_DEBUG) {
@@ -627,7 +627,7 @@ var F, JSON, require, VBS, View, Model__,
 			var filename = cachepath;
 			if (G.MO_DEBUG) filename += ";compiled by [" + _ParseTemplatePath(template) + "." + G.MO_TEMPLATE_PERX + "], please check if there are syntax error in template or use variable(s) that not be defined."
 			content = wapper(_Assigns, filename, G.MO_DEBUG ? scripts : "", M.Buffer, 1024);
-			if (G.MO_CACHE && G.MO_CACHE_DIR != "" && IO.directory.exists(G.MO_CACHE_DIR)) IO.file.writeAllText(F.mappath(G.MO_CACHE_DIR + _CacheFileName + ".cache"), content, G.MO_CHARSET);
+			if (G.MO_CACHE && G.MO_CACHE_DIR != "" && IO.directory.exists(G.MO_CACHE_DIR)) IO.file.writeAllText(F.mappath(G.MO_CACHE_DIR + _CacheFileName + ".cache"), content);
 			_runtime.timelines.run1 = _runtime.ticks(_tag);
 			return content;
 		};
@@ -740,7 +740,7 @@ var F, JSON, require, VBS, View, Model__,
 			if (G.MO_CACHE) {
 				_CacheFileName = MD5(F.server("URL") + F.get.toURIString() + "");
 				if (IO.file.exists(G.MO_CACHE_DIR + _CacheFileName + ".cache")) {
-					res.Write(IO.file.readAllText(F.mappath(G.MO_CACHE_DIR + _CacheFileName + ".cache"), G.MO_CHARSET));
+					res.Write(IO.file.readAllText(F.mappath(G.MO_CACHE_DIR + _CacheFileName + ".cache")));
 					return;
 				}
 			}
@@ -829,11 +829,11 @@ var F, JSON, require, VBS, View, Model__,
 		};
 		M.ModelCacheSave = function(name, content) {
 			if (name == "") return false;
-			return IO.file.writeAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"), content, G.MO_CHARSET);
+			return IO.file.writeAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"), content);
 		};
 		M.ModelCacheLoad = function(name) {
 			if (name == "") return "";
-			return IO.file.readAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"), G.MO_CHARSET);
+			return IO.file.readAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"));
 		};
 		M.ModelCacheDelete = function(name) {
 			if (name == "") return false;
@@ -897,7 +897,8 @@ var F, JSON, require, VBS, View, Model__,
 		"Encoding": ["encodeURIComponent", "encodeURI", "decodeURI", "getEncoding", "encoding"],
 		"Crc32": [null, "assets/crc32.js"],
 		"Safecode": [null, "Safecode@safecode"],
-		"BmpImage": [null, "BmpImage@safecode"]
+		"BmpImage": [null, "BmpImage@safecode"],
+		"HashTable": [null, "assets/hashtable.js"]
 	};
 	for (var lib in loaddelay) {
 		if (!loaddelay.hasOwnProperty(lib)) continue;
