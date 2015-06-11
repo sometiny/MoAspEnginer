@@ -299,11 +299,10 @@ var F, JSON, require, VBS, View, Model__,
 				), E_INFO
 			);
 			if (Model__ && Model__.debug) Model__.debug();
-			if (G.MO_DEBUG2FILE || G.MO_DEBUG_MODE == "FILE") {
-				if (G.MO_DEBUG_FILE) {
-					ExceptionManager.debug2file(G.MO_DEBUG_FILE);
-				}
-			} else if (G.MO_DEBUG_MODE == "SESSION") {
+			var mode = G.MO_DEBUG_MODE;
+			if (mode == "FILE" && G.MO_DEBUG_FILE) {
+				ExceptionManager.debug2file(G.MO_DEBUG_FILE);
+			} else if (mode == "SESSION" || mode == "APPLICATION") {
 				ExceptionManager.debug2session();
 			} else {
 				if (String(req.ServerVariables("HTTP_X_REQUESTED_WITH")).toLowerCase() == "xmlhttprequest") {
@@ -1003,6 +1002,7 @@ var MEM = ExceptionManager = (function() {
 		if (typeof e[e.length - 1] == "number") {
 			f = e.pop()
 		}
+		if(!(f & d)) return;
 		if (e.length == 1) {
 			if (e[0].constructor == Exception) {
 				c.push(e[0])
@@ -1078,7 +1078,9 @@ var MEM = ExceptionManager = (function() {
 	b.debug2session = function() {
 		var g = [],
 			_len = c.length,
-			key = "MO_DEBUGS_CACHE";
+			key = "MO_DEBUGS_CACHE",
+			mode = Mo.Config.Global.MO_DEBUG_MODE,
+			store = mode == "SESSION" ? Session : Application;
 		if (_len == 0);
 		for (var f = 0; f < _len; f++) {
 			var e = c[f];
@@ -1099,7 +1101,8 @@ var MEM = ExceptionManager = (function() {
 		}
 		if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
 		if (g.length > 0) {
-			var debugs = Session(key),
+			if(mode == "APPLICATION") Application.Lock();
+			var debugs = store(key),
 				data;
 			if (debugs) {
 				debugs = debugs.substr(0, debugs.length - 1) + "," + JSON.stringify(g).substr(1);
@@ -1108,18 +1111,21 @@ var MEM = ExceptionManager = (function() {
 					while (data.length > 50) data.shift();
 					debugs = JSON.stringify(data);
 				}
-				Session(key) = debugs;
+				store(key) = debugs;
 			} else {
-				Session(key) = JSON.stringify(g);
+				store(key) = JSON.stringify(g);
 			}
+			if(mode == "APPLICATION") Application.UnLock();
 		}
 	};
 	b.fromSession = function() {
 		d = 0;
-		var key = "MO_DEBUGS_CACHE";
+		var key = "MO_DEBUGS_CACHE", mode = Mo.Config.Global.MO_DEBUG_MODE, store = mode == "SESSION" ? Session : Application;
 		if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
-		var debugs = Session(key);
-		Session.Contents.Remove(key);
+		if(mode == "APPLICATION") Application.Lock();
+		var debugs = store(key);
+		store.Contents.Remove(key);
+		if(mode == "APPLICATION") Application.UnLock();
 		if (!debugs) return "[]";
 		return debugs;
 	};
