@@ -707,7 +707,7 @@ var F, JSON, require, VBS, View, Model__,
 		M.C.SaveAs = function(conf, data) {
 			if (!data) return;
 			var filepath = F.mappath(G.MO_APP + "Conf/" + conf + ".asp");
-			IO.file.writeAllText(filepath, "\u003cscript language=\"jscript\" runat=\"server\"\u003e\r\nreturn " + JSON.stringify(data) + ";\r\n\u003c/script\u003e", "utf-8");
+			IO.file.writeAllText(filepath, "\u003cscript language=\"jscript\" runat=\"server\"\u003e\r\nreturn ({\r\n  \"__conf__\" : " + JSON.stringify(data) + "\r\n})['__conf__'];\r\n\u003c/script\u003e", "utf-8");
 		};
 		M.C.Exists = function(conf) {
 			return IO.file.exists(G.MO_APP + "Conf/" + conf + ".asp");

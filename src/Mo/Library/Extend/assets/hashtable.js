@@ -85,17 +85,12 @@ function HashTable(encoding){
 			hash[key] = table.length;
 			table.push({k: key, v:value});
 		}else{
-			if(index==0){
-				table.unshift({k: key, v:value});
-				rebuildhash();
-			}else{
-				var ends = table.splice(index, table.length-index);
-				table = table.concat({k: key, v:value}).concat(ends);
-				rebuildhash();
-			}
+			table.splice(index, 0, {k: key, v:value});
+			rebuildhash();
 		}
 		return ht;
 	};
+	ht.hash = function(){return hash;};
 	ht.sort = function(isasc, byvalue){
 		var k = byvalue===true ? "v" : "k";
 		table.sort(new Function("a", "b", "var ak = a." + k + ", bk = b." + k + ";return ak " + (isasc===false ? "<" : ">") + " bk ? 1 : (ak == bk ? 0 : -1);"));
