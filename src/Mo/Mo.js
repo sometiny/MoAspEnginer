@@ -898,7 +898,8 @@ var F, JSON, require, VBS, View, Model__,
 		"Crc32": [null, "assets/crc32.js"],
 		"Safecode": [null, "Safecode@safecode"],
 		"BmpImage": [null, "BmpImage@safecode"],
-		"HashTable": [null, "assets/hashtable.js"]
+		"HashTable": [null, "assets/hashtable.js"],
+		"MCM": [null, "assets/configmanager.js"]
 	};
 	for (var lib in loaddelay) {
 		if (!loaddelay.hasOwnProperty(lib)) continue;
