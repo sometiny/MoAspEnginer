@@ -1,0 +1,26 @@
+﻿{
+	"name" : "net",
+	"version" : "1.0.3",
+	"description" : "提供基于HTTP协议的普通请求、文件上传、SOAP请求的实现。同时提供对处理客户端上传文件的支持，对Jmail的支持。",
+	"keywords" : ["net","http","SOAP","Jmail","文件上传"],
+	"homepage" : "http://mpi.thinkasp.cn/?/mpi/package/info/net",
+	"bugs" : {
+		"url" : "http://mpi.thinkasp.cn/?/mpi/package/info/net",
+		"email" : "zhanghuiguoanlige@126.com"
+	},
+	"license" : "GPLv3",
+	"author" : 
+	{
+		"name" : "anlige",
+		"email" : "zhanghuiguoanlige@126.com",
+		"url" : "http://m.thinkasp.cn/"
+	},
+	"files" : [
+		"index.js",
+		"mail.js",
+		"upload.js",
+		"upload.vbs",
+		"http/*"
+	],
+	"main" : "net"
+}

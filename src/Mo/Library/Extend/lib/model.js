@@ -248,12 +248,13 @@ function __Model__(tablename,pk,cfg,tablePrex){
 			Mo.C.SaveAs(schemaname, schema);
 		}
 	}
-	this.sp1 = this.base.splitChars[0];
-	this.sp2 = this.base.splitChars[1];
+	var sp1 = this.sp1 = this.base.splitChars[0];
+	var sp2 = this.sp2 = this.base.splitChars[1];
+	
 	if(this.type == "MSSQL"){
-		this.table = this.sp1 + this.base.cfg["DB_Name"] +this.sp2 + "." + this.sp1 + (this.base.cfg["DB_Owner"] || "dbo") +this.sp2 + "." + this.sp1 + this.table+this.sp2;
+		this.table = sp1 + this.base.cfg["DB_Name"] +sp2 + "." + sp1 + (this.base.cfg["DB_Owner"] || "dbo") +sp2 + "." + sp1 + this.table + sp2;
 	}else{
-		this.table = this.sp1 + this.table+this.sp2;
+		this.table = sp1 + this.table+sp2;
 	}
 	this.connection = this.base.base;
 	this.parms = [];
@@ -417,9 +418,9 @@ __Model__.prototype.join = function(table,jointype){
 	var type = (jointype || "inner").replace(" join",""),
 		indx = table.indexOf(" ");
 	if(indx > 0){
-		this.strjoin += " " + type + " join " + this.sp1 + this.tablePrex + table.substr(0, indx) + this.sp2 +" "+table.substr(indx + 1);
+		this.strjoin += " " + type + " join " + parse_table_name(table.substr(0, indx), this.tablePrex, this.sp1, this.sp2) +" "+table.substr(indx + 1);
 	}else{
-		this.strjoin += " " + type + " join "  + this.sp1 + this.tablePrex + table + this.sp2;
+		this.strjoin += " " + type + " join "  + parse_table_name(table, this.tablePrex, this.sp1, this.sp2);
 	}
 	this.joinlevel += "(";
 	return this;
@@ -782,6 +783,15 @@ function parseValAsPrm(arg){
 	if(type == "string") return {'type' : VARCHAR, 'value' : arg, 'size' : arg.length, 'subtype' : 'string'};
 	if(type == "object"){ arg.subtype = typeof arg.value; return arg;}
 	return parm;
+}
+function parse_table_name(name, prex, sp1, sp2){
+	if(name.indexOf(".")<0) return sp1 + prex + name + sp2;
+	
+	var names = name.split("."), table = names.pop(), len_ = names.length;
+	for(var i=0;i<len_;i++){
+		names[i] = sp1 + names[i] + sp2;
+	}
+	return names.join(".") + "." + sp1 + prex + table + sp2;
 }
 Mo.addEventListener("ondispose", Model__.dispose);
 exports.Model__ = Model__;

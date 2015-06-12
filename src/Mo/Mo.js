@@ -882,7 +882,6 @@ var F, JSON, require, VBS, View, Model__,
 		"Mpi": ["downloadAndInstall", "Host", "setDefaultInstallDirectory", "download", "fetchPackagesList", "fetchPackage", "packageExists", "install", "assets/mpi.js"],
 		"Tar": [null, "setNames", "packFolder", "packFile", "unpack", "assets/tar.js"],
 		"md5=MD5": [null, "md5@assets/md5.js"],
-		"md5_bytes=MD5Bytes": [null, "md5_bytes@assets/md5.js"],
 		"HMACMD5": [null, "HMACMD5@assets/md5.js"],
 		"SHA1": [null, "SHA1@assets/sha1.js"],
 		"HMACSHA1": [null, "HMACSHA1@assets/sha1.js"],
@@ -895,10 +894,13 @@ var F, JSON, require, VBS, View, Model__,
 		"Hex": ["parse", "stringify", "hex@encoding"],
 		"Encoding": ["encodeURIComponent", "encodeURI", "decodeURI", "getEncoding", "encoding"],
 		"Crc32": [null, "assets/crc32.js"],
-		"Safecode": [null, "Safecode@safecode"],
-		"BmpImage": [null, "BmpImage@safecode"],
+		"Safecode": [null, "Safecode@safecode"], "BmpImage": [null, "BmpImage@safecode"],
 		"HashTable": [null, "assets/hashtable.js"],
-		"MCM": [null, "assets/configmanager.js"]
+		"MCM": [null, "assets/configmanager.js"],
+		"Punycode" : ["toIDN", "fromIDN", "encode", "decode", "./punycode/index.js"],
+		"HttpRequest" : [null,"net/http/request.js"], "HttpUpload" : [null,"net/http/upload.js"], "WinHttp" : [null,"get", "getJson", "post", "postJson", "save", "net/http/winhttp.js"],
+		"SOAPClient" : [null,"net/http/soap.js"], "Net" : ["IpToLong","LongToIp","InSameNetWork","IsIP","net"], "Upload" : [null,"accept", "net/upload.js"],
+		"Jmail" : [null,"net/mail.js"], "QRCode" : [null,"./qrcode/index.js"]
 	};
 	for (var lib in loaddelay) {
 		if (!loaddelay.hasOwnProperty(lib)) continue;

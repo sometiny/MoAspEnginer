@@ -5,13 +5,11 @@ SafeCodeController.extend("Index",function(){
 });
 SafeCodeController.extend("Normal",function(){
 	ExceptionManager.errorReporting(E_ERROR);
-	var code = require("safecode");
-	code("test");
+	Safecode("test");
 });
 SafeCodeController.extend("Complex",function(){
 	ExceptionManager.errorReporting(E_ERROR);
-	var code = require("safecode");
-	code("test", {
+	Safecode("test", {
 		length:8, /*验证码长度*/
 		odd:3, /*噪点数*/
 		padding:5 /*内边距*/

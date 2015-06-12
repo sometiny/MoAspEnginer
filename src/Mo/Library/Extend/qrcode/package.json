@@ -1,0 +1,25 @@
+﻿{
+	"name" : "qrcode",
+	"version" : "1.0.0",
+	"description" : "在线生成二维码，由jQuery二维码插件改造。",
+	"keywords" : ["qrcode"],
+	"homepage" : "http://mpi.thinkasp.cn/?/mpi/package/info/qrcode",
+	"bugs" : {
+		"url" : "http://mpi.thinkasp.cn/?/mpi/package/info/qrcode",
+		"email" : "zhanghuiguoanlige@126.com"
+	},
+	"license" : "GPLv3",
+	"author" : 
+	{
+		"name" : "anlige",
+		"email" : "zhanghuiguoanlige@126.com",
+		"url" : "http://m.thinkasp.cn/"
+	},
+	"files" : [
+		"index.js"
+	],
+	"main" : "qrcode",
+	"dependencies" : {
+		"encoding" : "1.0.0.0"
+	}
+}
