@@ -10,7 +10,19 @@ var
 		defaultConfig[name.toUpperCase()] = value;
 	},
 	__events__ = {
-		"ondispose": []
+		"ondispose": [],
+		"oninited":[]
+	},
+	__invoke_event__ = function(eventname){
+		var events = __events__[eventname],
+			_len, event;
+		if (events) {
+			_len = events.length;
+			for (var i = 0; i < _len; i++) {
+				event = events[i];
+				if (event) event.call(Mo);
+			}
+		}		
 	};
 var F, JSON, require, VBS, View, Model__,
 	req = Request,
@@ -487,20 +499,13 @@ var F, JSON, require, VBS, View, Model__,
 			}
 			_lib("MO_PRE_LIB");
 			M.assign("VERSION", M.Version);
+			__invoke_event__("oninited");
 			return true;
 		};
 		M.Terminate = function() {
 			var _tag = _runtime.run();
 			_lib("MO_END_LIB");
-			var events = __events__["ondispose"],
-				_len, event;
-			if (events) {
-				_len = events.length;
-				for (var i = 0; i < _len; i++) {
-					event = events[i];
-					if (event) event.call(M);
-				}
-			}
+			__invoke_event__("ondispose");
 			_runtime.timelines.terminate = _runtime.ticks(_tag);
 			_debug();
 			_Assigns = null;
@@ -657,14 +662,16 @@ var F, JSON, require, VBS, View, Model__,
 				url += "/" + F.object.toURIString(parms);
 				F.object.toURIString.split_char_1 = "=";
 				F.object.toURIString.split_char_2 = "&";
-				if (ext) url += "." + ext;
+				ext = ext || G.MO_ROUTE_URL_EXT;
+				if (ext) ext = "." + ext;
 			} else {
 				url += "&" + F.object.toURIString(parms);
+				ext = "";
 			}
 			if (F.string.endsWith(url, "/") || F.string.endsWith(url, "&")) url = url.substr(0, url.length - 1);
 			if (anchor != "") url += "#" + anchor;
 			F.object.toURIString.fn = 1;
-			return url;
+			return url + ext;
 		};
 		M.L = function(key) {
 			if (!G.MO_LANGUAGE) {
@@ -871,33 +878,22 @@ var F, JSON, require, VBS, View, Model__,
 	var loaddelay = {
 		"base64=Base64": ["e", "d", "encode", "decode", "toBinary", "fromBinary", "setNames", "base64"],
 		"JSON": ["parse", "stringify", "create", "decodeStrict", "encodeUnicode", "assets/json.js"],
-		"IController": ["create", "IController@lib/dist.js"],
-		"IClass": ["create", "IClass@lib/dist.js"],
-		"dump": [null, "dump"],
-		"cookie=Cookie": [null, "assets/cookie.js"],
+		"IController": ["create", "IController@lib/dist.js"], "IClass": ["create", "IClass@lib/dist.js"],
+		"dump": [null, "dump"], "cookie=Cookie": [null, "assets/cookie.js"],
 		"Model__": [null, "cmd", "useCommand", "Debug", "setDefault", "setDefaultPK", "begin", "commit", "rollback", "getConnection", "dispose", "connect", "execute", "executeQuery", "Model__@lib/model.js"],
-		"DataTable": [null, "Model__.helper.DataTable@lib/model.js"],
-		"DataTableRow": [null, "Model__.helper.DataTableRow@lib/model.js"],
+		"DataTable": [null, "Model__.helper.DataTable@lib/model.js"], "DataTableRow": [null, "Model__.helper.DataTableRow@lib/model.js"],
 		"VBS": ["ns", "include", "eval", "require", "getref", "execute", "run", "assets/vbs.js"],
 		"Mpi": ["downloadAndInstall", "Host", "setDefaultInstallDirectory", "download", "fetchPackagesList", "fetchPackage", "packageExists", "install", "assets/mpi.js"],
 		"Tar": [null, "setNames", "packFolder", "packFile", "unpack", "assets/tar.js"],
-		"md5=MD5": [null, "md5@assets/md5.js"],
-		"HMACMD5": [null, "HMACMD5@assets/md5.js"],
-		"SHA1": [null, "SHA1@assets/sha1.js"],
-		"HMACSHA1": [null, "HMACSHA1@assets/sha1.js"],
-		"SHA256": [null, "SHA256@assets/sha256.js"],
-		"HMACSHA256": [null, "HMACSHA256@assets/sha256.js"],
+		"md5=MD5": [null, "md5@assets/md5.js"], "HMACMD5": [null, "HMACMD5@assets/md5.js"], 
+		"SHA1": [null, "SHA1@assets/sha1.js"], "HMACSHA1": [null, "HMACSHA1@assets/sha1.js"], "SHA256": [null, "SHA256@assets/sha256.js"], "HMACSHA256": [null, "HMACSHA256@assets/sha256.js"],
 		"Html": ["ActionLink", "Form", "FormUpload", "FormEnd", "CheckBox", "DropDownList", "ListBox", "Hidden", "Password", "RadioButton", "TextArea", "TextBox", "assets/htmlhelper.js"],
 		"Utf8": ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "utf8@encoding"],
 		"GBK": ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "gbk@encoding"],
 		"Unicode": ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "unicode@encoding"],
-		"Hex": ["parse", "stringify", "hex@encoding"],
-		"Encoding": ["encodeURIComponent", "encodeURI", "decodeURI", "getEncoding", "encoding"],
-		"Crc32": [null, "assets/crc32.js"],
-		"Safecode": [null, "Safecode@safecode"], "BmpImage": [null, "BmpImage@safecode"],
-		"HashTable": [null, "assets/hashtable.js"],
-		"MCM": [null, "assets/configmanager.js"],
-		"Punycode" : ["toIDN", "fromIDN", "encode", "decode", "./punycode/index.js"],
+		"Hex": ["parse", "stringify", "hex@encoding"],"Encoding": ["encodeURIComponent", "encodeURI", "decodeURI", "getEncoding", "encoding"],
+		"Crc32": [null, "assets/crc32.js"], "Safecode": [null, "Safecode@safecode"], "BmpImage": [null, "BmpImage@safecode"],
+		"HashTable": [null, "assets/hashtable.js"],"MCM": [null, "assets/configmanager.js"], "Punycode" : ["toIDN", "fromIDN", "encode", "decode", "./punycode/index.js"],
 		"HttpRequest" : [null,"net/http/request.js"], "HttpUpload" : [null,"net/http/upload.js"], "WinHttp" : [null,"get", "getJson", "post", "postJson", "save", "net/http/winhttp.js"],
 		"SOAPClient" : [null,"net/http/soap.js"], "Net" : ["IpToLong","LongToIp","InSameNetWork","IsIP","net"], "Upload" : [null,"accept", "net/upload.js"],
 		"Jmail" : [null,"net/mail.js"], "QRCode" : [null,"./qrcode/index.js"]
