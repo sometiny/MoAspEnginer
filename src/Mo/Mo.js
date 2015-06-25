@@ -20,7 +20,9 @@ var
 			_len = events.length;
 			for (var i = 0; i < _len; i++) {
 				event = events[i];
-				if (event) event.call(Mo);
+				if (event) {
+					if(event.call(Mo)===false) break;
+				}
 			}
 		}		
 	};
@@ -516,6 +518,7 @@ var F, JSON, require, VBS, View, Model__,
 		function _parseRouteTo(url) {
 			var mat = /^(.+?)(\?(.+))?$/.exec(url);
 			if (mat) {
+				F.get.clear();
 				var gma = _RightCopy(["", "", ""], mat[1].split("/"));
 				F.get(G.MO_GROUP_CHAR, gma[0]);
 				F.get(G.MO_METHOD_CHAR, gma[1]);
