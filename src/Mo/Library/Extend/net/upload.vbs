@@ -259,13 +259,7 @@ class upload
 		set Save = File
 	end function
 	
-	public function GetBinary(byval Name)
-		dim File
-		set File = Files(Name)
-		if not File.IsFile then
-			GetBinary = chrb(0)
-			exit function
-		end if
+	public function GetBinary(File)
 		StreamT.Position = File.Position
 		GetBinary = StreamT.read(File.Size)
 	end function 
