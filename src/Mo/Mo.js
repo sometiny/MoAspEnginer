@@ -899,7 +899,7 @@ var F, JSON, require, VBS, View, Model__,
 		"HashTable": [null, "assets/hashtable.js"],"MCM": [null, "assets/configmanager.js"], "Punycode" : ["toIDN", "fromIDN", "encode", "decode", "./punycode/index.js"],
 		"HttpRequest" : [null,"net/http/request.js"], "HttpUpload" : [null,"net/http/upload.js"], "WinHttp" : [null,"get", "getJson", "post", "postJson", "save", "net/http/winhttp.js"],
 		"SOAPClient" : [null,"net/http/soap.js"], "Net" : ["IpToLong","LongToIp","InSameNetWork","IsIP","net"], "Upload" : [null,"accept", "net/upload.js"],
-		"Jmail" : [null,"net/mail.js"], "QRCode" : [null,"./qrcode/index.js"]
+		"Jmail" : [null,"net/mail.js"], "QRCode" : [null,"./qrcode/index.js"], "Marked" : [null, "options", "./assets/marked.js"]
 	};
 	for (var lib in loaddelay) {
 		if (!loaddelay.hasOwnProperty(lib)) continue;
@@ -908,7 +908,7 @@ var F, JSON, require, VBS, View, Model__,
 			index = module.indexOf("@"),
 			exports = "",
 			cname = "",
-			index2 = lib.indexOf("=");
+			index2 = lib.indexOf("="), method="";
 		if (index > 0) {
 			exports = "." + module.substr(0, index);
 			module = module.substr(index + 1);
@@ -920,7 +920,7 @@ var F, JSON, require, VBS, View, Model__,
 		}
 		var _len = library.length;
 		for (var i = 0; i < _len; i++) {
-			var method = "." + library[i];
+			method = "." + library[i];
 			if (library[i] == null) method = "";
 			(new Function(lib + method + " = function(){" + lib + " = require(\"" + module + "\")" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};"))();
 		}
