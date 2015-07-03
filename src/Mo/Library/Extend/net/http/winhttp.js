@@ -131,7 +131,7 @@ $httprequest.fn.setTimeouts = function() {
 $httprequest.fn.send = function(fn) {
 	this.init();
 	if (typeof fn == "function") fn.call(this);
-	this.base = getXmlHttpRequestObject();
+	this.base = this.base || getXmlHttpRequestObject();
 	if (this.base == null) {
 		this.exception += "can not create winhttp object.";
 		return this;
@@ -201,6 +201,34 @@ $httprequest.fn.send = function(fn) {
 	}
 	return this;
 }
+$httprequest.fn.options = function(name, value) {
+	if(value===undefined) return this.$g[name];
+	this.$g[name] = value;
+};
+$httprequest.fn.next = function(url, options) {
+	var http = new $httprequest(url || this.url, options);
+	if(options===true) http.$g = this.$g;
+	http.base = this.base;
+	this.dispose();
+	return http;
+};
+$httprequest.fn.next_send = function(data) {
+	try {
+		this.base.Send(data);
+		this.sended = true;
+		this.readyState = 4;
+		this.status = parseInt(this.base.Status);
+		this.statusText = this.base.StatusText;
+		this.content = this.base.ResponseBody;
+	} catch (ex) {
+		this.sended = true;
+		this.exception += ex.description;
+	}
+};
+$httprequest.fn.dispose = function() {
+	this.base = null;
+	this.$g = null;
+};
 $httprequest.fn.save = function(filepath) {
 	if (!this.sended) this.send();
 	if(this.content==null)return this;
@@ -246,7 +274,7 @@ $httprequest.fn.getHeader = function(key) {
 	if (!this.sended) this.send();
 	if (this.readyState != 4) return null;
 	if (key) {
-		var headers = (this.headers || (this.headers = this.base.getAllResponseHeaders())).split("\r\n"),
+		var headers = this.base.getAllResponseHeaders().split("\r\n"),
 			result = [];
 		for(var i=0;i<headers.length;i++){
 			var header = headers[i] ,position = header.indexOf(":");
@@ -257,7 +285,7 @@ $httprequest.fn.getHeader = function(key) {
 		}
 		return result;
 	} else {
-		return this.headers || (this.headers = this.base.getAllResponseHeaders());
+		return this.base.getAllResponseHeaders();
 	}
 };
 

@@ -25,8 +25,7 @@ var
 				}
 			}
 		}		
-	};
-var F, JSON, require, VBS, View, Model__,
+	},F, require, View,
 	req = Request,
 	res = Response,
 	ROOT = Server.Mappath("/"),

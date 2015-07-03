@@ -201,12 +201,7 @@ class upload
 	end function
 	
 	private function CheckEntryType()
-		dim ContentType, ctArray, bArray,RequestMethod
-		RequestMethod=trim(LCase(Request.ServerVariables("REQUEST_METHOD")))
-		if RequestMethod<>"post" then
-			CheckEntryType = False
-			exit function
-		end if
+		dim ContentType, ctArray
 		ContentType = LCase(Request.ServerVariables("HTTP_CONTENT_TYPE"))
 		if ContentType="" then ContentType = LCase(Request.ServerVariables("CONTENT_TYPE"))
 		ctArray = Split(ContentType, ";")
