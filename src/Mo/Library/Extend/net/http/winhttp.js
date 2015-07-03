@@ -99,8 +99,7 @@ $httprequest.fn.init = function() {
 		this.$g.headers.push("If-Modified-Since:0");
 		this.$g.headers.push("Cache-Control:no-cache");
 	}
-	if (this.$g.method == "POST") this.$g.headers.push("Content-Type:application/x-www-form-urlencoded; charset=" + (this.charset || "utf-8"));
-	if (!this.$g.charset || this.$g.charset == "") this.$g.charset = "utf-8";
+	if (!this.$g.charset) this.$g.charset = "utf-8";
 };
 
 $httprequest.fn.setOptions = function(option, value) {
@@ -150,7 +149,6 @@ $httprequest.fn.send = function(fn) {
 	} catch (ex) {this.warning="there has some errors when set options(" + ex.description + ").";}
 
 	try {
-		var endchr = ((this.url.indexOf("?") < 0) ? "?" : "&");
 		if(!isNullOrEmpty(this.$g.data)){
 			if(typeof this.$g.data == "object"){
 				var d_ = "",fn = (this.$g.charset.toLowerCase()=="utf-8"?encodeURIComponent:escape);
@@ -161,7 +159,8 @@ $httprequest.fn.send = function(fn) {
 				if(d_!="")d_=d_.substr(0,d_.length-1);
 				this.$g.data = d_;
 			}
-			if (this.$g.method == "GET") this.url += endchr + this.$g.data;
+			this.$g.headers.push("Content-Length:" + this.$g.data.length);
+			this.$g.headers.push("Content-Type:application/x-www-form-urlencoded; charset=" + (this.charset || "utf-8"));
 		}
 		if(!(isNullOrEmpty(this.$g.username) || isNullOrEmpty(this.$g.password))){
 			this.base.SetCredentials(this.$g.username,this.$g.password, 0);

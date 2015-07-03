@@ -63,6 +63,11 @@ Module.prototype.compile = function(){
 		content = ReCompileForDebug(content,-1,1);
 		candebug = true;
 	}
+	if(Module.mode == "compile"){
+		Module.result += '"' + this.id + '":function(){var module = {exports:{}};var retvalue = (function(exports,require,module,__filename,__dirname,define, __scripts){'+
+		content
+		+'})(module.exports, _require , module, "' + this.filename.replace(/\\/g, "\\\\") + '", "' + IO.parent(this.filename).replace(/\\/g, "\\\\") + '", null, null);if(retvalue!==undefined) module.exports = retvalue ;return module.exports;},'
+	}
 	return wapper(content).apply(self.exports, [self.exports, require, self, this.filename, IO.parent(this.filename), define, candebug ? content:""]);
 };
 Module.prototype.loadpaths = function(){
@@ -126,6 +131,8 @@ Module._load = function(name, parent, aspfile, callback){
 Module.ROOT=ROOT;
 Module._cache = {};
 Module._pathes=[];
+Module.mode="normal";
+Module.result="";
 function require(name, arg1, arg2){
 	if(typeof arg1== "function"){
 		arg2 = arg1;
@@ -133,5 +140,16 @@ function require(name, arg1, arg2){
 	};
 	return Module._load(name, null, !!arg1, arg2);
 };
+require.use = function(){
+	Array.prototype.push.apply(Module._pathes, arguments);
+};
 require.module = Module;
+require.get_result = function(){
+	var result = Module.result;
+	if(result){
+		result = result.substr(0,result.length-1);
+		return "module.exports = (function(){var _require = function(name){ return _exports[name];};var _exports = {" + result + "};return function(name){ return _require(name)();};})();";
+	}
+	return "";
+};
 module.exports = require;

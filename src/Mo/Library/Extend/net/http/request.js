@@ -60,73 +60,76 @@ function $httprequest(url, method, data, autoClearBuffer) {
 	}
 	$g.method = $g.method || "GET";
 	$g.data = $g.data || "";
-	$g.autoClearBuffer = $g.autoClearBuffer || false;
-	if ($g.method == "") $g.method = "GET";
-	$g.method = $g.method.toUpperCase();
-	if ($g.method == "POST") $g.autoClearBuffer = false;
 	this.timeout = $g.timeout;
 	this.istimeout = false;
 	this.sended = false;
-	this.method = $g.method;
+	this.method = $g.method.toUpperCase();
 	this.url = url;
 	this.data = $g.data;
-	this.charset = $g.charset;
+	this.charset = $g.charset || "utf-8";
 	this.base = null;
 	this.headers = $g.headers;
 	this.status = 0;
 	this.readyState = 0;
 	this.content = null;
 	this.msg = "";
-	this.autoClearBuffer = $g.autoClearBuffer;
+	this.autoClearBuffer = $g.autoClearBuffer === true;
 	this.response = null;
-	this.dataset = {
-		charset: "utf-8",
-		data: [],
-		append: function(key, value, noencode) {
-			var fn = null;
-			if (this.charset.toLowerCase() == "utf-8") {
-				fn = function(_str) {
-					return encodeURIComponent(_str).replace(/\+/igm, "%2B").replace(/\//igm, "%2F");
-				};
-			} else {
-				fn = function(_str) {
-					return escape(_str).replace(/\+/igm, "%2B").replace(/\//igm, "%2F");
-				};
+	this.dataset = (function(cs){
+		var _data = [];
+		var fn1 = function(_str) {return escape(_str).replace(/\+/igm, "%2B").replace(/\//igm, "%2F");}, fn2 = function(_str) {return _str;}, fn;
+		if (cs == "UTF-8") fn1 = function(_str) {return encodeURIComponent(_str).replace(/\+/igm, "%2B").replace(/\//igm, "%2F");};
+		fn = fn1;
+		function _ds(){
+			
+		}
+		_ds.encode = function(ee){
+			if(ee===false){
+				fn = fn2;
+			}else{
+				fn = fn1
 			}
-			if (noencode == true) {
-				fn = function(_str) {
-					return _str;
-				}
-			}
-			this.data.push({
+		};
+		_ds.append = function(key, value){
+			_data.push({
 				"key": fn(key),
 				"value": fn(value)
-			});
-		},
-		remove: function(key) {
-			if (this.data.length <= 0) return false;
-			var _data = [];
-			for (var i = 0; i < this.data.length; i++) {
-				if (this.data[i].key != key) {
-					1
-					_data.push(this.data[i]);
-				}
-			}
-			this.data = _data;
-		},
-		isexists: function(key) {
-			if (this.data.length <= 0) return false;
-			for (var i = 0; i < this.data.length; i++) {
-				if (this.data[i].key == key) {
+			});			
+		};
+		_ds.isexists = function(key){
+			var _len = _data.length;
+			if (_len <= 0) return false;
+			for (var i = 0; i < _len; i++) {
+				if (_data[i].key == key) {
 					return true;
 				}
 			}
-			return false;
-		},
-		clear: function() {
-			this.dataset.data = [];
-		}
-	};
+			return false;			
+		};
+		_ds.remove = function(key){
+			var _len = _data.length;
+			if (_len <= 0) return false;
+			for (var i = _len-1; i >=0; i--) {
+				if (_data[i].key == key) {
+					_data.splice(i, 1);
+				}
+			}		
+		};
+		_ds.clear = function(){
+			_data = [];	
+		};
+		_ds.toString = function(){
+			var _len = _data.length, result = "";
+			if (_len <= 0) return "";
+			for (var i = 0; i < _len; i++) {
+				result += _data[i].key + "=" + _data[i].value + "&";
+			}
+			if(result) result = result.slice(0, -1);
+			return result;
+		};
+		return _ds;
+	})(this.charset);
+	
 	if(typeof this.data == "object")
 	{
 		for(var k in this.data)
@@ -134,7 +137,8 @@ function $httprequest(url, method, data, autoClearBuffer) {
 			if(!this.data.hasOwnProperty(k))continue;
 			this.dataset.append(k,this.data[k]);
 		}
-		this.data="";
+		this.data = this.dataset.toString();
+		this.dataset.clear();
 	}
 }
 $httprequest.create = function(url, method, data, autoClearBuffer)
@@ -249,28 +253,22 @@ $httprequest.getResources = function(url, opt )
 $httprequest.fn = $httprequest.prototype;
 
 $httprequest.fn.init = function() {
-	var datasetstr = "";
+	var datasetstr = this.dataset.toString();
 	this.response = null;
-	if (this.dataset.data.length > 0) {
-		for (var i = 0; i < this.dataset.data.length; i++) {
-			datasetstr += this.dataset.data[i].key + "=" + this.dataset.data[i].value + "&";
-		}
-	}
-	if (datasetstr != "") datasetstr = datasetstr.substr(0, datasetstr.length - 1);
-	if (this.data == "") {
+	if (!this.data) {
 		this.data = datasetstr;
 	} else {
 		if (datasetstr != "") this.data += "&" + datasetstr;
 	}
 	if (this.data == "") this.data = null;
-	var sChar = ((this.url.indexOf("?") < 0) ? "?" : "&");
-	if (this.data != null && this.method == "GET") this.url += sChar + this.data;
 	if (this.method == "GET" && this.autoClearBuffer) {
 		this.headers.push("If-Modified-Since:0");
 		this.headers.push("Cache-Control:no-cache");
 	}
-	if (this.method == "POST") this.headers.push("Content-Type:application/x-www-form-urlencoded; charset=" + (this.charset || "utf-8"));
-	if (!this.charset || this.charset == "") this.charset = "utf-8";
+	if (this.data!=null){
+		this.headers.push("Content-Length:" + this.data.length);
+		this.headers.push("Content-Type:application/x-www-form-urlencoded; charset=" + (this.charset || "UTF-8"));
+	}
 };
 
 $httprequest.fn.header = function(headstr) {
@@ -305,9 +303,7 @@ $httprequest.fn.send = function(fn) {
 	if (this.headers.length > 0) {
 		for (var i = 0; i < this.headers.length; i++) {
 			var Sindex = this.headers[i].indexOf(":");
-			var key = this.headers[i].substr(0, Sindex);
-			var value = this.headers[i].substr(Sindex + 1);
-			this.base.setRequestHeader(key, value);
+			this.base.setRequestHeader(this.headers[i].substr(0, Sindex), this.headers[i].substr(Sindex + 1));
 		}
 	}
 	try {

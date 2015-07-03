@@ -50,6 +50,25 @@ var F, JSON, require, VBS, View, Model__,
 			}
 			return src;
 		};
+		var _format = function(Str) {
+			var arg = arguments;
+			if (arg.length <= 1) {
+				return Str;
+			}
+			return Str.replace(/\{(\d+)(\.([\w\.\-]+))?(:(.+?))?\}/igm, function(ma) {
+				var match = /\{(\d+)(\.([\w\.\-]+))?(:(.+?))?\}/igm.exec(ma);
+				if (match && match.length == 6) {
+					var argvalue = arg[parseInt(match[1]) + 1];
+					if (argvalue === undefined) return "";
+					if (typeof argvalue == "object" && match[3] != "") {
+						argvalue = (new Function("return this" + "[\"" + match[3].replace(/\./igm, "\"][\"").replace(/\[\"(\d+)\"\]/igm, "[$1]") + "\"]")).call(argvalue);
+					}
+					if (argvalue == null) return "NULL";
+					return argvalue;
+				}
+				return ma;
+			});
+		};
 
 		var _RightCopy = function(src, target) {
 			var i = 0;
@@ -299,17 +318,10 @@ var F, JSON, require, VBS, View, Model__,
 			var timelines = _runtime.timelines;
 			ExceptionManager.put(
 				0, "MO",
-				F.format(
-					"System: {7}MS > Initialize: {0}MS; Route: {1}MS; Controller: {2}MS (Load: {3}MS, Compile: {4}MS, DebugCompile: {5}MS, Execute: {6}MS); Terminate: {8}MS.",
-					timelines.initialize,
-					timelines.route,
-					timelines.run,
-					timelines.load,
-					timelines.compile,
-					timelines.recompile,
-					timelines.run1,
-					timelines.initialize + timelines.route + timelines.run + timelines.terminate,
-					timelines.terminate
+				_format(
+					"System: {1}MS > Initialize: {0.initialize}MS; Route: {0.route}MS; Controller: {0.run}MS (Load: {0.load}MS, Compile: {0.compile}MS, DebugCompile: {0.recompile}MS, Execute: {0.run1}MS); Terminate: {0.terminate}MS.",
+					timelines,
+					timelines.initialize + timelines.route + timelines.run + timelines.terminate
 				), E_INFO
 			);
 			if (Model__ && Model__.debug) Model__.debug();
@@ -344,21 +356,6 @@ var F, JSON, require, VBS, View, Model__,
 				}
 			}
 			ExceptionManager.put(_exception);
-		}
-
-		var _InitializePath = function(cfg) {
-			var url_ = String(req.ServerVariables("URL"));
-			if (cfg.MO_APP_NAME == "") _exit("please define application name, config-item 'MO_APP_NAME'.")
-			if (cfg.MO_ROOT == "") cfg.MO_ROOT = url_.substr(0, url_.lastIndexOf("/") + 1);
-			if (cfg.MO_APP == "") cfg.MO_APP = cfg.MO_ROOT + cfg.MO_APP_NAME + "/";
-			if (cfg.MO_CORE == "") cfg.MO_CORE = cfg.MO_ROOT + "Mo/";
-			if (cfg.MO_APP.slice(-1) != "/") cfg.MO_APP = cfg.MO_APP + "/";
-			if (cfg.MO_CORE.slice(-1) != "/") cfg.MO_CORE = cfg.MO_CORE + "/";
-			if (!IO.directory.exists(cfg.MO_CORE)) _exit("core directory '" + cfg.MO_CORE + "' is not exists.");
-			if (cfg.MO_APP_ENTRY == "") {
-				cfg.MO_APP_ENTRY = url_.substr(url_.lastIndexOf("/") + 1);
-				if (cfg.MO_APP_ENTRY.toLowerCase() == "default.asp") cfg.MO_APP_ENTRY = "";
-			}
 		}
 
 		var M = function(opt) {
@@ -413,6 +410,7 @@ var F, JSON, require, VBS, View, Model__,
 			}
 		};
 		M.Initialize = function(cfg) {
+			var _tag = _runtime.run();
 			if (!cfg || typeof cfg != "object") cfg = {
 				MO_AUTO_CREATE_APP: false
 			}
@@ -428,8 +426,19 @@ var F, JSON, require, VBS, View, Model__,
 			res.Charset = "utf-8";
 			M.Config.Global = cfg;
 			M.Status = "200 OK";
-			var _tag = _runtime.run();
-			_InitializePath(cfg);
+
+			var url_ = String(req.ServerVariables("URL"));
+			if (cfg.MO_APP_NAME == "") _exit("please define application name, config-item 'MO_APP_NAME'.")
+			if (cfg.MO_ROOT == "") cfg.MO_ROOT = url_.substr(0, url_.lastIndexOf("/") + 1);
+			if (cfg.MO_APP == "") cfg.MO_APP = cfg.MO_ROOT + cfg.MO_APP_NAME + "/";
+			if (cfg.MO_CORE == "") cfg.MO_CORE = cfg.MO_ROOT + "Mo/";
+			if (cfg.MO_APP.slice(-1) != "/") cfg.MO_APP = cfg.MO_APP + "/";
+			if (cfg.MO_CORE.slice(-1) != "/") cfg.MO_CORE = cfg.MO_CORE + "/";
+			if (!IO.directory.exists(cfg.MO_CORE)) _exit("core directory '" + cfg.MO_CORE + "' is not exists.");
+			if (cfg.MO_APP_ENTRY == "") {
+				cfg.MO_APP_ENTRY = url_.substr(url_.lastIndexOf("/") + 1);
+				if (cfg.MO_APP_ENTRY.toLowerCase() == "default.asp") cfg.MO_APP_ENTRY = "";
+			}
 
 			/*load global config*/
 			if (IO.file.exists(cfg.MO_CORE + "Conf/Config.asp")) G = M.Config.Global = _wapper(IO.file.readAllScript(cfg.MO_CORE + "Conf/Config.asp"))();
@@ -442,15 +451,14 @@ var F, JSON, require, VBS, View, Model__,
 
 			/*load require module*/
 			require = _wappermodule(IO.file.readAllText(cfg.MO_CORE + "Library/Extend/lib/require.js"));
-			require.module._pathes = [c(G.MO_APP + "Library/Extend"), c(G.MO_CORE + "Library/Extend")];
-
+			require.use(c(G.MO_CORE + "Library/Extend"), c(G.MO_APP + "Library/Extend"));
+			
 			/*load fns module*/
 			F = require("lib/fns.js");
 			if (!F) {
 				ExceptionManager.put(0x213df, "F", "can not load module 'fns', system will be shut down.", E_ERROR);
 				return;
 			}
-
 			/*load IO module*/
 			IO = require("lib/io.js");
 			if (!IO) {
@@ -481,7 +489,7 @@ var F, JSON, require, VBS, View, Model__,
 					_extend(G, this);
 				});
 			}
-
+			
 			if (!G.MO_METHOD_CHAR) G.MO_METHOD_CHAR = "m";
 			if (!G.MO_ACTION_CHAR) G.MO_ACTION_CHAR = "a";
 			if (!G.MO_GROUP_CHAR) G.MO_GROUP_CHAR = "g";
@@ -877,7 +885,8 @@ var F, JSON, require, VBS, View, Model__,
 		};
 		return M;
 	})(), shutdown = Mo.Terminate;
-(function() {
+	
+Mo.addEventListener("oninited", function() {
 	var loaddelay = {
 		"base64=Base64": ["e", "d", "encode", "decode", "toBinary", "fromBinary", "setNames", "base64"],
 		"JSON": ["parse", "stringify", "create", "decodeStrict", "encodeUnicode", "assets/json.js"],
@@ -897,10 +906,10 @@ var F, JSON, require, VBS, View, Model__,
 		"Hex": ["parse", "stringify", "hex@encoding"],"Encoding": ["encodeURIComponent", "encodeURI", "decodeURI", "getEncoding", "encoding"],
 		"Crc32": [null, "assets/crc32.js"], "Safecode": [null, "Safecode@safecode"], "BmpImage": [null, "BmpImage@safecode"],
 		"HashTable": [null, "assets/hashtable.js"],"MCM": [null, "assets/configmanager.js"], "Punycode" : ["toIDN", "fromIDN", "encode", "decode", "./punycode/index.js"],
-		"HttpRequest" : [null,"net/http/request.js"], "HttpUpload" : [null,"net/http/upload.js"], "WinHttp" : [null,"get", "getJson", "post", "postJson", "save", "net/http/winhttp.js"],
+		"HttpRequest" : [null,"net/http/request.js"], "HttpUpload" : [null,"net/http/upload.js"], "WinHttpRequest=WinHttp" : [null,"get", "getJson", "post", "postJson", "save", "net/http/winhttp.js"],
 		"SOAPClient" : [null,"net/http/soap.js"], "Net" : ["IpToLong","LongToIp","InSameNetWork","IsIP","net"], "Upload" : [null,"accept", "net/upload.js"],
 		"Jmail" : [null,"net/mail.js"], "QRCode" : [null,"./qrcode/index.js"], "Marked" : [null, "options", "./assets/marked.js"]
-	};
+	}, executeable="";
 	for (var lib in loaddelay) {
 		if (!loaddelay.hasOwnProperty(lib)) continue;
 		var library = loaddelay[lib],
@@ -913,7 +922,7 @@ var F, JSON, require, VBS, View, Model__,
 			exports = "." + module.substr(0, index);
 			module = module.substr(index + 1);
 		}
-		(new Function(lib + " = {};"))();
+		executeable += lib + " = {};";
 		if (index2 > 0) {
 			cname = lib.substr(index2 + 1);
 			lib = lib.substr(0, index2);
@@ -922,11 +931,12 @@ var F, JSON, require, VBS, View, Model__,
 		for (var i = 0; i < _len; i++) {
 			method = "." + library[i];
 			if (library[i] == null) method = "";
-			(new Function(lib + method + " = function(){" + lib + " = require(\"" + module + "\")" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};"))();
+			executeable += lib + method + " = function(){" + lib + " = require(\"" + module + "\")" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};";
 		}
-		if (cname)(new Function(cname + " = " + lib + ";"))();
+		if (cname) executeable += cname + " = " + lib + ";";
 	}
-})();
+	(new Function(executeable))();
+});
 var HMAC = function(algorithm, blocksize, data, key, ra) {
 	var ipad = [],
 		opad = [];
