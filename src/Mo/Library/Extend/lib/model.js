@@ -793,6 +793,6 @@ function parse_table_name(name, prex, sp1, sp2){
 	}
 	return names.join(".") + "." + sp1 + prex + table + sp2;
 }
-Mo.addEventListener("ondispose", Model__.dispose);
+Mo.on("dispose", Model__.dispose);
 exports.Model__ = Model__;
 exports.__Model__ = __Model__;

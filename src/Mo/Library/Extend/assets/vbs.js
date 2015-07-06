@@ -20,7 +20,7 @@ try{
     	"end function\r\n"
     );
     (function(ScrCtl){
-	    Mo.addEventListener("ondispose", function(){
+	    Mo.on("dispose", function(){
 		    ScrCtl.Reset();
 	    });
 	    VBS.ctrl=ScrCtl;

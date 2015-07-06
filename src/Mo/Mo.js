@@ -10,8 +10,8 @@ var
 		defaultConfig[name.toUpperCase()] = value;
 	},
 	__events__ = {
-		"ondispose": [],
-		"oninited":[]
+		"dispose": [],
+		"load":[]
 	},
 	__invoke_event__ = function(eventname){
 		var events = __events__[eventname],
@@ -19,6 +19,7 @@ var
 		if (events) {
 			_len = events.length;
 			for (var i = 0; i < _len; i++) {
+		console.log(eventname);
 				event = events[i];
 				if (event) {
 					if(event.call(Mo)===false) break;
@@ -395,18 +396,11 @@ var
 		M.Debug = function() {
 			_runtime.log.apply(null, arguments)
 		};
-		M.addEventListener = function(name, callback) {
+		M.on = function(name, callback){
 			if (!__events__.hasOwnProperty(name)) __events__[name] = [];
 			var event = __events__[name];
 			callback.GUID = event.length;
 			event.push(callback);
-		};
-		M.removeEventListener = function(name, callback) {
-			if (!__events__.hasOwnProperty(name)) return;
-			var event = __events__[name];
-			for (var i = 0; i < event.length; i++) {
-				if (event[i].GUID == callback.GUID) event[i] = null;
-			}
 		};
 		M.Initialize = function(cfg) {
 			var _tag = _runtime.run();
@@ -508,13 +502,13 @@ var
 			}
 			_lib("MO_PRE_LIB");
 			M.assign("VERSION", M.Version);
-			__invoke_event__("oninited");
+			__invoke_event__("load");
 			return true;
 		};
 		M.Terminate = function() {
 			var _tag = _runtime.run();
 			_lib("MO_END_LIB");
-			__invoke_event__("ondispose");
+			__invoke_event__("dispose");
 			_runtime.timelines.terminate = _runtime.ticks(_tag);
 			_debug();
 			_Assigns = null;
@@ -885,7 +879,7 @@ var
 		return M;
 	})(), shutdown = Mo.Terminate;
 	
-Mo.addEventListener("oninited", function() {
+Mo.on("load", function() {
 	var loaddelay = {
 		"base64=Base64": ["e", "d", "encode", "decode", "toBinary", "fromBinary", "setNames", "base64"],
 		"JSON": ["parse", "stringify", "create", "decodeStrict", "encodeUnicode", "assets/json.js"],

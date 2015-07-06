@@ -483,10 +483,8 @@ MoAspEnginerView.prototype.parseAssignName = function() {
 	F.string.matches(this.Content, /<assign ([\s\S]+?)\/>(\s*)/igm, function($0, $1) {
 		var attrs = readAttrs__($1);
 		if (attrs["name"]) {
-			var quto = "\"";
-			if (attrs["notstring"] == "true") quto = "";
 			this.Content = F.replace(this.Content, $0, "");
-			this.assigns += "Mo.assign(\"" + attrs["name"] + "\"," + quto + F.string.replace(attrs["value"], /\"/igm, "\\\"") + quto + ");\r\n";
+			this.assigns += "Mo.assign(\"" + attrs["name"] + "\"," + attrs["value"] + ");\r\n";
 		}
 	}, this);
 };

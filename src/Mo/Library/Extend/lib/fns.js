@@ -1188,5 +1188,5 @@ _.foreach({
 });
 _.timer.ticks = _.timer.stop;
 init();
-Mo.addEventListener("ondispose", _.dispose);
+Mo.on("dispose", _.dispose);
 module.exports = _;
