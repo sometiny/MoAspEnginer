@@ -19,7 +19,6 @@ var
 		if (events) {
 			_len = events.length;
 			for (var i = 0; i < _len; i++) {
-		console.log(eventname);
 				event = events[i];
 				if (event) {
 					if(event.call(Mo)===false) break;
