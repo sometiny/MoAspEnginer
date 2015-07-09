@@ -135,7 +135,7 @@ MoAspEnginerView.prototype.parseMoAsAsp = function() {
 	}, this);
 	this.Content = this.Content.replace(/^--movbcrlf--$/igm, "");
 	this.Content = this.Content.replace(/(\r\n){2,}/igm, "\r\n");
-	if (G.MO_PREETY_HTML) {
+	if (G.MO_PREETY_HTML || G.MO_PRETTY_HTML) {
 		this.Content = this.Content.replace(/>(\s*)--movbcrlf--(\s*)\</ig, "><")
 	}
 	this.Content = this.Content.replace(/(^(\s+)|(\s+)$)/ig, "");
@@ -153,12 +153,17 @@ MoAspEnginerView.prototype.parseMoAsAsp = function() {
 	this.Content = F.string.replace(this.Content, /(\s*)MoAsp\?\}/igm, "");
 };
 
-MoAspEnginerView.prototype.getRndid = function() {
-	var rid = F.random.word(10);
+MoAspEnginerView.prototype.getRndid = function(l) {
+	l = l || 10
+	var rid = F.random.word(l);
 	while (this.mvarDicts.hasOwnProperty(rid)) {
-		rid = F.random.word(10);
+		rid = F.random.word(l);
 	}
 	return rid;
+};
+
+MoAspEnginerView.prototype.getRndKey = function() {
+	return "k_"+this.getRndid(3);
 };
 //****************************************************
 //@DESCRIPTION:	do something to the code that was combined to make the code pretty,such as remove blank lines
@@ -172,8 +177,8 @@ MoAspEnginerView.prototype.doSomethingToAsp = function() {
 		"\r\n}\r\n_end();delete _end;delete _echo;if(__buffer) return _contents;";
 	this.Content = this.Content.replace(/"\);\r\n_echo\("/igm, "");
 	this.Content = this.Content.replace(/^_echo\(\"(.+?)\"\);$/igm, "_contents += \"$1\";");
-	if (G.MO_PREETY_HTML) {
-		this.Content = this.Content.replace(/\\r\\n\\t/igm, "");
+	if (G.MO_PREETY_HTML || G.MO_PRETTY_HTML) {
+		this.Content = this.Content.replace(/(\\r|\\n|\\t)/igm, "");
 	}
 }
 
@@ -279,15 +284,15 @@ MoAspEnginerView.prototype.parseLoop = function() {
 		if (attrs["name"]) {
 			if (attrs["as"]) {
 				var cnames = attrs["as"].split(",");
-				if (cnames.length == 1) cnames = ['key'].concat(cnames);
+				if (cnames.length == 1) cnames = [''].concat(cnames);
 				this.parseLoopByArguments($0, attrs["name"], cnames[0], cnames[1]);
 			} else {
-				this.parseLoopByArguments($0, attrs["name"], attrs["key"] || "key", attrs["value"] || "value");
+				this.parseLoopByArguments($0, attrs["name"], attrs["key"], attrs["value"] || "value", attrs["withindex"]);
 			}
 		}
 	}, this);
-	F.string.matches(this.Content, REGEXP.LOOP, function($0, $1, $2, $3, $4, $5, $6) {
-		this.parseLoopByArguments($0, $1, $5 || "key", $6 || "value");
+	F.string.matches(this.Content, REGEXP.LOOP , function($0, $1, $2, $3, $4, $5, $6) {
+		this.parseLoopByArguments($0, $1, $5, $6 || "value");
 	}, this);
 	this.Content = F.replace(this.Content, "</loop>", "{?MoAsp }); MoAsp?}")
 }
@@ -295,11 +300,16 @@ MoAspEnginerView.prototype.parseLoop = function() {
 //****************************************************
 //@DESCRIPTION:	parse loop tag. 
 //****************************************************
-MoAspEnginerView.prototype.parseLoopByArguments = function(content, loopname, keyname, keynamevalue) {
+MoAspEnginerView.prototype.parseLoopByArguments = function(content, loopname, keyname, keynamevalue,withindex) {
+	withindex = withindex==="true";
 	var varloopname = loopname.replace(/\./ig, "_");
 	var vbscript = "{?MoAsp " + loopname + ".reset();\r\n";
-	vbscript += "var index_" + varloopname + "=" + loopname + ".pagesize *(" + loopname + ".currentpage-1);\r\n";
-	vbscript += loopname + ".each(function(" + keynamevalue + ", index){\r\nvar " + keyname + "=index_" + varloopname + "+index;\r\n MoAsp?}"
+	if(keyname){
+		vbscript += "var index_" + varloopname + "=" + loopname + ".pagesize *(" + loopname + ".currentpage-1);\r\n";
+		vbscript += loopname + ".each(function(" + keynamevalue + ", index){\r\nvar " + keyname + "=index_" + varloopname + "+index;\r\n MoAsp?}"
+	}else{
+		vbscript += loopname + ".each(function(" + keynamevalue + "){\r\n MoAsp?}"
+	}
 	this.Content = F.replace(this.Content, content, vbscript);
 }
 
@@ -324,13 +334,13 @@ MoAspEnginerView.prototype.parseFor = function() {
 			}
 		}
 		if (loopname) {
-			keyname = keyname || "key";
+			keyname = keyname || this.getRndKey();
 			keyvaluename = keyvaluename || "value";
 			var vbscript = "";
 			if (asc) {
-				vbscript = "{?MoAsp (function(){\r\nfor(var " + keyname + "=0;" + keyname + "<" + loopname + ".length;" + keyname + "++){\r\nvar " + keyvaluename + "=" + loopname + "[" + keyname + "];\r\nMoAsp?}\r\n";
+				vbscript = "{?MoAsp (function(){\r\nvar " + keyvaluename + ";\r\nfor(var " + keyname + "=0, " + keyname + "_length=" + loopname + ".length;" + keyname + "<" + keyname + "_length;" + keyname + "++){\r\n" + keyvaluename + "=" + loopname + "[" + keyname + "];\r\nMoAsp?}\r\n";
 			} else {
-				vbscript = "{?MoAsp (function(){\r\nfor(var " + keyname + "=" + loopname + ".length-1;" + keyname + ">=0;" + keyname + "--){\r\nvar " + keyvaluename + "=" + loopname + "[" + keyname + "];\r\nMoAsp?}\r\n";
+				vbscript = "{?MoAsp (function(){\r\nvar " + keyvaluename + ";\r\nfor(var " + keyname + "=" + loopname + ".length-1;" + keyname + ">=0;" + keyname + "--){\r\n" + keyvaluename + "=" + loopname + "[" + keyname + "];\r\nMoAsp?}\r\n";
 			}
 			this.Content = F.replace(this.Content, $0, vbscript);
 		}
