@@ -4,9 +4,8 @@ FormController.extend("Index", function(){
 	this.display("Home:Form");
 });
 FormController.extend("Index",true,function(){
-	require("dump");
 	this.assign("description","哈哈，调用post了。");
-	this.assign("dump",F.post.dump(true));
+	this.assign("dump",dump(F.post(), true));
 	this.display("Home:Form");
 });
 FormController.extend("Upload",function(){

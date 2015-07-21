@@ -21,10 +21,18 @@ var _post_ = null,
 	_included_ = {},
 	_post_map_ = null;
 var init = function() {
-	var e = new Enumerator(Request.QueryString), q, v;
+	var e = new Enumerator(Request.QueryString), q, v, ex, cname;
 	for (; !e.atEnd(); e.moveNext()) {
-		q = e.item(); v = String(Request.QueryString(q));
-		v && (_get_[q] = v);
+		q = e.item(); v = String(Request.QueryString(q)); v && (_get_[q] = v);
+		if(q.slice(-2)=="[]"){
+			delete _get_[q];
+			cname = q.slice(0,-2);
+			_get_[cname]=[];
+			ex = new Enumerator(Request.QueryString(q));
+			for (; !ex.atEnd(); ex.moveNext()) {
+				_get_[cname].push(ex.item());
+			}
+		}
 	}
 	
 	e = new Enumerator(Request.ServerVariables);
@@ -951,9 +959,20 @@ var postinit__ = function() {
 		if (!_postinited_) {
 			_post_ = {};
 			_post_map_ = {};
+			var cname, ex;
 			_.each(Request.Form, function(q) {
 				_post_[q] = String(this(q));
 				_post_map_[q.toUpperCase()] = q;
+				if(q.slice(-2)=="[]"){
+					delete _post_[q];
+					cname = q.slice(0,-2);
+					_post_[cname]=[];
+					_post_map_[cname.toUpperCase()] = cname;
+					ex = new Enumerator(this(q));
+					for (; !ex.atEnd(); ex.moveNext()) {
+						_post_[cname].push(ex.item());
+					}
+				}
 			});
 			_postinited_ = true;
 		}
