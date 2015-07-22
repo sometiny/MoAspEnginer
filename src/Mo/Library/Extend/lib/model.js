@@ -763,7 +763,7 @@ function _parseData(table){
 				parms.push(parseValAsPrm(v));
 			}else{
 				if(typeof ori_value == "string") v = ("'" + v.replace(/\'/igm,"''") + "'").replace(/\0/ig,"");
-				else if(typeof ori_value == "object") v =  toString.call(v);
+				else if(ori_value!==null && typeof ori_value == "object") v =  toString.call(v);
 				values.push(v);
 				update.push(sp1 + i + sp2 + " = " + v);
 			}
