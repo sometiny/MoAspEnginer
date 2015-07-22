@@ -13,7 +13,7 @@ var
 		"dispose": [],
 		"load":[]
 	},
-	__invoke_event__ = function(eventname){
+	__invoke_event__ = function(eventname, data){
 		var events = __events__[eventname],
 			_len, event;
 		if (events) {
@@ -21,7 +21,7 @@ var
 			for (var i = 0; i < _len; i++) {
 				event = events[i];
 				if (event) {
-					if(event.call(Mo)===false) break;
+					if(event.call(Mo, {data:data})===false) break;
 				}
 			}
 		}		
@@ -486,22 +486,20 @@ var
 			if (!G.MO_ACTION_CHAR) G.MO_ACTION_CHAR = "a";
 			if (!G.MO_GROUP_CHAR) G.MO_GROUP_CHAR = "g";
 
-			ExceptionManager.errorReporting(G.MO_ERROR_REPORTING);
-
 			if (G.MO_CHARSET != "UTF-8") res.Charset = G.MO_CHARSET;
 			if (IO.file.exists(G.MO_APP + "Common/Function.asp")) _wapperfile(G.MO_APP + "Common/Function.asp");
 			if (G.MO_IMPORT_COMMON_FILES != "") {
 				var files = G.MO_IMPORT_COMMON_FILES.split(";"),
 					_len = files.length;
-				if (_len <= 0) return;
 				for (var i = 0; i < _len; i++) {
 					if (!files[i]) continue;
 					_wapperfile(G.MO_APP + "Common/" + files[i] + ".asp");
 				}
 			}
-			_lib("MO_PRE_LIB");
 			M.assign("VERSION", M.Version);
-			__invoke_event__("load");
+			__invoke_event__("load", G);
+			ExceptionManager.errorReporting(G.MO_ERROR_REPORTING);
+			_lib("MO_PRE_LIB");
 			return true;
 		};
 		M.Terminate = function() {
