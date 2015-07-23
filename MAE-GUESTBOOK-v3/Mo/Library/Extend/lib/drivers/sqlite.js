@@ -24,7 +24,7 @@ function SQLITE_GetType(typed){
 }
 var Driver = {};
 Driver.GetConnectionString = function(){
-	return "DRIVER={SQLite3 ODBC Driver};Database=" + F.mappath(this["DB_Path"]) + (this["DB_Password"] ? (";PassWord=" + this["DB_Password"]) : "");
+	return this["DB_Connectionstring"] || "DRIVER={SQLite3 ODBC Driver};Database=" + F.mappath(this["DB_Path"]) + (this["DB_Password"] ? (";PassWord=" + this["DB_Password"]) : "");
 };
 Driver.GetSqls = function(){
 	var where_="",order_="",where2_="",groupby="",join="",on="",cname="", table = this.table, limit = this.strlimit, joinlevel = this.joinlevel, strpage = this.strpage,fields = this.fields;
@@ -72,15 +72,6 @@ Driver.GetColumns = function(tablename){
 		rs.movenext();
 	}
 	return obj;
-};
-Driver.Max = function(k){
-	return this.query("select IFNULL(max(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;
-};
-Driver.Min = function(k){
-	return this.query("select IFNULL(min(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;
-};
-Driver.Sum = function(k){
-	return this.query("select IFNULL(sum(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;
 };
 Driver.initialize = function(Helper, Conn){
 	

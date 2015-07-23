@@ -35,6 +35,7 @@ function MYSQL_GetType(typed){
 }
 var Driver = {};
 Driver.GetConnectionString = function(){
+	if(this["DB_Connectionstring"]) return this["DB_Connectionstring"];
 	var DB_Server = this["DB_Server"], DB_Host=DB_Server, DB_Port = 3306;
 	if(DB_Host.indexOf(",")>0){
 		DB_Host = DB_Server.substr(0,DB_Server.indexOf(","));
@@ -88,15 +89,6 @@ Driver.GetColumns = function(tablename){
 		rs.movenext();
 	}
 	return obj;
-};
-Driver.Max = function(k){
-	return this.query("select IFNULL(max(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;
-};
-Driver.Min = function(k){
-	return this.query("select IFNULL(min(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;
-};
-Driver.Sum = function(k){
-	return this.query("select IFNULL(sum(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;
 };
 Driver.initialize = function(Helper, Conn){
 	

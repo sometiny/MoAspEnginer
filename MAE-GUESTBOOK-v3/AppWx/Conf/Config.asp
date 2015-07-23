@@ -1,7 +1,6 @@
 ﻿<script language:"jscript" runat:"server">
 return {
-	MO_DEBUG : false,
-	MO_DEBUG2FILE : true,
+	MO_DEBUG_MODE : "FILE",
 	MO_DEBUG_FILE : IO.build(Mo.Config.Global.MO_APP, "Cache\\Debug.log"),
 	MO_TABLE_PERX : "Wx_",
 	MO_ERROR_REPORTING : E_ERROR,

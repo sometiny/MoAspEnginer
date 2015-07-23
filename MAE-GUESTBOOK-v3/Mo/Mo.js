@@ -4,25 +4,38 @@
  ** About:
  **		support@mae.im
  */
-var 
-	defaultConfig={}, 
-	define = function(name,value){
+var
+	defaultConfig = {},
+	define = function(name, value) {
 		defaultConfig[name.toUpperCase()] = value;
 	},
 	__events__ = {
-		"ondispose": []
-	}
-;
-var F, JSON, require, VBS, View, Model__,
+		"dispose": [],
+		"load":[]
+	},
+	__invoke_event__ = function(eventname, data){
+		var events = __events__[eventname],
+			_len, event;
+		if (events) {
+			_len = events.length;
+			for (var i = 0; i < _len; i++) {
+				event = events[i];
+				if (event) {
+					if(event.call(Mo, {data:data})===false) break;
+				}
+			}
+		}		
+	},F, require, View,
 	req = Request,
 	res = Response,
-	ROOT = Server.Mappath("/"), Mo,
+	ROOT = Server.Mappath("/"),
+	Mo,
 	startup = Mo = Mo || (function() {
 		var c = function(d) {
 			if (typeof d != "string") {
 				return ""
 			}
-			if (d.substr(1,1) == ":") {
+			if (d.substr(1, 1) == ":") {
 				return d
 			}
 			return Server.MapPath(d)
@@ -36,6 +49,25 @@ var F, JSON, require, VBS, View, Model__,
 			}
 			return src;
 		};
+		var _format = function(Str) {
+			var arg = arguments;
+			if (arg.length <= 1) {
+				return Str;
+			}
+			return Str.replace(/\{(\d+)(\.([\w\.\-]+))?(:(.+?))?\}/igm, function(ma) {
+				var match = /\{(\d+)(\.([\w\.\-]+))?(:(.+?))?\}/igm.exec(ma);
+				if (match && match.length == 6) {
+					var argvalue = arg[parseInt(match[1]) + 1];
+					if (argvalue === undefined) return "";
+					if (typeof argvalue == "object" && match[3] != "") {
+						argvalue = (new Function("return this" + "[\"" + match[3].replace(/\./igm, "\"][\"").replace(/\[\"(\d+)\"\]/igm, "[$1]") + "\"]")).call(argvalue);
+					}
+					if (argvalue == null) return "NULL";
+					return argvalue;
+				}
+				return ma;
+			});
+		};
 
 		var _RightCopy = function(src, target) {
 			var i = 0;
@@ -46,7 +78,7 @@ var F, JSON, require, VBS, View, Model__,
 			}
 			return src;
 		};
-		var _LoadTemplate = function(template){
+		var _LoadTemplate = function(template) {
 			var template = __LoadTemplate(template);
 			template = template.replace(/<selection name\=("|')(\w+)\1(\s*)\/>/ig, "");
 			template = template.replace(/<selection name\=("|')(\w+)\1(\s*)>([\s\S]*?)<\/selection>/ig, "$4");
@@ -71,20 +103,20 @@ var F, JSON, require, VBS, View, Model__,
 				ExceptionManager.put(0x6300, "__LoadTemplate()", "template '" + template + "' is not exists.", E_NOTICE);
 				return "";
 			}
-			var tempStr = IO.file.readAllText(F.mappath(path), G.MO_CHARSET),
+			var tempStr = IO.file.readAllText(F.mappath(path)),
 				masterexp = new RegExp("^<extend file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "i"),
 				includeexp = new RegExp("<include file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "igm");
 
-			var match = masterexp.exec(tempStr), master, callback;
-			if(match){
+			var match = masterexp.exec(tempStr),
+				master, callback;
+			if (match) {
 				templatelist2 = _RightCopy(templatelist, match[1].split(":"));
 				master = __LoadTemplate(templatelist2.join(":"));
-				callback = function($0,$1,$2,$3,$4){
-					var reg = new RegExp("<selection name\\=(\"|')" + $2 + "\\1>([\\s\\S]*?)<\\/selection>","igm");
+				callback = function($0, $1, $2, $3, $4) {
+					var reg = new RegExp("<selection name\\=(\"|')" + $2 + "\\1>([\\s\\S]*?)<\\/selection>", "igm");
 					var m = reg.exec(tempStr);
-					if(m){
-						master = F.replace(master,$0,m[0].replace("<super />",$4||""));
-						//master = F.replace(master,"<super />",$4||"");
+					if (m) {
+						master = F.replace(master, $0, m[0].replace("<super />", $4 || ""));
 					}
 				};
 				F.string.matches(master, /<selection name\=("|')(\w+)\1(\s*)\/>/ig, callback);
@@ -118,7 +150,9 @@ var F, JSON, require, VBS, View, Model__,
 			return new Function(content);
 		};
 		var _wappermodule = function(content) {
-			var module = {exports:{}};
+			var module = {
+				exports: {}
+			};
 			(new Function("exports", "module", content))(module.exports, module);
 			return module.exports;
 		};
@@ -134,7 +168,7 @@ var F, JSON, require, VBS, View, Model__,
 			if (_LoadController._controllers.hasOwnProperty(ccname)) return _LoadController._controllers[ccname];
 			try {
 				path = F.mappath(path);
-				var ret = IO.file.readAllScript(path, G.MO_CHARSET);
+				var ret = IO.file.readAllScript(path);
 				if (G.MO_DEBUG) {
 					ret = ReCompileForDebug(ret);
 				}
@@ -144,7 +178,7 @@ var F, JSON, require, VBS, View, Model__,
 					path == "" ? "" : path.substr(0, path.lastIndexOf("\\")),
 					Model__, M.C, M.L, G.MO_DEBUG ? ret : ""
 				);
-				if(_controller) return _controller && (_LoadController._controllers[ccname] = _controller);
+				if (_controller) return _controller && (_LoadController._controllers[ccname] = _controller);
 				ExceptionManager.put(0x8300, "_LoadController()", "can not load controller '" + controller + "', please ensure that if you have defined it.");
 			} catch (ex) {
 				ExceptionManager.put(ex.number, "_LoadController()", "can not load controller '" + controller + "', error: " + ex.description);
@@ -160,7 +194,7 @@ var F, JSON, require, VBS, View, Model__,
 			if (!IO.file.exists(path)) path = F.mappath(G.MO_CORE + "Library/Assets/" + name + ".asp");
 			if (!IO.file.exists(path)) return false;
 
-			var ret = IO.file.readAllScript(path, G.MO_CHARSET);
+			var ret = IO.file.readAllScript(path);
 			ret = "var " + name + ";\r\n" + ret + "\r\n return " + name + ";";
 			try {
 				var _asset = (new Function("__filename", "__dirname", "M", "C", "L", ret))(
@@ -192,7 +226,7 @@ var F, JSON, require, VBS, View, Model__,
 			return null;
 		};
 		_LoadConfig.configs = {};
-		
+
 		/*
 		from "https://github.com/component/path-to-regexp"
 		thanks!
@@ -208,45 +242,30 @@ var F, JSON, require, VBS, View, Model__,
 			if (path instanceof Array) path = '(' + path.join('|') + ')';
 
 			path = path
-			.concat(strict ? '' : '/?')
-			.replace(/\/\(/g, '/(?:')
-			.replace(/([\/\.])/g, '\\$1')
-			.replace(/(\\\/)?(\\\.)?:(\w+)(\(.*?\))?(\*)?(\?)?/g, function (match, slash, format, key, capture, star, optional) {
-			  slash = slash || '';
-			  format = format || '';
-			  capture = capture || '([^/' + format + ']+?)';
-			  optional = optional || '';
+				.concat(strict ? '' : '/?')
+				.replace(/\/\(/g, '/(?:')
+				.replace(/([\/\.])/g, '\\$1')
+				.replace(/(\\\/)?(\\\.)?:(\w+)(\(.*?\))?(\*)?(\?)?/g, function(match, slash, format, key, capture, star, optional) {
+					slash = slash || '';
+					format = format || '';
+					capture = capture || '([^/' + format + ']+?)';
+					optional = optional || '';
 
-			  keys.push({ name: key, optional: !!optional });
+					keys.push({
+						name: key,
+						optional: !!optional
+					});
 
-			  return ''
-			    + (optional ? '' : slash)
-			    + '(?:'
-			    + format + (optional ? slash : '') + capture
-			    + (star ? '((?:[\\/' + format + '].+?)?)' : '')
-			    + ')'
-			    + optional;
-			})
-			.replace(/\*/g, '(.*)');
+					return '' + (optional ? '' : slash) + '(?:' + format + (optional ? slash : '') + capture + (star ? '((?:[\\/' + format + '].+?)?)' : '') + ')' + optional;
+				})
+				.replace(/\*/g, '(.*)');
 
 			return new RegExp('^' + path + (end ? '$' : '(?=\/|$)'), sensitive ? '' : 'i');
 		};
-		var _start = function() {
-			if (G.MO_PRE_LIB != "") {
-				var libs = G.MO_PRE_LIB.split(","), _len = libs.length;
-				for (var i = 0; i < _len; i++) {
-					var asset = _LoadAssets(libs[i]);
-					if (asset) {
-						asset.Index();
-						asset.__destruct();
-					}
-				}
-			}
-		};
-
-		var _end = function() {
-			if (G.MO_END_LIB != "") {
-				var libs = G.MO_END_LIB.split(","), _len = libs.length;
+		var _lib = function(name) {
+			if (G[name] != "") {
+				var libs = G[name].split(","),
+					_len = libs.length;
 				for (var i = 0; i < _len; i++) {
 					var asset = _LoadAssets(libs[i]);
 					if (asset) {
@@ -277,14 +296,14 @@ var F, JSON, require, VBS, View, Model__,
 				if (scripts) _runtime.scripts = scripts;
 			},
 			timelines: {
-				initialize : 0,
-				route : 0,
-				run : 0,
-				load : 0,
-				compile : 0,
-				run1 : 0,
-				recompile : 0,
-				terminate : 0
+				initialize: 0,
+				route: 0,
+				run: 0,
+				load: 0,
+				compile: 0,
+				run1: 0,
+				recompile: 0,
+				terminate: 0
 			}
 		};
 
@@ -295,44 +314,37 @@ var F, JSON, require, VBS, View, Model__,
 			if (!G.MO_COMPILE_CACHE) {
 				ExceptionManager.put(0, "MO", "compile cache is not enabled, you should enable it in production env(set 'MO_COMPILE_CACHE' as true).", E_WARNING);
 			}
+			var timelines = _runtime.timelines;
 			ExceptionManager.put(
 				0, "MO",
-				F.format(
-					"System: {7}MS > Initialize: {0}MS; Route: {1}MS; Controller: {2}MS (Load: {3}MS, Compile: {4}MS, DebugCompile: {5}MS, Execute: {6}MS); Terminate: {8}MS.",
-					_runtime.timelines.initialize,
-					_runtime.timelines.route,
-					_runtime.timelines.run,
-					_runtime.timelines.load,
-					_runtime.timelines.compile,
-					_runtime.timelines.recompile,
-					_runtime.timelines.run1,
-					_runtime.timelines.initialize + _runtime.timelines.route + _runtime.timelines.run + _runtime.timelines.terminate,
-					_runtime.timelines.terminate
+				_format(
+					"System: {1}MS > Initialize: {0.initialize}MS; Route: {0.route}MS; Controller: {0.run}MS (Load: {0.load}MS, Compile: {0.compile}MS, DebugCompile: {0.recompile}MS, Execute: {0.run1}MS); Terminate: {0.terminate}MS.",
+					timelines,
+					timelines.initialize + timelines.route + timelines.run + timelines.terminate
 				), E_INFO
 			);
-			if (Model__ && Model__.debug) Model__.debug();
-			if(G.MO_DEBUG2FILE || G.MO_DEBUG_MODE == "FILE"){
-				if(G.MO_DEBUG_FILE){
-					ExceptionManager.debug2file(G.MO_DEBUG_FILE);
-				}
-			}else if(G.MO_DEBUG_MODE == "SESSION"){
+			var mode = G.MO_DEBUG_MODE;
+			if (mode == "FILE" && G.MO_DEBUG_FILE) {
+				ExceptionManager.debug2file(G.MO_DEBUG_FILE);
+			} else if (mode == "SESSION" || mode == "APPLICATION") {
 				ExceptionManager.debug2session();
-			}else{
-				if(String(Request.ServerVariables("HTTP_X_REQUESTED_WITH")).toLowerCase()=="xmlhttprequest"){
-					if(E_ERROR & ExceptionManager.errorReporting()) ExceptionManager.errorReporting(E_ERROR);
+			} else {
+				if (String(req.ServerVariables("HTTP_X_REQUESTED_WITH")).toLowerCase() == "xmlhttprequest") {
+					if (E_ERROR & ExceptionManager.errorReporting()) ExceptionManager.errorReporting(E_ERROR);
 					else ExceptionManager.errorReporting(E_NONE);
 				}
-				Response.Write(ExceptionManager.debug());
+				res.Write(ExceptionManager.debug());
 			}
 		};
 		var _getfunctionParms = function(fn) {
-			var _parms = fn.toString().replace(/^function(.*?)\((.*?)\)([\s\S]+)$/, "$2").replace(/\s/igm, "").split(","), _len = _parms.length;
+			var _parms = fn.toString().replace(/^function(.*?)\((.*?)\)([\s\S]+)$/, "$2").replace(/\s/igm, "").split(","),
+				_len = _parms.length;
 			for (var i = 0; i < _len; i++) {
 				_parms[i] = F.get(_parms[i]);
 			}
 			return _parms;
 		};
-		var _catchException = function(ex){
+		var _catchException = function(ex) {
 			var _exception = new Exception(ex.number, M.RealMethod + "." + M.RealAction, ex.description);
 			if (_runtime.line > 0) {
 				_exception.lineNumber = _runtime.line;
@@ -341,26 +353,11 @@ var F, JSON, require, VBS, View, Model__,
 					_exception.traceCode = _runtime.scripts.split("\n")[_runtime.debugLine];
 				}
 			}
-			ExceptionManager.put(_exception);			
-		}
-		
-		var _InitializePath = function(cfg) {
-			var url_ = String(req.ServerVariables("URL"));
-			if (cfg.MO_APP_NAME == "") _exit("please define application name, config-item 'MO_APP_NAME'.")
-			if (cfg.MO_ROOT == "") cfg.MO_ROOT = url_.substr(0, url_.lastIndexOf("/") + 1);
-			if (cfg.MO_APP == "") cfg.MO_APP = cfg.MO_ROOT + cfg.MO_APP_NAME + "/";
-			if (cfg.MO_CORE == "") cfg.MO_CORE = cfg.MO_ROOT + "Mo/";
-			if (cfg.MO_APP.slice(-1) != "/") cfg.MO_APP = cfg.MO_APP + "/";
-			if (cfg.MO_CORE.slice(-1) != "/") cfg.MO_CORE = cfg.MO_CORE + "/";
-			if (!IO.directory.exists(cfg.MO_CORE)) _exit("core directory '" + cfg.MO_CORE + "' is not exists.");
-			if (cfg.MO_APP_ENTRY == "") {
-				cfg.MO_APP_ENTRY = url_.substr(url_.lastIndexOf("/") + 1);
-				if (cfg.MO_APP_ENTRY.toLowerCase() == "default.asp") cfg.MO_APP_ENTRY = "";
-			}
+			ExceptionManager.put(_exception);
 		}
 
 		var M = function(opt) {
-				if ( typeof opt == "string") return opt ? _Assigns[opt] : _Assigns ;
+				if (typeof opt == "string") return opt ? _Assigns[opt] : _Assigns;
 				opt = _extend({}, defaultConfig);
 				var _tag = _runtime.run();
 				if (!M.Initialize(opt)) {
@@ -373,7 +370,7 @@ var F, JSON, require, VBS, View, Model__,
 				if (G.MO_ROUTE_MODE) M.Route();
 				_runtime.timelines.route = _runtime.ticks(_tag);
 
-				if(!G.MO_PLUGIN_MODE){
+				if (!G.MO_PLUGIN_MODE) {
 					_tag = _runtime.run();
 					M.Run();
 					_runtime.timelines.run = _runtime.ticks(_tag);
@@ -393,24 +390,18 @@ var F, JSON, require, VBS, View, Model__,
 		M.Status = "";
 		M.Buffer = false;
 		M.LoadAssets = _LoadAssets;
-		M.IsPost = String(Request.ServerVariables("REQUEST_METHOD")) == "POST" || String(Request.ServerVariables("CONTENT_TYPE")) != "";
+		M.IsPost = String(req.ServerVariables("REQUEST_METHOD")) == "POST" || String(req.ServerVariables("CONTENT_TYPE")) != "";
 		M.Debug = function() {
 			_runtime.log.apply(null, arguments)
 		};
-		M.addEventListener = function(name, callback){
-			if(!__events__.hasOwnProperty(name)) __events__[name] = [];
+		M.on = function(name, callback){
+			if (!__events__.hasOwnProperty(name)) __events__[name] = [];
 			var event = __events__[name];
 			callback.GUID = event.length;
 			event.push(callback);
 		};
-		M.removeEventListener = function(name, callback){
-			if(!__events__.hasOwnProperty(name)) return;
-			var event = __events__[name];
-			for(var i=0;i<event.length;i++){
-				if(event[i].GUID == callback.GUID) event[i]=null;
-			}
-		};
 		M.Initialize = function(cfg) {
+			var _tag = _runtime.run();
 			if (!cfg || typeof cfg != "object") cfg = {
 				MO_AUTO_CREATE_APP: false
 			}
@@ -426,36 +417,45 @@ var F, JSON, require, VBS, View, Model__,
 			res.Charset = "utf-8";
 			M.Config.Global = cfg;
 			M.Status = "200 OK";
-			var _tag = _runtime.run();
-			_InitializePath(cfg);
-			
+
+			var url_ = String(req.ServerVariables("URL"));
+			if (cfg.MO_APP_NAME == "") _exit("please define application name, config-item 'MO_APP_NAME'.")
+			if (cfg.MO_ROOT == "") cfg.MO_ROOT = url_.substr(0, url_.lastIndexOf("/") + 1);
+			if (cfg.MO_APP == "") cfg.MO_APP = cfg.MO_ROOT + cfg.MO_APP_NAME + "/";
+			if (cfg.MO_CORE == "") cfg.MO_CORE = cfg.MO_ROOT + "Mo/";
+			if (cfg.MO_APP.slice(-1) != "/") cfg.MO_APP = cfg.MO_APP + "/";
+			if (cfg.MO_CORE.slice(-1) != "/") cfg.MO_CORE = cfg.MO_CORE + "/";
+			if (!IO.directory.exists(cfg.MO_CORE)) _exit("core directory '" + cfg.MO_CORE + "' is not exists.");
+			if (cfg.MO_APP_ENTRY == "") {
+				cfg.MO_APP_ENTRY = url_.substr(url_.lastIndexOf("/") + 1);
+				if (cfg.MO_APP_ENTRY.toLowerCase() == "default.asp") cfg.MO_APP_ENTRY = "";
+			}
+
 			/*load global config*/
 			if (IO.file.exists(cfg.MO_CORE + "Conf/Config.asp")) G = M.Config.Global = _wapper(IO.file.readAllScript(cfg.MO_CORE + "Conf/Config.asp"))();
 			_extend(G, cfg);
-			
+
 			/*load 'Common' modules*/
 			IO.directory.files(G.MO_CORE + "Common", function(file) {
-				if(file.name.slice(-4) == ".asp") _wapperfile(file.path);
+				if (file.name.slice(-4) == ".asp") _wapperfile(file.path);
 			});
 
 			/*load require module*/
 			require = _wappermodule(IO.file.readAllText(cfg.MO_CORE + "Library/Extend/lib/require.js"));
-			require.module._pathes = [c(G.MO_APP + "Library/Extend"), c(G.MO_CORE + "Library/Extend")];
-
+			require.use(c(G.MO_CORE + "Library/Extend"), c(G.MO_APP + "Library/Extend"));
+			
 			/*load fns module*/
 			F = require("lib/fns.js");
-			if(!F){
+			if (!F) {
 				ExceptionManager.put(0x213df, "F", "can not load module 'fns', system will be shut down.", E_ERROR);
 				return;
 			}
-			
 			/*load IO module*/
 			IO = require("lib/io.js");
-			if(!IO){
+			if (!IO) {
 				ExceptionManager.put(0x213df, "IO", "can not load module 'IO', system will be shut down.", E_ERROR);
 				return;
 			}
-			
 			/*auto-create*/
 			if (G.MO_AUTO_CREATE_APP !== false && !IO.directory.exists(G.MO_APP)) {
 				F.foreach([
@@ -467,57 +467,55 @@ var F, JSON, require, VBS, View, Model__,
 			}
 
 			/*load application config*/
-			require(c(G.MO_APP + "Conf/Config.asp"), true, function(){
-				if(this.hasOwnProperty("MO_LIB_CNAMES")){
-					if(this.MO_LIB_CNAMES) _extend(G.MO_LIB_CNAMES, this.MO_LIB_CNAMES);
-					delete this.MO_LIB_CNAMES;
-				}
-				for(var k in cfg){
-					delete this[k];
-				}
-				_extend(G, this);
-			});
-
+			var app_config=G.MO_APP + "Conf/Config.asp";
+			if(IO.file.exists(app_config)){
+				require(c(app_config), true, function() {
+					if (this.hasOwnProperty("MO_LIB_CNAMES")) {
+						if (this.MO_LIB_CNAMES) _extend(G.MO_LIB_CNAMES, this.MO_LIB_CNAMES);
+						delete this.MO_LIB_CNAMES;
+					}
+					for (var k in cfg) {
+						delete this[k];
+					}
+					_extend(G, this);
+				});
+			}
+			
 			if (!G.MO_METHOD_CHAR) G.MO_METHOD_CHAR = "m";
 			if (!G.MO_ACTION_CHAR) G.MO_ACTION_CHAR = "a";
 			if (!G.MO_GROUP_CHAR) G.MO_GROUP_CHAR = "g";
-			
-			ExceptionManager.errorReporting(G.MO_ERROR_REPORTING);
-			
-			if (G.MO_CHARSET != "utf-8") res.Charset = G.MO_CHARSET;
+
+			if (G.MO_CHARSET != "UTF-8") res.Charset = G.MO_CHARSET;
 			if (IO.file.exists(G.MO_APP + "Common/Function.asp")) _wapperfile(G.MO_APP + "Common/Function.asp");
 			if (G.MO_IMPORT_COMMON_FILES != "") {
-				var files = G.MO_IMPORT_COMMON_FILES.split(";"), _len = files.length;
-				if (_len <= 0) return;
+				var files = G.MO_IMPORT_COMMON_FILES.split(";"),
+					_len = files.length;
 				for (var i = 0; i < _len; i++) {
 					if (!files[i]) continue;
 					_wapperfile(G.MO_APP + "Common/" + files[i] + ".asp");
 				}
 			}
-			_start();
 			M.assign("VERSION", M.Version);
+			__invoke_event__("load", G);
+			ExceptionManager.errorReporting(G.MO_ERROR_REPORTING);
+			_lib("MO_PRE_LIB");
 			return true;
 		};
 		M.Terminate = function() {
 			var _tag = _runtime.run();
-			_end();
-			var events = __events__["ondispose"], _len, event;
-			if(events){
-				_len = events.length;
-				for(var i=0;i<_len;i++){
-					event = events[i];
-					if(event) event.call(M);
-				}
-			}
+			_lib("MO_END_LIB");
+			__invoke_event__("dispose");
 			_runtime.timelines.terminate = _runtime.ticks(_tag);
 			_debug();
 			_Assigns = null;
-			this.Config = null;
+			M.Config = null;
 			_Language = null;
 		};
-		function _parseRouteTo(url){
+
+		function _parseRouteTo(url) {
 			var mat = /^(.+?)(\?(.+))?$/.exec(url);
-			if(mat){
+			if (mat) {
+				F.get.clear();
 				var gma = _RightCopy(["", "", ""], mat[1].split("/"));
 				F.get(G.MO_GROUP_CHAR, gma[0]);
 				F.get(G.MO_METHOD_CHAR, gma[1]);
@@ -526,9 +524,10 @@ var F, JSON, require, VBS, View, Model__,
 			}
 		}
 		M.Route = function() {
-			var qs = req.QueryString + "", uri = "";
+			var qs = req.QueryString + "",
+				uri = "";
 			var mat = /^404\;http(s)?\:\/\/(.+?)\/(.*?)$/i.exec(qs);
-			if (mat != null){
+			if (mat != null) {
 				G.MO_ROUTE_MODE = "404";
 				M.IsRewrite = true;
 				uri = "/" + mat[3];
@@ -543,38 +542,44 @@ var F, JSON, require, VBS, View, Model__,
 				return;
 			}
 			if (G.MO_ROOT != "/" && uri.substr(0, G.MO_ROOT.length) == G.MO_ROOT) uri = uri.substr(G.MO_ROOT.length - 1);
-			if(G.MO_ROUTE_URL_EXT) {
-				uri = uri.replace(new RegExp("\\." + G.MO_ROUTE_URL_EXT + "$","i"), "");
-				if(uri.slice(0,1)=="/") uri = uri.substr(1);
-				if(uri.slice(-1)=="/") uri = uri.substr(0,uri.length-1);
+			if (G.MO_ROUTE_URL_EXT) {
+				uri = uri.replace(new RegExp("\\." + G.MO_ROUTE_URL_EXT + "$", "i"), "");
+				if (uri.slice(0, 1) == "/") uri = uri.substr(1);
+				if (uri.slice(-1) == "/") uri = uri.substr(0, uri.length - 1);
 			}
-			if(!uri) return;
+			if (!uri) return;
 			var Maps = G.MO_ROUTE_MAPS;
-			if (Maps && Maps.hasOwnProperty(uri)){
+			if (Maps && Maps.hasOwnProperty(uri)) {
 				_parseRouteTo(Maps[uri]);
 				return;
 			}
-			var reqmethod = F.server("REQUEST_METHOD"), reston = G.MO_ROUTE_REST_ENABLED, RouteTo="";
-			var Rules = G.MO_ROUTE_RULES, _len = Rules.length;
+			var reqmethod = F.server("REQUEST_METHOD"),
+				reston = G.MO_ROUTE_REST_ENABLED,
+				RouteTo = "";
+			var Rules = G.MO_ROUTE_RULES,
+				_len = Rules.length;
 			for (var i = 0; i < _len; i++) {
-				var rule = Rules[i], lookfor = rule.LookFor;
-				if(!rule.Method) rule.Method = "GET";
-				if(typeof lookfor == "string") lookfor = _pathtoRegexp(lookfor, null, {strict:true});
-				if (lookfor.test(uri) && (!reston || reqmethod==rule.Method)) {
+				var rule = Rules[i],
+					lookfor = rule.LookFor;
+				if (!rule.Method) rule.Method = "GET";
+				if (typeof lookfor == "string") lookfor = _pathtoRegexp(lookfor, null, {
+					strict: true
+				});
+				if (lookfor.test(uri) && (!reston || reqmethod == rule.Method)) {
 					RouteTo = uri.replace(lookfor, rule.SendTo);
 					break;
 				}
 			}
-			if(RouteTo) _parseRouteTo(RouteTo);
+			if (RouteTo) _parseRouteTo(RouteTo);
 		};
 		M.display = function(template, extcachestr) {
-			res.Status = this.Status;
+			res.Status = M.Status;
 			res.AddHeader("Content-Type", "text/html; charset=" + G.MO_CHARSET);
 			M.fetch(template, extcachestr);
 		};
 		M.fetch = function(template, extcachestr) {
 			M.Buffer = !(arguments.callee.caller == M.display);
-			if(!G.MO_TEMPLATE_ENGINE){
+			if (!G.MO_TEMPLATE_ENGINE) {
 				ExceptionManager.put(0x12edf, "Mo.fetch()", "please define any template engine.");
 				return "";
 			}
@@ -585,6 +590,7 @@ var F, JSON, require, VBS, View, Model__,
 			if (G.MO_COMPILE_CACHE) {
 				cachename = M.Method + "^" + M.Action + "^" + F.string.replace(template, /\:/igm, "^");
 				if (extcachestr) cachename += "^" + extcachestr;
+				IO.directory.create(G.MO_APP + "Cache/Compiled");
 				cachepath = F.mappath(G.MO_APP + "Cache/Compiled/" + cachename + ".asp");
 				if (IO.file.exists(cachepath)) {
 					usecache = true;
@@ -593,7 +599,7 @@ var F, JSON, require, VBS, View, Model__,
 						if (F.date.datediff("s", OldHash, new Date()) >= G.MO_COMPILE_CACHE_EXPIRED) usecache = false;
 					}
 					if (usecache) {
-						scripts = IO.file.readAllScript(cachepath, G.MO_CHARSET);
+						scripts = IO.file.readAllScript(cachepath);
 					}
 				}
 			}
@@ -606,7 +612,7 @@ var F, JSON, require, VBS, View, Model__,
 					return "";
 				}
 				scripts = View.compile(html);
-				if (G.MO_COMPILE_CACHE) IO.file.writeAllText(cachepath, "\u003cscript language=\"jscript\" runat=\"server\"\u003e\r\n" + scripts + "\r\n\u003c/script\u003e", G.MO_CHARSET);
+				if (G.MO_COMPILE_CACHE) IO.file.writeAllText(cachepath, "\u003cscript language=\"jscript\" runat=\"server\"\u003e\r\n" + scripts + "\r\n\u003c/script\u003e");
 			}
 			_runtime.timelines.compile = _runtime.ticks(_tag);
 			if (G.MO_DEBUG) {
@@ -625,12 +631,12 @@ var F, JSON, require, VBS, View, Model__,
 			var filename = cachepath;
 			if (G.MO_DEBUG) filename += ";compiled by [" + _ParseTemplatePath(template) + "." + G.MO_TEMPLATE_PERX + "], please check if there are syntax error in template or use variable(s) that not be defined."
 			content = wapper(_Assigns, filename, G.MO_DEBUG ? scripts : "", M.Buffer, 1024);
-			if (G.MO_CACHE && G.MO_CACHE_DIR != "" && IO.directory.exists(G.MO_CACHE_DIR)) IO.file.writeAllText(F.mappath(G.MO_CACHE_DIR + _CacheFileName + ".cache"), content, G.MO_CHARSET);
+			if (G.MO_CACHE && G.MO_CACHE_DIR != "" && IO.directory.exists(G.MO_CACHE_DIR)) IO.file.writeAllText(F.mappath(G.MO_CACHE_DIR + _CacheFileName + ".cache"), content);
 			_runtime.timelines.run1 = _runtime.ticks(_tag);
 			return content;
 		};
 		M.U = function(path, _parms, ext) {
-			var match = /^(.*?)(\?(.*?))?(\#(.*?))?(\@(.*?))?(\!)?$/igm.exec(path||"");
+			var match = /^(.*?)(\?(.*?))?(\#(.*?))?(\@(.*?))?(\!)?$/igm.exec(path || "");
 			if (!match) return "";
 			F.object.toURIString.fn = 0;
 			var path = match[1],
@@ -656,14 +662,16 @@ var F, JSON, require, VBS, View, Model__,
 				url += "/" + F.object.toURIString(parms);
 				F.object.toURIString.split_char_1 = "=";
 				F.object.toURIString.split_char_2 = "&";
-				if (ext) url += "." + ext;
+				ext = ext || G.MO_ROUTE_URL_EXT;
+				if (ext) ext = "." + ext;
 			} else {
 				url += "&" + F.object.toURIString(parms);
+				ext = "";
 			}
 			if (F.string.endsWith(url, "/") || F.string.endsWith(url, "&")) url = url.substr(0, url.length - 1);
 			if (anchor != "") url += "#" + anchor;
 			F.object.toURIString.fn = 1;
-			return url;
+			return url + ext;
 		};
 		M.L = function(key) {
 			if (!G.MO_LANGUAGE) {
@@ -705,7 +713,7 @@ var F, JSON, require, VBS, View, Model__,
 		M.C.SaveAs = function(conf, data) {
 			if (!data) return;
 			var filepath = F.mappath(G.MO_APP + "Conf/" + conf + ".asp");
-			IO.file.writeAllText(filepath, "\u003cscript language=\"jscript\" runat=\"server\"\u003e\r\nreturn " + JSON.stringify(data) + ";\r\n\u003c/script\u003e", "utf-8");
+			IO.file.writeAllText(filepath, "\u003cscript language=\"jscript\" runat=\"server\"\u003e\r\nreturn ({\r\n  \"__conf__\" : " + JSON.stringify(data) + "\r\n})['__conf__'];\r\n\u003c/script\u003e", "utf-8");
 		};
 		M.C.Exists = function(conf) {
 			return IO.file.exists(G.MO_APP + "Conf/" + conf + ".asp");
@@ -727,40 +735,40 @@ var F, JSON, require, VBS, View, Model__,
 		};
 		M.Run = function() {
 			var _tag = _runtime.run();
-			this.Method = F.get(G.MO_METHOD_CHAR);
-			this.Action = F.get(G.MO_ACTION_CHAR);
-			this.Group = F.get(G.MO_GROUP_CHAR);
-			(!/^(\w+)$/i.test(this.Action)) && (this.Action = "Index");
-			(!/^(\w+)$/i.test(this.Method)) && (this.Method = "Home");
-			(!/^(\w+)$/i.test(this.Group)) && (this.Group = "");
-			if (this.Group != "") this.Group += "/";
-			if (G.MO_CONTROLLER_CNAMES && G.MO_CONTROLLER_CNAMES.hasOwnProperty(this.Method.toLowerCase())) this.Method = G.MO_CONTROLLER_CNAMES[this.Method.toLowerCase()];
+			M.Method = F.get(G.MO_METHOD_CHAR);
+			M.Action = F.get(G.MO_ACTION_CHAR);
+			M.Group = F.get(G.MO_GROUP_CHAR);
+			(!/^(\w+)$/i.test(M.Action)) && (M.Action = "Index");
+			(!/^(\w+)$/i.test(M.Method)) && (M.Method = "Home");
+			(!/^(\w+)$/i.test(M.Group)) && (M.Group = "");
+			if (M.Group != "") M.Group += "/";
+			if (G.MO_CONTROLLER_CNAMES && G.MO_CONTROLLER_CNAMES.hasOwnProperty(M.Method.toLowerCase())) M.Method = G.MO_CONTROLLER_CNAMES[M.Method.toLowerCase()];
 			if (G.MO_CACHE) {
 				_CacheFileName = MD5(F.server("URL") + F.get.toURIString() + "");
 				if (IO.file.exists(G.MO_CACHE_DIR + _CacheFileName + ".cache")) {
-					res.Write(IO.file.readAllText(F.mappath(G.MO_CACHE_DIR + _CacheFileName + ".cache"), G.MO_CHARSET));
+					res.Write(IO.file.readAllText(F.mappath(G.MO_CACHE_DIR + _CacheFileName + ".cache")));
 					return;
 				}
 			}
-			var ModelPath = G.MO_APP + "Controllers/" + this.Group + this.Method + "Controller.asp",
+			var ModelPath = G.MO_APP + "Controllers/" + M.Group + M.Method + "Controller.asp",
 				can_LoadController = true;
-			this.RealMethod = this.Method;
-			this.RealAction = this.Action;
+			M.RealMethod = M.Method;
+			M.RealAction = M.Action;
 			if (!IO.file.exists(ModelPath)) {
-				ModelPath = G.MO_APP + "Controllers/" + this.Group + "EmptyController.asp";
-				this.RealMethod = "Empty";
+				ModelPath = G.MO_APP + "Controllers/" + M.Group + "EmptyController.asp";
+				M.RealMethod = "Empty";
 				if (!IO.file.exists(ModelPath)) {
-					ModelPath = G.MO_CORE + "Controllers/" + this.Group + this.Method + "Controller.asp";
-					this.RealMethod = this.Method;
+					ModelPath = G.MO_CORE + "Controllers/" + M.Group + M.Method + "Controller.asp";
+					M.RealMethod = M.Method;
 					if (!IO.file.exists(ModelPath)) {
-						ModelPath = G.MO_CORE + "Controllers/" + this.Group + "EmptyController.asp";
-						this.RealMethod = "Empty";
+						ModelPath = G.MO_CORE + "Controllers/" + M.Group + "EmptyController.asp";
+						M.RealMethod = "Empty";
 						if (!IO.file.exists(ModelPath)) {
-							if (M.templateIsInApp(this.Action) || M.templateIsInCore(this.Action)) {
-								M.display(this.Action);
+							if (M.templateIsInApp(M.Action) || M.templateIsInCore(M.Action)) {
+								M.display(M.Action);
 								can_LoadController = false;
 							} else {
-								ExceptionManager.put(0x2dfc, this.RealMethod + "." + this.RealAction, "controller '" + this.Method + "' is not exists.");
+								ExceptionManager.put(0x2dfc, M.RealMethod + "." + M.RealAction, "controller '" + M.Method + "' is not exists.");
 								return;
 							}
 						}
@@ -768,21 +776,24 @@ var F, JSON, require, VBS, View, Model__,
 				}
 			}
 			var _controller;
-			if (!(can_LoadController && (_controller = _LoadController(ModelPath, this.RealMethod)))) return;
+			if (!(can_LoadController && (_controller = _LoadController(ModelPath, M.RealMethod)))) return;
 			if (_controller["__PRIVATE__"] === true) {
-				ExceptionManager.put(0x2dfc, this.RealMethod + "." + this.RealAction, "controller '" + this.Method + "' is not exists.");
+				ExceptionManager.put(0x2dfc, M.RealMethod + "." + M.RealAction, "controller '" + M.Method + "' is not exists.");
 				return;
 			}
 			_runtime.timelines.load = _runtime.ticks(_tag);
 			var MC = null;
-			try{
-				MC = new _controller(this.Action);
-			}catch(ex){
-				_catchException({number:0x3a9,description:"controller '" + this.Method + "' initialize failed: " + ex.description + "."});
+			try {
+				MC = new _controller(M.Action);
+			} catch (ex) {
+				_catchException({
+					number: 0x3a9,
+					description: "controller '" + M.Method + "' initialize failed: " + ex.description + "."
+				});
 				return;
 			}
 			if (MC.__STATUS__ === true) {
-				var action_ = this.Action;
+				var action_ = M.Action;
 				if (G.MO_ACTION_CASE_SENSITIVITY === false) action_ = action_.toLowerCase();
 				var fn = null,
 					args = [],
@@ -794,18 +805,18 @@ var F, JSON, require, VBS, View, Model__,
 				} else if (MC[action_] && MC[action_]["__PRIVATE__"] !== true) {
 					fn = MC[action_];
 
-				} else if (G.MO_AUTO_DISPLAY && (M.templateIsInApp(this.Action) || M.templateIsInCore(this.Action))) {
+				} else if (G.MO_AUTO_DISPLAY && (M.templateIsInApp(M.Action) || M.templateIsInCore(M.Action))) {
 					self = M;
 					fn = M.display;
-					args = [this.Action];
+					args = [M.Action];
 
 				} else {
 					if (MC["empty"] && MC["empty"]["__PRIVATE__"] !== true) {
 						M.RealAction = "empty";
 						fn = MC["empty"];
-						args = [this.Action];
+						args = [M.Action];
 					} else {
-						ExceptionManager.put(0x3a8, this.RealMethod + "." + this.RealAction, "please define '" + this.Action + "' or 'empty' method.");
+						ExceptionManager.put(0x3a8, M.RealMethod + "." + M.RealAction, "please define '" + M.Action + "' or 'empty' method.");
 					}
 				}
 				if (G.MO_PARSEACTIONPARMS === true) args = _getfunctionParms(fn);
@@ -824,11 +835,11 @@ var F, JSON, require, VBS, View, Model__,
 		};
 		M.ModelCacheSave = function(name, content) {
 			if (name == "") return false;
-			return IO.file.writeAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"), content, G.MO_CHARSET);
+			return IO.file.writeAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"), content);
 		};
 		M.ModelCacheLoad = function(name) {
 			if (name == "") return "";
-			return IO.file.readAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"), G.MO_CHARSET);
+			return IO.file.readAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"));
 		};
 		M.ModelCacheDelete = function(name) {
 			if (name == "") return false;
@@ -862,61 +873,60 @@ var F, JSON, require, VBS, View, Model__,
 			_Assigns[key] = value;
 		};
 		return M;
-	})();
-(function(){
-	/*delay load*/
+	})(), shutdown = Mo.Terminate;
+	
+Mo.on("load", function() {
 	var loaddelay = {
-		"base64=Base64" : ["e", "d", "encode", "decode", "toBinary", "fromBinary", "setNames", "base64"], /*base64*/
-		"JSON" : ["parse", "stringify", "create", "decodeStrict", "encodeUnicode", "assets/json.js"],/*JSON*/
-		"IController" : ["create", "IController@lib/dist.js"], /*controller*/
-		"IClass" : ["create", "IClass@lib/dist.js"],/*class*/
-		"dump" : [null, "dump"],/*dump variables*/
-		"cookie=Cookie" : [null, "assets/cookie.js"],/*cookie*/
-		"Model__" : [null, "cmd", "useCommand", "Debug", "setDefault", "setDefaultPK", "begin", "commit", "rollback", "getConnection", "dispose", "connect", "execute", "executeQuery", "Model__@lib/model.js"], /*database*/
-		"DataTable" : [null, "Model__.helper.DataTable@lib/model.js"],
-		"DataTableRow" : [null, "Model__.helper.DataTableRow@lib/model.js"],
-		"VBS" : ["ns","include","eval","require","getref","execute","run","assets/vbs.js"], /*vbs*/
-		"Mpi" : ["downloadAndInstall", "Host", "setDefaultInstallDirectory", "download", "fetchPackagesList", "fetchPackage", "packageExists", "install", "assets/mpi.js"], /*Mpi*/
-		"Tar" : [null, "setNames", "packFolder", "packFile", "unpack", "assets/tar.js"],
-		"md5=MD5" : [null, "md5@assets/md5.js"],
-		"md5_bytes=MD5Bytes" : [null, "md5_bytes@assets/md5.js"],
-		"HMACMD5" : [null, "HMACMD5@assets/md5.js"],
-		"SHA1" : [null, "SHA1@assets/sha1.js"],
-		"HMACSHA1" : [null, "HMACSHA1@assets/sha1.js"],
-		"SHA256" : [null, "SHA256@assets/sha256.js"],
-		"HMACSHA256" : [null, "HMACSHA256@assets/sha256.js"],
-		"Html" : ["ActionLink", "Form", "FormUpload", "FormEnd", "CheckBox", "DropDownList", "ListBox", "Hidden", "Password", "RadioButton", "TextArea", "TextBox", "assets/htmlhelper.js"],
-		"Utf8" : ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "utf8@encoding"],
-		"GBK" : ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "gbk@encoding"],
-		"Unicode" : ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "unicode@encoding"],
-		"Hex" : ["parse", "stringify", "hex@encoding"],
-		"Encoding" : ["encodeURIComponent", "encodeURI", "decodeURI", "getEncoding", "encoding"],
-		"Crc32" : [null, "assets/crc32.js"],
-		"Safecode" : [null, "Safecode@safecode"],
-		"BmpImage" : [null, "BmpImage@safecode"]
-	};
-	for(var lib in loaddelay){
-		if(!loaddelay.hasOwnProperty(lib)) continue;
-		var library = loaddelay[lib], module = library.pop(), index = module.indexOf("@"), exports="", cname="", index2 = lib.indexOf("=");
-		if(index>0){
-			exports = "." + module.substr(0,index);
-			module = module.substr(index+1);
+		"base64=Base64": ["e", "d", "encode", "decode", "toBinary", "fromBinary", "setNames", "base64"],
+		"JSON": ["parse", "stringify", "create", "decodeStrict", "encodeUnicode", "assets/json.js"],
+		"IController": ["create", "IController@lib/dist.js"], "IClass": ["create", "IClass@lib/dist.js"],
+		"dump": [null, "dump"], "cookie=Cookie": [null, "assets/cookie.js"],
+		"Model__": [null, "cmd", "useCommand", "Debug", "setDefault", "setDefaultPK", "begin", "commit", "rollback", "getConnection", "dispose", "connect", "execute", "executeQuery", "Model__@lib/model.js"],
+		"DataTable": [null, "Model__.helper.DataTable@lib/model.js"], "DataTableRow": [null, "Model__.helper.DataTableRow@lib/model.js"],
+		"VBS": ["ns", "include", "eval", "require", "getref", "execute", "run", "assets/vbs.js"],
+		"Mpi": ["downloadAndInstall", "Host", "setDefaultInstallDirectory", "download", "fetchPackagesList", "fetchPackage", "packageExists", "install", "assets/mpi.js"],
+		"Tar": [null, "setNames", "packFolder", "packFile", "unpack", "assets/tar.js"],
+		"md5=MD5": [null, "md5@assets/md5.js"], "HMACMD5": [null, "HMACMD5@assets/md5.js"], 
+		"SHA1": [null, "SHA1@assets/sha1.js"], "HMACSHA1": [null, "HMACSHA1@assets/sha1.js"], "SHA256": [null, "SHA256@assets/sha256.js"], "HMACSHA256": [null, "HMACSHA256@assets/sha256.js"],
+		"Html": ["ActionLink", "Form", "FormUpload", "FormEnd", "CheckBox", "DropDownList", "ListBox", "Hidden", "Password", "RadioButton", "TextArea", "TextBox", "assets/htmlhelper.js"],
+		"Utf8": ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "utf8@encoding"],
+		"GBK": ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "gbk@encoding"],
+		"Unicode": ["getWordArray", "getByteArray", "bytesToWords", "toString", "getString", "unicode@encoding"],
+		"Hex": ["parse", "stringify", "hex@encoding"],"Encoding": ["encodeURIComponent", "encodeURI", "decodeURI", "getEncoding", "encoding"],
+		"Crc32": [null, "assets/crc32.js"], "Safecode": [null, "Safecode@safecode"], "BmpImage": [null, "BmpImage@safecode"],
+		"HashTable": [null, "assets/hashtable.js"],"MCM": [null, "assets/configmanager.js"], "Punycode" : ["toIDN", "fromIDN", "encode", "decode", "./punycode/index.js"],
+		"HttpRequest" : [null,"net/http/request.js"], "HttpUpload" : [null,"net/http/upload.js"], "WinHttpRequest=WinHttp" : [null,"get", "getJson", "post", "postJson", "save", "net/http/winhttp.js"],
+		"SOAPClient" : [null,"net/http/soap.js"], "Net" : ["IpToLong","LongToIp","InSameNetWork","IsIP","net"], "Upload" : [null,"accept", "net/upload.js"],
+		"Jmail" : [null,"net/mail.js"], "QRCode" : [null,"./qrcode/index.js"], "Marked" : [null, "options", "./assets/marked.js"]
+	}, executeable="";
+	for (var lib in loaddelay) {
+		if (!loaddelay.hasOwnProperty(lib)) continue;
+		var library = loaddelay[lib],
+			module = library.pop(),
+			index = module.indexOf("@"),
+			exports = "",
+			cname = "",
+			index2 = lib.indexOf("="), method="";
+		if (index > 0) {
+			exports = "." + module.substr(0, index);
+			module = module.substr(index + 1);
 		}
-		(new Function(lib + " = {};" ))();
-		if(index2>0) {
-			cname = lib.substr(index2+1);
+		executeable += lib + " = {};";
+		if (index2 > 0) {
+			cname = lib.substr(index2 + 1);
 			lib = lib.substr(0, index2);
 		}
 		var _len = library.length;
-		for(var i=0;i<_len;i++){
-			var method = "." + library[i];
-			if(library[i]==null) method="";
-			(new Function(lib + method + " = function(){" + lib + " = require(\"" + module + "\")" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};"))();
+		for (var i = 0; i < _len; i++) {
+			method = "." + library[i];
+			if (library[i] == null) method = "";
+			executeable += lib + method + " = function(){" + lib + " = require(\"" + module + "\")" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};";
 		}
-		if(cname) (new Function(cname + " = " + lib + ";"))();
+		if (cname) executeable += cname + " = " + lib + ";";
 	}
-})();
-var HMAC = function(algorithm, blocksize, data, key, ra){
+	(new Function(executeable))();
+});
+var HMAC = function(algorithm, blocksize, data, key, ra) {
 	var ipad = [],
 		opad = [];
 	if (typeof data == "string") data = Utf8.getByteArray(data);
@@ -933,10 +943,11 @@ var HMAC = function(algorithm, blocksize, data, key, ra){
 	data = opad.concat(data);
 	return algorithm(data, ra === true);
 };
-var Encapsulate = Function.Create = function(len){
-	var args=[];for(var i=0;i<len;i++) args.push("arg" + i);
+var Encapsulate = Function.Create = function(len) {
+	var args = [];
+	for (var i = 0; i < len; i++) args.push("arg" + i);
 	var _args = args.join(",");
-	return new Function(_args,"return new this(" + _args + ");");
+	return new Function(_args, "return new this(" + _args + ");");
 };
 var E_NONE = 0,
 	E_ERROR = 1,
@@ -944,48 +955,46 @@ var E_NONE = 0,
 	E_WARNING = 4,
 	E_INFO = 8,
 	E_MODEL = 16,
-	E_ALL = E_ERROR | E_NOTICE | E_WARNING | E_INFO | E_MODEL;
+	E_LOG = 32,
+	E_ALL = E_ERROR | E_NOTICE | E_WARNING | E_INFO | E_MODEL | E_LOG;
+var console = {};
+console.log = function(msg) {
+	MEM.putLog(0, "Log", msg);
+};
 var MEM = ExceptionManager = (function() {
 	var b = {};
 	var c = [],
 		d = E_ALL,
 		j = {
-			1 : "red",
-			2 : "orange",
-			4 : "blue",
-			8 : "green",
-			16 : "green"
+			1: "red",
+			2: "orange",
+			4: "blue",
+			8: "green",
+			16: "green",
+			32: "black"
 		};
 	var a = function(e) {
 		var f = "0000000" + e.toString(16).toUpperCase();
 		return f.substr(f.length - 8)
 	};
 	var fnum = function(e) {
-		if(e<10) return "0" + e;
+		if (e < 10) return "0" + e;
 		return e;
 	};
 	var fnum2 = function(e) {
-		if(e<10) return "00" + e;
-		if(e<100) return "0" + e;
+		if (e < 10) return "00" + e;
+		if (e < 100) return "0" + e;
 		return e;
 	};
 	var ft = function(e) {
-		return e.getFullYear() 
-		+ "-" + fnum(e.getMonth()+1) 
-		+ "-" + fnum(e.getDate()) 
-		+ " " + fnum(e.getHours()) 
-		+ ":" + fnum(e.getMinutes()) 
-		+ ":" + fnum(e.getSeconds()) 
-		+ "." + fnum2(e.getMilliseconds());
+		return e.getFullYear() + "-" + fnum(e.getMonth() + 1) + "-" + fnum(e.getDate()) + " " + fnum(e.getHours()) + ":" + fnum(e.getMinutes()) + ":" + fnum(e.getSeconds()) + "." + fnum2(e.getMilliseconds());
 	};
 	var ft2 = function(e) {
-		return fnum(e.getHours()) 
-		+ ":" + fnum(e.getMinutes()) 
-		+ ":" + fnum(e.getSeconds()) 
-		+ "." + fnum2(e.getMilliseconds());
+		return fnum(e.getHours()) + ":" + fnum(e.getMinutes()) + ":" + fnum(e.getSeconds()) + "." + fnum2(e.getMilliseconds());
 	};
-	function h(num){
-		return num == 1 ? "E_ERROR" : (num == 2 ? "E_NOTICE" : (num == 4 ? "E_WARNING" : (num == 8 ? "E_INFO" : "E_MODEL")));
+
+	function h(num) {
+		return num == 1 ? "E_ERROR" : (num == 2 ? "E_NOTICE" : (num == 4 ? "E_WARNING" : (num == 8 ? "E_INFO" : (num == 16 ? "E_MODEL" : "E_LOG"))));
 	}
 	b.put = function() {
 		var e = Array.prototype.slice.call(arguments, 0),
@@ -993,6 +1002,7 @@ var MEM = ExceptionManager = (function() {
 		if (typeof e[e.length - 1] == "number") {
 			f = e.pop()
 		}
+		if(!(f & d)) return;
 		if (e.length == 1) {
 			if (e[0].constructor == Exception) {
 				c.push(e[0])
@@ -1014,13 +1024,18 @@ var MEM = ExceptionManager = (function() {
 		e.push(E_NOTICE);
 		b.put.apply(null, e)
 	};
+	b.putLog = function() {
+		var e = Array.prototype.slice.call(arguments, 0);
+		e.push(E_LOG);
+		b.put.apply(null, e)
+	};
 	b.putWarning = function(e) {
 		var f = Array.prototype.slice.call(arguments, 0);
 		f.push(E_WARNING);
 		b.put.apply(null, f)
 	};
 	b.errorReporting = function(f) {
-		if(arguments.length==0) return d;
+		if (arguments.length == 0) return d;
 		d = f
 	};
 	b.clear = function() {
@@ -1029,78 +1044,89 @@ var MEM = ExceptionManager = (function() {
 		}
 	};
 	b.debug = function() {
-		var g = "", _len = c.length;
-		if(_len == 0) return "";
+		var g = "",
+			_len = c.length;
+		if (_len == 0) return "";
 		for (var f = 0; f < _len; f++) {
 			var e = c[f];
 			if (e.level & d) {
 				g += "[<b>0x" + a(e.Number) + "</b>] <span style=\"color:" + j[e.level] + "\">" + e.Source + ": " + Server.HTMLEncode(e.Description) + " [" + h(e.level) + "]</span>\r\n";
-				if(e.filename) g += "  File: " + e.filename + "\r\n";
-				if(e.lineNumber>0) g += "  Line: " + e.lineNumber + "\r\n";
-				if(e.traceCode) g += "  Code: <span style=\"color:red\">" + e.traceCode + "</span>\r\n";
+				if (e.filename) g += "  File: " + e.filename + "\r\n";
+				if (e.lineNumber > 0) g += "  Line: " + e.lineNumber + "\r\n";
+				if (e.traceCode) g += "  Code: <span style=\"color:red\">" + e.traceCode + "</span>\r\n";
 			}
 		}
-		if(g=="") return "";
-		return "<pre style=\"font-family:'Courier New';font-size:12px; padding:8px; background-color:#f6f6f6;border:1px #ddd solid;border-radius:5px;line-height:18px;\">" + g +"</pre>";
+		if (g == "") return "";
+		return "<pre style=\"font-family:'Courier New';font-size:12px; padding:8px; background-color:#f6f6f6;border:1px #ddd solid;border-radius:5px;line-height:18px;\">" + g + "</pre>";
 	};
 	b.debug2file = function(file) {
-		var g = "", _len = c.length;
-		if(_len == 0) return "";
+		var g = "",
+			_len = c.length;
+		if (_len == 0) return "";
 		for (var f = 0; f < _len; f++) {
 			var e = c[f];
 			if (e.level & d) {
 				g += "[" + ft(e.datetime) + "][" + Mo.Method + "." + Mo.Action + "]" + e.Source + ": " + e.Description + " [" + h(e.level) + "]\r\n";
-				if(e.filename) g += "  File: " + e.filename + "\r\n";
-				if(e.lineNumber>0) g += "  Line: " + e.lineNumber + "\r\n";
-				if(e.traceCode) g += "  Code: " + e.traceCode + "\r\n";
+				if (e.filename) g += "  File: " + e.filename + "\r\n";
+				if (e.lineNumber > 0) g += "  Line: " + e.lineNumber + "\r\n";
+				if (e.traceCode) g += "  Code: " + e.traceCode + "\r\n";
 			}
 		}
-		if(g=="") return;
+		if (g == "") return;
 		IO.file.appendAllText(file, g + "\r\n");
 	};
 	b.debug2session = function() {
-		var g = [], _len = c.length, key = "MO_DEBUGS_CACHE";
-		if(_len == 0);
+		var g = [],
+			_len = c.length,
+			key = "MO_DEBUGS_CACHE",
+			mode = Mo.Config.Global.MO_DEBUG_MODE,
+			store = mode == "SESSION" ? Session : Application;
+		if (_len == 0);
 		for (var f = 0; f < _len; f++) {
 			var e = c[f];
 			if (e.level & d) {
 				g.push({
-					"number" : a(e.Number),
-					"datetime" : ft2(e.datetime),
-					"method" : Mo.Method,
-					"action" : Mo.Action,
-					"source" : e.Source,
-					"message" : e.Description,
-					"level" : h(e.level),
-					"filename" : e.filename,
-					"linenumber" : e.lineNumber,
-					"code" : e.traceCode
+					"number": a(e.Number),
+					"datetime": ft2(e.datetime),
+					"method": Mo.Method,
+					"action": Mo.Action,
+					"source": e.Source,
+					"message": e.Description,
+					"level": h(e.level),
+					"filename": e.filename,
+					"linenumber": e.lineNumber,
+					"code": e.traceCode
 				});
 			}
 		}
 		if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
-		if(g.length>0){
-			var debugs = Session(key), data;
-			if(debugs){
-				debugs = debugs.substr(0,debugs.length-1) + "," + JSON.stringify(g).substr(1);
-				if(debugs.length>2048){
+		if (g.length > 0) {
+			if(mode == "APPLICATION") Application.Lock();
+			var debugs = store(key),
+				data;
+			if (debugs) {
+				debugs = debugs.substr(0, debugs.length - 1) + "," + JSON.stringify(g).substr(1);
+				if (debugs.length > 2048) {
 					var data = JSON.parse(debugs);
-					while(data.length>50)data.shift();
+					while (data.length > 50) data.shift();
 					debugs = JSON.stringify(data);
 				}
-				Session(key) = debugs;
-			}else{
-				Session(key) = JSON.stringify(g);
+				store(key) = debugs;
+			} else {
+				store(key) = JSON.stringify(g);
 			}
+			if(mode == "APPLICATION") Application.UnLock();
 		}
 	};
-	b.fromSession = function(){
+	b.fromSession = function() {
 		d = 0;
-		var key = "MO_DEBUGS_CACHE";
+		var key = "MO_DEBUGS_CACHE", mode = Mo.Config.Global.MO_DEBUG_MODE, store = mode == "SESSION" ? Session : Application;
 		if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
-		var debugs = Session(key);
-		Session.Contents.Remove(key);
-		if(!debugs) return "[]";
+		if(mode == "APPLICATION") Application.Lock();
+		var debugs = store(key);
+		store.Contents.Remove(key);
+		if(mode == "APPLICATION") Application.UnLock();
+		if (!debugs) return "[]";
 		return debugs;
 	};
 	return b
@@ -1111,8 +1137,9 @@ function Exception(b, c, a, d) {
 	this.levelString = "E_ERROR";
 	this.Number = b || 0;
 	if (this.Number < 0) {
-		this.Number =  this.Number + 0x100000000;
+		this.Number = this.Number + 0x100000000;
 	}
+	if(this.Number==0x80040E10) a += " please ensure that you have typed field-name correctly.";
 	this.Source = c || "";
 	this.Message = a || "";
 	this.Description = a || "";
@@ -1128,7 +1155,7 @@ var IO = (function() {
 		if (typeof d != "string") {
 			return ""
 		}
-		if (d.substr(1,1) == ":") {
+		if (d.substr(1, 1) == ":") {
 			return d
 		}
 		return Server.MapPath(d)
@@ -1152,21 +1179,17 @@ var IO = (function() {
 		d.parent = function(p) {
 			return d.fso.GetParentFolderName(c(p));
 		};
-		d.absolute = function(path)
-		{
+		d.absolute = function(path) {
 			return d.fso.GetAbsolutePathName(c(path));
 		};
-		d.base = function(path)
-		{
+		d.base = function(path) {
 			return d.fso.GetBaseName(c(path));
 		};
-		d.parent = function(path)
-		{
+		d.parent = function(path) {
 			return d.fso.GetParentFolderName(c(path));
 		};
-		d.build = function(path,name)
-		{
-			return d.fso.GetAbsolutePathName(d.fso.BuildPath(c(path),name));
+		d.build = function(path, name) {
+			return d.fso.GetAbsolutePathName(d.fso.BuildPath(c(path), name));
 		};
 		d.stream = function(g, e) {
 			var f = new ActiveXObject("adodb.stream");
@@ -1261,18 +1284,15 @@ var IO = (function() {
 		d.exists = function(e) {
 			return b.fso.folderexists(c(e))
 		};
-		d.files = function(path,callback)
-		{
-			if(!d.exists(path))
-			{
+		d.files = function(path, callback) {
+			if (!d.exists(path)) {
 				return [];
 			}
-			var files=[];
+			var files = [];
 			var fc = new Enumerator(b.fso.getFolder(c(path)).files);
 			var isFunc = (typeof callback == "function");
-			for (;!fc.atEnd(); fc.moveNext())
-			{
-				if(isFunc) callback(fc.item());
+			for (; !fc.atEnd(); fc.moveNext()) {
+				if (isFunc) callback(fc.item());
 				else files.push(fc.item().path);
 			}
 			return files;
