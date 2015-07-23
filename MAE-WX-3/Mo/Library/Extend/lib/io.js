@@ -66,6 +66,10 @@ var $io = (function()
 		var stream = F.activex("adodb.stream");stream.mode = mode ||3;stream.type = type||1;return stream;
 	};
 	$Io.fps=[];
+	$Io.get_filesize = function(fp)
+	{
+		return $Io.fps[fp][3];
+	};
 	$Io.absolute = function(path)
 	{
 		path = F.mappath(path);
@@ -304,7 +308,7 @@ $io.file = $io.file || (function()
 				fp.position = fp.size;
 			}
 		}
-		$io.fps.push([fp,path,cfg]);
+		$io.fps.push([fp,path,cfg,$io.filesize]);
 		return $io.fps.length-1;
 	};
 	$file.seek = function(fp,position)
@@ -336,6 +340,26 @@ $io.file = $io.file || (function()
 			ExceptionManager.put(ex,"io.file.write");
 		}
 	};
+	$file.writeTo = function(fp, fp2, length){
+		if(length){
+			$io.fps[fp][0].CopyTo($io.fps[fp2][0], length);
+		}else{
+			$io.fps[fp][0].CopyTo($io.fps[fp2][0]);
+		}
+	};	
+	$file.writeToResponse = function(fp, blocksize){
+		var stream = $io.fps[fp][0],readed = 0, block = blocksize || 524288;
+		readed =0;
+		if(block>=stream.size){
+			Response.BinaryWrite(stream.Read(stream.size));
+		}else{
+			while(readed<stream.size){
+				if(readed+block>stream.size)block = stream.size-readed;
+				Response.BinaryWrite(stream.read(block));
+				readed += block;
+			}
+		}
+	};	
 	$file.writeBuffer = function(fp,content){
 		return $file.write(fp, buffer2string(content));
 	};

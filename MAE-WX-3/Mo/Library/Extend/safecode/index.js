@@ -12,7 +12,10 @@ function $safecode(sessionKey,opt){
 		data : "",
 		bit : 24,
 		font:"songti",
-		bgColor:0xffffff
+		bgColor:0xffffff,
+		wave : true,
+		width:0,
+		height:0
 	};
 	F.extend(cfg,opt||{});
 	Response.Buffer = false;
@@ -48,19 +51,23 @@ function $safecode(sessionKey,opt){
 	}
 	F.session(sessionKey,vCodes);
 	var padding = cfg.padding,
-		width=0,
-		height=0,
+		width=cfg.width,
+		height=cfg.height,
 		image = null;
-
-	for(var i=0;i<vCode.length;i++){
-		width += vCode[i].width;
-		height = Math.max(height, vCode[i].height);
+	if(width==0){
+		for(var i=0;i<vCode.length;i++){
+			width += vCode[i].width;
+			height = Math.max(height, vCode[i].height);
+		}
+		width += padding *2;
+		height += padding *2;
 	}
-	image = bmpImage(width + padding*2,height + padding*2,cfg.bit)
+	image = bmpImage(width,height,cfg.bit)
 	image.setBgColor(0xffffff, cfg.odd);
-	var drawed=0, x=0,y=0, w=0, h=0,wave=false;
+	var drawed=0, x=0,y=0, w=0, h=0,wave=cfg.wave,pi=3.141592653589793;
 	for(var i=0;i<vCode.length;i++){
 		achar = vCode[i]; w = achar.width; h = achar.height; 
+		//achar.change(F.random(-1,1) * pi / F.random(6,12));
 		x = drawed + padding + (wave?(Math.floor(Math.random() * (w / 2) - (w/4))):0); 
 		y = padding + (wave?(Math.floor(Math.random() * (h / 2) - (h/4))):0);
 		image.Char2(x, y, achar.data, w, h);
@@ -76,10 +83,28 @@ function $safecode(sessionKey,opt){
 // byteArrayOutputStream
 //---------------------------------------------------------------------
 var AChar = function(data){
-	var _char={};
+	var _char={},len_=0, w,h;
 	_char.data = data.slice(0);
 	_char.height = _char.data.pop();
 	_char.width = _char.data.pop();
+	len_ = _char.data.length;
+	w = _char.width;
+	h = _char.height;
+	_char.change = function(a){
+		var data2=[],p0 = Math.floor(w/2), p1 = Math.floor(h/2), x0, y0, p3,p4,sina=Math.sin(a),cosa=Math.cos(a);
+		for(var i=0;i<len_;i++) data2[i] = -1;
+		for(var x = 0;x<w;x++){
+			p3 = (x - p0);
+			for(var y=0;y<h;y++){
+				p4 = (y - p1);
+				x0= p3*cosa - p4*sina + p0 ;
+				y0= p3*sina + p4*cosa + p1 ;
+				//if(x0>=0 && x0<w && y0>=0 && y0<h) 
+					data2[Math.floor(x0)*w+Math.floor(y0)] = data[x * w + y];
+			}
+		}
+		_char.data = data2;
+	};
 	return _char;
 };
 var byteArrayOutputStream = function() {

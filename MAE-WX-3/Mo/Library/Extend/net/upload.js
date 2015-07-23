@@ -108,6 +108,7 @@ function $upload(cfg_){
 	$g.OnSucceed.call($upload,$g);
 	return true;
 };
+$upload.accept = $upload;
 $upload.$cfg=null;
 $upload.$exception="";
 $upload.$base=null;

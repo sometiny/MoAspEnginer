@@ -32,6 +32,7 @@ var $getHttpResponse = function(WS,content){
 	return result;
 };
 function $soap(url,namespace){
+	if(this.constructor!==$soap) return new $soap(url, namespace);
 	function def(v){
 		if(v==undefined)return "";
 		return v;
@@ -47,33 +48,7 @@ function $soap(url,namespace){
 	this.Parms={};
 	delete def;
 }
-$soap.ParmsManager = function(Src){
-	if(Src!=undefined) this.Parms = Src.Parms;
-	else this.Parms={};
-};
-$soap.ParmsManager.prototype.Push = function(path, value){
-	(new Function("value","this.Parms"+$soap.ParsePath(path)+"=value;")).apply(this,[value]);
-};
-
-$soap.ParmsManager.prototype.PushAsObject = function(path){
-	(new Function("this.Parms"+$soap.ParsePath(path)+"={};")).apply(this,[]);
-};
-
-$soap.ParmsManager.prototype.PushAsArray = function(path){
-	(new Function("this.Parms"+$soap.ParsePath(path)+"=[];")).apply(this,[]);
-};
-
-$soap.ParmsManager.prototype.PushVBArray = function(path, value){
-	(new Function("value","this.Parms"+$soap.ParsePath(path)+"=(new VBArray(value)).toArray();")).apply(this,[value]);
-};
-$soap.ParsePath = function(path){
-	if(/([^\w\.\[\]]+)/.test(path)){
-		throw {"description":"path error"};
-		return;
-	}
-	return path.replace(/\b([a-zA-Z]\w*)\b/igm,"[\"$1\"]").replace(/\./igm,"");
-};
-$soap.Protocols = {"SOAP":1,"SOAP12":2,"HttpGet":3,"HttpPost":4};
+SoapProtocols = $soap.Protocols = {"SOAP":1,"SOAP12":2,"HttpGet":3,"HttpPost":4};
 $soap.ParseArguments = function(arg){
 	var returnValue="";
 	if(typeof arg=="object"){
@@ -81,9 +56,11 @@ $soap.ParseArguments = function(arg){
 			if(arg.hasOwnProperty(i)){
 				var val = arg[i];
 				if(val.constructor == Array){
+					returnValue += "<" + i + ">";
 					for(var j=0;j<val.length;j++){
-						returnValue+="<" + i + ">" + $soap.ParseArguments(val[j]) + "</" + i + ">";
+						returnValue += $soap.ParseArguments(val[j]) ;
 					}
+					returnValue += "</" + i + ">";
 				}else{
 					returnValue+="<" + i + ">" + $soap.ParseArguments(val) + "</" + i + ">";
 				}
@@ -107,12 +84,9 @@ $soap.ParseArgumentsForHttp = function(arg){
 	}
 	return arg;
 };
-$soap.fn = $soap.prototype = new $soap.ParmsManager();
-$soap.fn.CreateParmsManager=function(){
-	return new $soap.ParmsManager(this);
-};
+$soap.fn = $soap.prototype;
 $soap.fn.SetParm = function(path,value){
-	(new Function("value","this.Parms"+$soap.ParsePath(path)+"=value;")).apply(this,[value]);
+	this.Parms = value;
 };
 $soap.fn.SetProtocolVersion=function(version){
 	if(version!=1 && version!=2 && version!=3 && version!=4)return;

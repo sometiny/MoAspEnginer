@@ -6,7 +6,7 @@
 */
 var Driver = {};
 Driver.GetConnectionString = function(){
-	return F.format("provider=sqloledb.1;Persist Security Info=false;data source={0};User ID={1};pwd={2};Initial Catalog={3}",this["DB_Server"],this["DB_Username"],this["DB_Password"],this["DB_Name"]);
+	return this["DB_Connectionstring"] || F.format("provider=sqloledb.1;Persist Security Info=false;data source={0};User ID={1};pwd={2};Initial Catalog={3}",this["DB_Server"],this["DB_Username"],this["DB_Password"],this["DB_Name"]);
 };
 Driver.GetSqls = function(){
 	var where_="",order_="",where2_="",groupby="",join="",on="",cname="", table = this.table, limit = this.strlimit, joinlevel = this.joinlevel, pagekey = this.pagekey, strpage = this.strpage;
@@ -69,15 +69,6 @@ Driver.GetColumns = function(tablename){
 		rs.movenext();
 	}
 	return obj;
-};
-Driver.Max = function(k){
-	return this.query("select isnull(max(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;
-};
-Driver.Min = function(k){
-	return this.query("select isnull(min(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;
-};
-Driver.Sum = function(k){
-	return this.query("select isnull(sum(" + k + "),0) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;
 };
 Driver.initialize = function(Helper, Conn){
 	

@@ -3,7 +3,7 @@ NoticeController = IController.create();
 NoticeController.extend("Index",function(){
 	var WXMessage = require("wx/WXMessage.js");
 	var WXConf = C("@.WX");
-	var WX = new WXMessage();
+	var WX = new WXMessage(WXConf);
 	var WxDelegate = Mo.A("Delegate");
 	WX.SignManager.token=WXConf.token;
 	WX.SignManager.timestamp = F.get("timestamp");

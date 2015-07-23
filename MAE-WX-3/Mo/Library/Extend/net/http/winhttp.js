@@ -46,6 +46,7 @@ var getXmlHttpRequestObject = function() {
 	return b;
 };
 function $httprequest(url, options) {
+	if(this.constructor!==$httprequest) return new $httprequest(url, options);
 	this.$g={};
 	this.url = url;
 	this.base=null;
@@ -59,7 +60,7 @@ function $httprequest(url, options) {
 	this.headers=null;
 	F.extend(this.$g, cfg, options||{});
 }
-$httprequest.OPTIONS = {
+HTTPOPTIONS = $httprequest.OPTIONS = {
 	UserAgentString : 0, URL : 1, URLCodePage : 2, EscapePercentInURL : 3, SslErrorIgnoreFlags : 4, SelectCertificate : 5, EnableRedirects : 6, UrlEscapeDisable : 7, UrlEscapeDisableQuery : 8,
 	SecureProtocols : 9, EnableTracing : 10, RevertImpersonationOverSsl : 11, EnableHttpsToHttpRedirects : 12, EnablePassportAuthentication : 13, MaxAutomaticRedirects : 14, MaxResponseHeaderSize : 15,
 	MaxResponseDrainSize : 16, EnableHttp1_1 : 17, EnableCertificateRevocationCheck : 18, RejectUserpwd : 19
@@ -98,8 +99,7 @@ $httprequest.fn.init = function() {
 		this.$g.headers.push("If-Modified-Since:0");
 		this.$g.headers.push("Cache-Control:no-cache");
 	}
-	if (this.$g.method == "POST") this.$g.headers.push("Content-Type:application/x-www-form-urlencoded; charset=" + (this.charset || "utf-8"));
-	if (!this.$g.charset || this.$g.charset == "") this.$g.charset = "utf-8";
+	if (!this.$g.charset) this.$g.charset = "utf-8";
 };
 
 $httprequest.fn.setOptions = function(option, value) {
@@ -131,7 +131,7 @@ $httprequest.fn.setTimeouts = function() {
 $httprequest.fn.send = function(fn) {
 	this.init();
 	if (typeof fn == "function") fn.call(this);
-	this.base = getXmlHttpRequestObject();
+	this.base = this.base || getXmlHttpRequestObject();
 	if (this.base == null) {
 		this.exception += "can not create winhttp object.";
 		return this;
@@ -149,7 +149,6 @@ $httprequest.fn.send = function(fn) {
 	} catch (ex) {this.warning="there has some errors when set options(" + ex.description + ").";}
 
 	try {
-		var endchr = ((this.url.indexOf("?") < 0) ? "?" : "&");
 		if(!isNullOrEmpty(this.$g.data)){
 			if(typeof this.$g.data == "object"){
 				var d_ = "",fn = (this.$g.charset.toLowerCase()=="utf-8"?encodeURIComponent:escape);
@@ -160,7 +159,8 @@ $httprequest.fn.send = function(fn) {
 				if(d_!="")d_=d_.substr(0,d_.length-1);
 				this.$g.data = d_;
 			}
-			if (this.$g.method == "GET") this.url += endchr + this.$g.data;
+			this.$g.headers.push("Content-Length:" + this.$g.data.length);
+			this.$g.headers.push("Content-Type:application/x-www-form-urlencoded; charset=" + (this.charset || "utf-8"));
 		}
 		if(!(isNullOrEmpty(this.$g.username) || isNullOrEmpty(this.$g.password))){
 			this.base.SetCredentials(this.$g.username,this.$g.password, 0);
@@ -201,6 +201,34 @@ $httprequest.fn.send = function(fn) {
 	}
 	return this;
 }
+$httprequest.fn.options = function(name, value) {
+	if(value===undefined) return this.$g[name];
+	this.$g[name] = value;
+};
+$httprequest.fn.next = function(url, options) {
+	var http = new $httprequest(url || this.url, options);
+	if(options===true) http.$g = this.$g;
+	http.base = this.base;
+	this.dispose();
+	return http;
+};
+$httprequest.fn.next_send = function(data) {
+	try {
+		this.base.Send(data);
+		this.sended = true;
+		this.readyState = 4;
+		this.status = parseInt(this.base.Status);
+		this.statusText = this.base.StatusText;
+		this.content = this.base.ResponseBody;
+	} catch (ex) {
+		this.sended = true;
+		this.exception += ex.description;
+	}
+};
+$httprequest.fn.dispose = function() {
+	this.base = null;
+	this.$g = null;
+};
 $httprequest.fn.save = function(filepath) {
 	if (!this.sended) this.send();
 	if(this.content==null)return this;
@@ -246,7 +274,7 @@ $httprequest.fn.getHeader = function(key) {
 	if (!this.sended) this.send();
 	if (this.readyState != 4) return null;
 	if (key) {
-		var headers = (this.headers || (this.headers = this.base.getAllResponseHeaders())).split("\r\n"),
+		var headers = this.base.getAllResponseHeaders().split("\r\n"),
 			result = [];
 		for(var i=0;i<headers.length;i++){
 			var header = headers[i] ,position = header.indexOf(":");
@@ -257,7 +285,7 @@ $httprequest.fn.getHeader = function(key) {
 		}
 		return result;
 	} else {
-		return this.headers || (this.headers = this.base.getAllResponseHeaders());
+		return this.base.getAllResponseHeaders();
 	}
 };
 

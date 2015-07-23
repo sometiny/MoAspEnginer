@@ -71,14 +71,19 @@ DataTable.prototype.__AddDataSet__ = function(rs,pagesize){
 	if(rs.state == 0){ExceptionManager.put(new Exception(0,"DataTable.__AddDataSet__(rs,pagesize)","Recordset's state is 'closed'."));return;}
 	try{
 		if(pagesize == undefined)pagesize = -1;
-		var ps = rs.AbsolutePosition, k = 0, fcount=0;
-		if(!rs.eof) fcount = rs.fields.Count;
+		var ps = rs.AbsolutePosition, k = 0, fcount=0, fields, field_names=[];
+		if(!rs.eof){
+			fcount = rs.fields.Count;
+			fields = rs.fields;
+			for(var i=0;i<fcount;i++){
+				field_names[i] = fields(i).Name;
+			}
+		}
 		while(!rs.eof && (k < pagesize || pagesize == -1)){
 			k++;
-			var r = {}, fields = rs.fields, field;
+			var r = {};
 			for(var i = 0;i < fcount;i++){
-				field = fields(i);
-				r[field.Name] = field.value;
+				r[field_names[i]] = fields(i).value;
 			}
 			this.LIST__.push(r);
 			rs.MoveNext();
@@ -275,7 +280,7 @@ for(var n in DataTypes){
 	eval(n + " = " + DataTypes[n]);
 }
 Driver.GetConnectionString = function(){
-	return "provider=microsoft.jet.oledb.4.0; data source=" + F.mappath(this["DB_Path"]) + (this["DB_Password"] ? (";Persist Security Info=False;Jet OLEDB:Database Password=" + this["DB_Password"]) : "");
+	return this["DB_Connectionstring"] || "provider=microsoft.jet.oledb.4.0; data source=" + F.mappath(this["DB_Path"]) + (this["DB_Password"] ? (";Persist Security Info=False;Jet OLEDB:Database Password=" + this["DB_Password"]) : "");
 };
 Driver.GetSqls = function(){
 	var where_="",order_="",where2_="",groupby="",join="",on="",cname="";
@@ -330,13 +335,13 @@ Driver.GetColumns = function(tablename){
 	return obj;
 };
 Driver.Max = function(k){
-	return this.query("select iif(isnull(max(" + k + ")),0,max(" + k + ")) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;
+	return this.query("select max(" + k + ") from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value || 0;
 };
 Driver.Min = function(k){
-	return this.query("select iif(isnull(min(" + k + ")),0,min(" + k + ")) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
+	return this.query("select min(" + k + ") from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value || 0;	
 };
 Driver.Sum = function(k){
-	return this.query("select iif(isnull(sum(" + k + ")),0,sum(" + k + ")) from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value;	
+	return this.query("select sum(" + k + ") from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value || 0;	
 };
 function ModelCMDManager(cmd,model,ct, modeltype){
 	if(modeltype!==1)modeltype=0;

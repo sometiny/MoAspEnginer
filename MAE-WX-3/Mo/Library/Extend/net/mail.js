@@ -5,15 +5,16 @@
 **		support@mae.im
 */
 function $jmail(){
+	if(this.constructor !==$jmail) return new $jmail();
 	this.Exception="";
 	this.jmail=null;
 	this.charset="GB2312";
 	this.contenttype="text/html";
 	
 	this.enabled=function(classid){
-		classid = classid || "JMail.Message";
+		classid = classid || "JMAIL.Message";
 		this.jmail = F.activex(classid);
-		if(this.jmaill==null) return false;
+		if(this.jmail==null) return false;
 		return true;
 	};
 	this.setting={

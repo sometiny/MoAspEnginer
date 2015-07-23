@@ -138,13 +138,14 @@ function dogenerate(fp, name, files){
 		if(!files.hasOwnProperty(i)) continue;
 		var file = files[i];
 		if(typeof file == "string"){
-			var data = IO.file.readAllBytes(file),
+			var fp2 = IO.file.open(file, {forText:false,forRead:true}),
 				header = tarHeader(name + i, file, false);
-			header.generate(IO.filesize);
+			header.generate(IO.get_filesize(fp2));
 			IO.file.write(fp, IO.buffer2binary(header.data));
 			if(header.filesize>0){
-				IO.file.write(fp, data);
+				IO.file.writeTo(fp2, fp);
 			}
+			IO.file.close(fp2);
 			var padding= header.filesize % 512;
 			if(padding>0){
 				var pad = [];

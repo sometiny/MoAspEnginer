@@ -1,0 +1,22 @@
+﻿{
+	"name" : "punycode",
+	"version" : "1.0.0",
+	"description" : "Punycode编码/解码的实现。",
+	"keywords" : ["punycode","domain"],
+	"homepage" : "http://mpi.thinkasp.cn/?/mpi/package/info/punycode",
+	"bugs" : {
+		"url" : "http://mpi.thinkasp.cn/?/mpi/package/info/punycode",
+		"email" : "zhanghuiguoanlige@126.com"
+	},
+	"license" : "GPLv3",
+	"author" : 
+	{
+		"name" : "anlige",
+		"email" : "zhanghuiguoanlige@126.com",
+		"url" : "http://m.thinkasp.cn/"
+	},
+	"files" : [
+		"index.js"
+	],
+	"main" : "punycode"
+}

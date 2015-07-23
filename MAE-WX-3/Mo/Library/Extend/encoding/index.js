@@ -90,7 +90,7 @@ module.exports = (function(){
 			}
 			i++;
 		}
-		return $encoding.toString($encoding.bytesToWords(ret));
+		return $encoding.getString(ret);
 	};
 	$enc.encode = function(string,enc,t){
 		enc = (enc || "utf-8").toUpperCase();

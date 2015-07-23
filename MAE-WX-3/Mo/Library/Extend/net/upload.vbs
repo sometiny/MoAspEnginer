@@ -201,12 +201,7 @@ class upload
 	end function
 	
 	private function CheckEntryType()
-		dim ContentType, ctArray, bArray,RequestMethod
-		RequestMethod=trim(LCase(Request.ServerVariables("REQUEST_METHOD")))
-		if RequestMethod<>"post" then
-			CheckEntryType = False
-			exit function
-		end if
+		dim ContentType, ctArray
 		ContentType = LCase(Request.ServerVariables("HTTP_CONTENT_TYPE"))
 		if ContentType="" then ContentType = LCase(Request.ServerVariables("CONTENT_TYPE"))
 		ctArray = Split(ContentType, ";")
@@ -259,13 +254,7 @@ class upload
 		set Save = File
 	end function
 	
-	public function GetBinary(byval Name)
-		dim File
-		set File = Files(Name)
-		if not File.IsFile then
-			GetBinary = chrb(0)
-			exit function
-		end if
+	public function GetBinary(File)
 		StreamT.Position = File.Position
 		GetBinary = StreamT.read(File.Size)
 	end function 

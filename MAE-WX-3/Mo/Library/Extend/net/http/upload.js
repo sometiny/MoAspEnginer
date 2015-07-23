@@ -33,6 +33,7 @@ var $writefileto = function(path,destStream){
 };
 
 function $httpupload(url, opt){
+	if(!(this instanceof $httpupload)) return new $httpupload(url, opt);
 	_httprequest.apply(this,[url,"POST","",false]);
 	this.boundary = F.random.letter(22);
 	this.forms=[];
