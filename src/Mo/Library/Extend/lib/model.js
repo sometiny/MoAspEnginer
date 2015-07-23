@@ -5,21 +5,12 @@
 **		support@mae.im
 */
 
-var Debugs = [],
-	Models = [],
+var Models = [],
 	Connections = {},
 	UseCommand = false,
+	LogIndex = 0;
 	PutDebug = function(log){
-		Debugs.push(log);
-		return Debugs.length-1;
-	},
-	AppendDebug = function(log, to){
-		if(Debugs.length<=0){
-			Debugs.push(log);
-		}else{
-			if(to === undefined) to = Debugs.length-1;
-			Debugs[to] = Debugs[to] + log;
-		}
+		ExceptionManager.put((++LogIndex) | 0xdb000000, "DBLOG", log, E_MODEL);
 	},ALLOWDEBUG = false;
 
 var _helper = require("model_defines.js");
@@ -83,19 +74,13 @@ Model__.dispose = function(){
 			if(M.base.state == 1)M.base.close();
 			ALLOWDEBUG && PutDebug("database(" + cfg +") disconnected.[time taken:" + F.timer.stop() + "MS]");
 		}catch(ex){
-			ALLOWDEBUG && PutDebug("database(" + cfg +") disconnect failed:" + ex.message);
+			MEM.put(ex.number, "Model__.dispose()", "database(" + cfg +") disconnect failed:" + ex.message);
 		}
 		M.base = null;
 		M = null;
 	}
 	delete Connections;
 	Connections = {};
-};
-
-Model__.debug = function(){
-	for(var i = 0;i < Debugs.length;i++){
-		ExceptionManager.put((i+1) | 0xdb000000, "DBLOG", Debugs[i], E_MODEL);
-	}
 };
 Model__.Debug = function(allowDebug){
 	ALLOWDEBUG = !!allowDebug;
@@ -110,12 +95,12 @@ Model__.connect = function(cfg){
 	}else{
 		cfg_ = Mo.Config.Global["MO_DATABASE_" + cfg];
 		if(!cfg_){
-			ALLOWDEBUG && PutDebug("can not find database config(" + cfg +").check it?");
+			MEM.put(0xdb00e124, "Model__.connect(cfg)", "can not find database config(" + cfg +").check it?");
 			return false;
 		}
 		type = cfg_["DB_Type"];
 		if(!type){
-			ALLOWDEBUG && PutDebug("please define 'DB_Type' for database(" + cfg +").");
+			MEM.put(0xdb00e125, "Model__.connect(cfg)", "please define 'DB_Type' for database(" + cfg +").");
 			return false;
 		}
 		base = F.activex.connection();
@@ -152,7 +137,7 @@ Model__.connect = function(cfg){
 		ALLOWDEBUG && PutDebug("database(" + cfg +") connect successfully.(time taken:" + F.timer.stop() + "MS)");
 		return true;
 	}catch(ex){
-		ALLOWDEBUG && PutDebug("database(" + cfg +") connect failed:" + ex.message);
+		MEM.put(ex.number, "Model__.connect(cfg)", "database(" + cfg +") connect failed:" + ex.message);
 		return false;
 	}
 	return false;
@@ -441,7 +426,7 @@ __Model__.prototype.createCommandManager = function(cmd,ct){
 __Model__.prototype.exec = function(manager){
 	var fp;
 	try{
-		ALLOWDEBUG && (fp = F.timer.run()) && PutDebug(manager.cmd+",");
+		ALLOWDEBUG && (fp = F.timer.run());
 		if(manager.withQuery){
 			this.rs__ = manager.exec();
 			this.fetch();
@@ -449,9 +434,9 @@ __Model__.prototype.exec = function(manager){
 		}else{
 			manager.exec();
 		}
-		ALLOWDEBUG && AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
+		ALLOWDEBUG && PutDebug(manager.cmd + ",[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 	}catch(ex){
-		ALLOWDEBUG && AppendDebug("[UNFINISHED],[#" + fp + "]");
+		ALLOWDEBUG && PutDebug(manager.cmd + ",[UNFINISHED],[#" + fp + "]");
 		_catchException("__Model__.exec(manager)", ex);
 	}
 	return this;
@@ -482,25 +467,25 @@ __Model__.prototype.query = function(){
 	if(arguments.length >= 1){
 		try{
 			if(arguments.length == 2 && arguments[1] === true){
-				ALLOWDEBUG && (fp = F.timer.run()) && PutDebug(arguments[0]+",");
+				ALLOWDEBUG && (fp = F.timer.run());
 				var rs_ = this.connection.execute(arguments[0]);
-				ALLOWDEBUG && AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
+				ALLOWDEBUG && PutDebug(arguments[0]+",[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 				return rs_;
 			}else if(arguments.length == 2 && (typeof arguments[1] == "string")){
 				this.sql= arguments[0];
 				this.countsql = arguments[1];
 			}else{
-				ALLOWDEBUG && (fp = F.timer.run()) && PutDebug(arguments[0]+",");
+				ALLOWDEBUG && (fp = F.timer.run());
 				if(has_parms){
 					Model__.lastRows = _executeCommand.call(this, arguments[0]).affectedRows;
 				}else{
 					Model__.lastRows = Model__.RecordsAffected(this.connection, arguments[0]);
 				}
-				ALLOWDEBUG && AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
+				ALLOWDEBUG && PutDebug(arguments[0]+",[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 				return this;
 			}
 		}catch(ex){
-			ALLOWDEBUG && AppendDebug("[UNFINISHED],[#" + fp + "]");
+			ALLOWDEBUG && PutDebug(arguments[0]+",[UNFINISHED],[#" + fp + "]");
 			_catchException("__Model__.query(args0,...," + (arguments.length-1) + ")", ex);
 			return this;
 		}
@@ -517,30 +502,33 @@ __Model__.prototype.query = function(){
 			}
 		}
 	}
+	var logsql="";
 	try{
 		if(!has_parms){
 			if(this.pagekeyorder == "") this.countsql = "";
 		}
 		if(this.strlimit == -1) this.countsql = "";
 		if(this.countsql != ""){
-			ALLOWDEBUG && (fp = F.timer.run()) && PutDebug(this.countsql+",");
+			logsql = this.countsql;
+			ALLOWDEBUG && (fp = F.timer.run());
 			if(has_parms){
 				this.rc = _executeCommand.call(this, this.countsql).dataset(0).value;
 			}else{
 				this.rc = _executeQueryWithReturn.call(this, this.countsql, 0);
 			}
-			ALLOWDEBUG && AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
+			ALLOWDEBUG && PutDebug(this.countsql+",[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 		}
-		ALLOWDEBUG && (fp = F.timer.run()) && PutDebug(this.sql+",");
+		ALLOWDEBUG && (fp = F.timer.run());
+		logsql = this.sql;
 		if(has_parms){
 			this.rs__ = _executeCommand.call(this, this.sql).dataset;
 		}else{
 			this.rs__ = _executeQuery.call(this, this.sql);
 		}
 		if(this.countsql == "")this.rc = this.rs__.recordcount;
-		ALLOWDEBUG && AppendDebug("[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
+		ALLOWDEBUG && PutDebug(this.sql+",[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 	}catch(ex){
-		ALLOWDEBUG && AppendDebug("[UNFINISHED],[#" + fp + "]");
+		ALLOWDEBUG && PutDebug(logsql + ",[UNFINISHED],[#" + fp + "]");
 		_catchException("__Model__.query()", ex);
 	}
 	return this;
@@ -721,16 +709,13 @@ function _executeQueryWithReturn(sql,index){
 }
 function _catchException(src, ex){
 	if(VBS && VBS.ctrl.error.number != 0){
-		//ExceptionManager.put(VBS.ctrl.error.number,"__Model__.query(args)",VBS.ctrl.error.description);
-		ALLOWDEBUG && PutDebug("<" + src + ":" + VBS.ctrl.error.description +">");
-		VBS.ctrl.error.clear();
+		MEM.put(VBS.ctrl.error.number, src, VBS.ctrl.error.description);
 	}else{
-		//ExceptionManager.put(new Exception(ex.number,"__Model__.query(args)",ex.message));
-		ALLOWDEBUG && PutDebug("<" + src + ":" + ex.message +">");
+		MEM.put(ex.number, src, ex.message);
 	}	
 }
 function _parseData(table){
-	var fields = [],values = [],update = [], schema = null, fieldsList = ((this.fields == "" || this.fields == "*") ? "" : ("," + this.fields + ",")), hasFieldsList = fieldsList!="", ori_value;
+	var fields = [],values = [],update = [], schema = null, fieldsList = ((this.fields == "" || this.fields == "*") ? "" : ("," + this.fields + ",")), hasFieldsList = fieldsList!="", value;
 	var name="", parms = this.parms, has_parms = parms.length>0, usecommand = this.base.useCommand, sp1 = this.sp1, sp2 = this.sp2, toString = Object.prototype.toString;
 	if(has_parms) usecommand = true;
 	if(usecommand && this.base.cfg["DB_Schema"] && this.base.cfg["DB_Schema"][this.tableWithNoSplitChar]) 
@@ -739,33 +724,36 @@ function _parseData(table){
 	}
 	for(var i in table){
 		if(!table.hasOwnProperty(i))continue;
-		ori_value = table[i]["value"];
-		if(ori_value === undefined)continue;
+		value = table[i]["value"];
+		if(value === undefined)continue;
 		if(hasFieldsList && fieldsList.indexOf("," + i + ",")<0) continue;
 		fields.push(sp1 + i + sp2);
-		var v = ori_value;
+		if(value===null){
+			values.push("null");
+			update.push(sp1 + i + sp2 + " = null");
+			continue;
+		}
 		if(schema){
 			name = "{"+(parms.length)+"}";
 			values.push(name);
 			update.push(sp1 + i + sp2 + " = " + name);
 			var tableschema = schema[i];
-			var parm = {value : v, type : tableschema["DATA_TYPE"]};
+			var parm = {value : value, type : tableschema["DATA_TYPE"]};
 			parms.push(parm);
 			if(tableschema["NUMERIC_PRECISION"] != null)parm.precision = tableschema["NUMERIC_PRECISION"];
-			if(tableschema["CHARACTER_MAXIMUM_LENGTH"] != null)parm.size = v.length;
+			if(tableschema["CHARACTER_MAXIMUM_LENGTH"] != null)parm.size = value.length;
 			if(tableschema["NUMERIC_SCALE"] != null)parm.scale = tableschema["NUMERIC_SCALE"];
 		}else{
-			if(v===null) v = "null";
-			if(usecommand && ori_value!==null){
+			if(usecommand){
 				name = "{"+parms.length+"}";
 				values.push(name);
 				update.push(sp1 + i + sp2 + " = " + name);
-				parms.push(parseValAsPrm(v));
+				parms.push(parseValAsPrm(value));
 			}else{
-				if(typeof ori_value == "string") v = ("'" + v.replace(/\'/igm,"''") + "'").replace(/\0/ig,"");
-				else if(ori_value!==null && typeof ori_value == "object") v =  toString.call(v);
-				values.push(v);
-				update.push(sp1 + i + sp2 + " = " + v);
+				if(typeof value == "object") value = toString.call(value);
+				if(typeof value == "string") value = ("'" + value.replace(/\'/igm,"''") + "'").replace(/\0/ig,"");
+				values.push(value);
+				update.push(sp1 + i + sp2 + " = " + value);
 			}
 		}
 	}

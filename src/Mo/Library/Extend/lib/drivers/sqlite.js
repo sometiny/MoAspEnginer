@@ -24,7 +24,7 @@ function SQLITE_GetType(typed){
 }
 var Driver = {};
 Driver.GetConnectionString = function(){
-	return "DRIVER={SQLite3 ODBC Driver};Database=" + F.mappath(this["DB_Path"]) + (this["DB_Password"] ? (";PassWord=" + this["DB_Password"]) : "");
+	return this["DB_Connectionstring"] || "DRIVER={SQLite3 ODBC Driver};Database=" + F.mappath(this["DB_Path"]) + (this["DB_Password"] ? (";PassWord=" + this["DB_Password"]) : "");
 };
 Driver.GetSqls = function(){
 	var where_="",order_="",where2_="",groupby="",join="",on="",cname="", table = this.table, limit = this.strlimit, joinlevel = this.joinlevel, strpage = this.strpage,fields = this.fields;

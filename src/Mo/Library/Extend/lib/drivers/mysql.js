@@ -35,6 +35,7 @@ function MYSQL_GetType(typed){
 }
 var Driver = {};
 Driver.GetConnectionString = function(){
+	if(this["DB_Connectionstring"]) return this["DB_Connectionstring"];
 	var DB_Server = this["DB_Server"], DB_Host=DB_Server, DB_Port = 3306;
 	if(DB_Host.indexOf(",")>0){
 		DB_Host = DB_Server.substr(0,DB_Server.indexOf(","));

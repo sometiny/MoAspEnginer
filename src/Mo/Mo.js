@@ -323,7 +323,6 @@ var
 					timelines.initialize + timelines.route + timelines.run + timelines.terminate
 				), E_INFO
 			);
-			if (Model__ && Model__.debug) Model__.debug();
 			var mode = G.MO_DEBUG_MODE;
 			if (mode == "FILE" && G.MO_DEBUG_FILE) {
 				ExceptionManager.debug2file(G.MO_DEBUG_FILE);
@@ -1140,6 +1139,7 @@ function Exception(b, c, a, d) {
 	if (this.Number < 0) {
 		this.Number = this.Number + 0x100000000;
 	}
+	if(this.Number==0x80040E10) a += " please ensure that you have typed field-name correctly.";
 	this.Source = c || "";
 	this.Message = a || "";
 	this.Description = a || "";

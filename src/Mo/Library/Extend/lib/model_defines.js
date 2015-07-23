@@ -280,7 +280,7 @@ for(var n in DataTypes){
 	eval(n + " = " + DataTypes[n]);
 }
 Driver.GetConnectionString = function(){
-	return "provider=microsoft.jet.oledb.4.0; data source=" + F.mappath(this["DB_Path"]) + (this["DB_Password"] ? (";Persist Security Info=False;Jet OLEDB:Database Password=" + this["DB_Password"]) : "");
+	return this["DB_Connectionstring"] || "provider=microsoft.jet.oledb.4.0; data source=" + F.mappath(this["DB_Path"]) + (this["DB_Password"] ? (";Persist Security Info=False;Jet OLEDB:Database Password=" + this["DB_Password"]) : "");
 };
 Driver.GetSqls = function(){
 	var where_="",order_="",where2_="",groupby="",join="",on="",cname="";
