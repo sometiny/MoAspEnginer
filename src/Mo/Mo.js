@@ -30,7 +30,7 @@ var
 	res = Response,
 	ROOT = Server.Mappath("/"),
 	Mo,
-	startup = Mo = Mo || (function() {
+	startup = Mo = (function() {
 		var c = function(d) {
 			if (typeof d != "string") {
 				return ""
