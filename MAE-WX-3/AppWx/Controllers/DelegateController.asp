@@ -33,6 +33,7 @@ WXMessage.News.push(title, content, url, picurl)：添加一条新闻。
 */
 var WXConf = C("@.WX");
 DelegateController = IController.create(function(){this.logname = __dirname + "\\Debugs\\" + F.formatdate(new Date(),"yyyy-MM-dd")+".log";});
+DelegateController.AsPrivate();
 
 /*
 事件：当消息到达时
