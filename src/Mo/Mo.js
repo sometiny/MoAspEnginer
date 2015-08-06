@@ -9,28 +9,37 @@ var
 	define = function(name, value) {
 		defaultConfig[name.toUpperCase()] = value;
 	},
-	__events__ = {
-		"dispose": [],
-		"load":[]
-	},
-	__invoke_event__ = function(eventname, data){
-		var events = __events__[eventname],
-			_len, event;
-		if (events) {
-			_len = events.length;
-			for (var i = 0; i < _len; i++) {
-				event = events[i];
-				if (event) {
-					if(event.call(Mo, {data:data})===false) break;
-				}
-			}
-		}		
-	},F, require, View,
+	F, require, View,
 	req = Request,
 	res = Response,
 	ROOT = Server.Mappath("/"),
 	Mo,
 	startup = Mo = (function() {
+		var __contenttypes__ = {
+			"json" : "application/json",
+			"text" : "text/plain",
+			"xml" : "application/xml",
+			"javascript" : "text/javascript",
+			"html" : "text/html"
+		};
+		var __events__ = {
+			"dispose": [],
+			"load":[],
+			"autoload":[]
+		},
+		__invoke_event__ = function(eventname, data){
+			var events = __events__[eventname],
+				_len, event;
+			if (events) {
+				_len = events.length;
+				for (var i = 0; i < _len; i++) {
+					event = events[i];
+					if (event) {
+						if(event.call(Mo, {data:data}, __invoke_event__)===false) break;
+					}
+				}
+			}		
+		};
 		var c = function(d) {
 			if (typeof d != "string") {
 				return ""
@@ -103,7 +112,7 @@ var
 				ExceptionManager.put(0x6300, "__LoadTemplate()", "template '" + template + "' is not exists.", E_NOTICE);
 				return "";
 			}
-			var tempStr = IO.file.readAllText(F.mappath(path)),
+			var tempStr = IO.file.readAllText(c(path)),
 				masterexp = new RegExp("^<extend file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "i"),
 				includeexp = new RegExp("<include file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "igm");
 
@@ -167,7 +176,7 @@ var
 				name = controller + "Controller";
 			if (_LoadController._controllers.hasOwnProperty(ccname)) return _LoadController._controllers[ccname];
 			try {
-				path = F.mappath(path);
+				path = c(path);
 				var ret = IO.file.readAllScript(path);
 				if (G.MO_DEBUG) {
 					ret = ReCompileForDebug(ret);
@@ -190,8 +199,8 @@ var
 		var _LoadAssets = function(name) {
 			var ccname = G.MO_APP_NAME + "@" + name;
 			if (_LoadAssets.assets.hasOwnProperty(ccname)) return new _LoadAssets.assets[ccname]();
-			var path = F.mappath(G.MO_APP + "Library/Assets/" + name + ".asp");
-			if (!IO.file.exists(path)) path = F.mappath(G.MO_CORE + "Library/Assets/" + name + ".asp");
+			var path = c(G.MO_APP + "Library/Assets/" + name + ".asp");
+			if (!IO.file.exists(path)) path = c(G.MO_CORE + "Library/Assets/" + name + ".asp");
 			if (!IO.file.exists(path)) return false;
 
 			var ret = IO.file.readAllScript(path);
@@ -215,8 +224,8 @@ var
 			type = type || "Conf";
 			var ccname = type + name + "@" + G.MO_APP_NAME;
 			if (_LoadConfig.configs.hasOwnProperty(ccname)) return _LoadConfig.configs[ccname];
-			var filepath = F.mappath(G.MO_APP + type + "/" + name + ".asp");
-			if (!IO.file.exists(filepath)) filepath = F.mappath(G.MO_CORE + type + "/" + name + ".asp");
+			var filepath = c(G.MO_APP + type + "/" + name + ".asp");
+			if (!IO.file.exists(filepath)) filepath = c(G.MO_CORE + type + "/" + name + ".asp");
 			if (!IO.file.exists(filepath)) return null;
 			var cfg = null;
 			if (cfg = _wapperfile(filepath)) {
@@ -348,7 +357,7 @@ var
 			var _exception = new Exception(ex.number, M.RealMethod + "." + M.RealAction, ex.description);
 			if (_runtime.line > 0) {
 				_exception.lineNumber = _runtime.line;
-				_exception.filename = _runtime.file.replace(F.mappath("/"), "").replace(/\\/ig, "\/");
+				_exception.filename = _runtime.file.replace(c("/"), "").replace(/\\/ig, "\/");
 				if (_runtime.debugLine > 0 && _runtime.scripts != "") {
 					_exception.traceCode = _runtime.scripts.split("\n")[_runtime.debugLine];
 				}
@@ -358,12 +367,14 @@ var
 
 		var M = function(opt) {
 				if (typeof opt == "string") return opt ? _Assigns[opt] : _Assigns;
+				if(M.Initialized) return;
 				opt = _extend({}, defaultConfig);
 				var _tag = _runtime.run();
 				if (!M.Initialize(opt)) {
 					M.Terminate();
 					return;
 				}
+				M.Initialized = true;
 				_runtime.timelines.initialize = _runtime.ticks(_tag);
 
 				_tag = _runtime.run();
@@ -376,10 +387,12 @@ var
 					_runtime.timelines.run = _runtime.ticks(_tag);
 					M.Terminate();
 				}
+				
 			},
 			G = {};
+		M.Initialized = false;
 		M.Runtime = _runtime;
-		M.Version = "MoAspEnginer 3.1.1";
+		M.Version = "MoAspEnginer 3.1.1.227";
 		M.Config = {};
 		M.IsRewrite = false;
 		M.Action = "";
@@ -572,15 +585,24 @@ var
 			}
 			if (RouteTo) _parseRouteTo(RouteTo);
 		};
+		M.contentType = function(contenttype) {
+			contenttype = contenttype || G.MO_CONTENT_TYPE;
+			if(contenttype){ 
+				if(__contenttypes__[contenttype]) contenttype = __contenttypes__[contenttype] + "; charset=" + G.MO_CHARSET;
+				res.AddHeader("Content-Type", contenttype);
+			}else{
+				res.AddHeader("Content-Type", "text/html; charset=" + G.MO_CHARSET);
+			}
+		};
 		M.display = function(template, extcachestr) {
 			res.Status = M.Status;
-			res.AddHeader("Content-Type", "text/html; charset=" + G.MO_CHARSET);
+			M.contentType();
 			M.fetch(template, extcachestr);
 		};
 		M.fetch = function(template, extcachestr) {
 			M.Buffer = !(arguments.callee.caller == M.display);
 			if (!G.MO_TEMPLATE_ENGINE) {
-				ExceptionManager.put(0x12edf, "Mo.fetch()", "please define any template engine.");
+				ExceptionManager.put(0x12edf, "Mo.fetch()", "please define a template engine on item 'MO_TEMPLATE_ENGINE'.");
 				return "";
 			}
 			var _tag = _runtime.run();
@@ -588,10 +610,9 @@ var
 			var html, cachename, OldHash, usecache = false,
 				scripts, cachepath = "";
 			if (G.MO_COMPILE_CACHE) {
-				cachename = M.Method + "^" + M.Action + "^" + F.string.replace(template, /\:/igm, "^");
+				cachename = M.Method + "^" + M.Action + "^" + template.replace(/\:/g, "^");
 				if (extcachestr) cachename += "^" + extcachestr;
-				IO.directory.create(G.MO_APP + "Cache/Compiled");
-				cachepath = F.mappath(G.MO_APP + "Cache/Compiled/" + cachename + ".asp");
+				cachepath = c(G.MO_APP + "Cache/Compiled/" + cachename + ".asp");
 				if (IO.file.exists(cachepath)) {
 					usecache = true;
 					if (G.MO_COMPILE_CACHE_EXPIRED > 0) {
@@ -631,7 +652,7 @@ var
 			var filename = cachepath;
 			if (G.MO_DEBUG) filename += ";compiled by [" + _ParseTemplatePath(template) + "." + G.MO_TEMPLATE_PERX + "], please check if there are syntax error in template or use variable(s) that not be defined."
 			content = wapper(_Assigns, filename, G.MO_DEBUG ? scripts : "", M.Buffer, 1024);
-			if (G.MO_CACHE && G.MO_CACHE_DIR != "" && IO.directory.exists(G.MO_CACHE_DIR)) IO.file.writeAllText(F.mappath(G.MO_CACHE_DIR + _CacheFileName + ".cache"), content);
+			if (G.MO_CACHE && G.MO_CACHE_DIR != "" && IO.directory.exists(G.MO_CACHE_DIR)) IO.file.writeAllText(c(G.MO_CACHE_DIR + _CacheFileName + ".cache"), content);
 			_runtime.timelines.run1 = _runtime.ticks(_tag);
 			return content;
 		};
@@ -712,15 +733,15 @@ var
 		};
 		M.C.SaveAs = function(conf, data) {
 			if (!data) return;
-			var filepath = F.mappath(G.MO_APP + "Conf/" + conf + ".asp");
+			var filepath = c(G.MO_APP + "Conf/" + conf + ".asp");
 			IO.file.writeAllText(filepath, "\u003cscript language=\"jscript\" runat=\"server\"\u003e\r\nreturn ({\r\n  \"__conf__\" : " + JSON.stringify(data) + "\r\n})['__conf__'];\r\n\u003c/script\u003e", "utf-8");
 		};
 		M.C.Exists = function(conf) {
 			return IO.file.exists(G.MO_APP + "Conf/" + conf + ".asp");
 		};
 		M.A = function(ctrl) {
-			var filepath = F.mappath(G.MO_APP + "Controllers/" + ctrl + "Controller.asp");
-			if (!IO.file.exists(filepath)) filepath = F.mappath(G.MO_CORE + "Controllers/" + ctrl + "Controller.asp");
+			var filepath = c(G.MO_APP + "Controllers/" + ctrl + "Controller.asp");
+			if (!IO.file.exists(filepath)) filepath = c(G.MO_CORE + "Controllers/" + ctrl + "Controller.asp");
 			if (IO.file.exists(filepath)) {
 				var _controller;
 				if (G.MO_CONTROLLER_CNAMES && G.MO_CONTROLLER_CNAMES.hasOwnProperty(ctrl.toLowerCase())) ctrl = G.MO_CONTROLLER_CNAMES[ctrl.toLowerCase()];
@@ -746,7 +767,7 @@ var
 			if (G.MO_CACHE) {
 				_CacheFileName = MD5(F.server("URL") + F.get.toURIString() + "");
 				if (IO.file.exists(G.MO_CACHE_DIR + _CacheFileName + ".cache")) {
-					res.Write(IO.file.readAllText(F.mappath(G.MO_CACHE_DIR + _CacheFileName + ".cache")));
+					res.Write(IO.file.readAllText(c(G.MO_CACHE_DIR + _CacheFileName + ".cache")));
 					return;
 				}
 			}
@@ -835,23 +856,23 @@ var
 		};
 		M.ModelCacheSave = function(name, content) {
 			if (name == "") return false;
-			return IO.file.writeAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"), content);
+			return IO.file.writeAllText(c(G.MO_APP + "Cache/Model/" + name + ".cak"), content);
 		};
 		M.ModelCacheLoad = function(name) {
 			if (name == "") return "";
-			return IO.file.readAllText(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"));
+			return IO.file.readAllText(c(G.MO_APP + "Cache/Model/" + name + ".cak"));
 		};
 		M.ModelCacheDelete = function(name) {
 			if (name == "") return false;
-			return IO.file.del(F.mappath(G.MO_APP + "Cache/Model/" + name + ".cak"));
+			return IO.file.del(c(G.MO_APP + "Cache/Model/" + name + ".cak"));
 		};
 		M.ModelCacheClear = function() {
-			return IO.directory.clear(F.mappath(G.MO_APP + "Cache/Model"), function(f, isfile) {
+			return IO.directory.clear(c(G.MO_APP + "Cache/Model"), function(f, isfile) {
 				if (isfile && f.name == ".mae") return false;
 			});
 		};
 		M.ClearCompiledCache = function() {
-			return IO.directory.clear(F.mappath(G.MO_APP + "Cache/Compiled"), function(f, isfile) {
+			return IO.directory.clear(c(G.MO_APP + "Cache/Compiled"), function(f, isfile) {
 				if (isfile && f.name == ".mae") return false;
 			});
 		}
@@ -875,7 +896,7 @@ var
 		return M;
 	})(), shutdown = Mo.Terminate;
 	
-Mo.on("load", function() {
+Mo.on("load", function(e, __invoke_event__) {
 	var loaddelay = {
 		"base64=Base64": ["e", "d", "encode", "decode", "toBinary", "fromBinary", "setNames", "base64"],
 		"JSON": ["parse", "stringify", "create", "decodeStrict", "encodeUnicode", "assets/json.js"],
@@ -899,6 +920,7 @@ Mo.on("load", function() {
 		"SOAPClient" : [null,"net/http/soap.js"], "Net" : ["IpToLong","LongToIp","InSameNetWork","IsIP","net"], "Upload" : [null,"accept", "net/upload.js"],
 		"Jmail" : [null,"net/mail.js"], "QRCode" : [null,"./qrcode/index.js"], "Marked" : [null, "options", "./assets/marked.js"]
 	}, executeable="";
+	__invoke_event__("autoload", loaddelay);
 	for (var lib in loaddelay) {
 		if (!loaddelay.hasOwnProperty(lib)) continue;
 		var library = loaddelay[lib],

@@ -76,13 +76,13 @@ IController.extend = function(name, isPost, fn) {
 };
 IController.extend("assign", function(key, value) {
 	Mo.assign(key, value);
-});
+}).AsPrivate();
 IController.extend("display", function() {
 	Mo.display.apply(Mo, arguments);
-});
+}).AsPrivate();
 IController.extend("fetch", function() {
 	return Mo.fetch.apply(Mo, arguments);
-});
+}).AsPrivate();
 IController.create = IClass.create;
 
 exports.IController = IController;
