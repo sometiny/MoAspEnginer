@@ -347,7 +347,7 @@ _.encode = function(src) {
 };
 _.decode = function(src) {
 	src = src || "";
-	return decodeURIComponent(src);
+	return decodeURIComponent(src).replace(/\+/, " ");
 };
 _.encodeHtml = function(src) {
 	src = src || "";
