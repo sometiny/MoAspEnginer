@@ -19,7 +19,7 @@ var WinHTTP = function(url){
 	},url);
 };
 
-var MPIHost = "mpi.thinkasp.cn",
+var MPIHost = Mo.Config.Global.MO_MPI_HOST,
 	installDirectory = IO.build(Mo.Config.Global.MO_CORE, "Library/Extend");
 
 /**

@@ -54,6 +54,7 @@ return {
 		"md5" : "assets/md5.js",
 		"tar" : "assets/tar.js",
 		"dump" : "assets/dump.js"
-	}
+	},
+	MO_MPI_HOST : "mpi.thinkasp.cn"
 };
 </script>
