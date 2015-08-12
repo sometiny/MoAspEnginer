@@ -17,11 +17,12 @@ var buffer2string = function(buffer) {
 	var ret = "";
 	var i = 0;
 	var l = buffer.length;
-	var cc;
+	var cc, nb=[];
 	for (; i < l; ++i) {
-		ret += String.fromCharCode(mapto437[buffer[i]]);
+		if(buffer[i]>=0x80) nb[i] = mapto437[buffer[i]];
+		else nb[i] = buffer[i];
 	}
-	return ret;
+	return String.fromCharCode.apply(null, nb);
 }
 /* Convert a code page 437 char code to a octet number*/
 var string2buffer = function(src) {
@@ -564,10 +565,7 @@ $io.directory = $io.directory || (function()
 })();
 
 /*some methods for drive*/
-$io.drive = $io.drive || function(path)
-{
-	path = F.mappath(path);
-	var dr = $io.fso.GetDrive($io.fso.GetDriveName(path));
+function get_drive(dr){
 	return {
 		space : {
 			available : dr.AvailableSpace,
@@ -581,7 +579,19 @@ $io.drive = $io.drive || function(path)
 		isReady : dr.IsReady,
 		path : dr.Path,
 		sn : (dr.SerialNumber < 0 ? (dr.SerialNumber+0x100000000) : dr.SerialNumber).toString(16)
-	};
+	};	
+}
+$io.drive = $io.drive || function(path)
+{
+	return get_drive($io.fso.GetDrive($io.fso.GetDriveName(F.mappath(path))));
+};
+$io.drive.drives = function(callback){
+	var ds = $io.fso.Drives, e = new Enumerator($io.fso.Drives);
+	for (; !e.atEnd(); e.moveNext())
+	{
+		callback(get_drive(e.item()));
+	}
+	e = null;
 };
 $io.drive.types = [
 	"Unknown", 

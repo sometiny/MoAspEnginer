@@ -392,7 +392,7 @@ var
 			G = {};
 		M.Initialized = false;
 		M.Runtime = _runtime;
-		M.Version = "MoAspEnginer 3.1.1.227";
+		M.Version = "MoAspEnginer 3.1.1.290";
 		M.Config = {};
 		M.IsRewrite = false;
 		M.Action = "";
