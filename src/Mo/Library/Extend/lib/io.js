@@ -566,30 +566,40 @@ $io.directory = $io.directory || (function()
 
 /*some methods for drive*/
 function get_drive(dr){
-	return {
-		space : {
-			available : dr.AvailableSpace,
-			free : dr.FreeSpace,
-			total : dr.TotalSize
-		},
-		letter : dr.DriveLetter,
-		type : dr.DriveType,
-		typeString : $io.drive.types[dr.DriveType] || "Unknown",
-		fileSystem : dr.FileSystem,
-		isReady : dr.IsReady,
-		path : dr.Path,
-		sn : (dr.SerialNumber < 0 ? (dr.SerialNumber+0x100000000) : dr.SerialNumber).toString(16)
-	};	
+	if(dr.IsReady){
+		return {
+			space : {
+				available : dr.AvailableSpace,
+				free : dr.FreeSpace,
+				total : dr.TotalSize
+			},
+			letter : dr.DriveLetter,
+			type : dr.DriveType,
+			typeString : $io.drive.types[dr.DriveType] || "Unknown",
+			fileSystem : dr.FileSystem,
+			isReady : dr.IsReady,
+			path : dr.Path,
+			sn : (dr.SerialNumber < 0 ? (dr.SerialNumber+0x100000000) : dr.SerialNumber).toString(16)
+		};	
+	}else{
+		return {
+			letter : dr.DriveLetter,
+			type : dr.DriveType,
+			typeString : $io.drive.types[dr.DriveType] || "Unknown",
+			isReady : dr.IsReady,
+			path : dr.Path
+		};
+	}
 }
 $io.drive = $io.drive || function(path)
 {
 	return get_drive($io.fso.GetDrive($io.fso.GetDriveName(F.mappath(path))));
 };
-$io.drive.drives = function(callback){
+$io.drive.drives = function(callback, raw){
 	var ds = $io.fso.Drives, e = new Enumerator($io.fso.Drives);
 	for (; !e.atEnd(); e.moveNext())
 	{
-		callback(get_drive(e.item()));
+		callback(raw===true ? e.item() : get_drive(e.item()));
 	}
 	e = null;
 };
