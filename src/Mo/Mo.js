@@ -659,7 +659,7 @@ var
 		M.U = function(path, _parms, ext) {
 			var match = /^(.*?)(\?(.*?))?(\#(.*?))?(\@(.*?))?(\!)?$/igm.exec(path || "");
 			if (!match) return "";
-			F.object.toURIString.fn = 0;
+			var fn = F.object.toURIString.fn;
 			var path = match[1],
 				parms = F.object.fromURIString(match[3]),
 				anchor = match[5],
@@ -678,6 +678,7 @@ var
 			else if (paths.length == 2) url += F.format(format[1], G.MO_METHOD_CHAR, paths[0], G.MO_ACTION_CHAR, paths[1]);
 			else if (paths.length == 1 && path != "") url += F.format(format[1], G.MO_METHOD_CHAR, M.Method, G.MO_ACTION_CHAR, paths[0]);
 			else url += F.format(format[1], G.MO_METHOD_CHAR, M.Method, G.MO_ACTION_CHAR, M.Action);
+			F.object.toURIString.fn = 1;
 			if (G.MO_ROUTE_MODE == "404" || G.MO_ROUTE_MODE == "URL") {
 				F.object.toURIString.split_char_1 = F.object.toURIString.split_char_2 = "/";
 				url += "/" + F.object.toURIString(parms);
@@ -691,7 +692,7 @@ var
 			}
 			if (F.string.endsWith(url, "/") || F.string.endsWith(url, "&")) url = url.substr(0, url.length - 1);
 			if (anchor != "") url += "#" + anchor;
-			F.object.toURIString.fn = 1;
+			F.object.toURIString.fn = fn;
 			return url + ext;
 		};
 		M.L = function(key) {
