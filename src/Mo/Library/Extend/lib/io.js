@@ -394,7 +394,7 @@ $io.file = $io.file || (function()
 		fp = $io.fps[fp];
 		try{
 			fp[0].flush();
-			fp[0].saveToFile(fp[1],2);
+			fp[0].saveToFile(fp[2].saveas || fp[1],2);
 		}catch(ex){
 			ExceptionManager.put(ex,"io.file.flush['" + F.string.right(fp[1],"\\") + "']");
 		}
