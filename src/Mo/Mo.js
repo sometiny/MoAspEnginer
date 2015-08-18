@@ -14,6 +14,7 @@ var
 	res = Response,
 	ROOT = Server.Mappath("/"),
 	Mo,
+	hed,
 	startup = Mo = (function() {
 		var __contenttypes__ = {
 			"json" : "application/json",
@@ -39,6 +40,24 @@ var
 					}
 				}
 			}		
+		};
+		var __headers=null;
+		hed = function(name, value){
+			if(__headers==null){
+				__headers = {};
+				var str_headers = (Request.ServerVariables("ALL_RAW") + "").split("\r\n"), len = str_headers.length, index=0, item;
+				for(var i=0;i<str_headers.length;i++){
+					item = str_headers[i];
+					index = item.indexOf(":");
+					if(index > 0){
+						__headers[item.substr(0, index).toLowerCase()] = item.substr(index + 1).replace(" ","");
+					}
+				}
+				str_headers=null;
+			}
+			if(name === undefined) return __headers;
+			if(value === undefined) return __headers[name.toLowerCase()] || "";
+			Response.AddHeader(name, value);
 		};
 		var c = function(d) {
 			if (typeof d != "string") {
@@ -934,6 +953,7 @@ Mo.on("load", function(e, __invoke_event__) {
 			exports = "." + module.substr(0, index);
 			module = module.substr(index + 1);
 		}
+		executeable += "try{";
 		executeable += lib + " = {};";
 		if (index2 > 0) {
 			cname = lib.substr(index2 + 1);
@@ -946,6 +966,7 @@ Mo.on("load", function(e, __invoke_event__) {
 			executeable += lib + method + " = function(){" + lib + " = require(\"" + module + "\")" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};";
 		}
 		if (cname) executeable += cname + " = " + lib + ";";
+		executeable += "}catch(ex){ExceptionManager.put(ex.number, 'AUTOLOAD', 'find error when load \\'" + lib + "\\': ' + ex.description, E_ERROR);}";
 	}
 	(new Function(executeable))();
 });
