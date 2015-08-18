@@ -19,14 +19,16 @@ function Module(id,parent){
 	this.children = [];
 	this.aspfile = false;
 }
-Module.prototype.require = function(name){
-	return Module._load(name, this);
-};
 Module.prototype.compile = function(){
 	var self = this;
 	var require = function(name){
-		return self.require(name);
+		return Module._load(name, self);
 	};
+	require.exists = function(name){
+		return Module._exists(name, self);
+	};
+	require.use = Module._use;
+	
 	var define = function(){
 		var alen = arguments.length;
 		if(alen == 0) return;
@@ -74,7 +76,7 @@ Module.prototype.loadpaths = function(){
 	var dir = IO.parent(this.filename);
 	return [dir].concat(Module._pathes);
 };
-Module._load = function(name, parent, aspfile, callback){
+Module._exists = function(name, parent){
 	var _file = null;
 	if(IO.is(name)){
 		if(IO.file.exists(name)){
@@ -100,6 +102,10 @@ Module._load = function(name, parent, aspfile, callback){
 			}
 		}
 	}
+	return _file;
+};
+Module._load = function(name, parent, aspfile, callback){
+	var _file = Module._exists(name, parent);
 	if(!_file){
 		ExceptionManager.put(new Exception(0xed34, "Module._load()", "Module '" + name + "' is not exists, required by " + (parent ? ("'" + parent.id + "'") : "ROOT") + "."));
 	}else{
@@ -128,6 +134,7 @@ Module._load = function(name, parent, aspfile, callback){
 	}
 	return null;
 };
+Module._use = function(){Array.prototype.push.apply(Module._pathes, arguments);};
 Module.ROOT=ROOT;
 Module._cache = {};
 Module._pathes=[];
@@ -140,9 +147,7 @@ function require(name, arg1, arg2){
 	};
 	return Module._load(name, null, !!arg1, arg2);
 };
-require.use = function(){
-	Array.prototype.push.apply(Module._pathes, arguments);
-};
+require.use = Module._use;
 require.module = Module;
 require.get_result = function(){
 	var result = Module.result;
@@ -152,4 +157,5 @@ require.get_result = function(){
 	}
 	return "";
 };
+require.exists = Module._exists;
 module.exports = require;
