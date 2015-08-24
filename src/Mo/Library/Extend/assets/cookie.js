@@ -12,7 +12,7 @@ function $cookie(key, value, option){
 		if(!_cookies_received) $cookie.receive();
 		return _cookies_received[key];
 	}
-	var cookie = {value: null, keys:null, options:F.extend({httponly:false,secure:false,expires:null, path: "/", domain : null}, option || {})};
+	var cookie = {value: null, keys:null, options:F.extend({httponly:true,secure:false,expires:null, path: "/", domain : null}, option || {})};
 	if(value && typeof value == "object" && value.constructor == Object){
 		if(!cookie.keys) cookie.keys={};
 		for(var k in value){
