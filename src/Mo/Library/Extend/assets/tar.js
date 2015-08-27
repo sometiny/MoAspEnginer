@@ -126,7 +126,7 @@ $manager.prototype.read = function(fn){
 	if(checksum_new != headerobj.checksum){
 		ExceptionManager.put(0x2d2e,"Tar.read","checksum error.");
 	}else{
-		if(typeof fn == "function")fn.call(this, headerobj, fp);
+		if(typeof fn == "function") return fn.call(this, headerobj, fp)!==false;
 	}
 	return true;
 };

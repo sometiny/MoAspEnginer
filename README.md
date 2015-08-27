@@ -1,4 +1,4 @@
-﻿##MoAspEnginer V3.1.1
+﻿##MoAspEnginer V3.1.1.322
 > 一款基于JScript的ASP开源MVC框架。A JScript-based MVC framework for ASP.
 > 
 > 单文件入口。Single entry point.
@@ -51,8 +51,6 @@
 > 
 
 ##目录结构(Contents)
-> dist	未压缩的源码
-> 
 > src	程序目录
 > 
 > README.MD	当前文件
@@ -60,7 +58,7 @@
 
 ##链接(Links)
 [官网(http://m.thinkasp.cn/)](http://m.thinkasp.cn/)<br />
-[文档(http://mae.im)](http://mae.im)<br />
+[文档(http://mae.im)](http://docs.thinkasp.cn/)<br />
 
 ##以前的版本(Versions)
 [MoAspEnginer2.0(https://github.com/zhanghuiguoanlige/MoAspEnginer/tree/v2)](https://github.com/zhanghuiguoanlige/MoAspEnginer/tree/v2)<br />

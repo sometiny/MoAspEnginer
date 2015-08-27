@@ -77,6 +77,15 @@ IController.extend = function(name, isPost, fn) {
 IController.extend("assign", function(key, value) {
 	Mo.assign(key, value);
 }).AsPrivate();
+IController.extend("invoke", function(name) {
+	var args = Array.prototype.slice.call(arguments, 1);
+	if (Mo.Config.Global.MO_ACTION_CASE_SENSITIVITY === false) name = name.toLowerCase();
+	if(!this[name]){
+		MEM.put(0x3d4e, "IController.invoke", "No method was found.");
+		return;
+	}
+	return this[name].apply(this, args);
+}).AsPrivate();
 IController.extend("display", function() {
 	Mo.display.apply(Mo, arguments);
 }).AsPrivate();

@@ -337,6 +337,8 @@ _["goto"] = function(url, msg) {
 	}
 	Response.Write('\u003cscript type="text/javascript"\u003ealert(decodeURIComponent("' + _.encode(msg) + '"));window.location = decodeURIComponent("' + _.encode(url) + '");\u003c/script\u003e');
 };
+_.script_start = '\u003cscript type="text/javascript"\u003e';
+_.script_end = '\u003c/script\u003e';
 _.initialize = function(name) {
 	if (typeof name == "string") name = eval(name);
 	return typeof name == "object" ? name : new name();
