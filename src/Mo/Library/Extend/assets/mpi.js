@@ -215,7 +215,7 @@ Mpi.packageExists = function(pkg){
 	}
 	var _file = require.exists(pkg.name);
 	if(!_file){
-		Mpi.message = "package.json is not exists.";
+		Mpi.message = "";
 		return null;
 	}
 	var pkgdirectory=IO.parent(_file),filename=IO.build(pkgdirectory, "package.json") ;
