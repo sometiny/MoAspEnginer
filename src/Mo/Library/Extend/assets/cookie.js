@@ -39,7 +39,7 @@ function send(key, cookie){
 		}else if(etype == "object" && expires.constructor == Date){
 			_cookie += "; expires=" + expires.toUTCString();
 		}else if(etype == "date" || etype == "number"){
-			_cookie += "; expires=" + (new Date(etype-0)).toUTCString();
+			_cookie += "; expires=" + (new Date(expires-0)).toUTCString();
 		}else{
 			ExceptionManager.put(0xed21,"cookie","invalid expires value.");
 		}

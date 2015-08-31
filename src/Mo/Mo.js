@@ -9,6 +9,14 @@ var
 	define = function(name, value) {
 		defaultConfig[name.toUpperCase()] = value;
 	},
+	register = function(host, name, path) {
+		if(register.registered) return;
+		if(Request.ServerVariables("HTTP_HOST") == host){
+			defaultConfig["MO_APP_NAME"] = name;
+			defaultConfig["MO_APP"] = path;
+			register.registered = true;
+		}
+	},
 	F, require, View,
 	req = Request,
 	res = Response,
@@ -411,7 +419,7 @@ var
 			G = {};
 		M.Initialized = false;
 		M.Runtime = _runtime;
-		M.Version = "MoAspEnginer 3.1.1.322";
+		M.Version = "MoAspEnginer 3.1.1.324";
 		M.Config = {};
 		M.IsRewrite = false;
 		M.Action = "";
