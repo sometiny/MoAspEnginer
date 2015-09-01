@@ -82,9 +82,9 @@ MoAspEnginerView.prototype.parse = function() {
 
 			var taglib = Mo.LoadAssets(lib);
 			if (taglib) {
-				var match, regexp = new RegExp("\\<" + lib + "\\b([\\s\\S]*?)\\>([\\s\\S]*?)\\<\\/" + lib + "\\>", "igm"),
+				var match, regexp = new RegExp("<" + lib + "\\b([\\s\\S]*?)>([\\s\\S]*?)<\\/" + lib + ">", "igm"),
 					matches = F.string.matches(this.Content, regexp);
-				if (matches && matches > 0) {
+				if (matches && matches.length > 0) {
 					closetag = false;
 				} else {
 					regexp = new RegExp("\\<" + lib + "\\b([\\s\\S]*?)\\/\\>", "igm");
