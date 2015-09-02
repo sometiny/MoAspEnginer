@@ -190,8 +190,9 @@ $io.file = $io.file || (function()
 	var $fn = function(fp, content)
 	{
 		$file.write(fp,content);
-		$file.flush(fp);
+		var result = $file.flush(fp) === true;
 		$file.close(fp);
+		return result;
 	};
 	$file.get = function(path)
 	{
@@ -268,19 +269,19 @@ $io.file = $io.file || (function()
 		return content;
 	};
 	$file.writeAllBytes = function(path,content){
-		$fn($file.open(path, {forText : false}), content);
+		return $fn($file.open(path, {forText : false}), content);
 	};
 	$file.writeAllText = function(path,content,encoding){
-		$fn($file.open(path, {encoding : encoding || "utf-8"}), content);
+		return $fn($file.open(path, {encoding : encoding || "utf-8"}), content);
 	};
 	$file.writeAllBuffer = function(path,buffer){
-		$fn($file.open(path, {encoding : "437"}), buffer2string(buffer));
+		return $fn($file.open(path, {encoding : "437"}), buffer2string(buffer));
 	};
 	$file.appendAllBytes = function(path,content){
-		$fn($file.open(path, {forText : false, forAppend : true}), content);
+		return $fn($file.open(path, {forText : false, forAppend : true}), content);
 	};
 	$file.appendAllText = function(path,content,encoding){
-		$fn($file.open(path, {encoding : encoding || "utf-8", forAppend : true}), content);
+		return $fn($file.open(path, {encoding : encoding || "utf-8", forAppend : true}), content);
 	};
 	$file.open = function(path,opt)
 	{
@@ -395,6 +396,7 @@ $io.file = $io.file || (function()
 		try{
 			fp[0].flush();
 			fp[0].saveToFile(fp[2].saveas || fp[1],2);
+			return true;
 		}catch(ex){
 			ExceptionManager.put(ex,"io.file.flush['" + F.string.right(fp[1],"\\") + "']");
 		}
