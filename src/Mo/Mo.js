@@ -1071,6 +1071,10 @@ var MEM = ExceptionManager = (function() {
 			}
 		}
 	};
+	b.last = function(){
+		if(c.length==0)return null;
+		return c[c.length - 1];
+	};
 	b.putNotice = function() {
 		var e = Array.prototype.slice.call(arguments, 0);
 		e.push(E_NOTICE);

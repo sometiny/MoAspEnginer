@@ -344,10 +344,10 @@ _.initialize = function(name) {
 	return typeof name == "object" ? name : new name();
 };
 _.encode = function(src) {
-	return encodeURIComponent(src || "").replace(/\+/, "%2B");
+	return encodeURIComponent(src || "").replace(/\+/g, "%2B");
 };
 _.decode = function(src) {
-	return decodeURIComponent(src || "").replace(/\+/, " ");
+	return decodeURIComponent(src || "");
 };
 _.encodeHtml = function(src) {
 	src = src || "";
