@@ -57,7 +57,7 @@
 > 
 
 ##链接(Links)
-[官网(http://m.thinkasp.cn/)](http://m.thinkasp.cn/)<br />
+[官网(http://www.thinkasp.cn/)](http://www.thinkasp.cn/)<br />
 [文档(http://mae.im)](http://docs.thinkasp.cn/)<br />
 
 ##以前的版本(Versions)
