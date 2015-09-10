@@ -398,7 +398,7 @@ _.formatdate = function(dt, fs) {
 		return src.substr(src.length-2);
 	}
 
-	fs = fs.replace(/(yyyy|mmmm|mmm|mm|dd|hh|ss|tttt|m|d|h|s)/ig,function(diff){
+	fs = fs.replace(/(yyyy|mmmm|mmm|mm|dddd|ddd|dd|hh|ss|tttt|m|d|h|s)/ig,function(diff){
 		switch(diff){
 			case "dddd" : return ws[0][dt.getDay()];
 			case "ddd" : return ws[1][dt.getDay()];
