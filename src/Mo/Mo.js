@@ -11,7 +11,16 @@ var
 	},
 	register = function(host, name, path, callback) {
 		if(register.registered) return;
-		if(Request.ServerVariables("HTTP_HOST") == host){
+		function check_host(h1, h2){
+			if(typeof h2 == "object") return h2.test(h1);
+			if(h2.indexOf("*")>=0){
+				h2 = h2.replace(/\*/g,"([0-9a-z\\-]+)").replace(/\./g, "\\.");
+				h2 = new RegExp("^" + h2 + "$", "i");
+				return h2.test(h1);
+			}
+			return h1 == h2;
+		}
+		if(check_host(Request.ServerVariables("HTTP_HOST"), host)){
 			defaultConfig["MO_APP_NAME"] = name;
 			defaultConfig["MO_APP"] = path;
 			register.registered = true;
@@ -616,10 +625,10 @@ var
 		M.contentType = function(contenttype) {
 			contenttype = contenttype || G.MO_CONTENT_TYPE;
 			if(contenttype){ 
-				if(__contenttypes__[contenttype]) contenttype = __contenttypes__[contenttype] + "; charset=" + G.MO_CHARSET;
-				res.AddHeader("Content-Type", contenttype);
+				if(__contenttypes__[contenttype]) contenttype = __contenttypes__[contenttype];
+				res.ContentType = contenttype;
 			}else{
-				res.AddHeader("Content-Type", "text/html; charset=" + G.MO_CHARSET);
+				res.ContentType = "text/html";
 			}
 		};
 		M.display = function(template, extcachestr) {
