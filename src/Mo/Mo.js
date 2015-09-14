@@ -9,12 +9,13 @@ var
 	define = function(name, value) {
 		defaultConfig[name.toUpperCase()] = value;
 	},
-	register = function(host, name, path) {
+	register = function(host, name, path, callback) {
 		if(register.registered) return;
 		if(Request.ServerVariables("HTTP_HOST") == host){
 			defaultConfig["MO_APP_NAME"] = name;
 			defaultConfig["MO_APP"] = path;
 			register.registered = true;
+			if(typeof callback == "function") callback(host, name, path);
 		}
 	},
 	F, require, View,
