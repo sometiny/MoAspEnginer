@@ -191,48 +191,6 @@ _.server = function(key, value) {
 	_server_[key] = value;
 	return;
 };
-_.cookie = function(key, value, expired, domain, path, secure, httponly) {
-	if (key == undefined) return "";
-	var mkey = key,
-		skey = "";
-	if (key.indexOf(".") > 0) {
-		mkey = key.split(".")[0];
-		skey = key.split(".")[1];
-	}
-	if (value === null) {
-		Response.Cookies(mkey).Expires = "1980-1-1";
-		return;
-	}
-	if (value === undefined) {
-		if (skey == "") return Request.Cookies(mkey).item;
-		return Request.Cookies(mkey)(skey);
-	}
-	if (skey == "") {
-		Response.Cookies(mkey) = value;
-	} else {
-		Response.Cookies(mkey)(skey) = value;
-	}
-	if(typeof expired=="object" && expired.constructor==Object){
-		domain = expired["domain"];
-		path = expired["path"];
-		secure = expired["secure"];
-		httponly = expired["httponly"];
-		expired = expired["expired"];
-	}
-	if (expired !== undefined && !isNaN(expired)) {
-		var dt = new Date();
-		dt.setTime(dt.getTime() + parseInt(expired) * 1000);
-		Response.Cookies(mkey).Expires = _.format("{0}-{1}-{2} {3}:{4}:{5}", dt.getYear(), dt.getMonth() + 1, dt.getDate(), dt.getHours(), dt.getMinutes(), dt.getSeconds());
-	}
-	if (domain) {
-		Response.Cookies(mkey).Domain = domain;
-	}
-	if(!path) path="/";
-	Response.Cookies(mkey).Path = path;
-	if (secure) {
-		Response.Cookies(mkey).Secure = secure;
-	}
-};
 _.echo = function(debug, brnl, newline,contenttype) {
 	if ((brnl & _.TEXT.BIN)) {
 		Response.BinaryWrite(debug);
