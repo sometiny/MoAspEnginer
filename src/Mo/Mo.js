@@ -33,6 +33,7 @@ var
 	ROOT = Server.Mappath("/"),
 	Mo,
 	hed,
+	CACHE = {MODEL:1, COMPILE:2, GZIP:4},
 	startup = Mo = (function() {
 		var __contenttypes__ = {
 			"json" : "application/json",
@@ -913,7 +914,17 @@ var
 			return IO.directory.clear(c(G.MO_APP + "Cache/Compiled"), function(f, isfile) {
 				if (isfile && f.name == ".mae") return false;
 			});
-		}
+		};
+		M.ClearGzipCache = function() {
+			return IO.directory.clear(c(G.MO_APP + "Cache/Gzip"), function(f, isfile) {
+				if (isfile && f.name == ".mae") return false;
+			});
+		};
+		M.ClearCache = function(mode) {
+			if(!mode || (CACHE.MODEL & mode))M.ModelCacheClear();
+			if(!mode || (CACHE.COMPILE & mode))M.ClearCompiledCache();
+			if(!mode || (CACHE.GZIP & mode))M.ClearGzipCache();
+		};
 		M.templateIsInApp = function(template) {
 			var vpath = _ParseTemplatePath(template),
 				path;
