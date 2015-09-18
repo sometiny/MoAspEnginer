@@ -29,38 +29,49 @@ $manager.prototype.file = function(name, path){
 	this.files[name] = path;
 	return this;
 };
-$manager.prototype.generate = function(target){
-	dogenerate("", this.files);
+$manager.prototype.generate = function(target, ignoreemptyfolder){
+	//dump(this.files);return;
+	ignoreemptyfolder = ignoreemptyfolder!==false;
+	Response.ContentType = "application/x-tar";
+	Response.AddHeader("Content-Disposition", "attachment; filename=\"" + target + "\"");
+	dogenerate("", this.files, ignoreemptyfolder);
 	var ending = [];
 	for(var i=0;i<1024;i++) ending.push(0);
-	Response.AddHeader("Content-Disposition", "attachment; filename=\"" + target + "\"");
 	Response.BinaryWrite(IO.buffer2binary(ending));
 	return result;
 };
-function dogenerate(name, files){
+function dogenerate(name, files, ignoreemptyfolder){
 	for(var i in files){
 		if(!files.hasOwnProperty(i)) continue;
 		var file = files[i];
 		if(typeof file == "string"){
-			var fp = IO.file.open(file, {forText:false,forRead:true}),
-				header = tarHeader(name + i, file, false);
-			header.generate(IO.get_filesize(fp));
-			Response.BinaryWrite(IO.buffer2binary(header.data));
-			if(header.filesize>0){
-				IO.file.writeToResponse(fp);
-			}
-			IO.file.close(fp);
-			var padding= header.filesize % 512;
-			if(padding>0){
-				var pad = [];
-				for(var i=0;i<512-padding;i++) pad.push(0);
-				Response.BinaryWrite(IO.buffer2binary(pad));
+			try{
+				var fp = IO.file.open(file, {forText:false,forRead:true});
+				var header = tarHeader(name + i, file, false);
+				header.generate(IO.get_filesize(fp));
+				Response.BinaryWrite(IO.buffer2binary(header.data));
+				if(header.filesize>0){
+					IO.file.writeToResponse(fp);
+				}
+				IO.file.close(fp);
+				var padding= header.filesize % 512;
+				if(padding>0){
+					var pad = [];
+					for(var j=0;j<512-padding;j++) pad.push(0);
+					Response.BinaryWrite(IO.buffer2binary(pad));
+					Response.Flush();
+				}
+			}catch(ex){
+				MEM.put(ex.number, "TarStream.dogenerate", ex.description + name + i);
 			}
 		}else{
-			var header = tarHeader(name + i, "", true);
-			header.generate(0);
-			Response.BinaryWrite(IO.buffer2binary(header.data));
-			dogenerate(name + i + "\\", file);
+			if(!ignoreemptyfolder){
+				var header = tarHeader(name + i, "", true);
+				header.generate(0);
+				Response.BinaryWrite(IO.buffer2binary(header.data));
+				Response.Flush();
+			}
+			dogenerate(name + i + "\\", file, ignoreemptyfolder);
 		}
 	}
 }
@@ -90,26 +101,6 @@ $manager.packFile = function(file, target){
 		return false;
 	}
 }
-$manager.unpack = function(srcfile,dest){
-	var zip = new $manager(srcfile);
-	var files = zip.files;
-	for(var i in files){
-		if(!files.hasOwnProperty(i)) continue;
-		var file = files[i];
-		if(file.dir){
-			IO.directory.create(IO.build(dest,file.name));
-		}else{
-			var destfile = IO.build(dest,file.name),parentDir=IO.parent(destfile);
-			if(!IO.directory.exists(parentDir))IO.directory.create(parentDir);
-			if(file.filesize>0){
-				IO.file.writeAllBytes(destfile,file.data);
-			}else{
-				IO.file.writeAllText(destfile,"","iso-8859-1");
-			}
-		}
-	}
-	return true;
-};
 var ArrayPush = Array.prototype.push;
 var formatOtc = function(num, len){
 	var numstr = num.toString(8)+" ", _len = numstr.length;

@@ -226,7 +226,7 @@ MoAspEnginerView.prototype.parsePreCombine = function() {
 }
 
 //****************************************************
-//@DESCRIPTION:	parse page tag. i will call function 'CreatePageList' to create page string,if you do not define function property
+//@DESCRIPTION:	parse page tag. i will call function '$CreatePageList' to create page string,if you do not define function property
 //****************************************************
 MoAspEnginerView.prototype.parsePage = function() {
 	F.string.matches(this.Content, /\<eof ([\s\S]+?)>([\s\S]+?)<\/eof>/igm,function($0,$1,$2){
@@ -253,7 +253,7 @@ MoAspEnginerView.prototype.parsePage = function() {
 				varloopname = loopname.replace(/\./ig,"_"),
 				nloopname = loopname,
 				pageurl = attrs["url"] || "",
-				func = attrs["function"] || "CreatePageList";
+				func = attrs["function"] || "$CreatePageList";
 			if (this.loops.indexOf(";" + varloopname + ";") >= 0) {
 				nloopname = "D__" + varloopname;
 				this.Content = F.replace(this.Content, $0, "{?MoAsp " + nloopname + " = " + this.parseAssign(loopname) + "; MoAsp?}\r\n{?MoAsp __Mo__.Echo(" + func + "(\"" + pageurl + "\"," + nloopname + ".recordcount," + nloopname + ".pagesize," + nloopname + ".currentpage)); MoAsp?}");

@@ -7,11 +7,11 @@
 ** About: 
 **		support@mae.im
 */
-IsEmpty = is_empty = function(variable){
+$IsEmpty = is_empty = function(variable){
 	return variable===""||variable===null||variable===undefined;
 }
 
-CreatePageList = function(URL, RecordCount, PageSize, CurrentPage){
+$CreatePageList = function(URL, RecordCount, PageSize, CurrentPage){
 	var PageCount ,PageStr="";
 	if(URL==""){
 		F.object.toURIString.clearFilter();
@@ -71,34 +71,29 @@ ReCompileForDebug = function(content, add, add2){
 	}
 	return F.string.trim(_content,"\r\n");
 };
-jsEncode = function(str) {
-	if (str == undefined) return "";
-	if (str == "") return "";
-	var i, j, aL1, aL2, c, p, ret = "";
-	aL1 = Array(0x22, 0x5C, 0x2F, 0x08, 0x0C, 0x0A, 0x0D, 0x09);
-	aL2 = Array(0x22, 0x5C, 0x2F, 0x62, 0x66, 0x6E, 0x72, 0x74);
-	for (i = 0; i < str.length; i++) {
-		p = true;
-		c = str.substr(i, 1);
-		for (j = 0; j <= 7; j++) {
-			if (c == String.fromCharCode(aL1[j])) {
-				ret += "\\" + String.fromCharCode(aL2[j]);
-				p = false;
-				break;
-			}
+STRstr = function(str) {
+	if (is_empty(str)) return "";
+	var i, c, es=[], ret = "", len = str.length, buffer=[];
+	es[8]='b';es[9]='t';es[10]='n';es[12]='f';es[13]='r';es[34]='"';es[47]='\/';es[92]='\\';
+	for (i = 0; i < len; i++) {
+		c = str.charCodeAt(i);
+		if(es[c]!==undefined){
+			buffer.push(92, c);
+			continue;
 		}
-		if (p) {
-			var a = c.charCodeAt(0);
-			if (a > 31 && a < 127) {
-				ret += c;
-			} else if (a > -1 || a < 65535) {
-				var slashu = a.toString(16);
-				while (slashu.length < 4) {
-					slashu = "0" + slashu;
-				}
-				ret += "\\u" + slashu;
-			}
+		if (c > 31 && c < 127) {
+			buffer.push(c);
+			continue;
 		}
+		if(buffer.length>0){
+			ret += String.fromCharCode.apply(null, buffer);
+			buffer.length = 0;
+		}
+		ret += "\\u" + ("0000" + c.toString(16)).slice(-4);
+	}
+	if(buffer.length>0){
+		ret += String.fromCharCode.apply(null, buffer);
+		buffer.length = 0;
 	}
 	return ret;
 };

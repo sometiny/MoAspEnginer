@@ -118,11 +118,12 @@ DataTable.prototype.read = function(name){
 };
 DataTable.prototype.each = function(callback){
 	if(typeof callback == "string")callback = (function(format){return function(r){F.echo(F.format(format,r));};})(callback);
-	if(typeof callback != "function")return;
+	if(typeof callback != "function")return this;
 	var  _list = this['LIST__'],_len = _list.length;
 	for(var i = 0;i < _len;i++){
 		callback.call(this,_list[i],i);
 	}
+	return this;
 }
 
 DataTable.prototype.assign = function(name){

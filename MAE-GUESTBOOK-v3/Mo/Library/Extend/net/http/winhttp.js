@@ -60,6 +60,7 @@ function $httprequest(url, options) {
 	this.headers=null;
 	F.extend(this.$g, cfg, options||{});
 }
+SecureProtocols = {ALL : 168, SSL2 : 8, SSL3 : 32, TLS1 : 128};
 HTTPOPTIONS = $httprequest.OPTIONS = {
 	UserAgentString : 0, URL : 1, URLCodePage : 2, EscapePercentInURL : 3, SslErrorIgnoreFlags : 4, SelectCertificate : 5, EnableRedirects : 6, UrlEscapeDisable : 7, UrlEscapeDisableQuery : 8,
 	SecureProtocols : 9, EnableTracing : 10, RevertImpersonationOverSsl : 11, EnableHttpsToHttpRedirects : 12, EnablePassportAuthentication : 13, MaxAutomaticRedirects : 14, MaxResponseHeaderSize : 15,

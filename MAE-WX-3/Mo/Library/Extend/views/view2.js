@@ -82,9 +82,9 @@ MoAspEnginerView.prototype.parse = function() {
 
 			var taglib = Mo.LoadAssets(lib);
 			if (taglib) {
-				var match, regexp = new RegExp("\\<" + lib + "\\b([\\s\\S]*?)\\>([\\s\\S]*?)\\<\\/" + lib + "\\>", "igm"),
+				var match, regexp = new RegExp("<" + lib + "\\b([\\s\\S]*?)>([\\s\\S]*?)<\\/" + lib + ">", "igm"),
 					matches = F.string.matches(this.Content, regexp);
-				if (matches && matches > 0) {
+				if (matches && matches.length > 0) {
 					closetag = false;
 				} else {
 					regexp = new RegExp("\\<" + lib + "\\b([\\s\\S]*?)\\/\\>", "igm");
@@ -255,7 +255,7 @@ MoAspEnginerView.prototype.parsePreCombine = function() {
 }
 
 //****************************************************
-//@DESCRIPTION:	parse page tag. i will call function 'CreatePageList' to create page string,if you do not define function property
+//@DESCRIPTION:	parse page tag. i will call function '$CreatePageList' to create page string,if you do not define function property
 //****************************************************
 MoAspEnginerView.prototype.parsePage = function() {
 		F.string.matches(this.Content, /\<eof ([\s\S]+?)>([\s\S]+?)<\/eof>/igm, function($0, $1, $2) {
@@ -269,7 +269,7 @@ MoAspEnginerView.prototype.parsePage = function() {
 			if (attrs["for"]) {
 				var loopname = attrs["for"],
 					pageurl = attrs["url"] || "",
-					func = attrs["function"] || "CreatePageList";
+					func = attrs["function"] || "$CreatePageList";
 				this.Content = F.replace(this.Content, $0, "{?MoAsp __Mo__.Echo(" + func + "(\"" + pageurl + "\"," + loopname + ".recordcount," + loopname + ".pagesize," + loopname + ".currentpage)); MoAsp?}");
 			}
 		}, this);

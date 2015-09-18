@@ -16,7 +16,7 @@ var dump__ = function(parm, level) {
 		//constructor
 		switch (typeof parm) {
 		case "string":
-			return "string(\"" + parm + "\")";
+			return "string(\"" + parm.replace(/\r/ig,"\\r").replace(/\n/ig,"\\n").replace(/\t/ig,"\\t") + "\")";
 		case "number":
 			return "number(" + parm.toString() + ")";
 		case "boolean":

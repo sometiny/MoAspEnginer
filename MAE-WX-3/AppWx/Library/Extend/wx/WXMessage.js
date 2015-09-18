@@ -141,11 +141,11 @@ WXMessage.prototype.decrypt = function(msg_encrypt,msg_signature){
 WXMessage.prototype.loadRequest = function(requeststr){
 	this.Message = requeststr;
 	var XML = require("xml");
-	var xml = XML.Load(requeststr)
+	var xml = XML.LoadText(requeststr)
 	if(xml.ROOT==null)return false;
 	if(F.get("encrypt_type")=="aes" && !this.IgnoreCrypt){
 		if(!this.decrypt(xml.select("Encrypt").text(),F.get("msg_signature"))) return false;
-		xml = XML.Load(this.Message);
+		xml = XML.LoadText(this.Message);
 		if(xml.ROOT==null){
 			this.Exception = "xml document error";
 			return false;
@@ -157,55 +157,55 @@ WXMessage.prototype.loadRequest = function(requeststr){
 			return false;
 		}
 	}
-	this.MsgType = xml.select("MsgType").text().toLowerCase();
+	this.MsgType = xml.select("//xml/MsgType").text().toLowerCase();
 	if(this.MsgType==""){
 		this.Exception = "can not find 'MsgType' node";
 		return false;
 	}
-	this.ToUserName = xml.select("ToUserName").text();
-	this.FromUserName = xml.select("FromUserName").text();
-	this.CreateTime = xml.select("CreateTime").text();
-	if(this.MsgType!="event")this.MsgId = xml.select("MsgId").text();
+	this.ToUserName = xml.select("//xml/ToUserName").text();
+	this.FromUserName = xml.select("//xml/FromUserName").text();
+	this.CreateTime = xml.select("//xml/CreateTime").text();
+	if(this.MsgType!="event")this.MsgId = xml.select("//xml/MsgId").text();
 	else{
-		this.Request["Event"] = xml.select("Event").text();
+		this.Request["Event"] = xml.select("//xml/Event").text();
 		//subscribe,unsubscribe,SCAN,LOCATION,CLICK,VIEW,MASSSENDJOBFINISH
 		if(this.Request["Event"]=="LOCATION"){
-			this.Request["Latitude"] = xml.select("Latitude").text();
-			this.Request["Longitude"] = xml.select("Longitude").text();
-			this.Request["Precision"] = xml.select("Precision").text();
+			this.Request["Latitude"] = xml.select("//xml/Latitude").text();
+			this.Request["Longitude"] = xml.select("//xml/Longitude").text();
+			this.Request["Precision"] = xml.select("//xml/Precision").text();
 		}else if(this.Request["Event"]=="MASSSENDJOBFINISH"){
-			this.Request["MsgID"] = xml.select("MsgID").text();
-			this.Request["Status"] = xml.select("Status").text();
-			this.Request["TotalCount"] = xml.select("TotalCount").text();
-			this.Request["FilterCount"] = xml.select("FilterCount").text();
-			this.Request["SentCount"] = xml.select("SentCount").text();
-			this.Request["ErrorCount"] = xml.select("ErrorCount").text();
+			this.Request["MsgID"] = xml.select("//xml/MsgID").text();
+			this.Request["Status"] = xml.select("//xml/Status").text();
+			this.Request["TotalCount"] = xml.select("//xml/TotalCount").text();
+			this.Request["FilterCount"] = xml.select("//xml/FilterCount").text();
+			this.Request["SentCount"] = xml.select("//xml/SentCount").text();
+			this.Request["ErrorCount"] = xml.select("//xml/ErrorCount").text();
 		}else{
-			this.Request["EventKey"] = xml.select("EventKey").text();
-			this.Request["Ticket"] = xml.select("Ticket").text();
+			this.Request["EventKey"] = xml.select("//xml/EventKey").text();
+			this.Request["Ticket"] = xml.select("//xml/Ticket").text();
 		}
 	}
 	if(this.MsgType=="text"){
-		this.Request["Content"] = xml.select("Content").text();
+		this.Request["Content"] = xml.select("//xml/Content").text();
 	}else if(this.MsgType=="image"){
-		this.Request["PicUrl"] = xml.select("PicUrl").text();
-		this.Request["MediaId"] = xml.select("MediaId").text();
+		this.Request["PicUrl"] = xml.select("//xml/PicUrl").text();
+		this.Request["MediaId"] = xml.select("//xml/MediaId").text();
 	}else if(this.MsgType=="voice"){
-		this.Request["Format"] = xml.select("Format").text();
-		this.Request["MediaId"] = xml.select("MediaId").text();
-		this.Request["Recognition"] = xml.select("Recognition").text();
+		this.Request["Format"] = xml.select("//xml/Format").text();
+		this.Request["MediaId"] = xml.select("//xml/MediaId").text();
+		this.Request["Recognition"] = xml.select("//xml/Recognition").text();
 	}else if(this.MsgType=="video"){
-		this.Request["ThumbMediaId"] = xml.select("ThumbMediaId").text();
-		this.Request["MediaId"] = xml.select("MediaId").text();
+		this.Request["ThumbMediaId"] = xml.select("//xml/ThumbMediaId").text();
+		this.Request["MediaId"] = xml.select("//xml/MediaId").text();
 	}else if(this.MsgType=="location"){
-		this.Request["Location_X"] = xml.select("Location_X").text();
-		this.Request["Location_Y"] = xml.select("Location_Y").text();
-		this.Request["Scale"] = xml.select("Scale").text();
-		this.Request["Label"] = xml.select("Label").text();
+		this.Request["Location_X"] = xml.select("//xml/Location_X").text();
+		this.Request["Location_Y"] = xml.select("//xml/Location_Y").text();
+		this.Request["Scale"] = xml.select("//xml/Scale").text();
+		this.Request["Label"] = xml.select("//xml/Label").text();
 	}else if(this.MsgType=="link"){
-		this.Request["Title"] = xml.select("Title").text();
-		this.Request["Description"] = xml.select("Description").text();
-		this.Request["Url"] = xml.select("Url").text();
+		this.Request["Title"] = xml.select("//xml/Title").text();
+		this.Request["Description"] = xml.select("//xml/Description").text();
+		this.Request["Url"] = xml.select("//xml/Url").text();
 	}
 	xml = null;
 	return true

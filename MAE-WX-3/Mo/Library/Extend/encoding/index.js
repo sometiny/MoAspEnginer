@@ -34,42 +34,116 @@
 ** About: 
 **		support@mae.im
 */
+var _SPEC={};
+_SPEC.S1 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'()";/*for URIComponent*/
+_SPEC.S2 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'();/?:@&=+$,#";/*for URI*/
+var string2binary = function(src, charset, bomsize){
+	return F.activex("ADODB.STREAM", function(data, cs,bs){
+		var byts;
+		this.Mode = 3;
+		this.Type = 2;
+		this.CharSet = cs || "utf-8";
+		this.Open();
+		this.WriteText(data);
+		this.Position = 0;
+		this.Type = 1;
+		this.Position = bs;
+		byts = this.Read();
+		this.Close();
+		return byts;
+	},src, charset, bomsize || 0);
+};
+var binary2string = function(src, charset){
+	return F.activex("ADODB.STREAM", function(data, cs){
+		var byts;
+		this.Mode = 3;
+		this.Type = 1;
+		this.Open();
+		this.Write(data);
+		this.Position = 0;
+		this.Type = 2;
+		this.CharSet = cs || "utf-8";
+		byts = this.ReadText();
+		this.Close();
+		return byts;
+	},src, charset);
+};
+var getByteArray = function(src, charset, bomsize){
+	return IO.binary2buffer(string2binary(src, charset, bomsize));
+};
+var getString = function(src, charset){
+	return binary2string(IO.buffer2binary(src), charset);
+};
+
+//unicode to utf8
+var utoutf8=function(u){
+	var a,b,c,d;
+	if(u<=0x7f) return u;
+	else if(u<=0x07FF){
+		a = 0xc0 | (u >> 6);
+		b = 0x80 | (u & 0x3f);
+		return (a<<8) | b;
+	}
+	else if(u<=0xFFFF){
+		a = 0xe0 | (u >> 12);
+		b = 0x80 | ((u >> 6) & 0x3f);
+		c = 0x80 | (u & 0x3f);
+		return (a<<16) | (b<<8) | c;
+	}
+	else if(u<=0x10FFFF){
+		a = 0xf0 | (u >> 18);
+		b = 0x80 | ((u >> 12) & 0x3f);
+		c = 0x80 | ((u >> 6) & 0x3f);
+		d = 0x80 | (u & 0x3f);
+		var ret = (a<<24) | (b<<16) | (c<<8) | d;
+		if(ret<0)ret+=0x100000000;
+		return ret;
+	}else return 0;
+};
+
+//utf8 to unicode
+var utf8tou=function(u){
+	var a,b,c,d;
+	if(u<=0x7f) return u;
+	else if(u<=0xdfbf) {
+		a = (u >> 8) & 0x1f;
+		b = u & 0x3f;
+		return (a << 6) | b;
+	}
+	else if(u<=0xefbfbf) {
+		a = (u >> 16) & 0xf;
+		b = (u >> 8) & 0x3f;
+		c = u & 0x3f;
+		return (a << 12) | (b << 6) | c;
+	}
+	else if(u<=0xf48fbfbf) {
+		a = (u >>> 24) & 0x7;
+		b = (u >> 16) & 0x3f;
+		c = (u >> 8) & 0x3f;
+		d = u & 0x3f;
+		return (a << 18) | (b << 12) | (c << 6) | d;
+	}
+	else return 0;
+};
+var bytestoword = function(u,i){
+	var c = u[i],ret=[1,c];
+	if(c<=0x7f)ret[1]=c;
+	else if(c<=0xDF){
+		ret[1]=(c << 8) | u[i+1];
+		ret[0]=2;
+	}else if(c<=0xEF){
+		ret[1]=(c << 16) | (u[i+1] << 8) | u[i+2];
+		ret[0]=3;
+	}else if(c<=0xF7){
+		ret[1]=(c << 24) | (u[i+1] << 16) | (u[i+2] << 8) | u[i+3];
+		ret[0]=4;
+	}
+	return ret;	
+};
 module.exports = (function(){
-	var _SPEC={};
-	_SPEC.S1 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'()";/*for URIComponent*/
-	_SPEC.S2 = "1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM-_.!~*'();/?:@&=+$,#";/*for URI*/
-	var getByteArray = function(src, charset, bomsize){
-		return IO.binary2buffer(F.activex("ADODB.STREAM", function(data, cs,bs){
-			var byts;
-			this.Mode = 3;
-			this.Type = 2;
-			this.CharSet = cs || "utf-8";
-			this.Open();
-			this.WriteText(data);
-			this.Position = 0;
-			this.Type = 1;
-			this.Position = bs;
-			byts = this.Read();
-			this.Close();
-			return byts;
-		},src, charset, bomsize || 0));
-	};
-	var getString = function(src, charset){
-		return F.activex("ADODB.STREAM", function(data, cs){
-			var byts;
-			this.Mode = 3;
-			this.Type = 1;
-			this.Open();
-			this.Write(data);
-			this.Position = 0;
-			this.Type = 2;
-			this.CharSet = cs || "utf-8";
-			byts = this.ReadText();
-			this.Close();
-			return byts;
-		},IO.buffer2binary(src), charset);
-	};
 	var $enc={};
+	$enc.getBinary = string2binary;
+	$enc.getString = binary2string;
 	$enc.encodeURIComponent = function(string,enc){
 		return $enc.encode(string,enc,"S1");
 	};
@@ -142,68 +216,6 @@ module.exports = (function(){
 		return $hex;
 	})();
 	$enc.utf8 = $enc.utf8 || (function(){
-		var utoutf8=function(u){
-			var a,b,c,d;
-			if(u<=0x7f) return u;
-			else if(u<=0x07FF){
-				a = 0xc0 | (u >> 6);
-				b = 0x80 | (u & 0x3f);
-				return (a<<8) | b;
-			}
-			else if(u<=0xFFFF){
-				a = 0xe0 | (u >> 12);
-				b = 0x80 | ((u >> 6) & 0x3f);
-				c = 0x80 | (u & 0x3f);
-				return (a<<16) | (b<<8) | c;
-			}
-			else if(u<=0x10FFFF){
-				a = 0xf0 | (u >> 18);
-				b = 0x80 | ((u >> 12) & 0x3f);
-				c = 0x80 | ((u >> 6) & 0x3f);
-				d = 0x80 | (u & 0x3f);
-				var ret = (a<<24) | (b<<16) | (c<<8) | d;
-				if(ret<0)ret+=0x100000000;
-				return ret;
-			}else return 0;
-		};
-		var utf8tou=function(u){
-			var a,b,c,d;
-			if(u<=0x7f) return u;
-			else if(u<=0xdfbf) {
-				a = (u >> 8) & 0x1f;
-				b = u & 0x3f;
-				return (a << 6) | b;
-			}
-			else if(u<=0xefbfbf) {
-				a = (u >> 16) & 0xf;
-				b = (u >> 8) & 0x3f;
-				c = u & 0x3f;
-				return (a << 12) | (b << 6) | c;
-			}
-			else if(u<=0xf48fbfbf) {
-				a = (u >>> 24) & 0x7;
-				b = (u >> 16) & 0x3f;
-				c = (u >> 8) & 0x3f;
-				d = u & 0x3f;
-				return (a << 18) | (b << 12) | (c << 6) | d;
-			}
-			else return 0;
-		};
-		var bytestoword = function(u,i){
-			var c = u[i],ret=[1,c];
-			if(c<=0x7f)ret[1]=c;
-			else if(c<=0xDF){
-				ret[1]=(c << 8) | u[i+1];
-				ret[0]=2;
-			}else if(c<=0xEF){
-				ret[1]=(c << 16) | (u[i+1] << 8) | u[i+2];
-				ret[0]=3;
-			}else if(c<=0xF7){
-				ret[1]=(c << 24) | (u[i+1] << 16) | (u[i+2] << 8) | u[i+3];
-				ret[0]=4;
-			}
-			return ret;	
-		};
 		var $utf8={};
 		$utf8.getWordArray = function(u){
 			if(u.length<=0)return [];
@@ -250,7 +262,7 @@ module.exports = (function(){
 			return ret;
 		};
 		$utf8.getBinary = function(u){
-			return String.fromCharCode.apply(null,$utf8.getByteArray(u));
+			return string2binary(u, "utf-8", 3);
 		};
 		$utf8.toString = function(u){
 			var _len = u.length;
@@ -302,7 +314,7 @@ module.exports = (function(){
 			return ret;
 		};
 		$gbk.getBinary = function(u){
-			return String.fromCharCode.apply(null,$gbk.getByteArray(u));
+			return string2binary(u, "gbk", 0);
 		};
 		$gbk.toString = function(bytes){
 			var _len = bytes.length;
@@ -357,7 +369,7 @@ module.exports = (function(){
 			return ret;
 		};
 		$unicode.getBinary = function(u){
-			return String.fromCharCode.apply(null,$unicode.getByteArray(u));
+			return string2binary(u, "utf-16", 2);
 		};
 		$unicode.toString = function(u){
 			var _len = u.length;
@@ -393,7 +405,11 @@ module.exports = (function(){
 			return getByteArray(u, name ,bom);
 		};
 		$encoding.getString = function(u){
+			if(typeof u=="unknown") return binary2string(u, name);
 			return getString(u, name);
+		};
+		$encoding.getBinary = function(u, bomsize){
+			return string2binary(u, name, bomsize);
 		};
 		return $encoding;
 	};
@@ -403,4 +419,4 @@ Utf8 = module.exports.utf8;
 GBK = module.exports.gbk;
 Unicode = module.exports.unicode;
 Hex = module.exports.hex;
-Encoding = module.exports.encoding;
+Encoding = module.exports;

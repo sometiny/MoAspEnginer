@@ -18,41 +18,29 @@
         rx_escapable = /[\\\"\u0000-\u001f\u007f-\u009f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
         rx_dangerous = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
 	function js(str) {
-		if (str == undefined) {
-			return ""
-		}
-		if (str == "") {
-			return ""
-		}
-		var i, j, aL1, aL2, c, p, ret = "", _len = str.length;
-		aL1 = Array(34, 92, 47, 8, 12, 10, 13, 9);
-		aL2 = Array(34, 92, 47, 98, 102, 110, 114, 116);
-		for (i = 0; i < _len; i++) {
-			p = true;
-			c = str.substr(i, 1);
-			for (j = 0; j <= 7; j++) {
-				if (c == String.fromCharCode(aL1[j])) {
-					ret += "\\" + String.fromCharCode(aL2[j]);
-					p = false;
-					break
-				}
+		var i, c, es=[], ret = "", len = str.length, buffer=[];
+		es[8]='b';es[9]='t';es[10]='n';es[12]='f';es[13]='r';es[34]='"';es[47]='\/';es[92]='\\';
+		for (i = 0; i < len; i++) {
+			c = str.charCodeAt(i);
+			if(es[c]!==undefined){
+				buffer.push(92, c);
+				continue;
 			}
-			if (p) {
-				var a = c.charCodeAt(0);
-				if (a > 31 && a < 127) {
-					ret += c
-				} else {
-					if (a > -1 || a < 65535) {
-						var slashu = a.toString(16);
-						while (slashu.length < 4) {
-							slashu = "0" + slashu
-						}
-						ret += "\\u" + slashu
-					}
-				}
+			if (c > 31 && c < 127) {
+				buffer.push(c);
+				continue;
 			}
+			if(buffer.length>0){
+				ret += String.fromCharCode.apply(null, buffer);
+				buffer.length = 0;
+			}
+			ret += "\\u" + ("0000" + c.toString(16)).slice(-4);
 		}
-		return ret
+		if(buffer.length>0){
+			ret += String.fromCharCode.apply(null, buffer);
+			buffer.length = 0;
+		}
+		return ret;
 	}
     function f(n) {
         return n < 10 

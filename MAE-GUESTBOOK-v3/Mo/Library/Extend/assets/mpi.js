@@ -19,7 +19,7 @@ var WinHTTP = function(url){
 	},url);
 };
 
-var MPIHost = "mpi.thinkasp.cn",
+var MPIHost = Mo.Config.Global.MO_MPI_HOST,
 	installDirectory = IO.build(Mo.Config.Global.MO_CORE, "Library/Extend");
 
 /**
@@ -46,11 +46,11 @@ function _install(pkg, idy, update){
 	if(!IO.directory.exists(_installDirectory)){
 		update = false;
 	}
-	var zipdata, JSZip, zip;
+	var TAR, Pkgm;
 	try{
 		var packagepath = IO.build(Mpi.PATH.CACHE,F.format("{0}@{1}.zip",pkg.name,pkg.version));
-		JSZip = require("assets/tar");
-		zip = new JSZip(packagepath);
+		TAR = require("assets/tar.js");
+		Pkgm = new TAR(packagepath);
 		IO.file.del(packagepath);
 	}catch(ex){
 		Mpi.message = ex.description;
@@ -59,7 +59,7 @@ function _install(pkg, idy, update){
 	if(update){
 		IO.directory.clear(_installDirectory);
 	}
-	var files = zip.files, unziped = [];
+	var files = Pkgm.files, unziped = [];
 	for(var i in files){
 		if(!files.hasOwnProperty(i)) continue;
 		var file = files[i];
@@ -213,15 +213,18 @@ Mpi.packageExists = function(pkg){
 		Mpi.message = "package name format error.";
 		return null;
 	}
-	var pkgdirectory=IO.build(installDirectory,pkg.name),filename=IO.build(pkgdirectory, "package.json") ;
-	if(IO.directory.exists(pkgdirectory)){
-		if(IO.file.exists(filename)){
-			try{
-				return JSON.parse(IO.file.readAllText(filename));
-			}catch(ex){Mpi.message = "package.json format error.";}
-		}else{
-			Mpi.message = "package.json is not exists.";
-		}
+	var _file = require.exists(pkg.name);
+	if(!_file){
+		Mpi.message = "";
+		return null;
+	}
+	var pkgdirectory=IO.parent(_file),filename=IO.build(pkgdirectory, "package.json") ;
+	if(IO.file.exists(filename)){
+		try{
+			return JSON.parse(IO.file.readAllText(filename));
+		}catch(ex){Mpi.message = "package.json format error.";}
+	}else{
+		Mpi.message = "package is exists, but package.json is not exists.";
 	}
 	return null;
 };

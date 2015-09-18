@@ -31,6 +31,25 @@ var $getHttpResponse = function(WS,content){
 	WS = null;
 	return result;
 };
+function _patchAttrs(e){
+	var attrs = this.Attrs;
+	if(!attrs) return;
+	if(this.Protocol==3 || this.Protocol==4) return;
+	var doc = new ActiveXObject("MSXML2.DOMDocument");
+	doc.loadXML(e.Envelope);
+	if(!doc.documentElement) return;
+	for(var i in attrs){
+		if(!attrs.hasOwnProperty(i)) continue;
+		var node = doc.selectSingleNode(e.Path + i);
+		if(node){
+			for(var j in attrs[i]){
+				if(!attrs[i].hasOwnProperty(j)) continue;
+				node.setAttribute(j, attrs[i][j]);
+			}
+		}
+	}
+	return doc.xml;
+}
 function $soap(url,namespace){
 	if(this.constructor!==$soap) return new $soap(url, namespace);
 	function def(v){
@@ -46,6 +65,7 @@ function $soap(url,namespace){
 	this.Response = "";
 	this.Location = "";
 	this.Parms={};
+	this.BeforeSend = [_patchAttrs];
 	delete def;
 }
 SoapProtocols = $soap.Protocols = {"SOAP":1,"SOAP12":2,"HttpGet":3,"HttpPost":4};
@@ -56,13 +76,13 @@ $soap.ParseArguments = function(arg){
 			if(arg.hasOwnProperty(i)){
 				var val = arg[i];
 				if(val.constructor == Array){
-					returnValue += "<" + i + ">";
 					for(var j=0;j<val.length;j++){
+						returnValue += "<" + i +">";
 						returnValue += $soap.ParseArguments(val[j]) ;
+						returnValue += "</" + i + ">";
 					}
-					returnValue += "</" + i + ">";
 				}else{
-					returnValue+="<" + i + ">" + $soap.ParseArguments(val) + "</" + i + ">";
+					returnValue+="<" + i +">" + $soap.ParseArguments(val) + "</" + i + ">";
 				}
 			}
 		}
@@ -85,7 +105,7 @@ $soap.ParseArgumentsForHttp = function(arg){
 	return arg;
 };
 $soap.fn = $soap.prototype;
-$soap.fn.SetParm = function(path,value){
+$soap.fn.SetParm = function(value){
 	this.Parms = value;
 };
 $soap.fn.SetProtocolVersion=function(version){
@@ -126,6 +146,9 @@ $soap.fn.InvokeSOAP12=function(func){
 	WS.open("POST",this.Url,false);
 	WS.setRequestHeader("Content-Length",Envelope.length);
 	WS.setRequestHeader("Content-Type","application/soap+xml; charset=utf-8");
+	for(var i=0;i<this.BeforeSend.length;i++){
+		Envelope = this.BeforeSend[i].call(this, {Envelope : Envelope, Path : "//soap12:Envelope/soap12:Body/" + func}, WS) || Envelope;
+	}
 	return $getHttpResponse.call(this,WS,Envelope);
 };
 
@@ -143,6 +166,9 @@ $soap.fn.InvokeSOAP=function(func){
 	WS.setRequestHeader("Content-Length",Envelope.length);
 	WS.setRequestHeader("Content-Type","text/xml; charset=utf-8");
 	WS.setRequestHeader("SOAPAction","\""+soapAction+"\"");
+	for(var i=0;i<this.BeforeSend.length;i++){
+		Envelope = this.BeforeSend[i].call(this,  {Envelope : Envelope, Path : "//soap:Envelope/soap:Body/" + func}, WS) || Envelope;
+	}
 	return $getHttpResponse.call(this,WS,Envelope);
 };
 
@@ -158,6 +184,9 @@ $soap.fn.InvokeHttpGet=function(){
 	MyUrl += QString;
 	if(QString=="")MyUrl = MyUrl.substr(0,MyUrl.length-1);
 	WS.open("GET",MyUrl,false);
+	for(var i=0;i<this.BeforeSend.length;i++){
+		this.BeforeSend[i].call(this, null, WS);
+	}
 	return $getHttpResponse.call(this,WS,null);
 };
 
@@ -172,6 +201,9 @@ $soap.fn.InvokeHttpPost=function(){
 	WS.open("POST",MyUrl,false);
 	WS.setRequestHeader("Content-Length",QString.length);
 	WS.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+	for(var i=0;i<this.BeforeSend.length;i++){
+		QString = this.BeforeSend[i].call(this, {QString : QString}, WS) || QString;
+	}
 	return $getHttpResponse.call(this,WS,QString);
 };
 module.exports = $soap;

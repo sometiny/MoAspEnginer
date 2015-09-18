@@ -337,37 +337,21 @@ _["goto"] = function(url, msg) {
 	}
 	Response.Write('\u003cscript type="text/javascript"\u003ealert(decodeURIComponent("' + _.encode(msg) + '"));window.location = decodeURIComponent("' + _.encode(url) + '");\u003c/script\u003e');
 };
+_.script_start = '\u003cscript type="text/javascript"\u003e';
+_.script_end = '\u003c/script\u003e';
 _.initialize = function(name) {
 	if (typeof name == "string") name = eval(name);
 	return typeof name == "object" ? name : new name();
 };
 _.encode = function(src) {
-	src = src || "";
-	return encodeURIComponent(src).replace(/\+/, "%2B");
+	return encodeURIComponent(src || "").replace(/\+/g, "%2B");
 };
 _.decode = function(src) {
-	src = src || "";
-	return decodeURIComponent(src);
+	return decodeURIComponent(src || "");
 };
 _.encodeHtml = function(src) {
 	src = src || "";
-	var ret = src.replace(/&/igm, "&amp;");
-	ret = ret.replace(/>/igm, "&gt;");
-	ret = ret.replace(/</igm, "&lt;");
-	ret = ret.replace(/ /igm, "&nbsp;");
-	ret = ret.replace(/\"/igm, "&quot;");
-	ret = ret.replace(/\u00a9/igm, "&copy;");
-	ret = ret.replace(/\u00ae/igm, "&reg;");
-	ret = ret.replace(/\u00b1/igm, "&plusmn;");
-	ret = ret.replace(/\u00d7/igm, "&times;");
-	ret = ret.replace(/\u00a7/igm, "&sect;");
-	ret = ret.replace(/\u00a2/igm, "&cent;");
-	ret = ret.replace(/\u00a5/igm, "&yen;");
-	ret = ret.replace(/\u2022/igm, "&middot;");
-	ret = ret.replace(/\u20ac/igm, "&euro;");
-	ret = ret.replace(/\u00a3/igm, "&pound;");
-	ret = ret.replace(/\u2122/igm, "&trade;");
-	return ret
+	return Server.HtmlEncode(src).replace(/\r/g,"&#10;").replace(/\n/g,"&#13;").replace(/ /g,"&nbsp;").replace(/'/g,"&#39;");
 };
 _.decodeHtml = function(src) {
 	src = src || "";
@@ -376,17 +360,9 @@ _.decodeHtml = function(src) {
 	ret = ret.replace(/&lt;/igm, "<");
 	ret = ret.replace(/&nbsp;/igm, " ");
 	ret = ret.replace(/&quot;/igm, "\"");
-	ret = ret.replace(/&copy;/igm, "\u00a9");
-	ret = ret.replace(/&reg;/igm, "\u00ae");
-	ret = ret.replace(/&plusmn;/igm, "\u00b1");
-	ret = ret.replace(/&times;/igm, "\u00d7");
-	ret = ret.replace(/&sect;/igm, "\u00a7");
-	ret = ret.replace(/&cent;/igm, "\u00a2");
-	ret = ret.replace(/&yen;/igm, "\u00a5");
-	ret = ret.replace(/&middot;/igm, "\u2022");
-	ret = ret.replace(/&euro;/igm, "\u20ac");
-	ret = ret.replace(/&pound;/igm, "\u00a3");
-	ret = ret.replace(/&trade;/igm, "\u2122");
+	ret = ret.replace(/&#10;/igm, "\r");
+	ret = ret.replace(/&#13;/igm, "\n");
+	ret = ret.replace(/&#39;/igm, "'");
 	return ret
 };
 _.formatdate = function(dt, fs) {
@@ -422,7 +398,7 @@ _.formatdate = function(dt, fs) {
 		return src.substr(src.length-2);
 	}
 
-	fs = fs.replace(/(yyyy|mmmm|mmm|mm|dd|hh|ss|tttt|m|d|h|s)/ig,function(diff){
+	fs = fs.replace(/(yyyy|mmmm|mmm|mm|dddd|ddd|dd|hh|ss|tttt|m|d|h|s)/ig,function(diff){
 		switch(diff){
 			case "dddd" : return ws[0][dt.getDay()];
 			case "ddd" : return ws[1][dt.getDay()];
@@ -580,7 +556,7 @@ _.foreach = function(src, fn, state) {
 };
 _.safe = function(src) {
 	src = src || "";
-	return src.replace(/\'/igm, "").replace(/((^[\s]+)|([\s]+$))/igm, "").replace(/[\r\n]+/igm, "").replace(/>/igm, "&gt;").replace(/</igm, "&lt;");
+	return src.replace(/('|"|\r|\n|(^[\s]+)|([\s]+$))/igm, "").replace(/>/igm, "&gt;").replace(/</igm, "&lt;");
 };
 
 

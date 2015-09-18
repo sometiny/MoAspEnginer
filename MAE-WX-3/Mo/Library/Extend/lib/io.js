@@ -17,11 +17,12 @@ var buffer2string = function(buffer) {
 	var ret = "";
 	var i = 0;
 	var l = buffer.length;
-	var cc;
+	var cc, nb=[];
 	for (; i < l; ++i) {
-		ret += String.fromCharCode(mapto437[buffer[i]]);
+		if(buffer[i]>=0x80) nb[i] = mapto437[buffer[i]];
+		else nb[i] = buffer[i];
 	}
-	return ret;
+	return String.fromCharCode.apply(null, nb);
 }
 /* Convert a code page 437 char code to a octet number*/
 var string2buffer = function(src) {
@@ -189,8 +190,9 @@ $io.file = $io.file || (function()
 	var $fn = function(fp, content)
 	{
 		$file.write(fp,content);
-		$file.flush(fp);
+		var result = $file.flush(fp) === true;
 		$file.close(fp);
+		return result;
 	};
 	$file.get = function(path)
 	{
@@ -267,19 +269,19 @@ $io.file = $io.file || (function()
 		return content;
 	};
 	$file.writeAllBytes = function(path,content){
-		$fn($file.open(path, {forText : false}), content);
+		return $fn($file.open(path, {forText : false}), content);
 	};
 	$file.writeAllText = function(path,content,encoding){
-		$fn($file.open(path, {encoding : encoding || "utf-8"}), content);
+		return $fn($file.open(path, {encoding : encoding || "utf-8"}), content);
 	};
 	$file.writeAllBuffer = function(path,buffer){
-		$fn($file.open(path, {encoding : "437"}), buffer2string(buffer));
+		return $fn($file.open(path, {encoding : "437"}), buffer2string(buffer));
 	};
 	$file.appendAllBytes = function(path,content){
-		$fn($file.open(path, {forText : false, forAppend : true}), content);
+		return $fn($file.open(path, {forText : false, forAppend : true}), content);
 	};
 	$file.appendAllText = function(path,content,encoding){
-		$fn($file.open(path, {encoding : encoding || "utf-8", forAppend : true}), content);
+		return $fn($file.open(path, {encoding : encoding || "utf-8", forAppend : true}), content);
 	};
 	$file.open = function(path,opt)
 	{
@@ -393,7 +395,8 @@ $io.file = $io.file || (function()
 		fp = $io.fps[fp];
 		try{
 			fp[0].flush();
-			fp[0].saveToFile(fp[1],2);
+			fp[0].saveToFile(fp[2].saveas || fp[1],2);
+			return true;
 		}catch(ex){
 			ExceptionManager.put(ex,"io.file.flush['" + F.string.right(fp[1],"\\") + "']");
 		}
@@ -564,24 +567,43 @@ $io.directory = $io.directory || (function()
 })();
 
 /*some methods for drive*/
+function get_drive(dr){
+	if(dr.IsReady){
+		return {
+			space : {
+				available : dr.AvailableSpace,
+				free : dr.FreeSpace,
+				total : dr.TotalSize
+			},
+			letter : dr.DriveLetter,
+			type : dr.DriveType,
+			typeString : $io.drive.types[dr.DriveType] || "Unknown",
+			fileSystem : dr.FileSystem,
+			isReady : dr.IsReady,
+			path : dr.Path,
+			sn : (dr.SerialNumber < 0 ? (dr.SerialNumber+0x100000000) : dr.SerialNumber).toString(16)
+		};	
+	}else{
+		return {
+			letter : dr.DriveLetter,
+			type : dr.DriveType,
+			typeString : $io.drive.types[dr.DriveType] || "Unknown",
+			isReady : dr.IsReady,
+			path : dr.Path
+		};
+	}
+}
 $io.drive = $io.drive || function(path)
 {
-	path = F.mappath(path);
-	var dr = $io.fso.GetDrive($io.fso.GetDriveName(path));
-	return {
-		space : {
-			available : dr.AvailableSpace,
-			free : dr.FreeSpace,
-			total : dr.TotalSize
-		},
-		letter : dr.DriveLetter,
-		type : dr.DriveType,
-		typeString : $io.drive.types[dr.DriveType] || "Unknown",
-		fileSystem : dr.FileSystem,
-		isReady : dr.IsReady,
-		path : dr.Path,
-		sn : (dr.SerialNumber < 0 ? (dr.SerialNumber+0x100000000) : dr.SerialNumber).toString(16)
-	};
+	return get_drive($io.fso.GetDrive($io.fso.GetDriveName(F.mappath(path))));
+};
+$io.drive.drives = function(callback, raw){
+	var ds = $io.fso.Drives, e = new Enumerator($io.fso.Drives);
+	for (; !e.atEnd(); e.moveNext())
+	{
+		callback(raw===true ? e.item() : get_drive(e.item()));
+	}
+	e = null;
 };
 $io.drive.types = [
 	"Unknown", 

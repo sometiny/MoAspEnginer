@@ -369,7 +369,7 @@ $httprequest.fn.getheader = function(key) {
 			key = key.replace("-", "\-");
 			var headers = this.base.getAllResponseHeaders(),
 				regexp = new RegExp("\n" + key + "\:(.+?)\r", "ig"),
-				resstr = "", val;
+				resstr = "", val, res;
 			while ((res = regexp.exec(headers)) != null) {
 				var val =res[1].replace(/(^(\s+)|(\s+)$)/igm, "");
 				resstr = resstr + val.substr(0, val.indexOf(";")) + "; "

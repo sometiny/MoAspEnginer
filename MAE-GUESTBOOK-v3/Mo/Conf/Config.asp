@@ -21,11 +21,11 @@ return {
 	MO_TABLE_PERX : "Mo_",
 	MO_DEBUG: false,
 	MO_DEBUG_MODE: "DIRECT",
-	MO_DEBUG2FILE : false,
 	MO_DEBUG_FILE : "",
 	MO_COMPILE_CACHE : true,
 	MO_COMPILE_CACHE_EXPIRED : 0,
-	MO_CHARSET : "UTF-8",
+	MO_CHARSET : "utf-8",
+	MO_CONTENT_TYPE : "",
 	MO_METHOD_CHAR : "m",
 	MO_ACTION_CHAR : "a",
 	MO_GROUP_CHAR : "g",
@@ -48,12 +48,13 @@ return {
 	MO_CONTROLLER_CNAMES : null,
 	MO_ACTION_CASE_SENSITIVITY : true,
 	MO_AUTO_DISPLAY : false,
-	MO_ERROR_REPORTING : E_ALL,
+	MO_ERROR_REPORTING : E_NONE,
 	MO_LIB_CNAMES : {
 		"base64" : "assets/base64.js",
 		"md5" : "assets/md5.js",
 		"tar" : "assets/tar.js",
 		"dump" : "assets/dump.js"
-	}
+	},
+	MO_MPI_HOST : "mpi.thinkasp.cn"
 };
 </script>

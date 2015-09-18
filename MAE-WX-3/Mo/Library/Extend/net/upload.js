@@ -27,7 +27,7 @@ var cfg = {
 	AllowFileTypes : "",
 	AllowMaxSize : -1,
 	AllowMaxFileSize : -1,
-	Charset : "gb2312",
+	Charset : "utf-8",
 	SavePath : "",
 	RaiseServerError : true,
 	OnSucceed:function(files,cfg){},
