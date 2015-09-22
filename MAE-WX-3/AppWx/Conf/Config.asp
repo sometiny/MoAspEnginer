@@ -9,7 +9,6 @@ return {
 		appid : "应用AppID",
 		appsecret : "应用AppSecret",
 		aeskey : "安全模式的AES密码",
-		maxrequestlength : 4096,
 		txkey : ""
 	}
 };

@@ -17,7 +17,7 @@ NoticeController.extend("Index",function(){
 		return;
 	}
 	try{
-		var received = F.string.fromBinary(Request.BinaryRead(WXConf.maxrequestlength),"utf-8");
+		var received = F.string.fromBinary(Request.BinaryRead(Request.TotalBytes),"utf-8");
 		if(!WX.loadRequest(received)){
 			if(WxDelegate.OnError) WxDelegate.OnError(WX, "request parse error(" + WX.Exception + ")");
 		}else{
