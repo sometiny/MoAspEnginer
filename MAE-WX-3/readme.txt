@@ -19,4 +19,4 @@
 2、其他接口代码在AppWx/Controller/ServicesController.asp；
 3、调试信息保存在AppWx/Controller/Debugs/目录
 4、完美支持微信AES加解密；
-5、欢迎支持MAE框架 @ http://m.thinkasp.cn
+5、欢迎支持MAE框架 @ http://www.thinkasp.cn/

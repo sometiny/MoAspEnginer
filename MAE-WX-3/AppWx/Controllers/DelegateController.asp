@@ -34,12 +34,11 @@ WXMessage.News.push(title, content, url, picurl)：添加一条新闻。
 var WXConf = C("@.WX");
 DelegateController = IController.create(function(){this.logname = __dirname + "\\Debugs\\" + F.formatdate(new Date(),"yyyy-MM-dd")+".log";});
 DelegateController.AsPrivate();
-
 /*
 事件：当消息到达时
 */
 DelegateController.extend("OnMessageReceived",function(WX){
-	//return; //如果要日志，请注释掉本行
+	return; //如果要日志，请注释掉本行
 	if(WX.EncryptType=="aes"){
 		WriteLog(this.logname, "【收到消息】\r\n" + F.server("QUERY_STRING") + "\r\n长度：" + WX.MessageLength + "\r\n密文：" + WX.Ori.Message +"\r\n原文：" + WX.Message);
 	}else{
@@ -52,9 +51,7 @@ DelegateController.extend("OnMessageReceived",function(WX){
 说明：如果返回false，则不发送回复的信息。
 */
 DelegateController.extend("OnBeforeReplySent",function(WX){
-	//return; //如果要日志，请注释掉本行
-	//WX.Reply = WX.createTextResponse("咋地，我就把你劫持了！");
-	//if(WX.EncryptType=="aes")WX.encrypt();
+	return; //如果要日志，请注释掉本行
 	if(WX.EncryptType=="aes"){
 		WriteLog(this.logname, "【回复消息】\r\n长度：" + WX.MessageLength + "\r\n密文：" + WX.Reply+"\r\n原文：" + WX.Ori.Reply+"\r\n");
 	}else{

@@ -1,4 +1,3 @@
-var httprequest = require("net/http/request");
 var CryptoJS = require("CryptoJS");
 var BitConverter = CryptoJS.enc.BitConverter;
 function WXMessage(conf){
@@ -69,8 +68,7 @@ function WXMessage(conf){
 }
 WXMessage.New = function(){return new WXMessage();};
 WXMessage.timespan = function(){
-	var df = (new Date())-(new Date(1970,0,1));
-	return (df-(df%1000))/1000-3600*8;
+	return Math.floor(+new Date() / 1000);
 };
 WXMessage.prototype.basic = function(){
 	return {
@@ -139,74 +137,44 @@ WXMessage.prototype.decrypt = function(msg_encrypt,msg_signature){
 	return true;
 };
 WXMessage.prototype.loadRequest = function(requeststr){
+	function xml2json(node, src){
+		var result= src || {};
+		var childs = node.childNodes;
+		for(var i=0;i<childs.length;i++){
+			result[childs(i).tagName] = childs(i).text;
+		}
+		return result;
+	}
 	this.Message = requeststr;
 	var XML = require("xml");
 	var xml = XML.LoadText(requeststr)
 	if(xml.ROOT==null)return false;
+	var wx_req = xml2json(xml.ROOT, this.Request);
 	if(F.get("encrypt_type")=="aes" && !this.IgnoreCrypt){
-		if(!this.decrypt(xml.select("Encrypt").text(),F.get("msg_signature"))) return false;
+		if(!this.decrypt(wx_req.Encrypt,F.get("msg_signature"))) return false;
 		xml = XML.LoadText(this.Message);
 		if(xml.ROOT==null){
 			this.Exception = "xml document error";
 			return false;
 		}
 		this.EncryptType = "aes";
+		wx_req['Encrypt']=null;
+		xml2json(xml.ROOT, wx_req);
 	}else{
 		if(!this.SignManager.comparewith(F.get("signature"))){
 			this.Exception = "signature verify failed.";
 			return false;
 		}
 	}
-	this.MsgType = xml.select("//xml/MsgType").text().toLowerCase();
+	this.MsgType = wx_req.MsgType.toLowerCase();
 	if(this.MsgType==""){
 		this.Exception = "can not find 'MsgType' node";
 		return false;
 	}
-	this.ToUserName = xml.select("//xml/ToUserName").text();
-	this.FromUserName = xml.select("//xml/FromUserName").text();
-	this.CreateTime = xml.select("//xml/CreateTime").text();
-	if(this.MsgType!="event")this.MsgId = xml.select("//xml/MsgId").text();
-	else{
-		this.Request["Event"] = xml.select("//xml/Event").text();
-		//subscribe,unsubscribe,SCAN,LOCATION,CLICK,VIEW,MASSSENDJOBFINISH
-		if(this.Request["Event"]=="LOCATION"){
-			this.Request["Latitude"] = xml.select("//xml/Latitude").text();
-			this.Request["Longitude"] = xml.select("//xml/Longitude").text();
-			this.Request["Precision"] = xml.select("//xml/Precision").text();
-		}else if(this.Request["Event"]=="MASSSENDJOBFINISH"){
-			this.Request["MsgID"] = xml.select("//xml/MsgID").text();
-			this.Request["Status"] = xml.select("//xml/Status").text();
-			this.Request["TotalCount"] = xml.select("//xml/TotalCount").text();
-			this.Request["FilterCount"] = xml.select("//xml/FilterCount").text();
-			this.Request["SentCount"] = xml.select("//xml/SentCount").text();
-			this.Request["ErrorCount"] = xml.select("//xml/ErrorCount").text();
-		}else{
-			this.Request["EventKey"] = xml.select("//xml/EventKey").text();
-			this.Request["Ticket"] = xml.select("//xml/Ticket").text();
-		}
-	}
-	if(this.MsgType=="text"){
-		this.Request["Content"] = xml.select("//xml/Content").text();
-	}else if(this.MsgType=="image"){
-		this.Request["PicUrl"] = xml.select("//xml/PicUrl").text();
-		this.Request["MediaId"] = xml.select("//xml/MediaId").text();
-	}else if(this.MsgType=="voice"){
-		this.Request["Format"] = xml.select("//xml/Format").text();
-		this.Request["MediaId"] = xml.select("//xml/MediaId").text();
-		this.Request["Recognition"] = xml.select("//xml/Recognition").text();
-	}else if(this.MsgType=="video"){
-		this.Request["ThumbMediaId"] = xml.select("//xml/ThumbMediaId").text();
-		this.Request["MediaId"] = xml.select("//xml/MediaId").text();
-	}else if(this.MsgType=="location"){
-		this.Request["Location_X"] = xml.select("//xml/Location_X").text();
-		this.Request["Location_Y"] = xml.select("//xml/Location_Y").text();
-		this.Request["Scale"] = xml.select("//xml/Scale").text();
-		this.Request["Label"] = xml.select("//xml/Label").text();
-	}else if(this.MsgType=="link"){
-		this.Request["Title"] = xml.select("//xml/Title").text();
-		this.Request["Description"] = xml.select("//xml/Description").text();
-		this.Request["Url"] = xml.select("//xml/Url").text();
-	}
+	this.ToUserName = wx_req.ToUserName;
+	this.FromUserName = wx_req.FromUserName;
+	this.CreateTime = wx_req.CreateTime;
+	if(this.MsgType!="event")this.MsgId = wx_req.MsgId;
 	xml = null;
 	return true
 };
