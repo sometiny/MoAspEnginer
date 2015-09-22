@@ -12,7 +12,8 @@ function $xml(dom) {
 	}
 	this.queue = [this.ROOT];
 	this.selectedNode = this.ROOT;
-	this.index = -1;
+	this.index = 0;
+	this.datatyped=false;
 }
 $xml.filter = function(node, filter, index) {
 	if (node == null) return null;
@@ -23,33 +24,13 @@ $xml.filter = function(node, filter, index) {
 	else if (node.nodeName == filter) return node;
 	return null;
 };
-$xml.Collection = function() {
-	this.length = 0;
-	this.index = 0;
-	this.push = function(value) {
-		this[(this.length++)] = value;
-	};
-	this.next = function() {
-		return this[this.index++];
-	};
-	this.reset = function() {
-		this.index = 0;
-	};
-	this.eof = function() {
-		return this.index >= this.length;
-	};
-	this.filter = function(tag) {
-		var col = new $xml.Collection();
-		for (var i = 0; i < this.length; i++) {
-			var node = $xml.filter(this[i], tag, i);
-			if (node != null) col.push(node);
-		}
-		return col;
-	};
-};
 $xml.fn = $xml.prototype;
-$xml.fn.select = function(xpath, parent) {
+$xml.fn.select = function(xpath, parent, callback) {
 	if (this.ROOT == null) return;
+	if(typeof parent == "function"){
+		callback = parent;
+		parent = null;
+	}
 	if (typeof xpath == "string") {
 		if (xpath == ":parent") {
 			return this.select(this.selectedNode.parentNode);
@@ -58,10 +39,10 @@ $xml.fn.select = function(xpath, parent) {
 		} else if (xpath == ":first") {
 			return this.select(this.selectedNode.firstChild);
 		} else if (xpath == ":children") {
-			return this.children();
+			return this.children(callback);
 		} else if (F.string.endWith(xpath, ":children")) {
 			this.select(xpath.substr(0, xpath.lastIndexOf(":")), parent);
-			return this.children();
+			return this.children(callback);
 		} else if (F.string.endWith(xpath, ":parent")) {
 			this.select(xpath.substr(0, xpath.lastIndexOf(":")), parent);
 			return this.select(this.selectedNode.parentNode);
@@ -72,7 +53,7 @@ $xml.fn.select = function(xpath, parent) {
 			this.select(xpath.substr(0, xpath.lastIndexOf(":")), parent);
 			return this.select(this.selectedNode.firstChild);
 		} else {
-			this.queue.push((parent || this.ROOT).selectSingleNode(xpath));
+			this.queue.push((parent || this.selectedNode).selectSingleNode(xpath));
 		}
 	} else if (typeof xpath == "number") {
 		this.selectedNode = this.queue[xpath];
@@ -89,42 +70,38 @@ $xml.fn.select = function(xpath, parent) {
 	return this;
 };
 $xml.fn.parent = function() {
-	this.select(":parent");
+	this.select(this.selectedNode.parentNode);
 	return this;
 };
 $xml.fn.first = function() {
-	this.select(":first");
+	this.select(this.selectedNode.firstChild);
 	return this;
 };
 $xml.fn.last = function() {
-	this.select(":last");
+	this.select(this.selectedNode.lastChild);
 	return this;
 };
-$xml.fn.children = function(filter) {
-	if (this.selectedNode == null) return new $xml.Collection();
-	var col = new $xml.Collection();
+$xml.fn.children = function(callback, filter) {
+	if (this.selectedNode == null) return [];
 	var children = this.selectedNode.childNodes;
 	for (var i = 0; i < children.length; i++) {
-		if (filter === undefined) col.push(children[i]);
+		if (filter === undefined) callback(children[i]);
 		else {
 			var node = $xml.filter(children[i], filter, i);
-			if (node != null) col.push(node);
+			if (node != null) callback(node);
 		}
 	}
-	return col;
 };
-$xml.fn.nodes = function(xpath, filter) {
-	if (this.selectedNode == null) return new $xml.Collection();
-	var col = new $xml.Collection();
+$xml.fn.nodes = function(xpath, callback, filter) {
+	if (this.selectedNode == null) return [];
 	var children = this.selectedNode.selectNodes(xpath);
 	for (var i = 0; i < children.length; i++) {
-		if (filter === undefined) col.push(children[i]);
+		if (filter === undefined) callback(children[i]);
 		else {
 			var node = $xml.filter(children[i], filter, i);
-			if (node != null) col.push(node);
+			if (node != null) callback(node);
 		}
 	}
-	return col;
 };
 $xml.fn.save = function(path) {
 	if (this.DOM == null) return this;
@@ -134,9 +111,6 @@ $xml.fn.save = function(path) {
 $xml.fn.root = function() {
 	this.select(this.ROOT);
 	return this;
-};
-$xml.fn.index = function() {
-	return this.index;
 };
 $xml.fn.clear = function() {
 	if (this.selectedNode == null) return this;
@@ -153,28 +127,33 @@ $xml.fn.remove = function() {
 $xml.fn.append = function(name, value) {
 	if (this.selectedNode == null) return this;
 	if (typeof name == "object") {
-		if (name.constructor == Object) {
+		var typeofname = Object.prototype.toString.call(name);
+		if(typeofname == "[object Object]"){
 			for (var i in name) {
 				if (!name.hasOwnProperty(i)) continue;
 				var b = this.DOM.createElement(i);
 				b.text = name[i];
 				this.selectedNode.appendChild(b);
 			}
-		} else {
-			F.each(name, function(key, dict, state) {
-				var b = state.DOM.createElement(key);
-				b.text = dict(key);
-				state.selectedNode.appendChild(b);
-			}, this);
 		}
 		return this;
-	} else if (typeof value == "object" && value.constructor == Array) {
-		for (var i = 0; i < value.length; i++) {
-			var b = this.DOM.createElement(name);
-			b.text = value[i];
-			this.selectedNode.appendChild(b);
+	} else if (typeof name == "string") {
+		if(typeof value == "object"){
+			var typeofvalue = Object.prototype.toString.call(value);
+			if(typeofvalue == "[object Array]"){
+				for (var i = 0; i < value.length; i++) {
+					var b = this.DOM.createElement(name);
+					this.selectedNode.appendChild(b);
+					b.text = value[i];
+				}
+			}else if(typeofvalue == "[object Object]"){
+				var node = this.selectedNode;
+				this.appendAndSelect(name);
+				this.append(value);
+				this.select(node);
+			}
+			return this;
 		}
-		return this;
 	}
 	var e = this.DOM.createElement(name);
 	if (value !== undefined) e.text = value;
@@ -205,8 +184,25 @@ $xml.fn.text = function(value) {
 	}
 	return this.selectedNode.text;
 };
+$xml.fn.base64 = function(value) {
+	return this.typed("base64", value);
+};
+$xml.fn.hex = function(value) {
+	return this.typed("hex", value);
+};
+$xml.fn.typed = function(type, value) {
+	if (this.selectedNode == null) return this;
+	if(!this.datatyped){
+		this.ROOT.setAttribute("xmlns:dt", "urn:schemas-microsoft-com:datatypes");
+		this.datatyped = true;
+	}
+	this.selectedNode.dataType = "bin." + type;
+	this.selectedNode.nodeTypedValue = value;
+	return this;
+};
 $xml.fn.value = function() {
 	if (this.selectedNode == null) return this;
+	if(this.attr("dt:dt")) return this.selectedNode.nodeTypedValue;
 	return this.selectedNode.nodeValue;
 };
 $xml.fn.comment = function(value) {
@@ -223,6 +219,10 @@ $xml.fn.CDATA = function(value) {
 };
 $xml.fn.attr = function(name, value) {
 	if (this.selectedNode == null) return this;
+	if(value===null){
+		this.selectedNode.removeAttribute(name);
+		return this
+	}
 	if (value !== undefined) {
 		this.selectedNode.setAttribute(name, value);
 		return this

@@ -1,6 +1,6 @@
 ﻿{
 	"name" : "xml",
-	"version" : "1.0.0",
+	"version" : "1.2.0",
 	"description" : "基于DOMDocument的xml读写操作。",
 	"keywords" : ["xml","dom"],
 	"homepage" : "http://mpi.thinkasp.cn/?/mpi/package/info/xml",
