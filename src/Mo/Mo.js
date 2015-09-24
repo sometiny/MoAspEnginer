@@ -101,18 +101,14 @@ var
 			if (arg.length <= 1) {
 				return Str;
 			}
-			return Str.replace(/\{(\d+)(\.([\w\.\-]+))?(:(.+?))?\}/igm, function(ma) {
-				var match = /\{(\d+)(\.([\w\.\-]+))?(:(.+?))?\}/igm.exec(ma);
-				if (match && match.length == 6) {
-					var argvalue = arg[parseInt(match[1]) + 1];
-					if (argvalue === undefined) return "";
-					if (typeof argvalue == "object" && match[3] != "") {
-						argvalue = (new Function("return this" + "[\"" + match[3].replace(/\./igm, "\"][\"").replace(/\[\"(\d+)\"\]/igm, "[$1]") + "\"]")).call(argvalue);
-					}
-					if (argvalue == null) return "NULL";
-					return argvalue;
+			return Str.replace(/\{(\d+)(?:\.([\w\.\-]+))?(?:\:(.+?))?\}/igm, function(ma, arg1, arg2, arg3) {
+				var argvalue = arg[parseInt(arg1) + 1];
+				if (argvalue === undefined) return "";
+				if (typeof argvalue == "object" && arg2) {
+					argvalue = (new Function("return this" + "[\"" + arg2.replace(/\./igm, "\"][\"").replace(/\[\"(\d+)\"\]/igm, "[$1]") + "\"]")).call(argvalue);
 				}
-				return ma;
+				if (argvalue == null) return "NULL";
+				return argvalue;
 			});
 		};
 

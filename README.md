@@ -58,7 +58,7 @@
 
 ##链接(Links)
 [官网(http://www.thinkasp.cn/)](http://www.thinkasp.cn/)<br />
-[文档(http://mae.im)](http://docs.thinkasp.cn/)<br />
+[文档(http://docs.thinkasp.cn/)](http://docs.thinkasp.cn/)<br />
 
 ##以前的版本(Versions)
 [MoAspEnginer2.0(https://github.com/zhanghuiguoanlige/MoAspEnginer/tree/v2)](https://github.com/zhanghuiguoanlige/MoAspEnginer/tree/v2)<br />

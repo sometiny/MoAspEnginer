@@ -261,62 +261,58 @@ _.format = function(Str) {
 	if (arg.length <= 1) {
 		return Str;
 	}
-	return Str.replace(/\{(\d+)(\.([\w\.\-]+))?(:(.+?))?\}/igm, function(ma) {
-		var match = /\{(\d+)(\.([\w\.\-]+))?(:(.+?))?\}/igm.exec(ma);
-		if (match && match.length == 6) {
-			var argvalue = arg[parseInt(match[1]) + 1];
-			if (argvalue === undefined) return "";
-			if (typeof argvalue == "object" && match[3] != "") {
-				argvalue = (new Function("return this" + "[\"" + match[3].replace(/\./igm, "\"][\"").replace(/\[\"(\d+)\"\]/igm, "[$1]") + "\"]")).call(argvalue);
-			}
-			if (argvalue==null) return "NULL";
-			var argformat = match[5];
-			var argtype = (typeof argvalue);
-			if (argformat != "") {
-				if (argtype == "date" || (argtype == "object" && argvalue.constructor == Date)) {
-					return _.formatdate(argvalue, argformat);
-				} else if (argtype == "number") {
-					if (/^(\d+)$/ig.test(argformat)) return argvalue.toString(argformat);
-					var mat2 = /^((\d+)\.)?(D|E|F|X)(\d*)$/igm.exec(argformat);
-					if (mat2) {
-						if (mat2[3] == "D") {
-							var c = (Math.pow(10, parseInt(mat2[4]) + 1) + argvalue).toString();
+	return Str.replace(/\{(\d+)(?:\.([\w\.\-]+))?(?:\:(.+?))?\}/ig, function(ma, arg1,  arg2 , arg3) {
+		var argvalue = arg[parseInt(arg1) + 1];
+		if (argvalue === undefined) return "";
+		if (typeof argvalue == "object" && arg2) {
+			argvalue = (new Function("return this" + "[\"" + arg2.replace(/\./igm, "\"][\"").replace(/\[\"(\d+)\"\]/igm, "[$1]") + "\"]")).call(argvalue);
+		}
+		if (argvalue==null) return "NULL";
+		var argformat = arg3 || "";
+		var argtype = (typeof argvalue);
+		if (argformat != "") {
+			if (argtype == "date" || (argtype == "object" && argvalue.constructor == Date)) {
+				return _.formatdate(argvalue, argformat);
+			} else if (argtype == "number") {
+				if (/^(\d+)$/ig.test(argformat)) return argvalue.toString(argformat);
+				var mat2 = /^((\d+)\.)?(D|E|F|X)(\d*)$/igm.exec(argformat);
+				if (mat2) {
+					if (mat2[3] == "D") {
+						var c = (Math.pow(10, parseInt(mat2[4]) + 1) + argvalue).toString();
+						argvalue = c.substr(c.length - parseInt(mat2[4]));
+					} else if (mat2[3] == "E") {
+						if (mat2[4] != "") argvalue = argvalue.toExponential(parseInt(mat2[4]));
+						else argvalue = argvalue.toExponential();
+					} else if (mat2[3] == "F") {
+						if (mat2[4] != "") argvalue = argvalue.toFixed(parseInt(mat2[4]));
+						else argvalue = argvalue.toFixed(0);
+					} else if (mat2[3] == "X") {
+						if (mat2[4] != "") {
+							var c = argvalue.toString(16).toUpperCase();
+							if (c.length >= parseInt(mat2[4])) return c;
+							c = Math.pow(10, parseInt(mat2[4]) + 1).toString() + "" + c;
 							argvalue = c.substr(c.length - parseInt(mat2[4]));
-						} else if (mat2[3] == "E") {
-							if (mat2[4] != "") argvalue = argvalue.toExponential(parseInt(mat2[4]));
-							else argvalue = argvalue.toExponential();
-						} else if (mat2[3] == "F") {
-							if (mat2[4] != "") argvalue = argvalue.toFixed(parseInt(mat2[4]));
-							else argvalue = argvalue.toFixed(0);
-						} else if (mat2[3] == "X") {
-							if (mat2[4] != "") {
-								var c = argvalue.toString(16).toUpperCase();
-								if (c.length >= parseInt(mat2[4])) return c;
-								c = Math.pow(10, parseInt(mat2[4]) + 1).toString() + "" + c;
-								argvalue = c.substr(c.length - parseInt(mat2[4]));
-							} else {
-								argvalue = argvalue.toString(16).toUpperCase();
-							}
-						}
-						if (mat2[2] != "") {
-							var l = parseInt(mat2[2]);
-							while (argvalue.length < l) {
-								argvalue = "0" + argvalue;
-							}
+						} else {
+							argvalue = argvalue.toString(16).toUpperCase();
 						}
 					}
-				} else if (argtype == "string") {
-					if (!isNaN(argformat)) {
-						var l = parseInt(argformat);
+					if (mat2[2] != "") {
+						var l = parseInt(mat2[2]);
 						while (argvalue.length < l) {
 							argvalue = "0" + argvalue;
 						}
 					}
 				}
+			} else if (argtype == "string") {
+				if (!isNaN(argformat)) {
+					var l = parseInt(argformat);
+					while (argvalue.length < l) {
+						argvalue = "0" + argvalue;
+					}
+				}
 			}
-			return argvalue;
 		}
-		return ma;
+		return argvalue;
 	});
 };
 _.redirect = function(url, msg) {
@@ -444,7 +440,7 @@ _.date.parse = function(srcDate) {
 				return null;
 			}
 		} else {
-			ExceptionManager.put(0x000001B9, "F.date.parse(string)", "argument format error.");
+			ExceptionManager.put(0x000001B9, "F.date.parse(string)", "argument $ error.");
 			return null;
 		}
 	}
