@@ -811,14 +811,12 @@ var
 			M.RealMethod = M.Method;
 			M.RealAction = M.Action;
 			if (!IO.file.exists(ModelPath)) {
-				ModelPath = G.MO_APP + "Controllers/" + M.Group + "EmptyController.asp";
-				M.RealMethod = "Empty";
+				ModelPath = G.MO_CORE + "Controllers/" + M.Group + M.Method + "Controller.asp";
 				if (!IO.file.exists(ModelPath)) {
-					ModelPath = G.MO_CORE + "Controllers/" + M.Group + M.Method + "Controller.asp";
-					M.RealMethod = M.Method;
+					ModelPath = G.MO_APP + "Controllers/" + M.Group + "EmptyController.asp";
+					M.RealMethod = "Empty";
 					if (!IO.file.exists(ModelPath)) {
 						ModelPath = G.MO_CORE + "Controllers/" + M.Group + "EmptyController.asp";
-						M.RealMethod = "Empty";
 						if (!IO.file.exists(ModelPath)) {
 							if (M.templateIsInApp(M.Action) || M.templateIsInCore(M.Action)) {
 								M.display(M.Action);
