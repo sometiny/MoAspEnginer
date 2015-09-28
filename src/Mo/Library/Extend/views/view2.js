@@ -172,8 +172,8 @@ MoAspEnginerView.prototype.doSomethingToAsp = function() {
 	this.Content = this.Content.replace(/--movbcrlf--/igm, "\\r\\n");
 	this.Content = "if(typeof Mo==\"undefined\"){Response.Write(\"invalid call.\");Response.End();}" +
 		"\r\nfunction _echo(src){if(src===undefined || src===null) src=\"\";_contents += src;if(!__buffer && _contents.length>__buffersize) {Response.Write(_contents);_contents=\"\";}}" +
-		"\r\nfunction _end(){if(!__buffer)Response.Write(_contents);}\r\n" + this.assigns + "var _contents = \"\";" +
-		"\r\n\"UNSAFECONTENTS\";\r\nwith($){\r\n" + this.Content.replace(/__Mo__\.Echo\(/igm, "_echo(") +
+		"\r\nfunction _end(){if(!__buffer)Response.Write(_contents);}\r\nvar _contents = \"\";" +
+		"\r\n\"UNSAFECONTENTS\";\r\nwith($){\r\n" + this.assigns + "\r\n" + this.Content.replace(/__Mo__\.Echo\(/igm, "_echo(") +
 		"\r\n}\r\n_end();delete _end;delete _echo;if(__buffer) return _contents;";
 	this.Content = this.Content.replace(/"\);\r\n_echo\("/igm, "");
 	this.Content = this.Content.replace(/^_echo\(\"(.+?)\"\);$/igm, "_contents += \"$1\";");
