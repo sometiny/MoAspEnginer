@@ -440,7 +440,7 @@ _.date.parse = function(srcDate) {
 				return null;
 			}
 		} else {
-			ExceptionManager.put(0x000001B9, "F.date.parse(string)", "argument $ error.");
+			ExceptionManager.put(0x000001B9, "F.date.parse(string)", "argument format error.");
 			return null;
 		}
 	}

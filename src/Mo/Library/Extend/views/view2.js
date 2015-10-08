@@ -586,14 +586,8 @@ MoAspEnginerView.prototype.parseAssign = function(key) {
 				rv = "Mo.L(\"" + l.substr(5) + "\")";
 			} else if (F.string.startWith(l.toLowerCase(), "mo.lang.")) {
 				rv = "Mo.L(\"" + l.substr(8) + "\")";
-			} else if (F.string.startWith(l.toLowerCase(), "mo.c.") || F.string.startWith(l.toLowerCase(), "mo.config.")) {
-				cf = l.substr(5);
-				if (F.string.startWith(l.toLowerCase(), "mo.config.")) cf = l.substr(10);
-				if (cf.indexOf(".") > 0) {
-					rv = "Mo.C(\"" + cf.substr(0, cf.indexOf(".")) + "." + cf.substr(cf.indexOf(".") + 1) + "\")";
-				} else {
-					rv = "Mo.C(\"Global." + cf.substr(cf.indexOf(".") + 1) + "\")";
-				}
+			} else if (F.string.startWith(l.toLowerCase(), "mo.c.")) {
+				rv = "Mo.C(\"" + l.substr(5) + "\")";
 			} else if (F.string.startWith(l.toLowerCase(), "mo.a.")) {
 				cf = l.substr(5);
 				if (cf.indexOf(".") > 0) {
@@ -631,12 +625,7 @@ MoAspEnginerView.prototype.parseAssign = function(key) {
 			} else if (F.string.startWith(l.toLowerCase(), "mo.l.")) {
 				return parsed.replace("{{k}}", "Mo.L(\"" + l.substr(5) + "\")");
 			} else if (F.string.startWith(l.toLowerCase(), "mo.c.")) {
-				cf = l.substr(5);
-				if (cf.indexOf(".") > 0) {
-					return parsed.replace("{{k}}", "Mo.C(\"" + cf.substr(0, cf.indexOf(".")) + "\")." + cf.substr(cf.indexOf(".") + 1));
-				} else {
-					return parsed.replace("{{k}}", "Mo.C(\"Global." + cf.substr(cf.indexOf(".") + 1));
-				}
+				return parsed.replace("{{k}}", "Mo.C(\"" + l.substr(5) + "\")");
 			} else if (F.string.startWith(l.toLowerCase(), "mo.a.")) {
 				cf = l.substr(5);
 				if (cf.indexOf(".") > 0) {
