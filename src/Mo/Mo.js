@@ -12,7 +12,15 @@ var
 	register = function(host, name, path, callback) {
 		if(register.registered) return;
 		function check_host(h1, h2){
-			if(typeof h2 == "object") return h2.test(h1);
+			var cons = Object.prototype.toString.call(h2);
+			if(cons == '[object RegExp]') return h2.test(h1);
+			if(cons == '[object Array]'){
+				for(var i = 0; i < h2.length; i++){
+					if(check_host(h1, h2[i])) return true;
+				}
+				return false;
+			}
+			if(h2 == "*") return true;
 			if(h2.indexOf("*")>=0){
 				h2 = h2.replace(/\*/g,"([0-9a-z\\-]+)").replace(/\./g, "\\.");
 				h2 = new RegExp("^" + h2 + "$", "i");
@@ -20,12 +28,13 @@ var
 			}
 			return h1 == h2;
 		}
-		if(host == "*" || check_host(Request.ServerVariables("HTTP_HOST"), host)){
+		var http_host = Request.ServerVariables("HTTP_HOST");
+		if(check_host(http_host, host)){
 			defaultConfig["MO_APP_NAME"] = name;
 			defaultConfig["MO_APP"] = path;
 			register.registered = true;
-			register.domain = host;
-			if(typeof callback == "function") callback(host, name, path);
+			register.domain = http_host;
+			if(typeof callback == "function") callback(http_host, name, path);
 		}
 	},
 	F, require, View,
@@ -1055,7 +1064,7 @@ var MEM = ExceptionManager = (function() {
 		if (typeof e[e.length - 1] == "number") {
 			f = e.pop()
 		}
-		if(!(f & d)) return;
+		if(!(f & Mo.Config.Global.MO_ERROR_REPORTING)) return;
 		if (e.length == 1) {
 			if (e[0].constructor == Exception) {
 				c.push(e[0])
@@ -1092,8 +1101,8 @@ var MEM = ExceptionManager = (function() {
 		b.put.apply(null, f)
 	};
 	b.errorReporting = function(f) {
-		if (arguments.length == 0) return d;
-		d = f
+		if (arguments.length == 0) return Mo.Config.Global.MO_ERROR_REPORTING;
+		Mo.Config.Global.MO_ERROR_REPORTING = f
 	};
 	b.clear = function() {
 		while (c.length > 0) {

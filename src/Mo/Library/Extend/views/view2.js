@@ -54,19 +54,21 @@ MoAspEnginerView.compile = function(content) {
 };
 MoAspEnginerView.prototype.setContent = function(content) {
 	if (!content) return this;
-	F.string.matches(content, /<literal>([\s\S]*)<\/literal>/ig, function($0, $1) {
+	F.string.matches(content, /<literal>([\s\S]*?)<\/literal>/ig, function($0, $1) {
 		var id = this.getRndid();
 		this.mvarDicts[id] = $1;
-		content = content.replace($0, "<literal id=\"" + id + "\"/>");
+		content = content.replace($0, "<$literalid=" + id + "/$>");
 	}, this);
 	content = content.replace(/(\s*)\<\!\-\-\/\/(.*?)\-\-\>(\s*)/ig, "");
 	content = content.replace(/(\s*)\<\!\-\-\/\*([\s\S]*?)\*\/\-\-\>(\s*)/ig, "");
 	content = F.string.replace(content, /<switch(.+?)>(\s*)<case/igm, "<switch$1><case");
-	content = F.string.replace(content, /\r\n/igm, "--movbcrlf--");
+	content = F.string.replace(content, /\n/igm, "--movbcrlf--");
 	content = F.string.replace(content, /\r/igm, "--movbcrlf--");
 	content = F.string.replace(content, /\n/igm, "--movbcrlf--");
-	content = F.string.replace(content, /(--movbcrlf--){1,}/igm, "--movbcrlf--");
-	content = F.string.replace(content, /--movbcrlf--/igm, "--movbcrlf--\r\n");
+	if (G.MO_PREETY_HTML || G.MO_PRETTY_HTML) {
+		content = F.string.replace(content, /(--movbcrlf--){1,}/igm, "--movbcrlf--");
+	}
+	content = F.string.replace(content, /--movbcrlf--/igm, "--movbcrlf--\n");
 	this.Content = content;
 	return this;
 }
@@ -128,29 +130,47 @@ MoAspEnginerView.prototype.parse = function() {
 
 
 MoAspEnginerView.prototype.parseMoAsAsp = function() {
-	F.string.matches(this.Content, /\{\?MoAsp([\s\S]*?)MoAsp\?\}/igm, function($0) {
+	F.string.matches(this.Content, /(\s*)\{\?MoAsp(?:[\s\S]*?)MoAsp\?\}(\s*)/igm, function($0) {
 		var id = this.getRndid();
 		this.mvarDicts[id] = $0;
-		this.Content = F.replace(this.Content, $0, "\r\n{?MoAsp" + id + "MoAsp?}\r\n");
+		this.Content = F.replace(this.Content, $0, "{?MoAsp" + id + "MoAsp?}");
 	}, this);
-	this.Content = this.Content.replace(/^--movbcrlf--$/igm, "");
-	this.Content = this.Content.replace(/(\r\n){2,}/igm, "\r\n");
+	this.Content = this.Content.replace(/--movbcrlf--/g, "\n");
+	this.Content = this.Content.replace(/(\n){2,}/g, "\n");
+	this.Content = this.Content.replace(/^(.+?)$/gm, function($0){
+		if(/^\{\?MoAsp(\w{10})MoAsp\?\}$/.test($0) || /^\<\$literalid\=(\w+?)\/\$\>$/.test($0)){
+			return $0;
+		}else{
+			var data = $0.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+			if (G.MO_PREETY_HTML || G.MO_PRETTY_HTML) {
+				data = data.replace(/(^(\s+)|(\s+)$)/, "");
+			}
+			data = data.replace(/\{\?MoAsp(\w{10})MoAsp\?\}/g, '");\n{?MoAsp$1MoAsp?}\n_echo("');
+			data = data.replace(/\<\$literalid\=(\w+?)\/\$\>/g, '");\n<$literalid=$1/$>\n_echo("');
+			return '_echo("' + data + '!--movbcrlf--!");';
+		}
+	});
 	if (G.MO_PREETY_HTML || G.MO_PRETTY_HTML) {
-		this.Content = this.Content.replace(/>(\s*)--movbcrlf--(\s*)\</ig, "><")
+		this.Content = this.Content.replace(/\!--movbcrlf--\!/g, "");
+		this.Content = this.Content.replace(/"\);\n_echo\("/igm, "");
+	}else{
+		this.Content = this.Content.replace(/\!--movbcrlf--\!/g, "\\r\\n");
 	}
-	this.Content = this.Content.replace(/(^(\s+)|(\s+)$)/ig, "");
-	this.Content = this.Content.replace(/\\/igm, "\\\\");
-	F.string.matches(this.Content, /(\s*)<literal id\=\"(\w+?)\"\/>(\s*)/ig, function($0, $1, $2) {
-		this.Content = this.Content.replace($0, this.mvarDicts[$2].replace(/\\/ig, "\\\\").replace(/\r/ig, "\\r").replace(/\n/ig, "\\n"));
-	}, this);
-	this.Content = this.Content.replace(/\"/igm, "\\\"");
-	this.Content = this.Content.replace(/\t/igm, "\\t");
-	this.Content = this.Content.replace(/^(.+?)$/igm, "__Mo__.Echo(\"$1\");");
-	F.string.matches(this.Content, /^__Mo__\.Echo\(\"\{\?MoAsp([\w]+?)MoAsp\?\}\"\);$/igm, function($0, $1) {
-		this.Content = F.replace(this.Content, $0, this.mvarDicts[$1]);
-	}, this);
-	this.Content = F.string.replace(this.Content, /\{\?MoAsp /igm, "");
-	this.Content = F.string.replace(this.Content, /(\s*)MoAsp\?\}/igm, "");
+	var that = this;
+	this.Content = this.Content.replace(/^(.+?)$/gm, function($0){
+		var mat;
+		if(mat = /^\{\?MoAsp(\w{10})MoAsp\?\}$/.exec($0)){
+			return that.mvarDicts[mat[1]].replace(/\{\?MoAsp(\s*)/, "").replace(/(\s*)MoAsp\?\}/, "").replace(/(^(\s+)|(\s+)$)/, "");
+		}else if(mat = /^\<\$literalid\=(\w+?)\/\$\>$/.exec($0)){
+			return '_echo("' + that.mvarDicts[mat[1]].replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r/g,'\\r').replace(/\n/g,'\\n').replace(/\t/g,'\\t') + '");';
+		}else{
+			if (G.MO_PREETY_HTML || G.MO_PRETTY_HTML) { $0 = $0.replace(/>(\s+)</g, '><');}
+			return $0;
+		}
+	});
+	this.Content = this.Content.replace(/^_echo\(\"\"\);$/igm, "");
+	this.Content = this.Content.replace(/(\n){2,}/g, "\n");
+	this.Content = this.Content.replace(/^_echo\(\"(.+?)\"\);$/igm, "_contents += \"$1\";");
 };
 
 MoAspEnginerView.prototype.getRndid = function(l) {
@@ -169,17 +189,11 @@ MoAspEnginerView.prototype.getRndKey = function() {
 //@DESCRIPTION:	do something to the code that was combined to make the code pretty,such as remove blank lines
 //****************************************************
 MoAspEnginerView.prototype.doSomethingToAsp = function() {
-	this.Content = this.Content.replace(/--movbcrlf--/igm, "\\r\\n");
 	this.Content = "if(typeof Mo==\"undefined\"){Response.Write(\"invalid call.\");Response.End();}" +
-		"\r\nfunction _echo(src){if(src===undefined || src===null) src=\"\";_contents += src;if(!__buffer && _contents.length>__buffersize) {Response.Write(_contents);_contents=\"\";}}" +
-		"\r\nfunction _end(){if(!__buffer)Response.Write(_contents);}\r\nvar _contents = \"\";" +
-		"\r\n\"UNSAFECONTENTS\";\r\nwith($){\r\n" + this.assigns + "\r\n" + this.Content.replace(/__Mo__\.Echo\(/igm, "_echo(") +
-		"\r\n}\r\n_end();delete _end;delete _echo;if(__buffer) return _contents;";
-	this.Content = this.Content.replace(/"\);\r\n_echo\("/igm, "");
-	this.Content = this.Content.replace(/^_echo\(\"(.+?)\"\);$/igm, "_contents += \"$1\";");
-	if (G.MO_PREETY_HTML || G.MO_PRETTY_HTML) {
-		this.Content = this.Content.replace(/(\\r|\\n|\\t)/igm, "");
-	}
+		"\nfunction _echo(src){if(src===undefined || src===null) src=\"\";_contents += src;if(!__buffer && _contents.length>__buffersize) {Response.Write(_contents);_contents=\"\";}}" +
+		"\nfunction _end(){if(!__buffer)Response.Write(_contents);}\nvar _contents = \"\";" +
+		"\n\"UNSAFECONTENTS\";\nwith($){\n" + this.assigns + "\n" + this.Content +
+		"\n}\n_end();delete _end;delete _echo;if(__buffer) return _contents;";
 }
 
 //****************************************************
@@ -218,7 +232,7 @@ MoAspEnginerView.prototype.parseHtmlHelper = function() {
 		if (mc) {
 			var parms = mc[2];
 			if (parms != "") parms = this.parseArguments(parms);
-			return "{?MoAsp __Mo__.Echo(Html." + mc[1] + "(" + parms + ")); MoAsp?}";
+			return "{?MoAsp _echo(Html." + mc[1] + "(" + parms + ")); MoAsp?}";
 		} else {
 			return "(此位置模板代码语法错误，相关代码：" + F.encodeHtml($1 + $0 + "}").replace(/\$/ig, "&#36;") + ")";
 		}
@@ -250,7 +264,7 @@ MoAspEnginerView.prototype.parsePreCombine = function() {
 	}, this);
 	this.Content = replacementter(this.Content, "\\{\\$U\\(", "\\}", function($0) {
 		$0 = $0.replace(/\\(\{|\})/ig, "$1");
-		return "{?MoAsp __Mo__.Echo(Mo.U(" + this.parseArguments($0.substr(0, $0.length - 1)) + ")); MoAsp?}";
+		return "{?MoAsp _echo(Mo.U(" + this.parseArguments($0.substr(0, $0.length - 1)) + ")); MoAsp?}";
 	}, this);
 }
 
@@ -270,7 +284,7 @@ MoAspEnginerView.prototype.parsePage = function() {
 				var loopname = attrs["for"],
 					pageurl = attrs["url"] || "",
 					func = attrs["function"] || "$CreatePageList";
-				this.Content = F.replace(this.Content, $0, "{?MoAsp __Mo__.Echo(" + func + "(\"" + pageurl + "\"," + loopname + ".recordcount," + loopname + ".pagesize," + loopname + ".currentpage)); MoAsp?}");
+				this.Content = F.replace(this.Content, $0, "{?MoAsp _echo(" + func + "(\"" + pageurl + "\"," + loopname + ".recordcount," + loopname + ".pagesize," + loopname + ".currentpage)); MoAsp?}");
 			}
 		}, this);
 	}
@@ -303,12 +317,12 @@ MoAspEnginerView.prototype.parseLoop = function() {
 MoAspEnginerView.prototype.parseLoopByArguments = function(content, loopname, keyname, keynamevalue,withindex) {
 	withindex = withindex==="true";
 	var varloopname = loopname.replace(/\./ig, "_");
-	var vbscript = "{?MoAsp " + loopname + ".reset();\r\n";
+	var vbscript = "{?MoAsp " + loopname + ".reset();\n";
 	if(keyname){
-		vbscript += "var index_" + varloopname + "=" + loopname + ".pagesize *(" + loopname + ".currentpage-1);\r\n";
-		vbscript += loopname + ".each(function(" + keynamevalue + ", index){\r\nvar " + keyname + "=index_" + varloopname + "+index;\r\n MoAsp?}"
+		vbscript += "var index_" + varloopname + "=" + loopname + ".pagesize *(" + loopname + ".currentpage-1);\n";
+		vbscript += loopname + ".each(function(" + keynamevalue + ", index){\nvar " + keyname + "=index_" + varloopname + "+index;\n MoAsp?}"
 	}else{
-		vbscript += loopname + ".each(function(" + keynamevalue + "){\r\n MoAsp?}"
+		vbscript += loopname + ".each(function(" + keynamevalue + "){\n MoAsp?}"
 	}
 	this.Content = F.replace(this.Content, content, vbscript);
 }
@@ -338,14 +352,14 @@ MoAspEnginerView.prototype.parseFor = function() {
 			keyvaluename = keyvaluename || "value";
 			var vbscript = "";
 			if (asc) {
-				vbscript = "{?MoAsp (function(){\r\nvar " + keyvaluename + ";\r\nfor(var " + keyname + "=0, " + keyname + "_length=" + loopname + ".length;" + keyname + "<" + keyname + "_length;" + keyname + "++){\r\n" + keyvaluename + "=" + loopname + "[" + keyname + "];\r\nMoAsp?}\r\n";
+				vbscript = "{?MoAsp (function(){\nvar " + keyvaluename + ";\nfor(var " + keyname + "=0, " + keyname + "_length=" + loopname + ".length;" + keyname + "<" + keyname + "_length;" + keyname + "++){\n" + keyvaluename + "=" + loopname + "[" + keyname + "];\nMoAsp?}\n";
 			} else {
-				vbscript = "{?MoAsp (function(){\r\nvar " + keyvaluename + ";\r\nfor(var " + keyname + "=" + loopname + ".length-1;" + keyname + ">=0;" + keyname + "--){\r\n" + keyvaluename + "=" + loopname + "[" + keyname + "];\r\nMoAsp?}\r\n";
+				vbscript = "{?MoAsp (function(){\nvar " + keyvaluename + ";\nfor(var " + keyname + "=" + loopname + ".length-1;" + keyname + ">=0;" + keyname + "--){\n" + keyvaluename + "=" + loopname + "[" + keyname + "];\nMoAsp?}\n";
 			}
 			this.Content = F.replace(this.Content, $0, vbscript);
 		}
 	}, this);
-	this.Content = F.replace(this.Content, "</for>", "{?MoAsp }\r\n})();\r\n MoAsp?}")
+	this.Content = F.replace(this.Content, "</for>", "{?MoAsp }\n})();\n MoAsp?}")
 }
 
 //****************************************************
@@ -370,11 +384,11 @@ MoAspEnginerView.prototype.parseForeach = function() {
 		if (loopname) {
 			keyname = keyname || "key";
 			keyvaluename = keyvaluename || "value";
-			var vbscript = "{?MoAsp (function(){\r\nfor(var " + keyname + " in " + loopname + "){\r\nif(!" + loopname + ".hasOwnProperty(" + keyname + "))continue;\r\nvar " + keyvaluename + "=" + loopname + "[" + keyname + "];\r\nMoAsp?}\r\n";
+			var vbscript = "{?MoAsp (function(){\nfor(var " + keyname + " in " + loopname + "){\nif(!" + loopname + ".hasOwnProperty(" + keyname + "))continue;\nvar " + keyvaluename + "=" + loopname + "[" + keyname + "];\nMoAsp?}\n";
 			this.Content = F.replace(this.Content, $0, vbscript);
 		}
 	}, this);
-	this.Content = F.replace(this.Content, "</foreach>", "{?MoAsp }\r\n})();\r\n MoAsp?}")
+	this.Content = F.replace(this.Content, "</foreach>", "{?MoAsp }\n})();\n MoAsp?}")
 	this.parseFor();
 }
 
@@ -402,7 +416,7 @@ MoAspEnginerView.prototype.parseExpression = function() {
 		if (expression == "") {
 			ExceptionManager.put(0x8300, "ViewParser", "模板代码语法错误，相关代码'" + $0 + "'");
 		} else {
-			this.Content = F.replace(this.Content, $0, "{?MoAsp if(" + expression + "){\r\n MoAsp?}");
+			this.Content = F.replace(this.Content, $0, "{?MoAsp if(" + expression + "){\n MoAsp?}");
 		}
 	}, this);
 };
@@ -481,7 +495,7 @@ MoAspEnginerView.prototype.parseEmpty = function() {
 		var attrs = readAttrs__($2);
 		if (attrs["name"]) {
 			var vari = this.parseAssign(attrs["name"]);
-			this.Content = F.replace(this.Content, $0, "{?MoAsp if(" + ($1 == "n" ? " !" : "") + "(typeof " + vari + " == \"undefined\" || is_empty(" + vari + "))){\r\n MoAsp?}")
+			this.Content = F.replace(this.Content, $0, "{?MoAsp if(" + ($1 == "n" ? " !" : "") + "(typeof " + vari + " == \"undefined\" || is_empty(" + vari + "))){\n MoAsp?}")
 		}
 	}, this);
 };
@@ -494,7 +508,7 @@ MoAspEnginerView.prototype.parseAssignName = function() {
 		var attrs = readAttrs__($1);
 		if (attrs["name"]) {
 			this.Content = F.replace(this.Content, $0, "");
-			this.assigns += "Mo.assign(\"" + attrs["name"] + "\"," + attrs["value"] + ");\r\n";
+			this.assigns += "Mo.assign(\"" + attrs["name"] + "\"," + attrs["value"] + ");\n";
 		}
 	}, this);
 };
@@ -544,7 +558,7 @@ MoAspEnginerView.prototype.parseVari = function(chars) {
 		} else if ($2 == "{$$") {
 			return (new Function("return " + assigned))();
 		} else {
-			return "{?MoAsp __Mo__.Echo(" + assigned + ");MoAsp?}";
+			return "{?MoAsp _echo(" + assigned + ");MoAsp?}";
 		}
 	}, this);
 };
