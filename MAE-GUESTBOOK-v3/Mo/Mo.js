@@ -12,7 +12,15 @@ var
 	register = function(host, name, path, callback) {
 		if(register.registered) return;
 		function check_host(h1, h2){
-			if(typeof h2 == "object") return h2.test(h1);
+			var cons = Object.prototype.toString.call(h2);
+			if(cons == '[object RegExp]') return h2.test(h1);
+			if(cons == '[object Array]'){
+				for(var i = 0; i < h2.length; i++){
+					if(check_host(h1, h2[i])) return true;
+				}
+				return false;
+			}
+			if(h2 == "*") return true;
 			if(h2.indexOf("*")>=0){
 				h2 = h2.replace(/\*/g,"([0-9a-z\\-]+)").replace(/\./g, "\\.");
 				h2 = new RegExp("^" + h2 + "$", "i");
@@ -20,11 +28,13 @@ var
 			}
 			return h1 == h2;
 		}
-		if(check_host(Request.ServerVariables("HTTP_HOST"), host)){
+		var http_host = Request.ServerVariables("HTTP_HOST");
+		if(check_host(http_host, host)){
 			defaultConfig["MO_APP_NAME"] = name;
 			defaultConfig["MO_APP"] = path;
 			register.registered = true;
-			if(typeof callback == "function") callback(host, name, path);
+			register.domain = http_host;
+			if(typeof callback == "function") callback(http_host, name, path);
 		}
 	},
 	F, require, View,
@@ -33,7 +43,7 @@ var
 	ROOT = Server.Mappath("/"),
 	Mo,
 	hed,
-	CACHE = {MODEL:1, COMPILE:2, GZIP:4},
+	CACHE = {MODEL:1, COMPILE:2, GZIP:4, ALL:8},
 	startup = Mo = (function() {
 		var __contenttypes__ = {
 			"json" : "application/json",
@@ -101,18 +111,14 @@ var
 			if (arg.length <= 1) {
 				return Str;
 			}
-			return Str.replace(/\{(\d+)(\.([\w\.\-]+))?(:(.+?))?\}/igm, function(ma) {
-				var match = /\{(\d+)(\.([\w\.\-]+))?(:(.+?))?\}/igm.exec(ma);
-				if (match && match.length == 6) {
-					var argvalue = arg[parseInt(match[1]) + 1];
-					if (argvalue === undefined) return "";
-					if (typeof argvalue == "object" && match[3] != "") {
-						argvalue = (new Function("return this" + "[\"" + match[3].replace(/\./igm, "\"][\"").replace(/\[\"(\d+)\"\]/igm, "[$1]") + "\"]")).call(argvalue);
-					}
-					if (argvalue == null) return "NULL";
-					return argvalue;
+			return Str.replace(/\{(\d+)(?:\.([\w\.\-]+))?(?:\:(.+?))?\}/igm, function(ma, arg1, arg2, arg3) {
+				var argvalue = arg[parseInt(arg1) + 1];
+				if (argvalue === undefined) return "";
+				if (typeof argvalue == "object" && arg2) {
+					argvalue = (new Function("return this" + "[\"" + arg2.replace(/\./igm, "\"][\"").replace(/\[\"(\d+)\"\]/igm, "[$1]") + "\"]")).call(argvalue);
 				}
-				return ma;
+				if (argvalue == null) return "NULL";
+				return argvalue;
 			});
 		};
 
@@ -430,7 +436,7 @@ var
 			G = {};
 		M.Initialized = false;
 		M.Runtime = _runtime;
-		M.Version = "MoAspEnginer 3.1.1.324";
+		M.Version = "MoAspEnginer 3.1.1.353";
 		M.Config = {};
 		M.IsRewrite = false;
 		M.Action = "";
@@ -750,33 +756,11 @@ var
 				ExceptionManager.put(3, "Mo.L(key)", "can not load language package '" + lib + "'.", E_ERROR);
 			}
 		};
-		M.C = function(conf, value) {
-			var key = "";
-			if (conf.indexOf(".") > 0) {
-				key = conf.substr(conf.indexOf(".") + 1);
-				conf = conf.substr(0, conf.indexOf("."));
-				if (conf == "@") conf = "Global";
-			}
-			if (M.Config.hasOwnProperty(conf)) {
-				if (key != "" && value !== undefined) M.Config[conf][key] = value;
-				return (key == "" ? M.Config[conf] : M.Config[conf][key]);
-			}
-			var cfg = null;
-			if (cfg = _LoadConfig(conf)) {
-				M.Config[conf] = cfg;
-				if (key != "" && value !== undefined) M.Config[conf][key] = value;
-				return (key == "" ? M.Config[conf] : M.Config[conf][key]);
-			} else {
-				ExceptionManager.put(3, "Mo.C(conf,value)", "can not load config '" + conf + "'.");
-			}
-		};
-		M.C.SaveAs = function(conf, data) {
-			if (!data) return;
-			var filepath = c(G.MO_APP + "Conf/" + conf + ".asp");
-			IO.file.writeAllText(filepath, "\u003cscript language=\"jscript\" runat=\"server\"\u003e\r\nreturn ({\r\n  \"__conf__\" : " + JSON.stringify(data) + "\r\n})['__conf__'];\r\n\u003c/script\u003e", "utf-8");
-		};
-		M.C.Exists = function(conf) {
-			return IO.file.exists(G.MO_APP + "Conf/" + conf + ".asp");
+		M.C = function(key, value) {
+			if(!key) return G;
+			if(key.substr(0,2) == "@.") key = key.substr(2);
+			if(value === undefined) return G[key];
+			G[key] = value;
 		};
 		M.A = function(ctrl) {
 			var filepath = c(G.MO_APP + "Controllers/" + ctrl + "Controller.asp");
@@ -815,14 +799,12 @@ var
 			M.RealMethod = M.Method;
 			M.RealAction = M.Action;
 			if (!IO.file.exists(ModelPath)) {
-				ModelPath = G.MO_APP + "Controllers/" + M.Group + "EmptyController.asp";
-				M.RealMethod = "Empty";
+				ModelPath = G.MO_CORE + "Controllers/" + M.Group + M.Method + "Controller.asp";
 				if (!IO.file.exists(ModelPath)) {
-					ModelPath = G.MO_CORE + "Controllers/" + M.Group + M.Method + "Controller.asp";
-					M.RealMethod = M.Method;
+					ModelPath = G.MO_APP + "Controllers/" + M.Group + "EmptyController.asp";
+					M.RealMethod = "Empty";
 					if (!IO.file.exists(ModelPath)) {
 						ModelPath = G.MO_CORE + "Controllers/" + M.Group + "EmptyController.asp";
-						M.RealMethod = "Empty";
 						if (!IO.file.exists(ModelPath)) {
 							if (M.templateIsInApp(M.Action) || M.templateIsInCore(M.Action)) {
 								M.display(M.Action);
@@ -924,6 +906,13 @@ var
 			if(!mode || (CACHE.MODEL & mode))M.ModelCacheClear();
 			if(!mode || (CACHE.COMPILE & mode))M.ClearCompiledCache();
 			if(!mode || (CACHE.GZIP & mode))M.ClearGzipCache();
+			if(!mode || (CACHE.ALL & mode)){
+				IO.directory.directories(c(G.MO_APP + "Cache"), function(file){
+					IO.directory.clear(file.path, function(f, isfile) {
+						if (isfile && f.name == ".mae") return false;
+					});
+				});
+			}
 		};
 		M.templateIsInApp = function(template) {
 			var vpath = _ParseTemplatePath(template),
@@ -1075,7 +1064,7 @@ var MEM = ExceptionManager = (function() {
 		if (typeof e[e.length - 1] == "number") {
 			f = e.pop()
 		}
-		if(!(f & d)) return;
+		if(!(f & Mo.Config.Global.MO_ERROR_REPORTING)) return;
 		if (e.length == 1) {
 			if (e[0].constructor == Exception) {
 				c.push(e[0])
@@ -1112,8 +1101,8 @@ var MEM = ExceptionManager = (function() {
 		b.put.apply(null, f)
 	};
 	b.errorReporting = function(f) {
-		if (arguments.length == 0) return d;
-		d = f
+		if (arguments.length == 0) return Mo.Config.Global.MO_ERROR_REPORTING;
+		Mo.Config.Global.MO_ERROR_REPORTING = f
 	};
 	b.clear = function() {
 		while (c.length > 0) {

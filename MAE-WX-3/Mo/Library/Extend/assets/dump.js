@@ -44,9 +44,10 @@ var dump__ = function(parm, level) {
 			}
 			if (parm.constructor == Array) {
 				var returnValue = "array(" + parm.length + "){\r\n";
-				F.foreach(parm, function(i) {
-					returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(this[i], level + 1) + "\r\n";
-				});
+				var len = parm.length;
+				for(var i=0;i<len;i++){
+					returnValue += dumpHelper__(level) + "[" + i + "] => " + dump__(parm[i], level + 1) + "\r\n";
+				}
 				returnValue += dumpHelper__(level - 1) + "}";
 				return returnValue;
 			}
