@@ -27,13 +27,16 @@ function ConfigManager(src){
 	if(src.length>2 && src.substr(1,1)==":") path = src;
 	else path = IO.build(Mo.C("@.MO_APP"), "Conf/" + src + ".asp");
 	if(IO.file.exists(path)){
+		try{
 		config = (new Function(IO.file.readAllScript(path)))();
+		}catch(ex){
+			MEM.put(ex, 'ConfigManager');
+		}
 	}
 	instance.path = path;
 	instance.config = config;
 	instance.save = function(pathas){
-		JSON.encodeUnicode(false);
-		IO.file.writeAllText(pathas || path, "\u003cscript language=\"jscript\" runat=\"server\"\u003ereturn ({\r\n  \"__conf__\" : " + JSON.stringify(config) + "\r\n})['__conf__'];\u003c/script\u003e");
+		return IO.file.writeAllText(pathas || path, "\u003cscript language=\"jscript\" runat=\"server\"\u003ereturn " + JSON.stringify(config, null, '\t') + ";\u003c/script\u003e");
 	};
 	return instance;
 }

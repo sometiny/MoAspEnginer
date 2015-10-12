@@ -662,6 +662,7 @@ $io.buffer2string = buffer2string;
 var stream_buffer = null;
 function buffer_init(type, charset){
 	if(stream_buffer){
+		stream_buffer.SetEOS();
 		stream_buffer.Position = 0;
 		stream_buffer.Type = type || 1;
 		if(type==2) stream_buffer.CharSet = charset || 437;
@@ -677,14 +678,14 @@ Mo.on('dispose', function(){
 $io.buffer_read_bytes = function(stream, size){
 	buffer_init(); 
 	if(stream.EOS) return null;
-	stream_buffer.Write(stream.Read(size));
+	stream.CopyTo(stream_buffer, size);
 	buffer_init(2);
 	return string2buffer(stream_buffer.ReadText(size));
 };
 $io.buffer_read_byte = function(stream){
 	buffer_init();
 	if(stream.EOS) return -1;
-	stream_buffer.Write(stream.Read(1));
+	stream.CopyTo(stream_buffer, 1);
 	buffer_init(2);
 	return string2buffer(stream_buffer.ReadText(1))[0];
 };
@@ -694,7 +695,7 @@ $io.buffer_read_boolean = function(stream){
 		ExceptionManager.put(0x2d25,"io.buffer_read_boolean","end of stream.");
 		return null;
 	}
-	stream_buffer.Write(stream.Read(1));
+	stream.CopyTo(stream_buffer, 1);
 	buffer_init(2);
 	return string2buffer(stream_buffer.ReadText(1))[0]!=0;
 };
@@ -707,5 +708,15 @@ $io.buffer_read_int = function(stream){
 	var bytes = $io.buffer_read_bytes(stream, 4);
 	if(!bytes) return -1;
 	return (bytes[3] << 24 >>> 0) + (bytes[2] << 16) + (bytes[1] << 8) + bytes[0];
+};
+$io.buffer_read_string = function(stream, size, charset){
+	buffer_init();
+	if(stream.EOS){
+		ExceptionManager.put(0x2d25,"io.buffer_read_string","end of stream.");
+		return "";
+	}
+	stream.CopyTo(stream_buffer, size || -1);
+	buffer_init(2, charset || "utf-8");
+	return stream_buffer.ReadText();
 };
 module.exports = $io;
