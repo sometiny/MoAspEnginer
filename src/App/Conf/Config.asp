@@ -4,7 +4,7 @@ return {
 	MO_DEBUG_MODE : "DIRECT",
 	MO_COMPILE_CACHE: true,
 	MO_TAG_LIB : "Test",
-	MO_TEMPLATE_ENGINE : "views/view.js",
+	MO_TEMPLATE_ENGINE : "views/view2.js",
 	MO_ERROR_REPORTING : E_ERROR | E_WARNING,
 	MO_ROUTE_MODE : "",
 	/*静态路由，不遍历，直接检索*/

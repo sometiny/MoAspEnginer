@@ -1,4 +1,4 @@
-﻿<assign name="title" value="Mpi演示" />
+﻿<assign name="title" value="'Mpi演示'" />
 <include file="top.html" />
 	<h3>Mpi演示：程序-/App/Controllers/MpiController.asp，模板-/App/Views/default/Home/Mpi.html</h3>
 	<h4 style="color:red">正式环境中，请删掉此控制器或只允许特定的权限运行本控制器</h4>
@@ -8,7 +8,7 @@
 			<tr><td width="30">序号</td><td width="200">名称</td><td width="60">版本</td><td width="120">安装</td><td width="120">依赖</td><td>描述</td></tr>
 		</thead>
 		<tbody class="l">
-		<for name="modules" value="module">
+		<for name="modules" value="module" key="key">
 			<tr>
 				<td>{$key + 1}</td>
 				<td><a href="http://mpi.thinkasp.cn/?/mpi/package/info/{$module.name}" target="_blank">{$module.name}</a></td>

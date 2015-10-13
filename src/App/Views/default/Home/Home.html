@@ -1,4 +1,4 @@
-﻿<assign name="title" value="基本演示" />
+﻿<assign name="title" value="'基本演示'" />
 <include file="top.html" />
     <script type="text/javascript">
         var demos=null;
@@ -149,7 +149,7 @@
         <tr>
             <td>eq标签</td>
             <td>&lt;eq name="appname" value="MoAspEnginer"&gt;appname为MoAspEnginer&lt;/eq&gt;</td>
-            <td><eq name="appname" value="MoAspEnginer">appname为MoAspEnginer</eq></td>
+            <td><eq name="appname" value="'MoAspEnginer'">appname为MoAspEnginer</eq></td>
         </tr>
         <tr>
             <td>自定义标签</td>
@@ -186,26 +186,27 @@
             <td>&lt;page for="data" url="?m=Home&a=Index&appname={&#36;#appname}" /&gt;</td>
             <td><page for="data" url="?m=Home&a=Index&page={#page}&appname={$#appname}" /></td>
         </tr>
-        <tr><td>foreach循环</td>
+        <tr><td>for循环</td>
             <td>
 <pre>
-&lt;foreach name="list"&gt;
+&lt;for name="list" key="key"&gt;
     &lt;gt name="key" value="4"&gt;
 {&#36;key} =&gt; &lt;span style="color:red"&gt;{&#36;value}&lt;/span&gt;&lt;br /&gt;
     &lt;/else&gt;
 {&#36;key} =&gt; {&#36;value}&lt;br /&gt;
     &lt;/gt&gt;
-&lt;/foreach&gt;
+&lt;/for&gt;
+不需要key的时候，可以不用定义。
 </pre>
             </td>
             <td>
-            <foreach name="list">
+            <for name="list" key="key">
                 <gt name="key" value="4">
             {$key} =&gt; <span style="color:red">{$value}</span><br />
                 </else>
             {$key} =&gt; {$value}<br />
                 </gt>
-            </foreach>
+            </for>
             </td>
         </tr>
         <tr><td>foreach循环</td>
@@ -225,9 +226,9 @@
         <tr><td>switch</td><td>
 <pre>
 &lt;switch name="age"&gt;
-    &lt;case value="23" type="number" /&gt;
+    &lt;case 23 /&gt;
         我23岁了。&lt;break /&gt;
-    &lt;case value="24" type="number" /&gt;
+    &lt;case 24 /&gt;
         我24岁了。&lt;break /&gt;
     &lt;default /&gt;
         我{&#36;age}岁了!!!!
@@ -235,9 +236,9 @@
 </pre>
             </td><td>
             <switch name="age">
-                <case value="23" type="number" />
+                <case 23 />
                     我23岁了。<break />
-                <case value="24" type="number" />
+                <case 24 />
                     我24岁了。<break />
                 <default />
                     我{$age}岁了!!!!

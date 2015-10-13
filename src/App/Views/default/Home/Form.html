@@ -1,4 +1,4 @@
-﻿<assign name="title" value="Form演示" />
+﻿<assign name="title" value="'Form演示'" />
 <include file="top.html" />
 	<h3>Form演示：程序-/App/Controllers/FormController.asp，模板-/App/Views/default/Home/Form.html</h3>
 	<h5>普通测试(Sample Test)</h5>
@@ -23,9 +23,9 @@
 		<input type="submit" value="上传(upload)" />
 	</form>
 	<h5>上传结果(Upload Result)</h5>
-	异常(exception) => {$exception}<br />
-	form1 => {$form1}<br />
-	select1 => {$select1}<br />
-	file1 => {$file1}<br />
-	file2 => {$file2}<br />
+	异常(exception) => <nempty name="exception">{$exception}</nempty><br />
+	form1 => <nempty name="form1">{$form1}</nempty><br />
+	select1 => <nempty name="select1">{$select1}</nempty><br />
+	file1 => <nempty name="file1">{$file1}</nempty><br />
+	file2 => <nempty name="file2">{$file2}</nempty><br />
 <include file="foot.html" />

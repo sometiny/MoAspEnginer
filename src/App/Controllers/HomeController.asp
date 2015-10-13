@@ -40,8 +40,7 @@ HomeController.extend("Home", function(){
 	this.display("Home");
 });
 HomeController.extend("clearcache", function(){
-	Mo.ClearCompiledCache();
-	Mo.ModelCacheClear();
+	Mo.ClearCache();
 	if(F.server("HTTP_REFERER")!="")F.goto(F.server("HTTP_REFERER")); else F.goto("/");
 });
 </script>

@@ -9,12 +9,12 @@ GzipController = IController.create();
 GzipController.extend("Index", function(name){
 	//用来把文件压缩为gzip格式，传输给浏览器
 	var gzip = require("gzip/deflate.js");
-	var data = base64.d(base64.fromBinary(IO.file.readAllBytes(__dirname+"\\Mo.png")));
+	var data = IO.file.readAllBuffer(__dirname+"\\Mo.png");
 	var gdata=gzip.deflate(data,{gzip:true});
 	Response.AddHeader("Vary","Accept-Encoding");
 	Response.AddHeader("Content-Type","image/png");
 	Response.AddHeader("Content-Encoding","gzip");
-	F.echo(base64.toBinary(base64.e(gdata)),F.TEXT.BIN);
+	F.echo(IO.buffer2binary(gdata),F.TEXT.BIN);
 
 	//测试下解压缩，基本用不到
 	//var ungzip = require("gzip/inflate.js");

@@ -17,7 +17,7 @@ return {
 	MO_TEMPLATE_NAME : "default",
 	MO_TEMPLATE_SPLIT : "/",
 	MO_TEMPLATE_PERX : "html",
-	MO_TEMPLATE_ENGINE : "views/view.js",
+	MO_TEMPLATE_ENGINE : "views/view2.js",
 	MO_TABLE_PERX : "Mo_",
 	MO_DEBUG: false,
 	MO_DEBUG_MODE: "DIRECT",
