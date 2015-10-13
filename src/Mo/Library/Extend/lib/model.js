@@ -219,7 +219,12 @@ function __Model__(tablename,pk,cfg,tablePrex){
 	if(!Model__.connect(cfg)) return;
 	this.base = Connections[cfg];
 	this.type = this.base.cfg["DB_Type"];
-	this.tablePrex = (tablePrex || (this.base.cfg["DB_TABLE_PERX"] || Mo.Config.Global.MO_TABLE_PERX));
+	this.tablePrex = Mo.Config.Global.MO_TABLE_PERX;
+	if(typeof tablePrex == "string"){
+		this.tablePrex = tablePrex;
+	}else if(typeof this.base.cfg["DB_TABLE_PERX"] == "string") {
+		this.tablePrex = this.base.cfg["DB_TABLE_PERX"];
+	}
 	this.table = this.tablePrex + this.table;
 	this.tableWithNoSplitChar = this.table;
 	if(this.base.useCommand && this.type != "OTHER"){
