@@ -130,7 +130,7 @@ MoAspEnginerView.prototype.parse = function() {
 
 
 MoAspEnginerView.prototype.parseMoAsAsp = function() {
-	F.string.matches(this.Content, /(\s*)\{\?MoAsp(?:[\s\S]*?)MoAsp\?\}(\s*)/igm, function($0) {
+	F.string.matches(this.Content, /\{\?MoAsp(?:[\s\S]*?)MoAsp\?\}/igm, function($0) {
 		var id = this.getRndid();
 		this.mvarDicts[id] = $0;
 		this.Content = F.replace(this.Content, $0, "{?MoAsp" + id + "MoAsp?}");
