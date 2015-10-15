@@ -1,0 +1,31 @@
+﻿<extend file="Index1.html" />
+<selection name="Left">文档页的左侧<br />文档页继承了Index1.html</selection>
+<selection name="Right">
+	<h3>{$name}</h3>
+	<ul>
+	<loop name="data" key="key">
+		<li>{$key + 1}：{$value.name} as {$value.age}, <for name="value.teachers" value="name">{$name}&nbsp;</for></li>
+	</loop>
+	</ul>
+
+	<h3>tag 'for'</h3>
+	<ul>
+	<for name="data1">
+		<li>{$value.name} as {$value.age}, <for name="value.teachers" value="name">{$name}&nbsp;</for></li>
+	</for>
+	</ul>
+
+	<h3>tag 'foreach'</h3>
+	<ul>
+	<foreach name='data2'>
+		<li>{$key} = <eq name="key" value="'teachers'"><for name="value" key="key" value="name">{$name}&nbsp;</for></else>{$value}</eq></li>
+	</foreach>
+	</ul>
+	<switch name="name">
+		<case "anlige" />
+			Anlige
+		<break /><case "lilith" />
+			Lilith
+	</switch>
+</selection>
+<selection name="Copyright"><div class="copyright">文档页的版权信息</div></selection>

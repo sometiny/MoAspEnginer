@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+		<title>模板的继承与重写</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<style type="text/css">
+			.clearfix{*zoom:1}
+			.clearfix:before,.clearfix:after{display:table;line-height:0;content:""}
+			.clearfix:after{clear:both}
+			.header,.footer,.copyright {background-color: #f6f6f6; margin-bottom: 10px; border-bottom:1px green solid; padding: 10px; }
+			.body .left {float: left;width:20%;background-color: #f3f3f3; height:400px}
+			.body .right {float: left;width:80%;background-color: #f6f6f6; height:400px}
+			.body .left>div,.body .right>div {padding: 10px;}
+			.footer,.copyright {border-bottom:0px;border-top:1px green solid; margin: 10px 0 0 0;}
+		</style>
+	</head>
+	<body>
+		<div class="header"><selection name="Header">默认头部</selection></div>
+		<div class="body clearfix">
+			<div class="left"><div><selection name="Left">左侧</selection></div></div>
+			<div class="right"><div><selection name="Right">右侧</selection></div></div>
+		</div>
+		<div class="footer"><selection name="Footer">默认底部</selection></div>
+		<selection name="Copyright" />
+	</body>
+</html>
