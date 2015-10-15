@@ -356,9 +356,9 @@ _.decodeHtml = function(src) {
 	ret = ret.replace(/&lt;/igm, "<");
 	ret = ret.replace(/&nbsp;/igm, " ");
 	ret = ret.replace(/&quot;/igm, "\"");
-	ret = ret.replace(/&#10;/igm, "\r");
-	ret = ret.replace(/&#13;/igm, "\n");
-	ret = ret.replace(/&#39;/igm, "'");
+	ret = ret.replace(/&#(\d+);/igm, function($0,$1){
+		return String.fromCharCode($1)
+	});
 	return ret
 };
 _.formatdate = function(dt, fs) {
