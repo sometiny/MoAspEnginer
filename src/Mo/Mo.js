@@ -604,6 +604,7 @@ var
 				if (uri.slice(0, 1) == "/") uri = uri.substr(1);
 				if (uri.slice(-1) == "/") uri = uri.substr(0, uri.length - 1);
 			}
+			if(G.MO_KEEP_PARAMS_WHEN_REWRITE===false) F.get.clear();
 			if (!uri) return;
 			var Maps = G.MO_ROUTE_MAPS;
 			if (Maps && Maps.hasOwnProperty(uri)) {
@@ -657,7 +658,7 @@ var
 				cachename = M.Method + "^" + M.Action + "^" + template.replace(/\:/g, "^");
 				if (extcachestr) cachename += "^" + extcachestr;
 				cachepath = c(G.MO_APP + "Cache/Compiled/" + cachename + ".asp");
-				if (IO.file.exists(cachepath)) {
+				if (!G.MO_INGORE_COMPILE_CACHE && IO.file.exists(cachepath)) {
 					usecache = true;
 					if (G.MO_COMPILE_CACHE_EXPIRED > 0) {
 						OldHash = F.fso.GetFile(cachepath).DateLastModified;
