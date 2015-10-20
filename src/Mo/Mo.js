@@ -487,6 +487,7 @@ var
 				cfg.MO_APP_ENTRY = url_.substr(url_.lastIndexOf("/") + 1);
 				if (cfg.MO_APP_ENTRY.toLowerCase() == "default.asp") cfg.MO_APP_ENTRY = "";
 			}
+			cfg.MO_APP_ROOT = IO.parent(cfg.MO_APP).replace(ROOT, "").replace(/\\/g,"/");
 
 			/*load global config*/
 			if (IO.file.exists(cfg.MO_CORE + "Conf/Config.asp")) G = M.Config.Global = _wapper(IO.file.readAllScript(cfg.MO_CORE + "Conf/Config.asp"))();
@@ -1251,9 +1252,6 @@ var IO = (function() {
 		};
 		d.base = function(path) {
 			return d.fso.GetBaseName(c(path));
-		};
-		d.parent = function(path) {
-			return d.fso.GetParentFolderName(c(path));
 		};
 		d.build = function(path, name) {
 			return d.fso.GetAbsolutePathName(d.fso.BuildPath(c(path), name));
