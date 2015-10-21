@@ -81,11 +81,11 @@ $manager.setNames = function(){
 		buffer2string = GBK.getString;
 	}
 };
-$manager.packFolder = function(path, target){
+$manager.packFolder = function(path, target, ignoreemptyfolder){
 	var zip = new $manager();
 	try{
 		zipfolder(zip,path);
-		return zip.generate(target);
+		return zip.generate(target, ignoreemptyfolder);
 	}catch(ex){
 		return false;
 	}

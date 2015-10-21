@@ -759,7 +759,13 @@ var Markdown = {};
 	};
 
 	Renderer.prototype.listitem = function(text) {
-		return '<li>' + text + '</li>\n';
+		if(this.options.gfmtl !== true) return '<li>' + text + '</li>\n';
+		var ma = /^\[(x| )\] ([\s\S]+)$/i.exec(text);
+		if(ma){
+			return '<li style="list-style:none"><input type="checkbox" class="task-list-item-checkbox"' + (ma[1]==' ' ? '' : ' checked="checked"' ) + ' />' + ma[2] + '</li>\n';
+		}else{
+			return '<li>' + text + '</li>\n';
+		}
 	};
 
 	Renderer.prototype.paragraph = function(text) {

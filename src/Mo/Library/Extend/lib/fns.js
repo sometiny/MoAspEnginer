@@ -336,27 +336,26 @@ _["goto"] = function(url, msg) {
 _.script_start = '\u003cscript type="text/javascript"\u003e';
 _.script_start_server = '\u003cscript language="jscript" runat="server"\u003e';
 _.script_end = '\u003c/script\u003e';
-_.initialize = function(name) {
-	if (typeof name == "string") name = eval(name);
-	return typeof name == "object" ? name : new name();
-};
 _.encode = function(src) {
 	return encodeURIComponent(src || "").replace(/\+/g, "%2B");
 };
 _.decode = function(src) {
 	return decodeURIComponent(src || "");
 };
-_.encodeHtml = function(src) {
-	return Server.HtmlEncode(src || "").replace(/'/g,"&#39;");
+_.encodeHtml = function(src, simple) {
+	if(simple===false){
+		return Server.HtmlEncode(src || "").replace(/'/g,"&#39;");
+	}
+	return (src || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g,'&#39;').replace(/</g, "&lt;").replace(/>/g, "&gt;");
 };
-_.decodeHtml = function(src) {
+_.decodeHtml = function(src, simple) {
 	if(!src) return "";
-	var ret = src.replace(/&amp;/igm, "&");
-	ret = ret.replace(/&gt;/igm, ">");
-	ret = ret.replace(/&lt;/igm, "<");
-	ret = ret.replace(/&quot;/igm, '"');
-	ret = ret.replace(/&#(\d+);/igm, function($0,$1){return String.fromCharCode($1)});
-	return ret
+	var ret = src.replace(/&amp;/g, "&");
+	ret = ret.replace(/&gt;/g, ">");
+	ret = ret.replace(/&lt;/g, "<");
+	ret = ret.replace(/&quot;/g, '"');
+	if(simple===false) return ret.replace(/&#(\d+);/igm, function($0,$1){return String.fromCharCode($1)});
+	return ret.replace(/&#39;/g, '\'');
 };
 _.formatdate = function(dt, fs) {
 	if (dt==null || dt==undefined) {
