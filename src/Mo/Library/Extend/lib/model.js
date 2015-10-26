@@ -417,7 +417,7 @@ __Model__.prototype.join = function(table,jointype){
 };
 
 __Model__.prototype.on = function(str){
-	this.strjoin += " on " + (str || "") +")";
+	this.strjoin += " on (" + (str || "") +"))";
 	return this;
 };
 
