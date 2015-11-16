@@ -47,8 +47,13 @@ function MoAspEnginerView() {
 	this.loops = ";";
 	this.assigns = "";
 }
-MoAspEnginerView.compile = function(content) {
+MoAspEnginerView.compile = function(content, assigns) {
 	var _view = new MoAspEnginerView();
+	var assign_str = "";
+	for(var i in assigns){
+		if(assigns.hasOwnProperty(i)) assign_str += "Mo.assign(\"" + i + "\"," + assigns[i] + ");\n";
+	}
+	_view.assigns = assign_str;
 	_view.setContent(content).parse();
 	return _view.Content;
 };
@@ -122,7 +127,6 @@ MoAspEnginerView.prototype.parse = function() {
 	this.Content = F.string.replace(this.Content, /<default \/>/igm, "{?MoAsp default : MoAsp?}");
 	this.Content = F.string.replace(this.Content, /<\/(n)?(eq|empty|lt|gt|expression|eof|foreach)>/igm, "{?MoAsp } MoAsp?}");
 	this.parseVari("");
-	this.parseAssignName();
 	this.parseMoAsAsp();
 	this.doSomethingToAsp();
 	return this;
@@ -171,6 +175,7 @@ MoAspEnginerView.prototype.parseMoAsAsp = function() {
 	this.Content = this.Content.replace(/^_echo\(\"\"\);$/igm, "");
 	this.Content = this.Content.replace(/(\n){2,}/g, "\n");
 	this.Content = this.Content.replace(/^_echo\(\"(.+?)\"\);$/igm, "_contents += \"$1\";");
+	this.Content = this.Content.replace(/";\n_echo\((.+?)\);\n_contents \+\= "/igm, '" + $1 + "');
 };
 
 MoAspEnginerView.prototype.getRndid = function(l) {
@@ -496,19 +501,6 @@ MoAspEnginerView.prototype.parseEmpty = function() {
 		if (attrs["name"]) {
 			var vari = this.parseAssign(attrs["name"]);
 			this.Content = F.replace(this.Content, $0, "{?MoAsp if(" + ($1 == "n" ? " !" : "") + "(typeof " + vari + " == \"undefined\" || is_empty(" + vari + "))){\n MoAsp?}")
-		}
-	}, this);
-};
-
-//****************************************************
-//@DESCRIPTION:	parse assign tag
-//****************************************************
-MoAspEnginerView.prototype.parseAssignName = function() {
-	F.string.matches(this.Content, /<assign ([\s\S]+?)\/>(\s*)/igm, function($0, $1) {
-		var attrs = readAttrs__($1);
-		if (attrs["name"]) {
-			this.Content = F.replace(this.Content, $0, "");
-			this.assigns += "Mo.assign(\"" + attrs["name"] + "\"," + attrs["value"] + ");\n";
 		}
 	}, this);
 };

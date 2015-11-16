@@ -74,11 +74,11 @@ ReCompileForDebug = function(content, add, add2){
 STRstr = function(str) {
 	if (is_empty(str)) return "";
 	var i, c, es=[], ret = "", len = str.length, buffer=[];
-	es[8]='b';es[9]='t';es[10]='n';es[12]='f';es[13]='r';es[34]='"';es[47]='\/';es[92]='\\';
+	es[8]=98;es[9]=116;es[10]=110;es[12]=102;es[13]=114;es[34]=34;es[47]=47;es[92]=92;
 	for (i = 0; i < len; i++) {
 		c = str.charCodeAt(i);
-		if(es[c]!==undefined){
-			buffer.push(92, c);
+		if(es[c]){
+			buffer.push(92, es[c]);
 			continue;
 		}
 		if (c > 31 && c < 127) {
