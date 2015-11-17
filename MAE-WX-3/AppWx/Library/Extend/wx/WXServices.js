@@ -1,4 +1,5 @@
 var httprequest = require("net/http/request");
+
 function WXServices(appID,appsecret){
 	this.Auth={
 		"appID":appID,
@@ -22,19 +23,18 @@ WXServices.prototype.parseerror = function(json){
 	this.errmsg="";
 	if(json!=null){
 		if(json["errcode"] && json["errcode"]>0){
-			this.errmsg = json["errmsg"];
 			if(json["errcode"]==40001) {
 				F.cache.enabled=true;
 				F.cache.clear(this.cachePerfix + "_wx_access_token");
 			}
+			json["error"]=true;
 		}else{
 			json["error"]=false;
-			return json;
 		}
+		return json;
 	}else{
-		this.errmsg = "json data error";
+		return {"error":true, errmsg : "json data error"};	
 	}
-	return {"error":true};	
 };
 WXServices.prototype.getgroups = function(){
 	return this.parseerror(httprequest.create("https://api.weixin.qq.com/cgi-bin/groups/get?access_token=" + this.Auth.access_token).getjson("utf-8"));
@@ -57,14 +57,21 @@ WXServices.prototype.updategroup = function(id,name){
 	return this.parseerror(httprequest.create(
 		"https://api.weixin.qq.com/cgi-bin/groups/update?access_token=" + this.Auth.access_token,
 		"POST",
-		F.format("{\"group\":{\"id\":{0},\"name\":\"{1}\"}}",id,name)
+		JSON.stringify({group:{id:id,name:name}})
 	).getjson("utf-8"));
 };
 WXServices.prototype.creategroup = function(name){
 	return this.parseerror(httprequest.create(
 		"https://api.weixin.qq.com/cgi-bin/groups/create?access_token=" + this.Auth.access_token,
 		"POST",
-		F.format("{\"group\":{\"name\":\"{0}\"}}",name)
+		JSON.stringify({group:{name:name}})
+	).getjson("utf-8"));
+};
+WXServices.prototype.deletegroup = function(id){
+	return this.parseerror(httprequest.create(
+		"https://api.weixin.qq.com/cgi-bin/groups/delete?access_token=" + this.Auth.access_token,
+		"POST",
+		JSON.stringify({group:{id:id}})
 	).getjson("utf-8"));
 };
 WXServices.prototype.createqrcode = function(scene_id,expire_seconds){
@@ -74,14 +81,14 @@ WXServices.prototype.createqrcode = function(scene_id,expire_seconds){
 	} 
 	expire_seconds = expire_seconds ||1800;
 	if(isNaN(expire_seconds))expire_seconds=1800;
-	if(expire_seconds>1800)expire_seconds=1800;
+	if(expire_seconds>604800)expire_seconds=604800;
 	return this.parseerror(httprequest.create(
 		"https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=" + this.Auth.access_token,
 		"POST",
-		F.format("{\"expire_seconds\": {1}, \"action_name\": \"QR_SCENE\", \"action_info\": {\"scene\": {\"scene_id\": {0}}}}",scene_id,expire_seconds)
+		JSON.stringify({"expire_seconds": expire_seconds, "action_name": "QR_SCENE", "action_info": {"scene": {"scene_id": scene_id}}})
 	).getjson("utf-8"));
 };
-WXServices.prototype.createlimitqrcode = function(scene_id){
+WXServices.prototype.createlimitqrcode = function(scene_id,scene_str){
 	if(isNaN(scene_id)){
 		this.errmsg = "scene_id must be a number";
 		return {"error":true};
@@ -90,11 +97,20 @@ WXServices.prototype.createlimitqrcode = function(scene_id){
 		this.errmsg = "scene_id must be less than 100000.";
 		return {"error":true};
 	}
+	var data = {"action_name": "QR_LIMIT_SCENE", "action_info": {"scene": {}}};
+	if(scene_id) data.action_info.scene["scene_id"] = scene_id;
+	if(scene_str) {
+		data["action_name"] = "QR_LIMIT_STR_SCENE";
+		data.action_info.scene["scene_str"] = scene_str;
+	}
 	return this.parseerror(httprequest.create(
 		"https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=" + this.Auth.access_token,
 		"POST",
-		F.format("{\"action_name\": \"QR_LIMIT_SCENE\", \"action_info\": {\"scene\": {\"scene_id\": {0}}}}",scene_id)
+		JSON.stringify(data)
 	).getjson("utf-8"));
+};
+WXServices.prototype.get_short_url = function(url){
+	return this.parseerror(httprequest.create("https://api.weixin.qq.com/cgi-bin/shorturl?access_token=" + this.Auth.access_token,"POST",JSON.stringify({action:'long2short', long_url : url})).getjson("utf-8"));
 };
 WXServices.prototype.getwxip = function(){
 	return httprequest.create("https://api.weixin.qq.com/cgi-bin/getcallbackip?access_token=" + this.Auth.access_token).getjson("utf-8");
@@ -108,8 +124,9 @@ WXServices.prototype.createmenu = function(menu){
 WXServices.prototype.deletemenu = function(){
 	return this.parseerror(httprequest.create("https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=" + this.Auth.access_token).getjson("utf-8"));
 };
-WXServices.prototype.downloadmedia = function(mediaid){
-	var http = httprequest.create("http://file.api.weixin.qq.com/cgi-bin/media/get?access_token=" + this.Auth.access_token + "&media_id=" + mediaid).send();
+/*temp*/
+WXServices.prototype.download = function(mediaid, isvideo){
+	var http = httprequest.create((isvideo===true ? "http://" : "https://") + "api.weixin.qq.com/cgi-bin/media/get?access_token=" + this.Auth.access_token + "&media_id=" + mediaid).send();
 	var header = http.getheader("Content-disposition");
 	if(header==""){
 		return this.parseerror(http.getjson("utf-8"));
@@ -119,9 +136,72 @@ WXServices.prototype.downloadmedia = function(mediaid){
 };
 WXServices.prototype.upload = function(type,path,contenttype){
 	var Upload = require("net/http/upload");
-	var httpupload = Upload("http://file.api.weixin.qq.com/cgi-bin/media/upload?access_token=" + this.Auth.access_token + "&type=" + type);
+	var httpupload = Upload("https://api.weixin.qq.com/cgi-bin/media/upload?access_token=" + this.Auth.access_token + "&type=" + type);
 	httpupload.appendFile("media",path,contenttype);
 	return this.parseerror(httpupload.send().getjson("utf-8"));
+};
+
+/*material*/
+WXServices.prototype.upload_image = function(path,contenttype){
+	var Upload = require("net/http/upload");
+	var httpupload = Upload("https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=" + this.Auth.access_token);
+	httpupload.appendFile("media", path, contenttype);
+	return this.parseerror(httpupload.send().getjson("utf-8"));
+};
+WXServices.prototype.upload_media = function(type,path,contenttype, description){
+	var Upload = require("net/http/upload");
+	var httpupload = Upload("https://api.weixin.qq.com/cgi-bin/material/add_material?access_token=" + this.Auth.access_token);
+	httpupload.appendFile("media", path, contenttype);
+	httpupload.appendForm("type", type);
+	if(description) httpupload.appendForm("description", JSON.stringify(description));
+	return this.parseerror(httpupload.send().getjson("utf-8"));
+};
+WXServices.prototype.upload_news = function(title, digest, content, author, thumb_media_id, content_source_url, show_cover_pic){
+	return this.parseerror(httprequest.create(
+		"https://api.weixin.qq.com/cgi-bin/material/add_news?access_token=" + this.Auth.access_token,
+		"POST",
+		JSON.stringify(typeof title=="string" ? {articles : [{title : title,thumb_media_id : thumb_media_id,author : author,digest : digest,show_cover_pic : show_cover_pic===false ? "0" : "1",content : content,content_source_url : content_source_url}]} : title)
+	).getjson("utf-8"));
+};
+WXServices.prototype.get_media_count = function(){
+	return this.parseerror(httprequest.create("https://api.weixin.qq.com/cgi-bin/material/get_materialcount?access_token=" + this.Auth.access_token).getjson("utf-8"));
+};
+WXServices.prototype.get_media_list = function(type, offset, count){
+	return this.parseerror(httprequest.create(
+		"https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=" + this.Auth.access_token,
+		"POST",
+		JSON.stringify({type : type, offset : offset, count : count})
+	).getjson("utf-8"));
+};
+WXServices.prototype.download_media = function(mediaid, type){
+	var http = httprequest.create("https://api.weixin.qq.com/cgi-bin/material/get_material?access_token=" + this.Auth.access_token,"POST",JSON.stringify({media_id:mediaid})).send();
+	if(type == "news" || type == "video"){
+		return this.parseerror(http.getjson("utf-8"));
+	}else{
+		return this.parseerror({"error":false,"data":http.getbinary(),"contenttype":http.getheader("Content-Type"),"filename":header});
+	}
+};
+WXServices.prototype.delete_media = function(mediaid){
+	return this.parseerror(httprequest.create(
+		"https://api.weixin.qq.com/cgi-bin/material/del_material?access_token=" + this.Auth.access_token,
+		"POST",
+		JSON.stringify({media_id:mediaid})
+	).getjson("utf-8"));
+};
+WXServices.prototype.update_news = function(mediaid, index, title, digest, content, author, thumb_media_id, content_source_url, show_cover_pic){
+	return this.parseerror(httprequest.create(
+		"https://api.weixin.qq.com/cgi-bin/material/add_news?access_token=" + this.Auth.access_token,
+		"POST",
+		JSON.stringify({media_id : mediaid, index : index, articles : {
+			title : title,
+			thumb_media_id : thumb_media_id,
+			author : author,
+			digest : digest,
+			show_cover_pic : show_cover_pic===false ? "0" : "1",
+			content : content,
+			content_source_url : content_source_url
+		}})
+	).getjson("utf-8"));
 };
 WXServices.prototype.getUser = function(openid,lang){
 	return this.parseerror(httprequest.create("https://api.weixin.qq.com/cgi-bin/user/info?access_token=" + this.Auth.access_token + "&openid="+(openid||"")+"&lang=" + (lang||"zh_CN")).getjson("utf-8"));

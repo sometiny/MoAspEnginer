@@ -131,13 +131,27 @@ var
 			}
 			return src;
 		};
-		var _LoadTemplate = function(template) {
-			var template = __LoadTemplate(template);
+		var _LoadTemplate = function(tplstr, assigns) {
+			assigns = assigns || {};
+			var template = __LoadTemplate(tplstr,assigns);
 			template = template.replace(/<selection name\=("|')(\w+)\1(\s*)\/>/ig, "");
 			template = template.replace(/<selection name\=("|')(\w+)\1(\s*)>([\s\S]*?)<\/selection>/ig, "$4");
 			return template;
 		};
-		var __LoadTemplate = function(template) {
+		var readAttrs__ = function(src) {
+			if (typeof src != "string") return {};
+			if (!src) return {};
+			src = F.string.trim(F.string.trim(src).replace(/^<(\w+)([\s\S]+?)(\/)?>([\s\S]*?)$/i, "$2"));
+			var returnValue = {};
+			var reg = /\b([\w\.]+)\=(\"|\')(.+?)(\2)( |$)/igm;
+			var a = reg.exec(src);
+			while (a != null) {
+				returnValue[a[1]] = a[3];
+				a = reg.exec(src);
+			}
+			return returnValue;
+		};
+		var __LoadTemplate = function(template, assigns) {
 			var templatelist, vpath, path, templatelist2;
 			templatelist = template.split(":");
 			if (templatelist.length == 1) {
@@ -160,14 +174,20 @@ var
 				masterexp = new RegExp("^<extend file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "i"),
 				includeexp = new RegExp("<include file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "igm");
 
+			F.string.matches(tempStr, /<assign ([\s\S]+?)\/>(\s*)/igm, function($0, $1) {
+				var attrs = readAttrs__($1);
+				if (attrs["name"]) {
+					if(!assigns.hasOwnProperty(attrs["name"])) assigns[attrs["name"]] = attrs["value"];
+				}
+			});
+			tempStr = tempStr.replace(/<assign ([\s\S]+?)\/>(\s*)/g, '');
 			var match = masterexp.exec(tempStr),
 				master, callback;
 			if (match) {
 				templatelist2 = _RightCopy(templatelist, match[1].split(":"));
-				master = __LoadTemplate(templatelist2.join(":"));
+				master = __LoadTemplate(templatelist2.join(":"), assigns);
 				callback = function($0, $1, $2, $3, $4) {
-					var reg = new RegExp("<selection name\\=(\"|')" + $2 + "\\1>([\\s\\S]*?)<\\/selection>", "igm");
-					var m = reg.exec(tempStr);
+					var m = (new RegExp("<selection name\\=(\"|')" + $2 + "\\1>([\\s\\S]*?)<\\/selection>")).exec(tempStr);
 					if (m) {
 						master = F.replace(master, $0, m[0].replace("<super />", $4 || ""));
 					}
@@ -178,7 +198,7 @@ var
 			}
 			F.string.matches(tempStr, includeexp, function($0, $1) {
 				templatelist2 = _RightCopy(templatelist, $1.split(":"));
-				tempStr = F.replace(tempStr, $0, __LoadTemplate(templatelist2.join(":")));
+				tempStr = F.replace(tempStr, $0, __LoadTemplate(templatelist2.join(":"), assigns));
 			});
 			return tempStr;
 		};
@@ -422,7 +442,10 @@ var
 				_runtime.timelines.initialize = _runtime.ticks(_tag);
 
 				_tag = _runtime.run();
-				if (G.MO_ROUTE_MODE) M.Route();
+				if (G.MO_ROUTE_MODE){
+					M.Route();
+					__invoke_event__("after_route", G);
+				}
 				_runtime.timelines.route = _runtime.ticks(_tag);
 
 				if (!G.MO_PLUGIN_MODE) {
@@ -436,7 +459,7 @@ var
 			G = {};
 		M.Initialized = false;
 		M.Runtime = _runtime;
-		M.Version = "MoAspEnginer 3.1.1.353";
+		M.Version = "MoAspEnginer 3.1.1.382";
 		M.Config = {};
 		M.IsRewrite = false;
 		M.Action = "";
@@ -487,6 +510,7 @@ var
 				cfg.MO_APP_ENTRY = url_.substr(url_.lastIndexOf("/") + 1);
 				if (cfg.MO_APP_ENTRY.toLowerCase() == "default.asp") cfg.MO_APP_ENTRY = "";
 			}
+			cfg.MO_APP_ROOT = IO.parent(cfg.MO_APP).replace(ROOT, "").replace(/\\/g,"/");
 
 			/*load global config*/
 			if (IO.file.exists(cfg.MO_CORE + "Conf/Config.asp")) G = M.Config.Global = _wapper(IO.file.readAllScript(cfg.MO_CORE + "Conf/Config.asp"))();
@@ -604,6 +628,7 @@ var
 				if (uri.slice(0, 1) == "/") uri = uri.substr(1);
 				if (uri.slice(-1) == "/") uri = uri.substr(0, uri.length - 1);
 			}
+			if(G.MO_KEEP_PARAMS_WHEN_REWRITE===false) F.get.clear();
 			if (!uri) return;
 			var Maps = G.MO_ROUTE_MAPS;
 			if (Maps && Maps.hasOwnProperty(uri)) {
@@ -657,7 +682,7 @@ var
 				cachename = M.Method + "^" + M.Action + "^" + template.replace(/\:/g, "^");
 				if (extcachestr) cachename += "^" + extcachestr;
 				cachepath = c(G.MO_APP + "Cache/Compiled/" + cachename + ".asp");
-				if (IO.file.exists(cachepath)) {
+				if (!G.MO_INGORE_COMPILE_CACHE && IO.file.exists(cachepath)) {
 					usecache = true;
 					if (G.MO_COMPILE_CACHE_EXPIRED > 0) {
 						OldHash = F.fso.GetFile(cachepath).DateLastModified;
@@ -669,14 +694,15 @@ var
 				}
 			}
 			if (!usecache) {
-				html = _LoadTemplate(template);
+				var assigns = {};
+				html = _LoadTemplate(template, assigns);
 				if (html == "") return "";
 				if (!View) View = require(G.MO_TEMPLATE_ENGINE);
 				if (!View) {
 					ExceptionManager.put(0x12edf, "Mo.fetch()", "can not load template engine.");
 					return "";
 				}
-				scripts = View.compile(html);
+				scripts = View.compile(html, assigns);
 				if (G.MO_COMPILE_CACHE) IO.file.writeAllText(cachepath, "\u003cscript language=\"jscript\" runat=\"server\"\u003e\r\n" + scripts + "\r\n\u003c/script\u003e");
 			}
 			_runtime.timelines.compile = _runtime.ticks(_tag);
@@ -763,8 +789,8 @@ var
 			G[key] = value;
 		};
 		M.A = function(ctrl) {
-			var filepath = c(G.MO_APP + "Controllers/" + ctrl + "Controller.asp");
-			if (!IO.file.exists(filepath)) filepath = c(G.MO_CORE + "Controllers/" + ctrl + "Controller.asp");
+			var filepath = c(G.MO_APP + "Controllers/" + M.Group + ctrl + "Controller.asp");
+			if (!IO.file.exists(filepath)) filepath = c(G.MO_CORE + "Controllers/" + M.Group + ctrl + "Controller.asp");
 			if (IO.file.exists(filepath)) {
 				var _controller;
 				if (G.MO_CONTROLLER_CNAMES && G.MO_CONTROLLER_CNAMES.hasOwnProperty(ctrl.toLowerCase())) ctrl = G.MO_CONTROLLER_CNAMES[ctrl.toLowerCase()];
@@ -1250,9 +1276,6 @@ var IO = (function() {
 		};
 		d.base = function(path) {
 			return d.fso.GetBaseName(c(path));
-		};
-		d.parent = function(path) {
-			return d.fso.GetParentFolderName(c(path));
 		};
 		d.build = function(path, name) {
 			return d.fso.GetAbsolutePathName(d.fso.BuildPath(c(path), name));

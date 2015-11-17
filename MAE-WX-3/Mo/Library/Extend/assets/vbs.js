@@ -92,7 +92,7 @@ try{
     })(objScrCtl);
     objScrCtl = null;
 }catch(ex){
-    ExceptionManager.put(ex,"VBS::init",E_WARNING);
+    ExceptionManager.put(ex,"VBS::init",E_ERROR);
     VBS = null;
 }
 module.exports = VBS;
