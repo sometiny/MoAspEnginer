@@ -175,7 +175,7 @@ MoAspEnginerView.prototype.parseMoAsAsp = function() {
 	this.Content = this.Content.replace(/^_echo\(\"\"\);$/igm, "");
 	this.Content = this.Content.replace(/(\n){2,}/g, "\n");
 	this.Content = this.Content.replace(/^_echo\(\"(.+?)\"\);$/igm, "_contents += \"$1\";");
-	this.Content = this.Content.replace(/";\n_echo\((.+?)\);\n_contents \+\= "/igm, '" + $1 + "');
+	/*this.Content = this.Content.replace(/";\n_echo\((.+?)\);\n_contents \+\= "/igm, '" + $1 + "');*/
 };
 
 MoAspEnginerView.prototype.getRndid = function(l) {
