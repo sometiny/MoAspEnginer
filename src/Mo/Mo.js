@@ -789,8 +789,8 @@ var
 			G[key] = value;
 		};
 		M.A = function(ctrl) {
-			var filepath = c(G.MO_APP + "Controllers/" + ctrl + "Controller.asp");
-			if (!IO.file.exists(filepath)) filepath = c(G.MO_CORE + "Controllers/" + ctrl + "Controller.asp");
+			var filepath = c(G.MO_APP + "Controllers/" + M.Group + ctrl + "Controller.asp");
+			if (!IO.file.exists(filepath)) filepath = c(G.MO_CORE + "Controllers/" + M.Group + ctrl + "Controller.asp");
 			if (IO.file.exists(filepath)) {
 				var _controller;
 				if (G.MO_CONTROLLER_CNAMES && G.MO_CONTROLLER_CNAMES.hasOwnProperty(ctrl.toLowerCase())) ctrl = G.MO_CONTROLLER_CNAMES[ctrl.toLowerCase()];

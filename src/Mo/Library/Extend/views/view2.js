@@ -175,7 +175,7 @@ MoAspEnginerView.prototype.parseMoAsAsp = function() {
 	this.Content = this.Content.replace(/^_echo\(\"\"\);$/igm, "");
 	this.Content = this.Content.replace(/(\n){2,}/g, "\n");
 	this.Content = this.Content.replace(/^_echo\(\"(.+?)\"\);$/igm, "_contents += \"$1\";");
-	/*this.Content = this.Content.replace(/";\n_echo\((.+?)\);\n_contents \+\= "/igm, '" + $1 + "');*/
+	//this.Content = this.Content.replace(/";\n_echo\((.+?)\);\n_contents \+\= "/igm, '" + $1 + "');
 };
 
 MoAspEnginerView.prototype.getRndid = function(l) {
@@ -444,7 +444,7 @@ MoAspEnginerView.prototype.parseExpressionComponent = function(compare) {
 				if (vv_ == "Empty") {
 					var vari = this.parseAssign(varmatches[1]);
 					if (varmatches[2] != "") vari += varmatches[2];
-					expression += " (typeof " + vari + " == \"undefined\" || is_empty(" + vari + ")) ";
+					expression += (varmatches[5] == 'neq' ? ' !' : ' ') + "(typeof " + vari + " == \"undefined\" || is_empty(" + vari + ")) ";
 				} else {
 					expression += this.parseAssign(varmatches[1]);
 					if (varmatches[2] != "") expression += varmatches[2];
