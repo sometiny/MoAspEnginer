@@ -27,7 +27,7 @@
 
 	function start(){
 		Ajax(
-			"?m=Console&a=Show&app={$APP}&_r=" + Math.random(),
+			"?m=Console&a=Show<nempty name='APP'>&app={$APP}</nempty>&_r=" + Math.random(),
 			function(msg){
 				var child = box.firstChild;
 				if(msg){

@@ -8,15 +8,17 @@
 **	support@mae.im
 */
 var app_ = Request.QueryString('app') + '';
-if(app_ != "App") app_ = '';
+
+/*这里的修改是为了同时调试多个不同配置的app，必须设置app白名单，防止恶意调用*/
+if(app_ != "App") app_ = 'App';
 define("MO_APP_NAME", "mcms");
-define("MO_APP", app_ || "App");
+define("MO_APP", app_);
 define("MO_CORE", "Mo");
 Mo.on("load", function(){
 	if(Mo.C("MO_APP_ROOT")=="/") Mo.C("MO_APP_ROOT", "");
 	Mo.C("MO_VIEWS_DIR", "");
 	Mo.C("MO_TEMPLATE_NAME", "default");
-	Mo.assign("APP", app_ || "App");
+	Mo.assign("APP", app_);
 	F.get("g", "");
 	F.get("m", "Console");
 });
