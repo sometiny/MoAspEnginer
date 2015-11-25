@@ -494,7 +494,6 @@ var
 				MO_HOST: String(req.ServerVariables("HTTP_HOST")),
 				MO_PROTOCOL: String(req.ServerVariables("HTTPS")) == "off" ? "http://" : "https://"
 			}, cfg);
-			res.Charset = "utf-8";
 			M.Config.Global = cfg;
 			M.Status = "200 OK";
 
@@ -566,7 +565,7 @@ var
 			if (!G.MO_ACTION_CHAR) G.MO_ACTION_CHAR = "a";
 			if (!G.MO_GROUP_CHAR) G.MO_GROUP_CHAR = "g";
 
-			if (G.MO_CHARSET != "UTF-8") res.Charset = G.MO_CHARSET;
+			if (G.MO_CHARSET) res.Charset = G.MO_CHARSET;
 			if (IO.file.exists(G.MO_APP + "Common/Function.asp")) _wapperfile(G.MO_APP + "Common/Function.asp");
 			if (G.MO_IMPORT_COMMON_FILES != "") {
 				var files = G.MO_IMPORT_COMMON_FILES.split(";"),
