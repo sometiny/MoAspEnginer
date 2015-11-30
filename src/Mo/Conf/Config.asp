@@ -57,6 +57,7 @@ return {
 		"tar" : "assets/tar.js",
 		"dump" : "assets/dump.js"
 	},
-	MO_MPI_HOST : "mpi.thinkasp.cn"
+	MO_MPI_HOST : "mpi.thinkasp.cn",
+	MO_COMPILE_CORE : true
 };
 </script>

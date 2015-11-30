@@ -37,7 +37,7 @@ var
 			if(typeof callback == "function") callback(http_host, name, path);
 		}
 	},
-	F, require, View,
+	F, require, View, IController, IClass,
 	req = Request,
 	res = Response,
 	ROOT = Server.Mappath("/"),
@@ -459,7 +459,7 @@ var
 			G = {};
 		M.Initialized = false;
 		M.Runtime = _runtime;
-		M.Version = "MoAspEnginer 3.1.1.382";
+		M.Version = "MoAspEnginer 3.1.1.392";
 		M.Config = {};
 		M.IsRewrite = false;
 		M.Action = "";
@@ -523,19 +523,31 @@ var
 			/*load require module*/
 			require = _wappermodule(IO.file.readAllText(cfg.MO_CORE + "Library/Extend/lib/require.js"));
 			require.use(c(G.MO_CORE + "Library/Extend"), c(G.MO_APP + "Library/Extend"));
-			
-			/*load fns module*/
-			F = require("lib/fns.js");
-			if (!F) {
-				ExceptionManager.put(0x213df, "F", "can not load module 'fns', system will be shut down.", E_ERROR);
-				return;
+			var core = G.MO_CORE + "Library/Extend/lib/core.js";
+			if(!IO.file.exists(core)){
+				/*load fns module*/
+				F = require("lib/fns.js");
+				if (!F) _exit("can not load module 'fns', system will be shut down.");
+				
+				/*load IO module*/
+				IO = require("lib/io.js");
+				if (!IO) _exit("can not load module 'io', system will be shut down.");
+				
+				/*load Iclass module*/
+				var IC = require("lib/dist.js");
+				if(!IC) _exit("can not load module 'dist', system will be shut down.");
+				IController = IC.IController;
+				IClass = IC.IClass;
+				if(G.MO_COMPILE_CORE === true) C_(G.MO_CORE + "Library/Extend/lib/fns.js", G.MO_CORE + "Library/Extend/lib/io.js", G.MO_CORE + "Library/Extend/lib/dist.js", G.MO_CORE + "Library/Extend/lib/core.js");
+			}else{
+				var Core = require("lib/core.js");
+				if(!Core) _exit("can not load module 'core', system will be shut down.");
+				F = Core[0];
+				IO = Core[1];
+				IController = Core[2].IController;
+				IClass = Core[2].IClass;
 			}
-			/*load IO module*/
-			IO = require("lib/io.js");
-			if (!IO) {
-				ExceptionManager.put(0x213df, "IO", "can not load module 'IO', system will be shut down.", E_ERROR);
-				return;
-			}
+		
 			/*auto-create*/
 			if (G.MO_AUTO_CREATE_APP !== false && !IO.directory.exists(G.MO_APP)) {
 				F.foreach([
@@ -963,7 +975,6 @@ Mo.on("load", function(e, __invoke_event__) {
 	var loaddelay = {
 		"base64=Base64": ["e", "d", "encode", "decode", "toBinary", "fromBinary", "setNames", "base64"],
 		"JSON": ["parse", "stringify", "create", "decodeStrict", "encodeUnicode", "assets/json.js"],
-		"IController": ["create", "IController@lib/dist.js"], "IClass": ["create", "IClass@lib/dist.js"],
 		"dump": [null, "dump"], "cookie=Cookie": [null, "assets/cookie.js"],
 		"Model__": [null, "cmd", "useCommand", "Debug", "setDefault", "setDefaultPK", "begin", "commit", "rollback", "getConnection", "dispose", "connect", "execute", "executeQuery", "Model__@lib/model.js"],
 		"DataTable": [null, "Model__.helper.DataTable@lib/model.js"], "DataTableRow": [null, "Model__.helper.DataTableRow@lib/model.js"],
@@ -1013,6 +1024,17 @@ Mo.on("load", function(e, __invoke_event__) {
 	}
 	(new Function(executeable))();
 });
+var C_ = function(){
+	if(arguments.length<=2) return;
+	var src = Array.prototype.slice.call(arguments, 0), target = src.pop();
+	var wapper = 'module.exports=[];\nvar modules = {exports : {}};\n';
+	for(var i=0;i<src.length;i++){
+		wapper += 'modules.exports = {};\n(function(exports,require,module,__filename,__dirname,define){\n';
+		wapper += IO.file.readAllText(src[i]);
+		wapper += '\n})(modules.exports, require, modules, __filename, __dirname, define);\nmodule.exports.push(modules.exports);\n';
+	}
+	IO.file.writeAllText(target, wapper);
+};
 var HMAC = function(algorithm, blocksize, data, key, ra) {
 	var ipad = [],
 		opad = [];

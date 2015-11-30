@@ -61,7 +61,7 @@ var $io = (function()
 	var $Io = {};
 	$Io.filesize = 0;
 	$Io.is = function(path){if(path.length<2)return false; return path.substr(1,1)==":";};
-	$Io.fso = F.fso || F.activex("scripting.filesystemobject");
+	$Io.fso = new ActiveXObject("scripting.filesystemobject");
 	$Io.stream = function(mode,type)
 	{
 		var stream = F.activex("adodb.stream");stream.mode = mode ||3;stream.type = type||1;return stream;
