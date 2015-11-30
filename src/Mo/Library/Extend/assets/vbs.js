@@ -9,6 +9,10 @@ var VBS = {
 };
 try{
     var objScrCtl = F.activex("MSScriptControl.ScriptControl");
+    if(!objScrCtl){
+  		ExceptionManager.put(ex, "VBS::init", "can not load vbs module, please check if your app is running at '32Bit Mode'.", E_ERROR);
+	    return;
+    }
     objScrCtl.Language = "VBScript";
     objScrCtl.AddObject("F", F);
     objScrCtl.AddObject("Mo", Mo);

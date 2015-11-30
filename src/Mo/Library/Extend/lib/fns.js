@@ -901,8 +901,8 @@ _["int"] = function(value, default_, islist) {
 		if (isNaN(value)) return (default_ === undefined ? 0 : default_);
 		return parseInt(value);
 	} else {
-		if (!/^([\d\,]+)$/.test(value)) return (default_ === undefined ? 0 : default_);
-		return (value);
+		if (!/^([\d\,]+)$/.test(value)) return [];
+		return value.split(',');
 	}
 };
 _.md5 = function(src) {

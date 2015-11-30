@@ -337,14 +337,18 @@ MoAspEnginerView.prototype.parseLoopByArguments = function(content, loopname, ke
 //****************************************************
 MoAspEnginerView.prototype.parseFor = function() {
 	F.string.matches(this.Content, /<for (.+?)>/igm, function($0, $1, $2) {
-		var attrs = readAttrs__($1);
-		var loopname, keyname, keyvaluename, asc = true;
+		var vbscript = "", attrs = readAttrs__($1), loopname, keyname, keyvaluename, asc = true;
 		if (attrs["name"]) {
 			loopname = attrs["name"];
 			keyname = attrs.key;
 			keyvaluename = attrs.value;
 			if (attrs.asc) asc = F.bool(attrs.asc);
-		} else {
+		} else if(attrs["start"]!==undefined && attrs["end"]!==undefined){
+			keyvaluename = attrs.value || 'value';
+			var step = attrs["step"]===undefined ? 1 : attrs["step"];
+			if (attrs.asc) asc = F.bool(attrs.asc);
+			vbscript = "{?MoAsp (function(){\nfor(var " + keyvaluename + "=" + attrs["start"] + ";" + keyvaluename + "" + (asc ? "<" : ">") + "=" + attrs["end"] + ";" + keyvaluename + "+=" + step + "){\nMoAsp?}\n";
+		}else {
 			var mc = REGEXP.FOR.exec($0);
 			if (mc) {
 				loopname = mc[1];
@@ -355,14 +359,13 @@ MoAspEnginerView.prototype.parseFor = function() {
 		if (loopname) {
 			keyname = keyname || this.getRndKey();
 			keyvaluename = keyvaluename || "value";
-			var vbscript = "";
 			if (asc) {
 				vbscript = "{?MoAsp (function(){\nvar " + keyvaluename + ";\nfor(var " + keyname + "=0, " + keyname + "_length=" + loopname + ".length;" + keyname + "<" + keyname + "_length;" + keyname + "++){\n" + keyvaluename + "=" + loopname + "[" + keyname + "];\nMoAsp?}\n";
 			} else {
 				vbscript = "{?MoAsp (function(){\nvar " + keyvaluename + ";\nfor(var " + keyname + "=" + loopname + ".length-1;" + keyname + ">=0;" + keyname + "--){\n" + keyvaluename + "=" + loopname + "[" + keyname + "];\nMoAsp?}\n";
 			}
-			this.Content = F.replace(this.Content, $0, vbscript);
 		}
+		this.Content = F.replace(this.Content, $0, vbscript);
 	}, this);
 	this.Content = F.replace(this.Content, "</for>", "{?MoAsp }\n})();\n MoAsp?}")
 }
