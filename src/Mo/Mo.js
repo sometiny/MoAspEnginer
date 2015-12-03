@@ -968,6 +968,9 @@ var
 			if (!/^(\w+)$/ig.test(key)) return ExceptionManager.put(0x2e4c, "Mo.assign", "Parameter 'key' is invalid.");
 			_Assigns[key] = value;
 		};
+		M.helper = {
+			LoadController : _LoadController
+		};
 		return M;
 	})(), shutdown = Mo.Terminate;
 	

@@ -915,7 +915,7 @@ var _helper = function(){
 		if(typeof callback != "function")return this;
 		var  _list = this['LIST__'],_len = _list.length;
 		for(var i = 0;i < _len;i++){
-			callback.call(this,_list[i],i);
+			if(callback.call(this,_list[i],i)===false) break;
 		}
 		return this;
 	}

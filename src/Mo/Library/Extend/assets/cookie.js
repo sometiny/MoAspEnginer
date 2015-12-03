@@ -55,10 +55,14 @@ function receive(){
 		_cookies_received = {};
 		var cookies = (F.server("HTTP_COOKIE") || "").replace(/\s+/ig,"");
 		F.string.matches(cookies, /(.+?)\=(.+?)(\;|$)/ig, function($0, key, value){
-			if(value.indexOf("=")>0){
-				_cookies_received[key] = F.object.fromURIString(value);
-			}else{
-				_cookies_received[key] = F.decode(value);
+			try{
+				if(value.indexOf("=")>0){
+					_cookies_received[key] = F.object.fromURIString(value);
+				}else{
+					_cookies_received[key] = F.decode(value);
+				}
+			}catch(ex){
+				_cookies_received[key] = '';
 			}
 		});
 	}
