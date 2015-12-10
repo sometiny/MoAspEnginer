@@ -581,7 +581,8 @@ function get_drive(dr){
 			fileSystem : dr.FileSystem,
 			isReady : dr.IsReady,
 			path : dr.Path,
-			sn : (dr.SerialNumber < 0 ? (dr.SerialNumber+0x100000000) : dr.SerialNumber).toString(16)
+			sn : (dr.SerialNumber < 0 ? (dr.SerialNumber+0x100000000) : dr.SerialNumber).toString(16),
+			volumename : dr.VolumeName
 		};	
 	}else{
 		return {

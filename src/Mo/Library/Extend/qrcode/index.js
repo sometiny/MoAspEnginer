@@ -376,6 +376,9 @@ var $qrcode = function() {
 		_this.getModuleCount = function() {
 			return _moduleCount;
 		};
+		_this.getModule = function() {
+			return _modules;
+		};
 		_this.getVersion = function() {
 			return _typeNumber;
 		};
