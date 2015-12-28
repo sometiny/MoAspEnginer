@@ -37,10 +37,16 @@ helper.DropDownList = function(name, list, selectedIndex, attrs){
 	selectedIndex = selectedIndex || 0;
 	var select = "<select name=\"" + name + "\"" + parseattrs(attrs) + ">";
 	var index=0;
-	for(var i in list){
-		if(!list.hasOwnProperty(i)) continue;
-		select += F.format("<option value=\"{0}\"{2}>{1}</option>", i, list[i], selectedIndex==index ? " selected=\"selected\"":"");
-		index++;
+	if(list.length !== undefined){
+		for(var i =0;i<list.length;i++){
+			select += F.format("<option value=\"{0}\"{2}>{1}</option>", list[i], list[i], selectedIndex==list[i] ? " selected=\"selected\"":"");
+		}
+	}else{
+		for(var i in list){
+			if(!list.hasOwnProperty(i)) continue;
+			select += F.format("<option value=\"{0}\"{2}>{1}</option>", i, list[i], selectedIndex==index ? " selected=\"selected\"":"");
+			index++;
+		}
 	}
 	return select + "</select>";
 };

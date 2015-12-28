@@ -422,7 +422,7 @@ MoAspEnginerView.prototype.parseExpression = function() {
 	F.string.matches(this.Content, /<expression ([\s\S]+?)>/igm, function($0, $1) {
 		var expression = this.parseExpressionComponent($1);
 		if (expression == "") {
-			ExceptionManager.put(0x8300, "ViewParser", "模板代码语法错误，相关代码'" + $0 + "'");
+			ExceptionManager.put(0x8300, "tag 'expression'", "模板代码语法错误，相关代码'" + F.encodeHtml($0).replace(/\$/ig, "&#36;") + "'");
 		} else {
 			this.Content = F.replace(this.Content, $0, "{?MoAsp if(" + expression + "){\n MoAsp?}");
 		}
@@ -431,7 +431,7 @@ MoAspEnginerView.prototype.parseExpression = function() {
 MoAspEnginerView.prototype.parseExpressionElse = function() {
 	F.string.matches(this.Content, /<else ([\s\S]+?) \/>/igm, function($0, $1) {
 		var expression = this.parseExpressionComponent($1)
-		if (expression == "") ExceptionManager.put(0x8300, "ViewParser", "模板代码语法错误，相关代码'" + $0 + "'");
+		if (expression == "") ExceptionManager.put(0x8300, "tag 'else'", "模板代码语法错误，相关代码'" + F.encodeHtml($0).replace(/\$/ig, "&#36;") + "'");
 		else this.Content = F.replace(this.Content, $0, "{?MoAsp }else if(" + expression + "){ MoAsp?}");
 	}, this);
 };

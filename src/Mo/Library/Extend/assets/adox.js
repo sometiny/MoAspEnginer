@@ -74,7 +74,7 @@ var _table = function(obj) {
 			_columns = {};
 			var __Columns = __table.Columns, count=__Columns.Count;
 			for (var i = 0; i < count; i++) {
-				_columns[__Columns[i].Name] = __Columns[i];
+				_columns[__Columns(i).Name] = __Columns(i);
 			}
 		}
 		if (_columns.hasOwnProperty(name)) return _columns[name];
@@ -114,7 +114,7 @@ var _table = function(obj) {
 		if (_keys == null) {
 			_keys = {};
 			for (var i = 0; i < __table.Keys.Count; i++) {
-				_keys[__table.Keys[i].Name] = __table.Keys[i];
+				_keys[__table.Keys(i).Name] = __table.Keys(i);
 			}
 		}
 		if (_keys.hasOwnProperty(name)) return _keys[name];
@@ -153,7 +153,7 @@ var _table = function(obj) {
 		if (_indexes == null) {
 			_indexes = {};
 			for (var i = 0; i < __table.Indexes.Count; i++) {
-				_indexes[__table.Indexes[i].Name] = __table.Indexes[i];
+				_indexes[__table.Indexes(i).Name] = __table.Indexes(i);
 			}
 		}
 		if (_indexes.hasOwnProperty(name)) return _indexes[name];
@@ -168,13 +168,15 @@ var _table = function(obj) {
 		__table.Indexes.Delete(name);
 		delete _indexes[name];
 	};
-	table.indexes.create = function(name, column) {
+	table.indexes.create = function(name, column, unique, clustered ) {
 		var index = table.indexes(name);
 		if (index != null) {
 			ExceptionManager.put(0x80012351, "table.indexes.create", "index '" + name + "' is exists;");
 			return null;
 		}
 		var index = newIndex(name);
+		if(unique===true) index.Unique = true;
+		if(clustered===true) index.Clustered = true;
 		var columns = column.split(",");
 		for (var i = 0; i < columns.length; i++) {
 			index.Columns.Append(columns[i]);
@@ -255,6 +257,7 @@ var adox = function() {
 			}
 		} else {
 			activeconnection = conn;
+			if(conn!=null) catlog.ActiveConnection = conn;
 		}
 		return true;
 	};
