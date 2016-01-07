@@ -109,14 +109,6 @@ Module._load = function(name, parent, aspfile, callback){
 	if(!_file){
 		ExceptionManager.put(new Exception(0xed34, "Module._load()", "Module '" + name + "' is not exists, required by " + (parent ? ("'" + parent.id + "'") : "ROOT") + "."));
 	}else{
-		var _parent=parent;
-		while(_parent){
-			if(_parent.filename==_file){
-				ExceptionManager.put(new Exception(0xed35, "Module._load()", "Module '" + name + "' is required by self. forbidden!"));
-				return null;
-			}
-			_parent = _parent.parent;
-		}
 		var _cache = Module._cache[_file];
 		if(_cache) return _cache.exports;
 		var module = new Module(name,parent);

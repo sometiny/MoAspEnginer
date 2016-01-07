@@ -70,26 +70,6 @@ Driver.GetSqls = function(){
 		}
 	}
 };
-Driver.GetColumns = function(tablename){
-	var conn = this.base;
-	var rs = conn.execute("show columns from `" + tablename + "`");
-	if(rs==null)return null;
-	var obj={},i=0, typed, sch;
-	while(!rs.eof){
-		typed = MYSQL_GetType(rs.fields("Type").Value); 
-		sch = {
-			"DATA_TYPE":typed.type,
-			"IS_NULLABLE":rs.fields("Null").Value=="YES",
-			"IS_PK":rs.fields("Key").Value=="PRI"
-		};
-		if(typed.hasOwnProperty('precision')) sch['NUMERIC_PRECISION'] = typed.precision;
-		if(typed.hasOwnProperty('scale')) sch['NUMERIC_SCALE'] = typed.scale;
-		if(typed.hasOwnProperty('size')) sch['CHARACTER_MAXIMUM_LENGTH'] = typed.size;
-		obj[rs("Field").Value]=sch;
-		rs.movenext();
-	}
-	return obj;
-};
 Driver.initialize = function(Helper, Conn){
 	
 };

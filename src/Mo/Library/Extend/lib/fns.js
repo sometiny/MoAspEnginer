@@ -358,37 +358,25 @@ _.decodeHtml = function(src, simple) {
 	return ret.replace(/&#39;/g, '\'');
 };
 _.formatdate = function(dt, fs) {
-	if (dt==null || dt==undefined) {
-		dt = new Date();
-	}else{
+	if (dt===null || dt===undefined) return '';
+	if (fs===undefined) return _.formatdate(new Date(), dt);
+	if(Object.prototype.toString.call(dt) != '[object Date]'){
 		var type = typeof dt;
-		if(type == "object" &&  dt.constructor == Date){
-			
-		}
-		else if(type == "string"){
+		if(type == "string"){
 			var _dt = _.date.parse(dt);
-			if(_dt){
-				dt = new Date(_dt.ticks);
-			}
+			if(_dt) dt = new Date(_dt.ticks);
 			else{
 				dt = Date.parse(dt);
 				if(!dt){
 					ExceptionManager.put(0x3456,"F.formatdate","date string format error, parse failed.");
-					return "";
+					return '';
 				}
 			}
 		}
-		else if(type == "date" || type == "number"){
-			dt = new Date(dt - 0);
-		}
+		else if(type == "date" || type == "number") dt = new Date(dt-0);
 	}
-	if (!dt.getFullYear) dt = new Date();
 	
-	function _right2(src){
-		if(src>=10) return src;
-		src = "0" + src;
-		return src.substr(src.length-2);
-	}
+	if (!dt.getFullYear) return '';
 
 	fs = fs.replace(/(yyyy|mmmm|mmm|mm|dddd|ddd|dd|hh|ss|tttt|m|d|h|s)/ig,function(diff){
 		switch(diff){
@@ -398,17 +386,15 @@ _.formatdate = function(dt, fs) {
 			case "MMM" : return ms[1][dt.getMonth()];
 			case "yyyy" : return dt.getFullYear();
 			case "M" : return dt.getMonth() + 1;
-			case "MM" : return _right2(dt.getMonth() + 1);
+			case "MM" : return ('0' + (dt.getMonth() + 1)).slice(-2);
 			case "d" : return dt.getDate();
-			case "dd" : return _right2(dt.getDate());
-			case "H" : return dt.getHours() % 12;
-			case "HH" : return _right2(dt.getHours());
+			case "dd" : return ('0' + dt.getDate()).slice(-2);
+			case "HH" : return ('0' + dt.getHours()).slice(-2);
 			case "h" : return dt.getHours();
-			case "hh" : return _right2(dt.getHours() % 12);
 			case "m" : return dt.getMinutes();
-			case "mm" : return _right2(dt.getMinutes());
+			case "mm" : return ('0' + dt.getMinutes()).slice(-2);
 			case "s" : return dt.getSeconds();
-			case "ss" : return _right2(dt.getSeconds());
+			case "ss" : return ('0' + dt.getSeconds()).slice(-2);
 			case "tttt" : return dt.getMilliseconds();
 			default : return diff;
 		}

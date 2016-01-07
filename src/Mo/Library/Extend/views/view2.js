@@ -117,11 +117,11 @@ MoAspEnginerView.prototype.parse = function() {
 	this.parseEmpty();
 	this.parseSwitch();
 	this.parseCompare(["lt", "gt", "nlt", "ngt", "eq", "neq"]);
+	this.Content = F.string.replace(this.Content, /<else(\s*)\/>/igm, "{?MoAsp }else{ MoAsp?}");
 	this.parseExpression();
 	this.parseExpressionElse();
 	this.Content = F.string.replace(this.Content, /<(and|or)(.+?)\/>/igm, "")
 	this.Content = F.string.replace(this.Content, /<\/else>/igm, "{?MoAsp }else{ MoAsp?}");
-	this.Content = F.string.replace(this.Content, /<else \/>/igm, "{?MoAsp }else{ MoAsp?}");
 	this.Content = F.string.replace(this.Content, /<break \/>/igm, "{?MoAsp break; MoAsp?}");
 	this.Content = F.string.replace(this.Content, /<\/switch>/igm, "{?MoAsp } MoAsp?}");
 	this.Content = F.string.replace(this.Content, /<default \/>/igm, "{?MoAsp default : MoAsp?}");

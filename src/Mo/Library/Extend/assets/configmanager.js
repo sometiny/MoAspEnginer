@@ -26,9 +26,11 @@ function ConfigManager(src){
 	};
 	if(src.length>2 && src.substr(1,1)==":") path = src;
 	else path = IO.build(Mo.C("@.MO_APP"), "Conf/" + src + ".asp");
+	instance.loaded = false;
 	if(IO.file.exists(path)){
 		try{
-		config = (new Function(IO.file.readAllScript(path)))();
+			config = (new Function(IO.file.readAllScript(path)))();
+			instance.loaded = true;
 		}catch(ex){
 			MEM.put(ex, 'ConfigManager');
 		}

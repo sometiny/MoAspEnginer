@@ -48,9 +48,16 @@ IClass.create = function(__construct, __destruct) {
 /*IController*/
 function IFunction(fn) {
 	this.fn = fn;
+	this.fn._data = {};
 }
 IFunction.prototype.AsPrivate = function() {
 	this.fn.__PRIVATE__ = true;
+	return this;
+};
+IFunction.prototype.data = function(key, value) {
+	if(value === undefined) return this.fn_data[key];
+	this.fn._data[key] = value;
+	return this;
 };
 
 function IController() {
@@ -85,6 +92,10 @@ IController.extend("invoke", function(name) {
 		return;
 	}
 	return this[name].apply(this, args);
+}).AsPrivate();
+IController.extend("getAction", function(name) {
+	if (Mo.Config.Global.MO_ACTION_CASE_SENSITIVITY === false) name = name.toLowerCase();
+	return this[name];
 }).AsPrivate();
 IController.extend("display", function() {
 	Mo.display.apply(Mo, arguments);

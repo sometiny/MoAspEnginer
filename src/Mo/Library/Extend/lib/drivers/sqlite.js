@@ -53,26 +53,6 @@ Driver.GetSqls = function(){
 		}
 	}
 };
-Driver.GetColumns = function(tablename){
-	var conn = this.base;
-	var rs = conn.execute("PRAGMA table_info(" + tablename + ")");
-	if(rs==null)return null;
-	var obj={},i=0, typed, sch;
-	while(!rs.eof){
-		typed = SQLITE_GetType(rs.fields("Type").Value); 
-		sch = {
-			"DATA_TYPE":typed.type,
-			"IS_NULLABLE":rs.fields("notnull").Value==0,
-			"IS_PK":rs.fields("pk").Value==1
-		};
-		if(typed.hasOwnProperty('precision')) sch['NUMERIC_PRECISION'] = typed.precision;
-		if(typed.hasOwnProperty('scale')) sch['NUMERIC_SCALE'] = typed.scale;
-		if(typed.hasOwnProperty('size')) sch['CHARACTER_MAXIMUM_LENGTH'] = typed.size;
-		obj[rs("name").Value]=sch;
-		rs.movenext();
-	}
-	return obj;
-};
 Driver.initialize = function(Helper, Conn){
 	
 };

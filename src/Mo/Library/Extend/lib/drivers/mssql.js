@@ -47,29 +47,6 @@ Driver.GetSqls = function(){
 	if(strpage>1)where_ +=" " + (where_!=""?"and":"where") + " " + prex + "." + pagekey + " not in(select top " + limit * (strpage-1) + " " + prex + "." + pagekey + " from " +joinlevel + table + cname + join + where_ + groupby+ order_ +")"	;
 	this.sql="select top " + limit + " " + fields + " from " + joinlevel + table + cname + join + where_ + groupby+ order_;
 };
-Driver.GetColumns = function(tablename){
-	var rs = this.base.openSchema(4,VBS.eval("Array(\"" + this.cfg.DB_Name + "\",\"" + (this.cfg.DB_Owner||"dbo") + "\",\"" + tablename + "\")"));
-	if(rs==null)return null;
-	var obj={},i=0, typed, sch;
-	while(!rs.eof){
-		var cname=rs("COLUMN_NAME").Value;
-		obj[cname]={
-			"DATA_TYPE":rs.fields("DATA_TYPE").Value,
-			"COLUMN_FLAGS":rs.fields("COLUMN_FLAGS").Value,
-			"IS_NULLABLE":rs.fields("IS_NULLABLE").Value,
-			"NUMERIC_PRECISION":rs.fields("NUMERIC_PRECISION").Value,
-			"NUMERIC_SCALE":rs.fields("NUMERIC_SCALE").Value,
-			"CHARACTER_MAXIMUM_LENGTH":rs.fields("CHARACTER_MAXIMUM_LENGTH").Value
-		};
-		if(obj[cname].DATA_TYPE==130){
-			if(obj[cname].COLUMN_FLAGS>>7 ==1){
-				obj[cname].CHARACTER_MAXIMUM_LENGTH=1024000;
-			}
-		}
-		rs.movenext();
-	}
-	return obj;
-};
 Driver.initialize = function(Helper, Conn){
 	
 };

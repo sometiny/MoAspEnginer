@@ -235,14 +235,17 @@ function __Model__(tablename,pk,cfg,tablePrex){
 	this.table = this.tablePrex + this.table;
 	this.tableWithNoSplitChar = this.table;
 	if(this.base.useCommand && this.type != "OTHER"){
-		var schema = {}, schemaname = "SCHMEA-" + cfg;
+		var schemaname = "SCHMEA-" + cfg, cf = null;
 		if(!this.base.cfg["DB_Schema"]){
-			if(Mo.C.Exists(schemaname)) schema = Mo.C(schemaname);
-			this.base.cfg["DB_Schema"]=schema;
+			this.base.cfg["DB_Schema"] = {};
+			cf = MCM(schemaname);
+			if(cf.loaded) this.base.cfg["DB_Schema"] = cf.config;
 		}
 		if(!this.base.cfg["DB_Schema"][this.table]){
 			this.base.cfg["DB_Schema"][this.table] = (this.base.driver.GetColumns || _helper.Helper.GetColumns).call(this.base,this.table);
-			Mo.C.SaveAs(schemaname, schema);
+			if(cf == null) cf = MCM(schemaname);
+			cf.config[this.table] = this.base.cfg["DB_Schema"][this.table];
+			cf.save();
 		}
 	}
 	var sp1 = this.sp1 = this.base.splitChars[0];
@@ -756,9 +759,9 @@ function _parseData(table){
 			var tableschema = schema[i];
 			var parm = {value : value, type : tableschema["DATA_TYPE"]};
 			parms.push(parm);
-			if(tableschema["NUMERIC_PRECISION"] != null)parm.precision = tableschema["NUMERIC_PRECISION"];
-			if(tableschema["CHARACTER_MAXIMUM_LENGTH"] != null)parm.size = value.length;
-			if(tableschema["NUMERIC_SCALE"] != null)parm.scale = tableschema["NUMERIC_SCALE"];
+			if(tableschema["NUMERIC_PRECISION"] >0)parm.precision = tableschema["NUMERIC_PRECISION"];
+			if(typeof value == 'string' || tableschema["SIZE"]>0) parm.size = tableschema["SIZE"] || value.length;
+			if(tableschema["NUMERIC_SCALE"] >0)parm.scale = tableschema["NUMERIC_SCALE"];
 		}else{
 			if(usecommand){
 				name = "{"+parms.length+"}";
@@ -1105,28 +1108,25 @@ var _helper = function(){
 		}
 	};
 	Driver.GetColumns = function(tablename){
-		var conn = this.base;
-		var rs = conn.openSchema(4,VBS.eval("Array(Empty,Empty,\"" + tablename + "\")"));
-		if(rs==null)return null;
-		var obj={},i=0, typed, sch;
-		while(!rs.eof){
-			var cname=rs("COLUMN_NAME").Value;
-			obj[cname]={
-				"DATA_TYPE":rs.fields("DATA_TYPE").Value,
-				"COLUMN_FLAGS":rs.fields("COLUMN_FLAGS").Value,
-				"IS_NULLABLE":rs.fields("IS_NULLABLE").Value,
-				"NUMERIC_PRECISION":rs.fields("NUMERIC_PRECISION").Value,
-				"NUMERIC_SCALE":rs.fields("NUMERIC_SCALE").Value,
-				"CHARACTER_MAXIMUM_LENGTH":rs.fields("CHARACTER_MAXIMUM_LENGTH").Value
-			};
-			if(obj[cname].DATA_TYPE==130){
-				if(obj[cname].COLUMN_FLAGS>>7 ==1){
-					obj[cname].CHARACTER_MAXIMUM_LENGTH=1024000;
-				}
+		return F.activex("ADOX.Catalog",function(connection){
+			this.ActiveConnection = connection;
+			var Table, Columns, Column, _c, Data = {};
+			try{
+				Table = this.Tables(tablename);
+			}catch(ex){
+				return {};
 			}
-			rs.movenext();
-		}
-		return obj;
+			Columns = Table.Columns;
+			for(var j=0; j<Columns.Count; j++){
+				Column = Columns(j);
+				_c = Data[Column.Name]={};
+				_c['SIZE'] = Column.DefinedSize;
+				_c['DATA_TYPE'] = Column.Type;
+				_c['NUMERIC_PRECISION'] = Column.Precision;
+				_c['NUMERIC_SCALE'] = Column.NumericScale;
+			}
+			return Data;
+		}, this.base);
 	};
 	Driver.Max = function(k){
 		return this.query("select max(" + k + ") from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value || 0;
