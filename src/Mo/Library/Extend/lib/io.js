@@ -23,7 +23,7 @@ var buffer2string = function(buffer) {
 		else nb[i] = buffer[i];
 	}
 	return String.fromCharCode.apply(null, nb);
-}
+};
 /* Convert a code page 437 char code to a octet number*/
 var string2buffer = function(src) {
 	var buffer = [];
@@ -34,7 +34,7 @@ var string2buffer = function(src) {
 		buffer.push(maptostring[src.charCodeAt(i)]);
 	}
 	return buffer;
-}
+};
 var string2binary = function(src) {
 	var buffer = "";
 	var i = 0;
@@ -44,7 +44,7 @@ var string2binary = function(src) {
 		buffer += String.fromCharCode(maptostring[src.charCodeAt(i)]);
 	}
 	return buffer;
-}
+};
 var binary2string = function(src) {
 	var ret = "";
 	var i = 0;
@@ -54,7 +54,7 @@ var binary2string = function(src) {
 		ret += String.fromCharCode(mapto437[src.charCodeAt(i)]);
 	}
 	return ret;
-}
+};
 
 var $io = (function()
 {

@@ -38,7 +38,7 @@ function ConfigManager(src){
 	instance.path = path;
 	instance.config = config;
 	instance.save = function(pathas){
-		return IO.file.writeAllText(pathas || path, "\u003cscript language=\"jscript\" runat=\"server\"\u003ereturn " + JSON.stringify(config, null, '\t') + ";\u003c/script\u003e");
+		return IO.file.writeAllText(pathas || path, "\u003cscript language=\"jscript\" runat=\"server\"\u003ereturn \r\n" + JSON.stringify(config) + ";\u003c/script\u003e");
 	};
 	return instance;
 }

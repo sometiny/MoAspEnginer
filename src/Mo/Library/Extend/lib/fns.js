@@ -510,7 +510,7 @@ _.datetime.prototype.toString = function(format) {
 };
 
 _.untimespan = function(ts, format) {
-	if (format === undefined) format = "yyyy-MM-dd HH:mm:ss"
+	if (format === undefined) format = "yyyy-MM-dd HH:mm:ss";
 	return _.formatdate(new Date(ts * 1000), format);
 };
 _.timespan = function(src) {
@@ -830,7 +830,7 @@ _.object.toArray = function(src, key, value) {
 	return returnValue;
 };
 _.object.toURIString = function(src, charset) {
-	charset = charset || "utf-8"
+	charset = charset || "utf-8";
 	var fn = charset == "utf-8" ? _.encode : escape;
 	if (_.object.toURIString.fn == 0) fn = function(src) {
 		return src;
@@ -1039,7 +1039,7 @@ _.session.parse = function(name) {
 		}
 	});
 	return obj;
-}
+};
 _.get.keys = function() {
 	return _.object.keys(_get_);
 };
@@ -1085,7 +1085,7 @@ _.server.toURIString = function(charset) {
 	return _.object.toURIString(_server_, charset || "utf-8");
 };
 _.session.toURIString = function(charset) {
-	charset = charset || "utf-8"
+	charset = charset || "utf-8";
 	var fn = charset == "utf-8" ? _.encode : escape;
 	var returnValue = "";
 	_.each(Session.Contents, function(q) {
@@ -1095,7 +1095,7 @@ _.session.toURIString = function(charset) {
 	});
 	if (returnValue != "") returnValue = returnValue.substr(0, returnValue.length - 1);
 	return returnValue;
-}
+};
 _.get.sort = function(asc) {
 	_get_ = _.object.sort(_get_, asc);
 };
@@ -1126,7 +1126,7 @@ _.activex.httprequest = function() {
 			b = new ActiveXObject(httplist[i]);
 			(function(o) {
 				_.activex.httprequest = function() {
-					return new ActiveXObject(o)
+					return new ActiveXObject(o);
 				};
 			})(httplist[i]);
 			return b;

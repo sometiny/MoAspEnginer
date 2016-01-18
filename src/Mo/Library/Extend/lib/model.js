@@ -195,12 +195,6 @@ function __Model__(tablename,pk,cfg,tablePrex){
 	cfg = cfg ||Model__.defaultDBConf;
 	this.usecache = false;
 	this.cachename = "";
-	this.table = F.string.trim(tablename || "");
-	this.strcname = "";
-	if(this.table.indexOf(" ") > 0){
-		this.strcname = this.table.substr(this.table.indexOf(" ")+1);
-		this.table = this.table.substr(0,this.table.indexOf(" "));
-	}
 	this.joinlevel = "";
 	this.fields = "*";
 	this.strwhere = "";
@@ -220,17 +214,28 @@ function __Model__(tablename,pk,cfg,tablePrex){
 	this.isonlypkorder = false;
 	this.onlypkorder = "asc";
 	this.ballowOnlyPKOrder = true;
-	this.base = null;
-	this.tableWithNoSplitChar = "";
 	this.connection = null;
 	if(!Model__.connect(cfg)) return;
 	this.base = Connections[cfg];
+	this.table = F.string.trim(tablename || "");
+	this.strcname = "";
+	if(this.table.indexOf(" ") > 0){
+		this.strcname = this.table.substr(this.table.indexOf(" ")+1);
+		this.table = this.table.substr(0,this.table.indexOf(" "));
+	}
 	this.type = this.base.cfg["DB_Type"];
 	this.tablePrex = Mo.Config.Global.MO_TABLE_PERX;
 	if(typeof tablePrex == "string"){
 		this.tablePrex = tablePrex;
 	}else if(typeof this.base.cfg["DB_TABLE_PERX"] == "string") {
 		this.tablePrex = this.base.cfg["DB_TABLE_PERX"];
+	}
+	var _owner = this.base.cfg["DB_Owner"] || "dbo", _db = this.base.cfg["DB_Name"];
+	if(this.table.indexOf('.')>0){
+		var _table = this.table.split('.');
+		this.table = _table[_table.length - 1];
+		if(_table.length > 1) _owner = _table[_table.length-2];
+		if(_table.length > 2) _db = _table[_table.length-3];
 	}
 	this.table = this.tablePrex + this.table;
 	this.tableWithNoSplitChar = this.table;
@@ -242,19 +247,21 @@ function __Model__(tablename,pk,cfg,tablePrex){
 			if(cf.loaded) this.base.cfg["DB_Schema"] = cf.config;
 		}
 		if(!this.base.cfg["DB_Schema"][this.table]){
-			this.base.cfg["DB_Schema"][this.table] = (this.base.driver.GetColumns || _helper.Helper.GetColumns).call(this.base,this.table);
-			if(cf == null) cf = MCM(schemaname);
-			cf.config[this.table] = this.base.cfg["DB_Schema"][this.table];
-			cf.save();
+			var _columns = (this.base.driver.GetColumns || _helper.Helper.GetColumns).call(this.base,this.table);
+			if(_columns){
+				this.base.cfg["DB_Schema"][this.table] = _columns;
+				if(cf == null) cf = MCM(schemaname);
+				cf.config[this.table] = _columns;
+				cf.save();
+			}
 		}
 	}
-	var sp1 = this.sp1 = this.base.splitChars[0];
-	var sp2 = this.sp2 = this.base.splitChars[1];
-	
+	this.sp1 = this.base.splitChars[0];
+	this.sp2 = this.base.splitChars[1];
 	if(this.type == "MSSQL"){
-		this.table = sp1 + this.base.cfg["DB_Name"] +sp2 + "." + sp1 + (this.base.cfg["DB_Owner"] || "dbo") +sp2 + "." + sp1 + this.table + sp2;
+		this.table = [this.sp1 + _db + this.sp2, this.sp1 + _owner +this.sp2, this.sp1 + this.table + this.sp2].join(".");
 	}else{
-		this.table = sp1 + this.table+sp2;
+		this.table = this.sp1 + this.table + this.sp2;
 	}
 	this.connection = this.base.base;
 	this.parms = [];
@@ -1114,7 +1121,7 @@ var _helper = function(){
 			try{
 				Table = this.Tables(tablename);
 			}catch(ex){
-				return {};
+				return null;
 			}
 			Columns = Table.Columns;
 			for(var j=0; j<Columns.Count; j++){

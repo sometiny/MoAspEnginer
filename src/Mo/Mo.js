@@ -459,7 +459,7 @@ var
 			G = {};
 		M.Initialized = false;
 		M.Runtime = _runtime;
-		M.Version = "MoAspEnginer 3.1.1.410";
+		M.Version = "MoAspEnginer 3.1.1.419";
 		M.Config = {};
 		M.IsRewrite = false;
 		M.Action = "";
@@ -511,34 +511,29 @@ var
 			}
 			cfg.MO_APP_ROOT = IO.parent(cfg.MO_APP).replace(ROOT, "").replace(/\\/g,"/");
 
-			/*load global config*/
 			if (IO.file.exists(cfg.MO_CORE + "Conf/Config.asp")) G = M.Config.Global = _wapper(IO.file.readAllScript(cfg.MO_CORE + "Conf/Config.asp"))();
 			_extend(G, cfg);
 
-			/*load 'Common' modules*/
 			IO.directory.files(G.MO_CORE + "Common", function(file) {
 				if (file.name.slice(-4) == ".asp") _wapperfile(file.path);
 			});
 
-			/*load require module*/
 			require = _wappermodule(IO.file.readAllText(cfg.MO_CORE + "Library/Extend/lib/require.js"));
 			require.use(c(G.MO_CORE + "Library/Extend"), c(G.MO_APP + "Library/Extend"));
 			var core = G.MO_CORE + "Library/Extend/lib/core.js";
 			if(!IO.file.exists(core)){
-				/*load fns module*/
 				F = require("lib/fns.js");
 				if (!F) _exit("can not load module 'fns', system will be shut down.");
 				
-				/*load IO module*/
 				IO = require("lib/io.js");
 				if (!IO) _exit("can not load module 'io', system will be shut down.");
 				
-				/*load Iclass module*/
 				var IC = require("lib/dist.js");
 				if(!IC) _exit("can not load module 'dist', system will be shut down.");
 				IController = IC.IController;
 				IClass = IC.IClass;
-				if(G.MO_COMPILE_CORE === true) C_(G.MO_CORE + "Library/Extend/lib/fns.js", G.MO_CORE + "Library/Extend/lib/io.js", G.MO_CORE + "Library/Extend/lib/dist.js", G.MO_CORE + "Library/Extend/lib/core.js");
+				JSON = require('assets/json.js');
+				if(G.MO_COMPILE_CORE === true) C_(G.MO_CORE + "Library/Extend/lib/fns.js", G.MO_CORE + "Library/Extend/lib/io.js", G.MO_CORE + "Library/Extend/lib/dist.js", G.MO_CORE + "Library/Extend/assets/json.js", G.MO_CORE + "Library/Extend/lib/core.js");
 			}else{
 				var Core = require("lib/core.js");
 				if(!Core) _exit("can not load module 'core', system will be shut down.");
@@ -546,9 +541,9 @@ var
 				IO = Core[1];
 				IController = Core[2].IController;
 				IClass = Core[2].IClass;
+				JSON = Core[3];
 			}
 		
-			/*auto-create*/
 			if (G.MO_AUTO_CREATE_APP !== false && !IO.directory.exists(G.MO_APP)) {
 				F.foreach([
 					"", "Controllers", "Cache/Compiled", "Cache/Model", "Views", "Conf", "Lang",
@@ -558,7 +553,6 @@ var
 				});
 			}
 
-			/*load application config*/
 			var app_config=G.MO_APP + "Conf/Config.asp";
 			if(IO.file.exists(app_config)){
 				require(c(app_config), true, function() {
@@ -977,7 +971,6 @@ var
 Mo.on("load", function(e, __invoke_event__) {
 	var loaddelay = {
 		"base64=Base64": ["e", "d", "encode", "decode", "toBinary", "fromBinary", "setNames", "base64"],
-		"JSON": ["parse", "stringify", "create", "decodeStrict", "encodeUnicode", "assets/json.js"],
 		"dump": [null, "dump"], "cookie=Cookie": [null, "assets/cookie.js"],
 		"Model__": [null, "cmd", "useCommand", "Debug", "setDefault", "setDefaultPK", "begin", "commit", "rollback", "getConnection", "dispose", "connect", "execute", "executeQuery", "Model__@lib/model.js"],
 		"DataTable": [null, "Model__.helper.DataTable@lib/model.js"], "DataTableRow": [null, "Model__.helper.DataTableRow@lib/model.js"],
@@ -1010,7 +1003,7 @@ Mo.on("load", function(e, __invoke_event__) {
 			exports = "." + module.substr(0, index);
 			module = module.substr(index + 1);
 		}
-		executeable += "try{";
+		executeable += "if(typeof " + lib.replace(/(.+?)\=/,'') + " == 'undefined'){";
 		executeable += lib + " = {};";
 		if (index2 > 0) {
 			cname = lib.substr(index2 + 1);
@@ -1020,10 +1013,10 @@ Mo.on("load", function(e, __invoke_event__) {
 		for (var i = 0; i < _len; i++) {
 			method = "." + library[i];
 			if (library[i] == null) method = "";
-			executeable += lib + method + " = function(){" + lib + " = require(\"" + module + "\")" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};";
+			executeable += lib + method + " = function(){" + lib + " = require('" + module + "')" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};";
 		}
 		if (cname) executeable += cname + " = " + lib + ";";
-		executeable += "}catch(ex){ExceptionManager.put(ex.number, 'AUTOLOAD', 'find error when load \\'" + lib + "\\': ' + ex.description, E_ERROR);}";
+		executeable += "}";
 	}
 	(new Function(executeable))();
 });
