@@ -1,0 +1,11 @@
+﻿<assign name="title" value="'插件演示'" />
+<include file="top.html" />
+	<h3>插件演示：程序-/App/Controllers/WidgetController.asp，模板-/App/Views/default/Home/Widget.html，插件-/App/Library/Assets/</h3>
+	<h5>闭合插件-插件直接返回文本内容</h5>
+	<compile><widget:TestClose /></compile>
+	<h5>非闭合插件-插件返回一个对象，供模板使用</h5>
+	<compile:html><widget:TestNoClose name="anlige" age="20">
+		{$Name} -> {$Age}<br />
+	</widget:TestNoClose></compile:html>
+	
+<include file="foot.html" />

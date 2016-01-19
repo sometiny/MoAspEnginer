@@ -41,11 +41,12 @@ var REGEXP = {
 	FOREACH2: /<foreach2 ([\w\.]+)(\="(((\w+) as )?(\w+))")?>/i
 };
 
-function MoAspEnginerView() {
+function MoAspEnginerView(assub) {
 	this.mvarDicts = {};
 	this.Content = "";
 	this.loops = ";";
 	this.assigns = "";
+	this.assub = assub === true;
 }
 MoAspEnginerView.compile = function(content, assigns) {
 	var _view = new MoAspEnginerView();
@@ -64,10 +65,16 @@ MoAspEnginerView.prototype.setContent = function(content) {
 		this.mvarDicts[id] = $1;
 		content = content.replace($0, "<$literalid=" + id + "/$>");
 	}, this);
+	F.string.matches(content, /<compile\:html>([\s\S]*?)<\/compile\:html>/ig, function($0, $1) {
+		var parser = new MoAspEnginerView();
+		parser.assigns = this.assigns;
+		var scripts = parser.setContent($1).parse().Content;
+		content = content.replace($0, (new Function("$", "__filename", "__scripts", "__buffer", "__buffersize", scripts))(Mo(''), '', '', true, 1024));
+	}, this);
 	content = content.replace(/(\s*)\<\!\-\-\/\/(.*?)\-\-\>(\s*)/ig, "");
 	content = content.replace(/(\s*)\<\!\-\-\/\*([\s\S]*?)\*\/\-\-\>(\s*)/ig, "");
 	content = F.string.replace(content, /<switch(.+?)>(\s*)<case/igm, "<switch$1><case");
-	content = F.string.replace(content, /\n/igm, "--movbcrlf--");
+	content = F.string.replace(content, /\r\n/igm, "--movbcrlf--");
 	content = F.string.replace(content, /\r/igm, "--movbcrlf--");
 	content = F.string.replace(content, /\n/igm, "--movbcrlf--");
 	if (G.MO_PREETY_HTML || G.MO_PRETTY_HTML) {
@@ -78,6 +85,7 @@ MoAspEnginerView.prototype.setContent = function(content) {
 	return this;
 }
 MoAspEnginerView.prototype.parse = function() {
+	this.parseCompile();
 	this.parsePreCombine();
 	if (G.MO_TAG_LIB != "") {
 		var libs = G.MO_TAG_LIB.split(","),
@@ -108,6 +116,7 @@ MoAspEnginerView.prototype.parse = function() {
 			}
 		}
 	}
+	this.parseWidget();
 	this.parseSource();
 	this.parseHtmlHelper();
 	this.parsePage();
@@ -127,6 +136,7 @@ MoAspEnginerView.prototype.parse = function() {
 	this.Content = F.string.replace(this.Content, /<default \/>/igm, "{?MoAsp default : MoAsp?}");
 	this.Content = F.string.replace(this.Content, /<\/(n)?(eq|empty|lt|gt|expression|eof|foreach)>/igm, "{?MoAsp } MoAsp?}");
 	this.parseVari("");
+	if(this.assub === true) return this;
 	this.parseMoAsAsp();
 	this.doSomethingToAsp();
 	return this;
@@ -244,6 +254,23 @@ MoAspEnginerView.prototype.parseHtmlHelper = function() {
 	}, this);
 };
 
+MoAspEnginerView.prototype.parseWidget = function(){
+	F.string.matches(this.Content, /<widget\:(\w+)\b(.*?)(\/)?>/g, function($0, $1, $2, $3) {
+		var id = this.getRndKey();
+		if($3){
+			this.Content = this.Content.replace($0, "{?MoAsp var " + id + " = Mo.LoadAssets('" + $1 + "'); if(" + id + "){ MoAsp?}{?MoAsp _echo(" + id + ".Index(" + JSON.stringify(readAttrs__($2)) + "))  MoAsp?} {?MoAsp }  MoAsp?}");
+		}else{
+			this.Content = this.Content.replace($0, "{?MoAsp var " + id + " = Mo.LoadAssets('" + $1 + "'); if(" + id + "){ with(" + id + ".Index(" + JSON.stringify(readAttrs__($2)) + ")){  MoAsp?}");
+		}
+	}, this);
+	this.Content = this.Content.replace(/<\/widget\:(\w+)>/g, '{?MoAsp }}  MoAsp?}');
+};
+MoAspEnginerView.prototype.parseCompile = function(){
+	F.string.matches(this.Content, /<compile>([\s\S]*?)<\/compile>/ig, function($0, $1) {
+		var parser = new MoAspEnginerView(true);
+		this.Content = this.Content.replace($0, parser.setContent($1).parse().Content);
+	}, this);
+};
 
 //****************************************************
 //@DESCRIPTION:	PreCombine the template with global values,such as "{$$MO_CORE}"

@@ -477,7 +477,10 @@ __Model__.prototype.find = function(Id){
 	{
 		return __Model__.prototype.where.apply(this,arguments).query().fetch_one();
 	}
-	return null;
+	else 
+	{
+		return this.query().fetch_one();
+	}
 };
 __Model__.prototype.select = function(callback){
 	if(typeof callback == "function") return this.query().fetch().each(callback);
