@@ -1,1 +1,2375 @@
-﻿module.exports=[];var modules={exports:{}};modules.exports={};(function(o,v,r,c,b,n){var w=[["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]];var s=[["January","February","March","April","May","June","July","August","September","October","November","December",""],["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec",""]];var h=null,e={},m={},d=[],k=false,l={},f={},j=null;var q=function(){var x=new Enumerator(Request.QueryString),z,A,y,i;for(;!x.atEnd();x.moveNext()){z=x.item();A=String(Request.QueryString(z));A&&(e[z]=A);if(z.slice(-2)=="[]"){delete e[z];i=z.slice(0,-2);e[i]=[];y=new Enumerator(Request.QueryString(z));for(;!y.atEnd();y.moveNext()){e[i].push(y.item())}}}x=new Enumerator(Request.ServerVariables);for(;!x.atEnd();x.moveNext()){z=x.item();A=String(Request.ServerVariables(z));if(z=="URL"&&A.indexOf("?")>0){A=A.substr(0,A.indexOf("?"))}m[z]=A}};var a={};a.TEXT={BR:1,NL:2,BIN:4,NLBR:1|2,FILE:8};a.has=function(x,i){return x.hasOwnProperty(i)};a.toString=function(){return"v1"};a.extend=function(z){if(arguments.length<1){return{}}if(arguments.length<2){return z}for(var y=1;y<arguments.length;y++){for(var x in arguments[y]){if(arguments[y].hasOwnProperty(x)){z[x]=arguments[y][x]}}}return z};a.dispose=function(i){if(i!=undefined){i=null;return}while(d.length>0){a.dispose(d.pop())}};a.random=function(x,i){if(x===undefined&&i===undefined){return Math.random()}if(i===undefined){i=x;x=1}return parseInt(Math.random()*(i-x+1))+x};a.guid=function(i){i=i||"D";var y=a.activex("scriptlet.typelib");var x=y.Guid.replace(/^\{(.+?)\}([\s\S]*)$/i,"$1");switch(i.toUpperCase()){case"B":return"{"+x+"}";case"P":return"("+x+")";case"N":return x.replace(/([^0-9a-z]+)/igm,"");default:return x}return x};a.mappath=function(i){if(i.substr(1,1)==":"){return i}return Server.MapPath(i)};a.activex=function(x,z){var i=null,A;try{i=Server.CreateObject(x);d.push(i)}catch(y){return null}if(typeof z=="function"){A=z.apply(i,[].slice.apply(arguments).slice(2));if(A!==undefined){return A}}return i};a.activex.enabled=function(i){try{Server.CreateObject(i);return true}catch(x){return false}};a.json=function(z,y){var i=false;try{if(typeof y=="string"&&/^(\w+)$/.test(y)){i=true;(new Function(y+" = "+z+";"))()}else{return(new Function("return "+z+";"))()}}catch(x){if(!i){return null}(new Function(y+" = null;"))()}};a.post=function(i,x){u();if(i===undefined){return h}if(x===null){a.post.remove(i);return}if(x===undefined){return(j.hasOwnProperty(i.toUpperCase())?h[j[i.toUpperCase()]]:"")}h[i]=x;j[i.toUpperCase()]=i;return};a.session=function(i,x){if(i===undefined){return""}if(Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG){i=Mo.Config.Global.MO_APP_NAME+"_"+i}if(x===null){Session.Contents.Remove(i);return}if(x===undefined){if(Session.Contents(i)!=undefined){return Session.Contents(i)}return""}Session(i)=x};a.get=function(i,x){if(i===undefined){return e}if(x===null){a.get.remove(i);return}if(x===undefined){return(e.hasOwnProperty(i)?e[i]:"")}e[i]=x;return};a.all=function(i){if(i==undefined){return""}if(e.hasOwnProperty(i)){return a.get(i)}u();if(j.hasOwnProperty(i.toUpperCase())){return h[j[i.toUpperCase()]]}return""};a.server=function(i,x){if(i===undefined){return m}if(x===null){delete m[i];return}if(x===undefined){return(m.hasOwnProperty(i)?m[i]:"")}m[i]=x;return};a.cookie=function(A,G,y,i,C,D,z){if(A==undefined){return""}var B=A,E="";if(A.indexOf(".")>0){B=A.split(".")[0];E=A.split(".")[1]}if(G===null){Response.Cookies(B).Expires="1980-1-1";return}if(G===undefined){if(E==""){return Request.Cookies(B).item}return Request.Cookies(B)(E)}if(E==""){Response.Cookies(B)=G}else{Response.Cookies(B)(E)=G}if(typeof y=="object"&&y.constructor==Object){i=y.domain;C=y.path;D=y.secure;z=y.httponly;y=y.expired}if(y!==undefined&&!isNaN(y)){var x=new Date();x.setTime(x.getTime()+parseInt(y)*1000);Response.Cookies(B).Expires=a.format("{0}-{1}-{2} {3}:{4}:{5}",x.getYear(),x.getMonth()+1,x.getDate(),x.getHours(),x.getMinutes(),x.getSeconds())}if(i){Response.Cookies(B).Domain=i}if(!C){C="/"}Response.Cookies(B).Path=C;if(D){Response.Cookies(B).Secure=D}};a.echo=function(y,i,z,x){if((i&a.TEXT.BIN)){Response.BinaryWrite(y)}else{Response.Write(y)}if(i===true){Response.Write("<br />");if(z!==false){Response.Write("\r\n")}return}if(isNaN(i)){return}if(i&a.TEXT.BR){Response.Write("<br />")}if(i&a.TEXT.NL){Response.Write("\r\n")}if(i&a.TEXT.FILE){Response.ContentType=x||"application/octet-stream";Response.AddHeader("Content-Disposition",'attachment; filename="'+z+'"')}};a.exit=function(x,i,y){a.echo(x,i,y);Response.End()};a.format=function(x){var i=arguments;if(i.length<=1){return x}return x.replace(/\{(\d+)(?:\.([\w\.\-]+))?(?:\:(.+?))?\}/ig,function(H,y,z,A){var D=i[parseInt(y)+1];if(D===undefined){return""}if(typeof D=="object"&&z){D=(new Function('return this["'+z.replace(/\./igm,'"]["').replace(/\[\"(\d+)\"\]/igm,"[$1]")+'"]')).call(D)}if(D==null){return"NULL"}var B=A||"";var C=(typeof D);if(B!=""){if(C=="date"||(C=="object"&&D.constructor==Date)){return a.formatdate(D,B)}else{if(C=="number"){if(/^(\d+)$/ig.test(B)){return D.toString(B)}var I=/^((\d+)\.)?(D|E|F|X)(\d*)$/igm.exec(B);if(I){if(I[3]=="D"){var E=(Math.pow(10,parseInt(I[4])+1)+D).toString();D=E.substr(E.length-parseInt(I[4]))}else{if(I[3]=="E"){if(I[4]!=""){D=D.toExponential(parseInt(I[4]))}else{D=D.toExponential()}}else{if(I[3]=="F"){if(I[4]!=""){D=D.toFixed(parseInt(I[4]))}else{D=D.toFixed(0)}}else{if(I[3]=="X"){if(I[4]!=""){var E=D.toString(16).toUpperCase();if(E.length>=parseInt(I[4])){return E}E=Math.pow(10,parseInt(I[4])+1).toString()+""+E;D=E.substr(E.length-parseInt(I[4]))}else{D=D.toString(16).toUpperCase()}}}}}if(I[2]!=""){var G=parseInt(I[2]);while(D.length<G){D="0"+D}}}}else{if(C=="string"){if(!isNaN(B)){var G=parseInt(B);while(D.length<G){D="0"+D}}}}}}return D})};a.redirect=function(x,i){if(i===undefined){i=""}i=i+"";if(i!=""){a["goto"](x,i)}else{Response.Redirect(x)}Response.End()};a["goto"]=function(x,i){if(i===undefined){Response.Status="302 Object Moved";Response.AddHeader("Location",x);return}Response.Write('\u003cscript type="text/javascript"\u003ealert(decodeURIComponent("'+a.encode(i)+'"));window.location = decodeURIComponent("'+a.encode(x)+'");\u003c/script\u003e')};a.script_start='\u003cscript type="text/javascript"\u003e';a.script_start_server='\u003cscript language="jscript" runat="server"\u003e';a.script_end="\u003c/script\u003e";a.encode=function(i){return encodeURIComponent(i||"").replace(/\+/g,"%2B")};a.decode=function(i){return decodeURIComponent(i||"")};a.encodeHtml=function(x,i){if(i===false){return Server.HtmlEncode(x||"").replace(/'/g,"&#39;")}return(x||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/</g,"&lt;").replace(/>/g,"&gt;")};a.decodeHtml=function(y,x){if(!y){return""}var i=y.replace(/&amp;/g,"&");i=i.replace(/&gt;/g,">");i=i.replace(/&lt;/g,"<");i=i.replace(/&quot;/g,'"');if(x===false){return i.replace(/&#(\d+);/igm,function(z,A){return String.fromCharCode(A)})}return i.replace(/&#39;/g,"'")};a.formatdate=function(x,y){if(x===null||x===undefined){return""}if(y===undefined){return a.formatdate(new Date(),x)}if(Object.prototype.toString.call(x)!="[object Date]"){var z=typeof x;if(z=="string"){var i=a.date.parse(x);if(i){x=new Date(i.ticks)}else{x=Date.parse(x);if(!x){ExceptionManager.put(13398,"F.formatdate","date string format error, parse failed.");return""}}}else{if(z=="date"||z=="number"){x=new Date(x-0)}}}if(!x.getFullYear){return""}y=y.replace(/(yyyy|mmmm|mmm|mm|dddd|ddd|dd|hh|ss|tttt|m|d|h|s)/ig,function(A){switch(A){case"dddd":return w[0][x.getDay()];case"ddd":return w[1][x.getDay()];case"MMMM":return s[0][x.getMonth()];case"MMM":return s[1][x.getMonth()];case"yyyy":return x.getFullYear();case"M":return x.getMonth()+1;case"MM":return("0"+(x.getMonth()+1)).slice(-2);case"d":return x.getDate();case"dd":return("0"+x.getDate()).slice(-2);case"HH":return("0"+x.getHours()).slice(-2);case"h":return x.getHours();case"m":return x.getMinutes();case"mm":return("0"+x.getMinutes()).slice(-2);case"s":return x.getSeconds();case"ss":return("0"+x.getSeconds()).slice(-2);case"tttt":return x.getMilliseconds();default:return A}});return y};a.date=function(i){return new a.datetime(i||new Date())};a.date.timezone=new Date().getTimezoneOffset()/60;a.date.parse=function(C){if(typeof C=="string"){C=C.replace(/(\-|\s|\:|\.)0(\d)/ig,"$1$2");var z=/^(\d{4})\-(\d{1,2})\-(\d{1,2})( (\d{1,2})\:(\d{1,2})(\:(\d{1,2}))?(\.(\d{1,3}))?)?$/.exec(C);if(z){try{if(z[4]==""){C=new Date(parseInt(z[1]),parseInt(z[2])-1,parseInt(z[3]))}else{C=new Date(parseInt(z[1]),parseInt(z[2])-1,parseInt(z[3]),parseInt(z[5]),parseInt(z[6]),(z[7]==""?0:parseInt(z[8])),(z[9]==""?0:parseInt(z[10])))}}catch(x){ExceptionManager.put(x,"F.date.parse(string)");return null}}else{ExceptionManager.put(441,"F.date.parse(string)","argument format error.");return null}}var i=new Date(C-0);var B={ticks:i-0,year:i.getFullYear(),month:i.getMonth(),day:i.getDate(),hour:i.getHours(),minute:i.getMinutes(),second:i.getSeconds(),ms:i.getMilliseconds(),weekday:i.getDay()};B.yeardays=a.date.datediff("d",new Date(B.year,0,1),i)+1;B.season=(B.month-B.month%3)/3+1;var y=new Date(B.year,0,1);if(y.getDay()==0){B.weeks=(B.yeardays-B.yeardays%7)/7+(B.yeardays%7==0?0:1)}else{var A=B.yeardays-7+y.getDay();B.weeks=(A-A%7)/7+(A%7==0?0:1)+1}return B};a.date.datediff=function(i,y,z){var x=new Date(z-0)-new Date(y-0);switch(i){case"s":return(x-x%1000)/1000;case"m":return(x-x%60000)/60000;case"h":return(x-x%3600000)/3600000;case"d":return(x-x%86400000)/86400000;case"w":return(x-x%604800000)/604800000;case"M":return z.getFullYear()*12+z.getMonth()-y.getFullYear()*12-y.getMonth();case"y":return z.getFullYear()-y.getFullYear()}return x};a.date.dateadd=function(x,z,y){var i=a.date.parse(y);switch(x){case"ms":return new Date(i.ticks-z*-1);case"s":return new Date(i.ticks-z*-1000);case"m":return new Date(i.ticks-z*-60000);case"h":return new Date(i.ticks-z*-3600000);case"d":return new Date(i.ticks-z*-86400000);case"w":return new Date(i.ticks-z*-604800000);case"M":return new Date(i.year,i.month+z,i.day,i.hour,i.minute,i.second,i.ms);case"y":return new Date(i.year+z,i.month,i.day,i.hour,i.minute,i.second,i.ms)}return y};a.datetime=function(z){var x=a.date.parse(z);for(var y in x){if(!x.hasOwnProperty(y)){continue}this[y]=x[y]}};a.datetime.prototype.add=function(i,x){return a.date.call(this,a.date.dateadd(i,x,this.ticks))};a.datetime.prototype.diff=function(i,x){return a.date.datediff(i,x,this.ticks)};a.datetime.prototype.toString=function(i){if(i){return a.formatdate(this.ticks,i)}return(new Date(this.ticks)).toString()};a.untimespan=function(x,i){if(i===undefined){i="yyyy-MM-dd HH:mm:ss"}return a.formatdate(new Date(x*1000),i)};a.timespan=function(i){i=a.date.parse(i||new Date());return(i.ticks-(i.ticks%1000))/1000};a.each=function(y,x,z){if(typeof x!="function"){return}var i=new Enumerator(y);for(;!i.atEnd();i.moveNext()){if(x.apply(y,[i.item(),y,z])===false){break}}i=null};a.foreach=function(z,x,A){if(typeof x!="function"){return}for(var y in z){if(!z.hasOwnProperty(y)){continue}if(x.apply(z,[y,z[y],A])===false){break}}};a.safe=function(i){i=i||"";return i.replace(/('|"|\r|\n|(^[\s]+)|([\s]+$))/igm,"").replace(/>/igm,"&gt;").replace(/</igm,"&lt;")};a.cache={};a.cache.enabled=false;a.cache.write=function(i,x){if(!a.cache.enabled){return}Application.Lock();Application(i)=x;Application.UnLock()};a.cache.read=function(i){if(Application.Contents(i)!=undefined){return Application.Contents(i)}return null};a.cache.exists=function(i){return Application.Contents(i)!=undefined};a.cache.clear=function(x){if(x!=undefined&&(typeof x=="string")&&x.length>0){if(x.substr(x.length-1)=="."){var y=[];a.each(Application.Contents,function(z){if(z.length>x.length&&z.substr(0,x.length)==x){y.push(z)}});a.each(y,function(z){Application.Contents.Remove(z)});return y.length}Application.Contents.Remove(x);return}var i=[];a.each(Application.Contents,function(z){i.push(z)});a.each(i,function(z){Application.Contents.Remove(z)});return i.length};a.sortable={};a.sortable.data__=[];a.sortable.add=function(i){a.sortable.data__.push(i)};a.sortable.clear=function(){while(a.sortable.data__.length>0){a.sortable.data__.pop()}};a.sortable.sort=function(i){if(i==undefined){i=true}a.sortable.data__=a.sortable.data__.sort(function(x,y){if(x>y==i){return 1}if(x==y){return 0}if(x<y==i){return -1}})};a.sortable.join=function(i){return a.sortable.data__.join(i||"")};a.timer={};a.timer.start=null;a.timer.end=null;a.timer.run=function(){this.start=+new Date();return this.start};a.timer.stop=function(i){this.end=+new Date();return this.end-(i||this.start)};a.replace=function(A,z,x){if(typeof z=="object"){return A.replace(z,x)}var y="",i="";while(A.indexOf(z)>=0){i=A.substr(0,A.indexOf(z)+z.length);if(i.length<A.length){A=A.substr(i.length)}else{A=""}y+=i.replace(z,x)}return y+A};a.string={};a.string.left=function(x,i){x=x||"";if(typeof i=="number"){return x.slice(0,i)}if(typeof i=="string"){if(x.indexOf(i)<0){return x}return x.substr(0,x.indexOf(i))}return x};a.string.right=function(x,i){x=x||"";if(typeof i=="number"){return x.slice(-i)}if(typeof i=="string"){if(x.indexOf(i)<0){return x}return x.substr(x.lastIndexOf(i)+i.length)}return x};a.string.startWith=a.string.startsWith=function(x,i){return x.indexOf(i)===0};a.string.endWith=a.string.endsWith=function(y,x){var i=y.length-x.length;return i>=0&&y.lastIndexOf(x)===i};a.string.trim=function(x,i){return a.string.trimLeft(a.string.trimRight(x,i),i)};a.string.trimLeft=function(x,i){if(x==""){return""}if(i===undefined){return x.replace(/^(\s+)/ig,"")}if(a.string.startWith(x,i)){if(x==i){return""}return a.string.trimLeft(x.substr(i.length),i)}return x};a.string.trimRight=function(x,i){if(x==""){return""}if(i===undefined){return x.replace(/(\s+)$/ig,"")}if(a.string.endWith(x,i)){if(x==i){return""}return a.string.trimRight(x.substr(0,x.length-i.length),i)}return x};a.string.format=function(){return a.format.apply(a,arguments)};a.string.email=function(i){return a.string.exp(i,/^([\w\.\-]+)@([\w\.\-]+)$/)};a.string.url=function(i){return a.string.exp(i,/^http(s)?\:\/\/(.+?)$/i)};a.string.test=function(y,i,x){i=a.string.exp_(i,x);if(i==null){return false}return i.test(y)};a.string.replace=function(z,i,x,y){if(arguments.length==3){y=x;x=""}z=z||"";if(typeof i!="object"){i=i+"";i=a.string.exp_(i,x)||i}return z.replace(i,y)};a.string.matches=function(C,i,y,x){var z=null;if(typeof y=="function"){if(x){z=x}x=y;y=""}i=a.string.exp_(i,y);if(i==null){return null}if(!i.global){return i.exec(C)}var B=[],A=i.exec(C);while(A){if(typeof x=="function"){x.apply(z||A,A)}else{B.push(A)}A=i.exec(C)}return B};a.string.exp=function(y,i,x){if(typeof i!="object"){if(typeof i!=="string"){return""}i=a.string.exp_(i,x);if(i==null){return""}}y=y||"";return(i.test(y)?y:"")};a.string.exp_=function(x,y){if(typeof x=="object"){return x}y=y||"";if(!/^\/(.+)\/([igm]*)$/.test(x)){x="/"+x+"/"+y}try{return(new Function("return "+x+";"))()}catch(i){ExceptionManager.put(i,"F.string.exp_");return null}return x};a.string.fromBinary=function(i,y){var x,z=a.activex("ADODB.STREAM",function(){this.Mode=3;this.Type=1});z.Open();z.Write(i);z.Position=0;z.Type=2;z.CharSet=y||"utf-8";x=z.ReadText();z.Close();z=null;return x};a.string.getByteArray=function(B){if(B==""){return[]}var z=a.encode(B);var y=[],x=z.length;for(var A=0;A<x;A++){if(z.substr(A,1)=="%"){y.push(parseInt(z.substr(A+1,2),16));A+=2}else{y.push(z.charCodeAt(A))}}return y};a.string.fromByteArray=function(z){var B="",y=z.length,x=0;if(z.constructor!=Array||y<=0){return""}for(var A=0;A<y;A++){x=z[A];if(x<=0){break}B+="%"+x.toString(16)}return a.decode(B)};a.object={};a.object.sort=function(C,z){a.sortable.data__=a.object.keys(C);a.sortable.sort(z);var B={},x=a.sortable.data__,y=x.length;for(var A=0;A<y;A++){B[x[A]]=C[x[A]]}return B};a.object.keys=function(z){var y=[];for(var x in z){if(!z.hasOwnProperty(x)){continue}y.push(x)}return y};a.object.values=function(z){var y=[];for(var x in z){if(!z.hasOwnProperty(x)){continue}y.push(z[x])}return y};a.object.toArray=function(A,y,B){var z=[];y=y||"key";B=B||"value";for(var x in A){if(!A.hasOwnProperty(x)){continue}z.push((function(C,i,E){var D=new Object();D[i]=C;D[E]=A[C];return D})(x,y,B))}return z};a.object.toURIString=function(D,x){x=x||"utf-8";var z=x=="utf-8"?a.encode:escape;if(a.object.toURIString.fn==0){z=function(i){return i}}var C="";for(var A in D){if(!D.hasOwnProperty(A)){continue}var y=true;for(var B=0;B<a.object.toURIString.filter.length;B++){if(a.object.toURIString.filter[B].substr(0,1)=="!"&&A==a.object.toURIString.filter[B].substr(1)){y=false}if(a.object.toURIString.filter[B].substr(0,1)=="@"&&!a.string.startWith(A,a.object.toURIString.filter[B].substr(1))){y=false}if(!y){break}}if(y){C+=z(A)+a.object.toURIString.split_char_1+z(D[A])+a.object.toURIString.split_char_2}}if(C!=""){C=C.substr(0,C.length-1)}return C};a.object.fromURIString=function(A){var z={};var B=A.split(a.object.toURIString.split_char_2),x=B.length;for(var y=0;y<x;y++){if(B[y].indexOf(a.object.toURIString.split_char_1)>0){z[a.decode(B[y].substr(0,B[y].indexOf(a.object.toURIString.split_char_1)))]=a.decode(a.string.trimLeft(B[y].substr(B[y].indexOf(a.object.toURIString.split_char_1)),a.object.toURIString.split_char_1))}}return z};a.object.toURIString.split_char_1="=";a.object.toURIString.split_char_2="&";a.object.toURIString.filter=[];a.object.toURIString.clearFilter=function(){while(a.object.toURIString.filter.length>0){a.object.toURIString.filter.pop()}};a.object.toURIString.fn=1;a.dbl=function(x,i){if(x==""){return(i===undefined?0:i)}if(isNaN(x)){return(i===undefined?0:i)}return parseFloat(x)};a.bool=function(x,i){if(x==null){return !!(i||false)}if(typeof x=="number"){return x!=0}if(typeof x=="boolean"){return x}if(typeof x!="string"){return false}if(x==""){return !!(i||false)}return(x.toLowerCase()==="true"?true:false)};a["int"]=function(y,i,x){if(x!==true){x=false}y=String(y).replace(/\s/igm,"");if(y==""){return(i===undefined?0:i)}if(!x){if(isNaN(y)){return(i===undefined?0:i)}return parseInt(y)}else{if(!/^([\d\,]+)$/.test(y)){return[]}return y.split(",")}};a.md5=function(x){var i=v("md5");if(!i){return""}return i.md5(x)};a.md5_bytes=function(x){var i=v("md5");if(!i){return""}return i.md5_bytes(x)};a.delgate=function(){try{var i,x=(i=Array.prototype.slice.apply(arguments)).pop();return new Function(i,x)}catch(y){ExceptionManager.put(y.number,"F.func",y.description+" function body [ "+x+" ]")}};var u=function(){if(!k){h={};j={};var i,x;a.each(Request.Form,function(y){h[y]=String(this(y));j[y.toUpperCase()]=y;if(y.slice(-2)=="[]"){delete h[y];i=y.slice(0,-2);h[i]=[];j[i.toUpperCase()]=i;x=new Enumerator(this(y));for(;!x.atEnd();x.moveNext()){h[i].push(x.item())}}});k=true}};var t=["get","post","session","all"],g=t.length;for(var p=0;p<g;p++){(function(i){a[i].exp=function(y,x,z){return a.string.exp(a[i](y),x,z)};a[i].email=function(x){return a.string.email(a[i].safe(x))};a[i].url=function(x){return a.string.url(a[i].safe(x))};a[i].safe=function(x,y){if(y!==undefined){return a.safe(a[i](x)).substr(0,y)}return a.safe(a[i](x))};a[i].intList=function(y,x){return a[i]["int"](y,x,true)};if(i!="all"){a[i]["int"]=function(z,x,y){return a["int"](a[i](z),x,y)};a[i].dbl=function(y,x){return a.dbl(a[i](y),x)};a[i].bool=function(y,x){return a.bool(a[i](y),x)}}})(t[p])}t=["int","dbl","bool"];g=t.length;for(var p=0;p<g;p++){(function(i){a.all[i]=function(z,x,y){if(a.get.exists(z)){return a.get[i](z,x,y)}u();if(a.post.exists(z)){return a.post[i](z,x,y)}return x||(i=="bool"?false:0)}})(t[p])}a.post.remove=function(i){u();if(j.hasOwnProperty(i.toUpperCase())){delete h[j[i.toUpperCase()]];delete j[i.toUpperCase()]}};a.get.remove=function(i){delete e[i]};a.post.clear=function(){u();h={};j={}};a.get.clear=function(){e={}};a.post.exists=function(i){u();return j.hasOwnProperty(i.toUpperCase())};a.get.exists=function(i){return e[i]!=undefined};a.all.exists=function(i){u();return a.get.exists(i)||a.post.exists(i)};a.session.exists=function(i){if(i==undefined){return false}if(Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG){i=Mo.Config.Global.MO_APP_NAME+"_"+i}if(Session.Contents(i)!=undefined){return true}return false};a.session.destroy=function(i){if(i===true){Session.Abandon();return}if(i==undefined){Session.Contents.RemoveAll();return}if(Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG){i=Mo.Config.Global.MO_APP_NAME+"_"+i}if(Session.Contents(i)!=undefined){Session.Contents.Remove(i);return}};a.session.clear=function(){Session.Contents.RemoveAll()};a.session.parse=function(i){var x={};a.each(Session.Contents,function(z){var y=z;if(Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG){y=a.string.trimLeft(z,Mo.Config.Global.MO_APP_NAME+"_")}if(a.string.startWith(y,i+".")){x[y.substr(i.length+1)]=Session.Contents(z)}});return x};a.get.keys=function(){return a.object.keys(e)};a.post.keys=function(){u();return a.object.keys(h)};a.get.values=function(){return a.object.values(e)};a.post.values=function(){u();return a.object.values(h)};a.get.fromURIString=function(z){var A=z.split(a.object.toURIString.split_char_2),x=A.length;for(var y=0;y<x;y++){if(A[y].indexOf(a.object.toURIString.split_char_1)>0){e[a.decode(A[y].substr(0,A[y].indexOf(a.object.toURIString.split_char_1)))]=a.decode(a.string.trimLeft(A[y].substr(A[y].indexOf(a.object.toURIString.split_char_1)),a.object.toURIString.split_char_1))}}};a.post.fromURIString=function(A){u();var B=A.split(a.object.toURIString.split_char_2),x=B.length;for(var y=0;y<x;y++){if(B[y].indexOf(a.object.toURIString.split_char_1)>0){var z=a.decode(B[y].substr(0,B[y].indexOf(a.object.toURIString.split_char_1))),C=a.decode(a.string.trimLeft(B[y].substr(B[y].indexOf(a.object.toURIString.split_char_1)),a.object.toURIString.split_char_1));h[z]=C;j[z.toUpperCase()]=z}}};a.get.toURIString=function(i){return a.object.toURIString(e,i||"utf-8")};a.post.toURIString=function(i){u();return a.object.toURIString(h,i||"utf-8")};a.server.toURIString=function(i){return a.object.toURIString(m,i||"utf-8")};a.session.toURIString=function(i){i=i||"utf-8";var x=i=="utf-8"?a.encode:escape;var y="";a.each(Session.Contents,function(A){var z=A;if(Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG){z=a.string.trimLeft(A,Mo.Config.Global.MO_APP_NAME+"_")}y+=x(z)+"="+x(Session.Contents(A))+"&"});if(y!=""){y=y.substr(0,y.length-1)}return y};a.get.sort=function(i){e=a.object.sort(e,i)};a.post.sort=function(i){u();h=a.object.sort(h,i)};a.activex.connection=function(){return a.activex("ADODB.CONNECTION")};a.activex.recordset=function(){return a.activex("ADODB.RECORDSET")};a.activex.stream=function(){return a.activex("ADODB.STREAM")};a.activex.dictionary=function(){return a.activex("SCRIPTING.DICTIONARY")};a.activex.document=function(){return a.activex("MSXML2.DOMDocument")};a.activex.httprequest=function(){var x=null;var z=["MSXML2.serverXMLHttp.3.0","MSXML2.serverXMLHttp","MSXML2.XMLHttp.3.0","MSXML2.XMLHttp","Microsoft.XMLHttp"];for(var A=0;A<=z.length-1;A++){try{x=new ActiveXObject(z[A]);(function(i){a.activex.httprequest=function(){return new ActiveXObject(i)}})(z[A]);return x}catch(y){}}if(x==null){ExceptionManager.put(424,"F.activex.httprequest","can not load httprequest object.")}return x};a.random.initialize=function(A,y){if(A.length<=0){return""}if(isNaN(y)){ExceptionManager.put(425,"F.random.initialize","argument 'length' must be a number.");return""}y=parseInt(y);var z="";for(var x=0;x<y;x++){z+=A.substr(a.random(0,A.length-1),1)}return z};a.foreach({number:"123456789012345678901234567890",letter:"abcdefghiIJKLMNOPQRSTUVWXYZjklmnopqrstuvwxyzABCDEFGH",hex:"123456789012345678901234567890ABCDEFABCDEFABCDEFABCDEFABCDEF",word:"abcdefghiIJKLMNOPQRSTUVWXYZjklmnopqrstuvwxyzABCDEFGH12345678906789012678901234534567890126789012345345",mix:"~!@#$%^&*()_+=-[]{}:'<>/?\\,.|`abcdefghiIJKLMNOPQRSTUVWXYZjklmnopqrstuvwxyzABCDEFGH6789012678901234534567890126789012345345"},function(x,y){a.random[x]=function(i){return a.random.initialize(y,i)}});a.timer.ticks=a.timer.stop;q();Mo.on("dispose",a.dispose);r.exports=a})(modules.exports,require,modules,__filename,__dirname,define);module.exports.push(modules.exports);modules.exports={};(function(h,o,n,c,b,g){var l=[],m=[];for(var k=0;k<128;k++){m[k]=l[k]=k}l[128]=199;l[129]=252;l[130]=233;l[131]=226;l[132]=228;l[133]=224;l[134]=229;l[135]=231;l[136]=234;l[137]=235;l[138]=232;l[139]=239;l[140]=238;l[141]=236;l[142]=196;l[143]=197;l[144]=201;l[145]=230;l[146]=198;l[147]=244;l[148]=246;l[149]=242;l[150]=251;l[151]=249;l[152]=255;l[153]=214;l[154]=220;l[155]=162;l[156]=163;l[157]=165;l[158]=8359;l[159]=402;l[160]=225;l[161]=237;l[162]=243;l[163]=250;l[164]=241;l[165]=209;l[166]=170;l[167]=186;l[168]=191;l[169]=8976;l[170]=172;l[171]=189;l[172]=188;l[173]=161;l[174]=171;l[175]=187;l[176]=9617;l[177]=9618;l[178]=9619;l[179]=9474;l[180]=9508;l[181]=9569;l[182]=9570;l[183]=9558;l[184]=9557;l[185]=9571;l[186]=9553;l[187]=9559;l[188]=9565;l[189]=9564;l[190]=9563;l[191]=9488;l[192]=9492;l[193]=9524;l[194]=9516;l[195]=9500;l[196]=9472;l[197]=9532;l[198]=9566;l[199]=9567;l[200]=9562;l[201]=9556;l[202]=9577;l[203]=9574;l[204]=9568;l[205]=9552;l[206]=9580;l[207]=9575;l[208]=9576;l[209]=9572;l[210]=9573;l[211]=9561;l[212]=9560;l[213]=9554;l[214]=9555;l[215]=9579;l[216]=9578;l[217]=9496;l[218]=9484;l[219]=9608;l[220]=9604;l[221]=9612;l[222]=9616;l[223]=9600;l[224]=945;l[225]=223;l[226]=915;l[227]=960;l[228]=931;l[229]=963;l[230]=181;l[231]=964;l[232]=934;l[233]=920;l[234]=937;l[235]=948;l[236]=8734;l[237]=966;l[238]=949;l[239]=8745;l[240]=8801;l[241]=177;l[242]=8805;l[243]=8804;l[244]=8992;l[245]=8993;l[246]=247;l[247]=8776;l[248]=176;l[249]=8729;l[250]=183;l[251]=8730;l[252]=8319;l[253]=178;l[254]=9632;l[255]=160;m[199]=128;m[252]=129;m[233]=130;m[226]=131;m[228]=132;m[224]=133;m[229]=134;m[231]=135;m[234]=136;m[235]=137;m[232]=138;m[239]=139;m[238]=140;m[236]=141;m[196]=142;m[197]=143;m[201]=144;m[230]=145;m[198]=146;m[244]=147;m[246]=148;m[242]=149;m[251]=150;m[249]=151;m[255]=152;m[214]=153;m[220]=154;m[162]=155;m[163]=156;m[165]=157;m[8359]=158;m[402]=159;m[225]=160;m[237]=161;m[243]=162;m[250]=163;m[241]=164;m[209]=165;m[170]=166;m[186]=167;m[191]=168;m[8976]=169;m[172]=170;m[189]=171;m[188]=172;m[161]=173;m[171]=174;m[187]=175;m[9617]=176;m[9618]=177;m[9619]=178;m[9474]=179;m[9508]=180;m[9569]=181;m[9570]=182;m[9558]=183;m[9557]=184;m[9571]=185;m[9553]=186;m[9559]=187;m[9565]=188;m[9564]=189;m[9563]=190;m[9488]=191;m[9492]=192;m[9524]=193;m[9516]=194;m[9500]=195;m[9472]=196;m[9532]=197;m[9566]=198;m[9567]=199;m[9562]=200;m[9556]=201;m[9577]=202;m[9574]=203;m[9568]=204;m[9552]=205;m[9580]=206;m[9575]=207;m[9576]=208;m[9572]=209;m[9573]=210;m[9561]=211;m[9560]=212;m[9554]=213;m[9555]=214;m[9579]=215;m[9578]=216;m[9496]=217;m[9484]=218;m[9608]=219;m[9604]=220;m[9612]=221;m[9616]=222;m[9600]=223;m[945]=224;m[223]=225;m[915]=226;m[960]=227;m[931]=228;m[963]=229;m[181]=230;m[964]=231;m[934]=232;m[920]=233;m[937]=234;m[948]=235;m[8734]=236;m[966]=237;m[949]=238;m[8745]=239;m[8801]=240;m[177]=241;m[8805]=242;m[8804]=243;m[8992]=244;m[8993]=245;m[247]=246;m[8776]=247;m[176]=248;m[8729]=249;m[183]=250;m[8730]=251;m[8319]=252;m[178]=253;m[9632]=254;m[160]=255;var f=function(s){var x="";var u=0;var v=s.length;var t,w=[];for(;u<v;++u){if(s[u]>=128){w[u]=l[s[u]]}else{w[u]=s[u]}}return String.fromCharCode.apply(null,w)};var r=function(w){var s=[];var u=0;var v=w.length;var t;for(;u<v;++u){s.push(m[w.charCodeAt(u)])}return s};var q=function(w){var s="";var u=0;var v=w.length;var t;for(;u<v;++u){s+=String.fromCharCode(m[w.charCodeAt(u)])}return s};var d=function(w){var v="";var t=0;var u=w.length;var s;for(;t<u;++t){v+=String.fromCharCode(l[w.charCodeAt(t)])}return v};var a=(function(){var i={};i.filesize=0;i.is=function(s){if(s.length<2){return false}return s.substr(1,1)==":"};i.fso=new ActiveXObject("scripting.filesystemobject");i.stream=function(s,u){var t=F.activex("adodb.stream");t.mode=s||3;t.type=u||1;return t};i.fps=[];i.get_filesize=function(s){return i.fps[s][3]};i.absolute=function(s){s=F.mappath(s);return i.fso.GetAbsolutePathName(s)};i.base=function(s){s=F.mappath(s);return i.fso.GetBaseName(s)};i.parent=function(s){return i.fso.GetParentFolderName(F.mappath(s))};i.build=function(t,s){return i.fso.GetAbsolutePathName(i.fso.BuildPath(F.mappath(t),s))};i.get=function(s){s=F.mappath(s);var t=null;if(i.file.exists(s)){t=i.fso.getFile(s)}else{if(i.directory.exists(s)){t=i.fso.getFolder(s)}}if(t==null){ExceptionManager.put(11550,"io.get","file or directory is not exists.");return{}}return{attr:t.Attributes,toString:function(){return i.attr.toString(t.Attributes)},date:{created:t.DateCreated,accessed:t.DateLastAccessed,modified:t.DateLastModified},name:t.Name,path:t.Path,size:t.Size,type:t.Type,src:t}};i.attr=function(u,s){var t=i.get(u);if(!t.hasOwnProperty("src")){return -1}if(s!==undefined){if(s&8||s&16||s&64||s&128){ExceptionManager.put(11533,"io.attr","attributes value error.");return -1}return t.src.Attributes=s}else{return t.src.Attributes}};i.attr.add=function(u,s){var t=i.get(u);if(!t.hasOwnProperty("src")){return -1}if(!(t.src.Attributes&s)){return t.src.Attributes|=s}return -1};i.attr.remove=function(u,s){var t=i.get(u);if(!t.hasOwnProperty("src")){return -1}if(t.src.Attributes&s){return t.src.Attributes^=s}return -1};i.attr.toString=function(s){var t="";if(s>0){for(var u in i.attrs){if(!i.attrs.hasOwnProperty(u)){continue}if(s&i.attrs[u]){t+=u+", "}}if(t!=""){t=t.substr(0,t.length-2)}}else{t="Normal"}return t};return i})();a.file=a.file||(function(){var i={};var s=function(u,t){i.write(u,t);var v=i.flush(u)===true;i.close(u);return v};i.get=function(t){var u=null;t=F.mappath(t);if(a.fso.fileexists(t)){u=a.fso.getFile(t)}else{ExceptionManager.put(11550,"io.file.get","file is not exists.")}return u};i.exists=function(t){t=F.mappath(t);return a.fso.fileexists(t)};i.del=function(u){if(!i.exists(u)){return true}try{a.fso.deletefile(F.mappath(u));return true}catch(t){ExceptionManager.put(t,"io.file.del");return false}};i.copy=function(v,t){try{a.fso.CopyFile(v,t)}catch(u){ExceptionManager.put(u,"io.file.copy");return false}};i.move=function(v,t){try{a.fso.MoveFile(v,t)}catch(u){ExceptionManager.put(u,"io.file.move");return false}};i.readAllText=function(w,u){var v=a.file.open(w,{forText:true,forRead:true,encoding:u||"utf-8"});var t=a.file.read(v);a.file.close(v);return t};i.readAllBuffer=function(v){var u=a.file.open(v,{forText:true,forRead:true,encoding:"437"});var t=a.file.read(u);a.file.close(u);return r(t)};i.readAllTextBinary=function(v){var u=a.file.open(v,{forText:true,forRead:true,encoding:"437"});var t=a.file.read(u);a.file.close(u);return q(t)};i.readAllScript=function(w,u){var v=a.file.open(w,{forText:true,forRead:true,encoding:u||"utf-8"});var t=a.file.read(v);a.file.close(v);return t.replace(new RegExp("^(\\s*)<script(.+?)>(\\s*)","i"),"").replace(new RegExp("(\\s*)<\\/script>(\\s*)$","i"),"")};i.readAllBytes=function(v){var u=a.file.open(v,{forText:false,forRead:true});var t=a.file.read(u);a.file.close(u);return t};i.writeAllBytes=function(u,t){return s(i.open(u,{forText:false}),t)};i.writeAllText=function(v,t,u){return s(i.open(v,{encoding:u||"utf-8"}),t)};i.writeAllBuffer=function(u,t){return s(i.open(u,{encoding:"437"}),f(t))};i.appendAllBytes=function(u,t){return s(i.open(u,{forText:false,forAppend:true}),t)};i.appendAllText=function(v,t,u){return s(i.open(v,{encoding:u||"utf-8",forAppend:true}),t)};i.open=function(w,v){a.filesize=0;w=F.mappath(w);var t={forAppend:false,forText:true,forRead:false,encoding:"utf-8"};F.extend(t,v||{});var u=a.stream(3,t.forText?2:1);if(t.forText){u.charset=t.encoding}u.open();if(i.exists(w)&&(t.forAppend||t.forRead)){u.loadfromfile(w);a.filesize=u.size;if(t.forAppend){u.position=u.size}}a.fps.push([u,w,t,a.filesize]);return a.fps.length-1};i.seek=function(t,u){if(!a.fps[t]){ExceptionManager.put(11566,"io.file.seek","file resource id is invalid.");return}a.fps[t][0].position=u};i.write=function(v,t){if(!a.fps[v]){ExceptionManager.put(11582,"io.file.write","file resource id is invalid.");return}try{if(a.fps[v][2].forText){a.fps[v][0].writeText(t)}else{a.fps[v][0].write(t)}}catch(u){ExceptionManager.put(u,"io.file.write")}};i.writeTo=function(t,u,v){if(v){a.fps[t][0].CopyTo(a.fps[u][0],v)}else{a.fps[t][0].CopyTo(a.fps[u][0])}};i.writeToResponse=function(v,u){var x=a.fps[v][0],w=0,t=u||524288;w=0;if(t>=x.size){Response.BinaryWrite(x.Read(x.size))}else{while(w<x.size){if(w+t>x.size){t=x.size-w}Response.BinaryWrite(x.read(t));w+=t}}};i.writeBuffer=function(u,t){return i.write(u,f(t))};i.read=function(t,u){if(!a.fps[t]){ExceptionManager.put(11598,"io.file.read","file resource id is invalid.");return null}if(a.fps[t][2].forText){if(u){return a.fps[t][0].readText(u)}return a.fps[t][0].readText()}else{if(u){return a.fps[t][0].read(u)}return a.fps[t][0].read()}};i.readBuffer=function(t,u){return r(i.read(t,u))};i.flush=function(u){if(!a.fps[u]){ExceptionManager.put(11614,"io.file.flush","file resource id is invalid.");return}u=a.fps[u];try{u[0].flush();u[0].saveToFile(u[2].saveas||u[1],2);return true}catch(t){ExceptionManager.put(t,"io.file.flush['"+F.string.right(u[1],"\\")+"']")}};i.close=function(t){if(!a.fps[t]){ExceptionManager.put(11630,"io.file.close","file resource id is invalid.");return}a.fps[t][0].close()};i.extension=function(t){return a.fso.GetExtensionName(F.mappath(t))};return i})();a.directory=a.directory||(function(){var i={};i.get=function(s){var t=null;if(a.fso.folderexists(s)){t=a.fso.getFolder(s)}else{ExceptionManager.put(11550,"io.directory.get","directory is not exists.")}return t};i.exists=function(s){s=F.mappath(s);return a.fso.folderexists(s)};i.del=function(t){if(!i.exists(t)){return true}try{a.fso.deletefolder(F.mappath(t));return true}catch(s){ExceptionManager.put(s,"io.directory.del");return false}};i.copy=function(u,s){try{a.fso.CopyFolder(u,s)}catch(t){ExceptionManager.put(t,"io.directory.copy");return false}};i.move=function(u,s){try{a.fso.MoveFolder(u,s)}catch(t){ExceptionManager.put(t,"io.directory.move");return false}};i.create=function(u){u=F.mappath(u);if(i.exists(u)){return true}var t=a.fso.GetParentFolderName(u);if(!i.exists(t)){i.create(t)}try{a.fso.CreateFolder(u);return true}catch(s){ExceptionManager.put(s,"io.directory.create");return false}};i.clear=function(v,t){v=F.mappath(v);var u=(typeof t=="function");if(!i.exists(v)){return false}try{i.files(v,function(w){if(u){if(t(w,true)!==false){w.Delete()}}else{w.Delete()}});i.directories(v,function(w){if(u){if(t(w,false)!==false){w.Delete()}}else{w.Delete()}});return true}catch(s){ExceptionManager.put(s,"io.directory.clear");return false}};i.files=function(w,s){if(!i.exists(w)){return[]}var u=[];w=F.mappath(w);var t=new Enumerator(a.fso.getFolder(w).files);var v=(typeof s=="function");for(;!t.atEnd();t.moveNext()){if(v){s(t.item())}else{u.push(t.item().path)}}return u};i.directories=function(w,s){if(!i.exists(w)){return[]}var u=[];w=F.mappath(w);var t=new Enumerator(a.fso.getFolder(w).subfolders);var v=(typeof s=="function");for(;!t.atEnd();t.moveNext()){if(v){s(t.item())}else{u.push(t.item().path)}}return u};i.windows=a.fso.GetSpecialFolder(0);i.system=a.fso.GetSpecialFolder(1);i.temp=a.fso.GetSpecialFolder(2);return i})();function j(i){if(i.IsReady){return{space:{available:i.AvailableSpace,free:i.FreeSpace,total:i.TotalSize},letter:i.DriveLetter,type:i.DriveType,typeString:a.drive.types[i.DriveType]||"Unknown",fileSystem:i.FileSystem,isReady:i.IsReady,path:i.Path,sn:(i.SerialNumber<0?(i.SerialNumber+4294967296):i.SerialNumber).toString(16),volumename:i.VolumeName}}else{return{letter:i.DriveLetter,type:i.DriveType,typeString:a.drive.types[i.DriveType]||"Unknown",isReady:i.IsReady,path:i.Path}}}a.drive=a.drive||function(i){return j(a.fso.GetDrive(a.fso.GetDriveName(F.mappath(i))))};a.drive.drives=function(i,u){var s=a.fso.Drives,t=new Enumerator(a.fso.Drives);for(;!t.atEnd();t.moveNext()){i(u===true?t.item():j(t.item()))}t=null};a.drive.types=["Unknown","Removable","Fixed","Network","CDROM","RAM"];a.attrs={Normal:0,ReadOnly:1,Hidden:2,System:4,Volume:8,Directory:16,Archive:32,Alias:64,Compressed:128};a.directory.attr=a.file.attr=a.attr;a.directory.base=a.file.base=a.base;a.directory.absolute=a.file.absolute=a.absolute;a.directory.parent=a.file.parent=a.parent;a.binary2buffer=function(i){return F.activex("ADODB.STREAM",function(t){var s;this.Mode=3;this.Type=1;this.Open();this.Write(t);this.Position=0;this.Type=2;this.CharSet=437;s=this.ReadText();this.Close();return r(s)},i)};a.buffer2binary=function(i){return F.activex("ADODB.STREAM",function(t){var s;this.Mode=3;this.Type=2;this.CharSet=437;this.Open();this.WriteText(f(t));this.Position=0;this.Type=1;s=this.Read();this.Close();return s},i)};a.string2buffer=r;a.buffer2string=f;var p=null;function e(s,i){if(p){p.SetEOS();p.Position=0;p.Type=s||1;if(s==2){p.CharSet=i||437}return}p=a.stream(3,1);p.Open()}Mo.on("dispose",function(){if(p){p.Close()}p=null});a.buffer_read_bytes=function(s,i){e();if(s.EOS){return null}s.CopyTo(p,i);e(2);return r(p.ReadText(i))};a.buffer_read_byte=function(i){e();if(i.EOS){return -1}i.CopyTo(p,1);e(2);return r(p.ReadText(1))[0]};a.buffer_read_boolean=function(i){e();if(i.EOS){ExceptionManager.put(11557,"io.buffer_read_boolean","end of stream.");return null}i.CopyTo(p,1);e(2);return r(p.ReadText(1))[0]!=0};a.buffer_read_int=function(s){var i=a.buffer_read_bytes(s,4);if(!i){return -1}return(i[0]<<24>>>0)+(i[1]<<16)+(i[2]<<8)+i[3]};a.buffer_read_int=function(s){var i=a.buffer_read_bytes(s,4);if(!i){return -1}return(i[3]<<24>>>0)+(i[2]<<16)+(i[1]<<8)+i[0]};a.buffer_read_string=function(t,s,i){e();if(t.EOS){ExceptionManager.put(11557,"io.buffer_read_string","end of stream.");return""}t.CopyTo(p,s||-1);e(2,i||"utf-8");return p.ReadText()};n.exports=a})(modules.exports,require,modules,__filename,__dirname,define);module.exports.push(modules.exports);modules.exports={};(function(d,i,h,b,a,c){function e(){}e.extend=function(l,j){if(l&&typeof l=="object"){for(var k in l){if(!l.hasOwnProperty(k)){continue}if(typeof l[k]=="function"){this.prototype[k]=l[k]}}return}if(typeof j!="function"){ExceptionManager.put("0x5ca","IClass.extend(...)","argument 'fn' must be a function.");return}this.prototype[l]=j;return new g(j)};e.extend("__destruct",function(){});e.create=function(j,k){var l=this;var m=(function(n){return function(){l.call(this);this.__STATUS__=true;if(typeof n=="function"){this.__STATUS__=n.apply(this,arguments)!==false}}})(j);m.prototype=new l();m.extend=l.extend;m.AsPrivate=function(){this.__PRIVATE__=true;return this};if(typeof k=="function"){m.prototype.__destruct=k}return m};function g(j){this.fn=j;this.fn._data={}}g.prototype.AsPrivate=function(){this.fn.__PRIVATE__=true;return this};g.prototype.data=function(j,k){if(k===undefined){return this.fn_data[j]}this.fn._data[j]=k;return this};function f(){e.call(this)}f.prototype=new e();f.extend=function(m,k,j){if(m&&typeof m=="object"){for(var l in m){if(!m.hasOwnProperty(l)){continue}f.extend.call(this,l,m[l])}return}if(Mo.Config.Global.MO_ACTION_CASE_SENSITIVITY===false){m=m.toLowerCase()}if(k===true){m+="_Post_"}else{j=k}e.extend.call(this,m,j);return new g(j)};f.extend("assign",function(j,k){Mo.assign(j,k)}).AsPrivate();f.extend("invoke",function(k){var j=Array.prototype.slice.call(arguments,1);if(Mo.Config.Global.MO_ACTION_CASE_SENSITIVITY===false){k=k.toLowerCase()}if(!this[k]){MEM.put(15694,"IController.invoke","No method was found.");return}return this[k].apply(this,j)}).AsPrivate();f.extend("getAction",function(j){if(Mo.Config.Global.MO_ACTION_CASE_SENSITIVITY===false){j=j.toLowerCase()}return this[j]}).AsPrivate();f.extend("display",function(){Mo.display.apply(Mo,arguments)}).AsPrivate();f.extend("fetch",function(){return Mo.fetch.apply(Mo,arguments)}).AsPrivate();f.create=e.create;d.IController=f;d.IClass=e})(modules.exports,require,modules,__filename,__dirname,define);module.exports.push(modules.exports);modules.exports={};(function(exports,require,module,__filename,__dirname,define){(function(JSON){var rx_one=/^[\],:{}\s]*$/,rx_two=/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,rx_three=/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,rx_four=/(?:^|:|,)(?:\s*\[)+/g,rx_escapable=/[\\\"\u0000-\u001f\u007f-\u009f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,rx_dangerous=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;function js(str){var i,c,es=[],ret="",len=str.length,buffer=[];es[8]="b";es[9]="t";es[10]="n";es[12]="f";es[13]="r";es[34]='"';es[47]="/";es[92]="\\";for(i=0;i<len;i++){c=str.charCodeAt(i);if(es[c]!==undefined){buffer.push(92,c);continue}if(c>31&&c<127){buffer.push(c);continue}if(buffer.length>0){ret+=String.fromCharCode.apply(null,buffer);buffer.length=0}ret+="\\u"+("0000"+c.toString(16)).slice(-4)}if(buffer.length>0){ret+=String.fromCharCode.apply(null,buffer);buffer.length=0}return ret}function f(n){return n<10?"0"+n:n}function this_value(){return this.valueOf()}if(typeof Date.prototype.toJSON!=="function"){Date.prototype.toJSON=function(){return isFinite(this.valueOf())?this.getUTCFullYear()+"-"+f(this.getUTCMonth()+1)+"-"+f(this.getUTCDate())+"T"+f(this.getUTCHours())+":"+f(this.getUTCMinutes())+":"+f(this.getUTCSeconds())+"Z":null};Boolean.prototype.toJSON=this_value;Number.prototype.toJSON=this_value;String.prototype.toJSON=this_value}var gap,indent,meta,rep;function quote(string){rx_escapable.lastIndex=0;return rx_escapable.test(string)?'"'+string.replace(rx_escapable,function(a){var c=meta[a];return typeof c==="string"?c:"\\u"+("0000"+a.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+string+'"'}function str(key,holder){var i,k,v,length,mind=gap,partial,value=holder[key];if(value&&typeof value==="object"&&typeof value.toJSON==="function"){value=value.toJSON(key)}if(typeof rep==="function"){value=rep.call(holder,key,value)}switch(typeof value){case"string":return JSON.encode?'"'+js(value)+'"':quote(value);case"number":return isFinite(value)?String(value):"null";case"boolean":case"null":return String(value);case"object":if(!value){return"null"}gap+=indent;partial=[];if(Object.prototype.toString.apply(value)==="[object Array]"){length=value.length;for(i=0;i<length;i+=1){partial[i]=str(i,value)||"null"}v=partial.length===0?"[]":gap?"[\n"+gap+partial.join(",\n"+gap)+"\n"+mind+"]":"["+partial.join(",")+"]";gap=mind;return v}if(rep&&typeof rep==="object"){length=rep.length;for(i=0;i<length;i+=1){if(typeof rep[i]==="string"){k=rep[i];v=str(k,value);if(v){partial.push(quote(k)+(gap?": ":":")+v)}}}}else{for(k in value){if(Object.prototype.hasOwnProperty.call(value,k)){v=str(k,value);if(v){partial.push(quote(k)+(gap?": ":":")+v)}}}}v=partial.length===0?"{}":gap?"{\n"+gap+partial.join(",\n"+gap)+"\n"+mind+"}":"{"+partial.join(",")+"}";gap=mind;return v}}JSON.encode=false;JSON.encodeUnicode=function(value){JSON.encode=value!==false};if(typeof JSON.stringify!=="function"){meta={"\b":"\\b","\t":"\\t","\n":"\\n","\f":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"};JSON.stringify=function(value,replacer,space){var i;gap="";indent="";if(typeof space==="number"){for(i=0;i<space;i+=1){indent+=" "}}else{if(typeof space==="string"){indent=space}}rep=replacer;if(replacer&&typeof replacer!=="function"&&(typeof replacer!=="object"||typeof replacer.length!=="number")){throw new Error("JSON.stringify")}return str("",{"":value})}}if(typeof JSON.parse!=="function"){JSON.parse=function(text,reviver){var j;function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==="object"){for(k in value){if(Object.prototype.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v}else{delete value[k]}}}}return reviver.call(holder,key,value)}text=String(text);rx_dangerous.lastIndex=0;if(rx_dangerous.test(text)){text=text.replace(rx_dangerous,function(a){return"\\u"+("0000"+a.charCodeAt(0).toString(16)).slice(-4)})}if(rx_one.test(text.replace(rx_two,"@").replace(rx_three,"]").replace(rx_four,""))){j=eval("("+text+")");return typeof reviver==="function"?walk({"":j},""):j}throw new SyntaxError("JSON.parse")}}JSON.ARRAY=1;JSON.OBJECT=2;JSON.create=function(jsonType){if(JSON.class_){return new JSON.class_(jsonType)}JSON.class_=function(_jsonType){if(typeof _jsonType=="object"&&_jsonType.constructor==Array){this.jsonType=JSON.ARRAY;this.data=_jsonType}else{if(typeof _jsonType=="object"&&_jsonType.constructor==Object){this.jsonType=JSON.OBJECT;this.data=_jsonType}else{this.jsonType=(_jsonType!==JSON.ARRAY?JSON.OBJECT:JSON.ARRAY);this.data=(this.jsonType==JSON.ARRAY?[]:{})}}};JSON.class_.prototype.put=function(value){if(arguments.length==2){return JSON.class_.prototype.set.apply(this,arguments)}if(typeof value=="object"&&value.constructor==JSON.class_){this.data.push(value.data);return value}this.data.push(value);return this};JSON.class_.prototype.putArray=function(){var args=arguments,key=null;if(this.jsonType==JSON.OBJECT){key=(args=Array.prototype.slice.apply(arguments)).shift()}var object=(function(json,args){if(args.length==1&&typeof args[0]=="object"&&args[0].constructor==Array){json.data=args[0]}else{json.data=Array.prototype.slice.apply(args)}return json})(JSON.create(JSON.ARRAY),args);if(this.jsonType==JSON.OBJECT){return this.put(key,object)}else{return this.put(object)}};JSON.class_.prototype.putObject=function(){var args=arguments,key=null;if(this.jsonType==JSON.OBJECT){key=(args=Array.prototype.slice.apply(arguments)).shift()}var object=(function(json,args){if(args.length>0){json.data=args[0]}return json})(JSON.create(),args);if(this.jsonType==JSON.OBJECT){return this.put(key,object)}else{return this.put(object)}};JSON.class_.prototype.set=function(key,value){if(typeof value=="object"&&value.constructor==JSON.class_){this.data[key]=value.data;return value}this.data[key]=value;return this};JSON.class_.prototype.get=function(key){return this.data[key]};JSON.class_.prototype.stringify=JSON.class_.prototype.toString=function(space){return JSON.stringify(this.data,null,space||"")};JSON.class_.prototype.toXML=function(rootElementName){rootElementName=rootElementName||"root";return json2xml(this.data,rootElementName)};return new JSON.class_(jsonType)}}(module.exports))})(modules.exports,require,modules,__filename,__dirname,define);module.exports.push(modules.exports);
+﻿module.exports=[];
+var modules = {exports : {}};
+modules.exports = {};
+(function(exports,require,module,__filename,__dirname,define){
+/*
+** File: fns.js
+** Usage: define many method for MAE, such as post, get, server and so on...
+** About: 
+**		support@mae.im
+*/
+var ws = [
+	["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+	["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+];
+var ms = [
+	["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", ""],
+	["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", ""]
+];
+var DIFF = function(diff){
+	var dt = this;
+	switch(diff){
+		case "dddd" : return ws[0][dt.getDay()];
+		case "ddd" : return ws[1][dt.getDay()];
+		case "MMMM" : return ms[0][dt.getMonth()];
+		case "MMM" : return ms[1][dt.getMonth()];
+		case "yyyy" : return dt.getFullYear();
+		case "M" : return dt.getMonth() + 1;
+		case "MM" : return ('0' + (dt.getMonth() + 1)).slice(-2);
+		case "d" : return dt.getDate();
+		case "dd" : return ('0' + dt.getDate()).slice(-2);
+		case "HH" : return ('0' + dt.getHours()).slice(-2);
+		case "h" : return dt.getHours();
+		case "m" : return dt.getMinutes();
+		case "mm" : return ('0' + dt.getMinutes()).slice(-2);
+		case "s" : return dt.getSeconds();
+		case "ss" : return ('0' + dt.getSeconds()).slice(-2);
+		case "tttt" : return dt.getMilliseconds();
+		default : return diff;
+	}
+};
+var DIFF_UTC = function(diff){
+	var dt = this;
+	switch(diff){
+		case "dddd" : return ws[0][dt.getUTCDay()];
+		case "ddd" : return ws[1][dt.getUTCDay()];
+		case "MMMM" : return ms[0][dt.getUTCMonth()];
+		case "MMM" : return ms[1][dt.getUTCMonth()];
+		case "yyyy" : return dt.getUTCFullYear();
+		case "M" : return dt.getUTCMonth() + 1;
+		case "MM" : return ('0' + (dt.getUTCMonth() + 1)).slice(-2);
+		case "d" : return dt.getDate();
+		case "dd" : return ('0' + dt.getUTCDate()).slice(-2);
+		case "HH" : return ('0' + dt.getUTCHours()).slice(-2);
+		case "h" : return dt.getUTCHours();
+		case "m" : return dt.getUTCMinutes();
+		case "mm" : return ('0' + dt.getUTCMinutes()).slice(-2);
+		case "s" : return dt.getUTCSeconds();
+		case "ss" : return ('0' + dt.getUTCSeconds()).slice(-2);
+		case "tttt" : return dt.getUTCMilliseconds();
+		default : return diff;
+	}
+};
+var _post_ = null,
+	_get_ = {},
+	_server_ = {},
+	_activex_ = [],
+	_postinited_ = false,
+	_required_ = {},
+	_included_ = {},
+	_post_map_ = null;
+var init = function() {
+	var e = new Enumerator(Request.QueryString), q, v, ex, cname;
+	for (; !e.atEnd(); e.moveNext()) {
+		q = e.item(); v = String(Request.QueryString(q)); v && (_get_[q] = v);
+		if(q.slice(-2)=="[]"){
+			delete _get_[q];
+			cname = q.slice(0,-2);
+			_get_[cname]=[];
+			ex = new Enumerator(Request.QueryString(q));
+			for (; !ex.atEnd(); ex.moveNext()) {
+				_get_[cname].push(ex.item());
+			}
+		}
+	}
+	
+	e = new Enumerator(Request.ServerVariables);
+	for (; !e.atEnd(); e.moveNext()) {
+		q = e.item(); v = String(Request.ServerVariables(q));
+		if (q == "URL" && v.indexOf("?") > 0) v = v.substr(0, v.indexOf("?"));
+		_server_[q] = v;
+	}
+};
+var _ = {};
+_.TEXT = {
+	BR: 1,
+	NL: 2,
+	BIN: 4,
+	NLBR: 1 | 2,
+	FILE: 8
+};
+_.has = function(obj, key) {
+	return obj.hasOwnProperty(key);
+};
+_.toString = function() {
+	return "v1";
+};
+_.extend = function(src) {
+	if (arguments.length < 1) return {};
+	if (arguments.length < 2) return src;
+	for (var i = 1; i < arguments.length; i++) {
+		for (var c in arguments[i]) {
+			if (arguments[i].hasOwnProperty(c)) src[c] = arguments[i][c];
+		}
+	}
+	return src;
+};
+_.dispose = function(obj) {
+	if (obj != undefined) {
+		obj = null;
+		return;
+	}
+	while (_activex_.length > 0) {
+		_.dispose(_activex_.pop());
+	}
+};
+_.random = function(minValue, maxValue) {
+	if (minValue === undefined && maxValue === undefined) return Math.random();
+	if (maxValue === undefined) {
+		maxValue = minValue;
+		minValue = 1;
+	}
+	return parseInt(Math.random() * (maxValue - minValue + 1)) + minValue;
+};
+_.guid = function(format) {
+	format = format || "D";
+	var typelib = _.activex("scriptlet.typelib");
+	var returnValue = typelib.Guid.replace(/^\{(.+?)\}([\s\S]*)$/i,"$1");
+	switch (format.toUpperCase()) {
+	case "B":
+		return "{"+returnValue+"}";
+	case "P":
+		return "("+returnValue+")";
+	case "N":
+		return returnValue.replace(/([^0-9a-z]+)/igm, "");
+	default:
+		return returnValue
+	}
+	return returnValue;
+};
+_.mappath = function(path) {
+	if (path.substr(1,1) == ":") return path;
+	return Server.MapPath(path);
+};
+_.activex = function(classid, fn) {
+	var $o = null, returnValue;
+	try {
+		$o = Server.CreateObject(classid);
+		_activex_.push($o);
+	} catch (ex) {
+		return null;
+	}
+	if (typeof fn == "function"){
+		returnValue = fn.apply($o, [].slice.apply(arguments).slice(2));
+		if(returnValue!==undefined)return returnValue;
+	}
+	return $o;
+};
+_.activex.enabled = function(classid) {
+	try {
+		Server.CreateObject(classid);
+		return true;
+	} catch (ex) {
+		return false;
+	}
+};
+_.json = function(src, globalvar) {
+	var cglobal = false;
+	try {
+		if (typeof globalvar == "string" && /^(\w+)$/.test(globalvar)) {
+			cglobal = true;
+			(new Function(globalvar + " = " + src + ";"))();
+		} else {
+			return (new Function("return " + src + ";"))();
+		}
+	} catch (ex) {
+		if (!cglobal) return null;
+		(new Function(globalvar + " = null;"))();
+	}
+};
+_.post = function(key, value) {
+	postinit__();
+	if (key === undefined) return _post_;
+	if (value === null) {
+		_.post.remove(key);
+		return;
+	}
+	if (value === undefined) return (_post_map_.hasOwnProperty(key.toUpperCase()) ? _post_[_post_map_[key.toUpperCase()]] : "");
+	_post_[key] = value;
+	_post_map_[key.toUpperCase()] = key;
+	return;
+};
+_.session = function(key, value) {
+	if (key === undefined) return "";
+	if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
+	if (value === null) {
+		Session.Contents.Remove(key);
+		return
+	}
+	if (value === undefined) {
+		if (Session.Contents(key) != undefined) return Session.Contents(key);
+		return "";
+	}
+	Session(key) = value;
+};
+_.get = function(key, value) {
+	if (key === undefined) return _get_;
+	if (value === null) {
+		_.get.remove(key);
+		return;
+	}
+	if (value === undefined) return (_get_.hasOwnProperty(key) ? _get_[key] : "");
+	_get_[key] = value;
+	return;
+};
+_.all = function(key) {
+	if (key == undefined) return "";
+	if (_get_.hasOwnProperty(key)) return _.get(key);
+	postinit__();
+	if (_post_map_.hasOwnProperty(key.toUpperCase())) return _post_[_post_map_[key.toUpperCase()]];
+	return "";
+};
+_.server = function(key, value) {
+	if (key === undefined) return _server_;
+	if (value === null) {
+		delete _server_[key];
+		return;
+	}
+	if (value === undefined) return (_server_.hasOwnProperty(key) ? _server_[key] : "");
+	_server_[key] = value;
+	return;
+};
+_.cookie = function(key, value, expired, domain, path, secure, httponly) {
+	if (key == undefined) return "";
+	var mkey = key,
+		skey = "";
+	if (key.indexOf(".") > 0) {
+		mkey = key.split(".")[0];
+		skey = key.split(".")[1];
+	}
+	if (value === null) {
+		Response.Cookies(mkey).Expires = "1980-1-1";
+		return;
+	}
+	if (value === undefined) {
+		if (skey == "") return Request.Cookies(mkey).item;
+		return Request.Cookies(mkey)(skey);
+	}
+	if (skey == "") {
+		Response.Cookies(mkey) = value;
+	} else {
+		Response.Cookies(mkey)(skey) = value;
+	}
+	if(typeof expired=="object" && expired.constructor==Object){
+		domain = expired["domain"];
+		path = expired["path"];
+		secure = expired["secure"];
+		httponly = expired["httponly"];
+		expired = expired["expired"];
+	}
+	if (expired !== undefined && !isNaN(expired)) {
+		var dt = new Date();
+		dt.setTime(dt.getTime() + parseInt(expired) * 1000);
+		Response.Cookies(mkey).Expires = _.format("{0}-{1}-{2} {3}:{4}:{5}", dt.getYear(), dt.getMonth() + 1, dt.getDate(), dt.getHours(), dt.getMinutes(), dt.getSeconds());
+	}
+	if (domain) {
+		Response.Cookies(mkey).Domain = domain;
+	}
+	if(!path) path="/";
+	Response.Cookies(mkey).Path = path;
+	if (secure) {
+		Response.Cookies(mkey).Secure = secure;
+	}
+};
+_.echo = function(debug, brnl, newline,contenttype) {
+	if ((brnl & _.TEXT.BIN)) {
+		Response.BinaryWrite(debug);
+	} else {
+		Response.Write(debug);
+	}
+	if (brnl === true) {
+		Response.Write("<br />");
+		if (newline !== false) Response.Write("\r\n");
+		return;
+	}
+	if (isNaN(brnl)) return;
+	if (brnl & _.TEXT.BR) Response.Write("<br />");
+	if (brnl & _.TEXT.NL) Response.Write("\r\n");
+	if (brnl & _.TEXT.FILE){
+		Response.ContentType=contenttype || "application/octet-stream";
+		Response.AddHeader("Content-Disposition", "attachment; filename=\"" + newline + "\"");
+	}
+};
+_.exit = function(debug, brnl, newline) {
+	_.echo(debug, brnl, newline);
+	Response.End();
+};
+_.format = function(Str) {
+	var arg = arguments;
+	if (arg.length <= 1) {
+		return Str;
+	}
+	return Str.replace(/\{(\d+)(?:\.([\w\.\-]+))?(?:\:(.+?))?\}/ig, function(ma, arg1,  arg2 , arg3) {
+		var argvalue = arg[parseInt(arg1) + 1];
+		if (argvalue === undefined) return "";
+		if (typeof argvalue == "object" && arg2) {
+			argvalue = (new Function("return this" + "[\"" + arg2.replace(/\./igm, "\"][\"").replace(/\[\"(\d+)\"\]/igm, "[$1]") + "\"]")).call(argvalue);
+		}
+		if (argvalue==null) return "NULL";
+		var argformat = arg3 || "";
+		var argtype = (typeof argvalue);
+		if (argformat != "") {
+			if (argtype == "date" || (argtype == "object" && argvalue.constructor == Date)) {
+				return _.formatdate(argvalue, argformat);
+			} else if (argtype == "number") {
+				if (/^(\d+)$/ig.test(argformat)) return argvalue.toString(argformat);
+				var mat2 = /^((\d+)\.)?(D|E|F|X)(\d*)$/igm.exec(argformat);
+				if (mat2) {
+					if (mat2[3] == "D") {
+						var c = (Math.pow(10, parseInt(mat2[4]) + 1) + argvalue).toString();
+						argvalue = c.substr(c.length - parseInt(mat2[4]));
+					} else if (mat2[3] == "E") {
+						if (mat2[4] != "") argvalue = argvalue.toExponential(parseInt(mat2[4]));
+						else argvalue = argvalue.toExponential();
+					} else if (mat2[3] == "F") {
+						if (mat2[4] != "") argvalue = argvalue.toFixed(parseInt(mat2[4]));
+						else argvalue = argvalue.toFixed(0);
+					} else if (mat2[3] == "X") {
+						if (mat2[4] != "") {
+							var c = argvalue.toString(16).toUpperCase();
+							if (c.length >= parseInt(mat2[4])) return c;
+							c = Math.pow(10, parseInt(mat2[4]) + 1).toString() + "" + c;
+							argvalue = c.substr(c.length - parseInt(mat2[4]));
+						} else {
+							argvalue = argvalue.toString(16).toUpperCase();
+						}
+					}
+					if (mat2[2] != "") {
+						var l = parseInt(mat2[2]);
+						while (argvalue.length < l) {
+							argvalue = "0" + argvalue;
+						}
+					}
+				}
+			} else if (argtype == "string") {
+				if (!isNaN(argformat)) {
+					var l = parseInt(argformat);
+					while (argvalue.length < l) {
+						argvalue = "0" + argvalue;
+					}
+				}
+			}
+		}
+		return argvalue;
+	});
+};
+_.redirect = function(url, msg) {
+	if (msg === undefined) msg = "";
+	msg = msg + "";
+	if (msg != "") {
+		_["goto"](url, msg);
+	} else {
+		Response.Redirect(url);
+	}
+	Response.End();
+};
+_["goto"] = function(url, msg) {
+	if (msg === undefined){
+		Response.Status = "302 Object Moved";
+		Response.AddHeader("Location", url);
+		return;
+	}
+	Response.Write('\u003cscript type="text/javascript"\u003ealert(decodeURIComponent("' + _.encode(msg) + '"));window.location = decodeURIComponent("' + _.encode(url) + '");\u003c/script\u003e');
+};
+_.script_start = '\u003cscript type="text/javascript"\u003e';
+_.script_start_server = '\u003cscript language="jscript" runat="server"\u003e';
+_.script_end = '\u003c/script\u003e';
+_.encode = function(src) {
+	return encodeURIComponent(src || "").replace(/\+/g, "%2B");
+};
+_.decode = function(src) {
+	return decodeURIComponent(src || "");
+};
+_.encodeHtml = function(src, simple) {
+	if(simple===false){
+		return Server.HtmlEncode(src || "").replace(/'/g,"&#39;");
+	}
+	return (src || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g,'&#39;').replace(/</g, "&lt;").replace(/>/g, "&gt;");
+};
+_.decodeHtml = function(src, simple) {
+	if(!src) return "";
+	var ret = src.replace(/&amp;/g, "&");
+	ret = ret.replace(/&gt;/g, ">");
+	ret = ret.replace(/&lt;/g, "<");
+	ret = ret.replace(/&quot;/g, '"');
+	if(simple===false) return ret.replace(/&#(\d+);/igm, function($0,$1){return String.fromCharCode($1)});
+	return ret.replace(/&#39;/g, '\'');
+};
+_.formatdate = function(dt, fs, utc) {
+	if (dt===null || dt===undefined) return '';
+	if (fs===undefined) return _.formatdate(new Date(), dt, utc);
+	if(Object.prototype.toString.call(dt) != '[object Date]'){
+		var type = typeof dt;
+		if(type == "string"){
+			var _dt = _.date.parse(dt);
+			if(_dt) dt = new Date(_dt.ticks);
+			else{
+				dt = Date.parse(dt);
+				if(!dt){
+					ExceptionManager.put(0x3456,"F.formatdate","date string format error, parse failed.");
+					return '';
+				}
+			}
+		}
+		else if(type == "date" || type == "number") dt = new Date(dt-0);
+	}
+	
+	if (!dt.getFullYear) return '';
+	fs = fs.replace(/(yyyy|mmmm|mmm|mm|dddd|ddd|dd|hh|ss|tttt|m|d|h|s)/ig, (function(cb, date){ return function(diff){ return cb.call(date, diff)};})(utc === true ? DIFF_UTC : DIFF, dt));
+
+	return fs;
+};
+_.date = function(srcDate) {
+	return new _.datetime(srcDate || new Date());
+};
+_.date.timezone = new Date().getTimezoneOffset() / 60;
+_.date.parse = function(srcDate) {
+	if (typeof srcDate == "string") {
+		srcDate = srcDate.replace(/(\-|\s|\:|\.)0(\d)/ig, "$1$2");
+		var match = /^(\d{4})\-(\d{1,2})\-(\d{1,2})( (\d{1,2})\:(\d{1,2})(\:(\d{1,2}))?(\.(\d{1,3}))?)?$/.exec(srcDate);
+		if (match) {
+			try {
+				if (match[4] == "") {
+					srcDate = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
+				} else {
+					srcDate = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]), parseInt(match[5]), parseInt(match[6]), (match[7] == "" ? 0 : parseInt(match[8])), (match[9] == "" ? 0 : parseInt(match[10])));
+				}
+			} catch (ex) {
+				ExceptionManager.put(ex, "F.date.parse(string)");
+				return null;
+			}
+		} else {
+			ExceptionManager.put(0x000001B9, "F.date.parse(string)", "argument format error.");
+			return null;
+		}
+	}
+	var date_ = new Date(srcDate - 0);
+	var obj_ = {
+		ticks: date_ - 0,
+		year: date_.getFullYear(),
+		month: date_.getMonth(),
+		day: date_.getDate(),
+		hour: date_.getHours(),
+		minute: date_.getMinutes(),
+		second: date_.getSeconds(),
+		ms: date_.getMilliseconds(),
+		weekday: date_.getDay()
+	};
+	obj_["yeardays"] = _.date.datediff("d", new Date(obj_.year, 0, 1), date_) + 1;
+	obj_["season"] = (obj_.month - obj_.month % 3) / 3 + 1;
+	var firstday = new Date(obj_.year, 0, 1);
+	if (firstday.getDay() == 0) {
+		obj_["weeks"] = (obj_.yeardays - obj_.yeardays % 7) / 7 + (obj_.yeardays % 7 == 0 ? 0 : 1)
+	} else {
+		var ndays = obj_.yeardays - 7 + firstday.getDay();
+		obj_["weeks"] = (ndays - ndays % 7) / 7 + (ndays % 7 == 0 ? 0 : 1) + 1;
+	}
+	return obj_;
+};
+_.date.datediff = function(diff, src1, src2) {
+	var miisecond = new Date(src2 - 0) - new Date(src1 - 0);
+	switch (diff) {
+	case "s":
+		return (miisecond - miisecond % 1000) / 1000;
+	case "m":
+		return (miisecond - miisecond % 60000) / 60000;
+	case "h":
+		return (miisecond - miisecond % 3600000) / 3600000;
+	case "d":
+		return (miisecond - miisecond % 86400000) / 86400000;
+	case "w":
+		return (miisecond - miisecond % 604800000) / 604800000;
+	case "M":
+		return src2.getFullYear() * 12 + src2.getMonth() - src1.getFullYear() * 12 - src1.getMonth();
+	case "y":
+		return src2.getFullYear() - src1.getFullYear();
+	}
+	return miisecond;
+};
+_.date.dateadd = function(diff, value, srcDate) {
+	var date_ = _.date.parse(srcDate);
+	switch (diff) {
+	case "ms":
+		return new Date(date_.ticks - value * -1);
+	case "s":
+		return new Date(date_.ticks - value * -1000);
+	case "m":
+		return new Date(date_.ticks - value * -60000);
+	case "h":
+		return new Date(date_.ticks - value * -3600000);
+	case "d":
+		return new Date(date_.ticks - value * -86400000);
+	case "w":
+		return new Date(date_.ticks - value * -604800000);
+	case "M":
+		return new Date(date_.year, date_.month + value, date_.day, date_.hour, date_.minute, date_.second, date_.ms);
+	case "y":
+		return new Date(date_.year + value, date_.month, date_.day, date_.hour, date_.minute, date_.second, date_.ms);
+	}
+	return srcDate;
+};
+_.datetime = function(srcDate) {
+	var date_ = _.date.parse(srcDate);
+	for (var i in date_) {
+		if (!date_.hasOwnProperty(i)) continue;
+		this[i] = date_[i];
+	}
+};
+_.datetime.prototype.add = function(diff, value) {
+	return _.date.call(this, _.date.dateadd(diff, value, this.ticks));
+};
+_.datetime.prototype.diff = function(diff, srcdate) {
+	return _.date.datediff(diff, srcdate, this.ticks);
+};
+_.datetime.prototype.toString = function(format, utc) {
+	if (format) return _.formatdate(this.ticks, format, utc);
+	return (new Date(this.ticks)).toString();
+};
+
+_.untimespan = function(ts, format, utc) {
+	if(format === true){
+		utc = true;
+		format = undefined;
+	}
+	if (format === undefined) format = "yyyy-MM-dd HH:mm:ss";
+	return _.formatdate(new Date(ts * 1000), format, utc);
+};
+_.timespan = function(src) {
+	src = _.date.parse(src || new Date());
+	return (src.ticks - (src.ticks % 1000)) / 1000;
+};
+_.each = function(src, fn, state) {
+	if (typeof fn != "function") return;
+	var e = new Enumerator(src);
+	for (; !e.atEnd(); e.moveNext()) {
+		if (fn.apply(src, [e.item(), src, state]) === false) break;
+	}
+	e = null;
+};
+_.foreach = function(src, fn, state) {
+	if (typeof fn != "function") return;
+	for (var i in src) {
+		if (!src.hasOwnProperty(i)) continue;
+		if (fn.apply(src, [i, src[i], state]) === false) break;
+	}
+};
+_.safe = function(src) {
+	src = src || "";
+	return src.replace(/('|"|\r|\n|(^[\s]+)|([\s]+$))/igm, "").replace(/>/igm, "&gt;").replace(/</igm, "&lt;");
+};
+
+
+
+_.cache = {};
+_.cache.enabled = false;
+_.cache.write = function(key, value) {
+	if (!_.cache.enabled) return;
+	Application.Lock();
+	Application(key) = value;
+	Application.UnLock();
+};
+_.cache.read = function(key) {
+	if (Application.Contents(key) != undefined) return Application.Contents(key);
+	return null;
+};
+_.cache.exists = function(key) {
+	return Application.Contents(key) != undefined;
+};
+_.cache.clear = function(key) {
+	if (key != undefined && (typeof key == "string") && key.length > 0) {
+		if (key.substr(key.length - 1) == ".") {
+			var list = [];
+			_.each(Application.Contents, function(q) {
+				if (q.length > key.length && q.substr(0, key.length) == key) list.push(q);
+			});
+			_.each(list, function(q) {
+				Application.Contents.Remove(q);
+			});
+			return list.length;
+		}
+		Application.Contents.Remove(key);
+		return;
+	}
+	var all = [];
+	_.each(Application.Contents, function(q) {
+		all.push(q);
+	});
+	_.each(all, function(q) {
+		Application.Contents.Remove(q);
+	});
+	return all.length;
+};
+
+_.sortable = {};
+_.sortable.data__ = [];
+_.sortable.add = function(v) {
+	_.sortable.data__.push(v);
+};
+_.sortable.clear = function() {
+	while (_.sortable.data__.length > 0) {
+		_.sortable.data__.pop();
+	}
+};
+_.sortable.sort = function(asc) {
+	if (asc == undefined) asc = true;
+	_.sortable.data__ = _.sortable.data__.sort(function(a, b) {
+		if (a > b == asc) return 1;
+		if (a == b) return 0;
+		if (a < b == asc) return -1;
+	});
+};
+_.sortable.join = function(c) {
+	return _.sortable.data__.join(c || "");
+};
+
+
+_.timer = {};
+_.timer.start = null;
+_.timer.end = null;
+_.timer.run = function() {
+	this.start = +new Date();
+	return this.start;
+};
+_.timer.stop = function(start) {
+	this.end = +new Date();
+	return this.end - (start || this.start);
+};
+
+_.replace = function(src, search, replacement) {
+	if (typeof search == "object") return src.replace(search, replacement);
+	var rv = "",
+		r = "";
+	while (src.indexOf(search) >= 0) {
+		r = src.substr(0, src.indexOf(search) + search.length);
+		if (r.length < src.length) src = src.substr(r.length);
+		else src = "";
+		rv += r.replace(search, replacement);
+	}
+	return rv + src;
+};
+_.string = {};
+_.string.left = function(src, len) {
+	src = src || "";
+	if (typeof len == "number") {
+		return src.slice(0, len);
+	}
+	if (typeof len == "string") {
+		if (src.indexOf(len) < 0) return src;
+		return src.substr(0, src.indexOf(len));
+	}
+	return src;
+};
+_.string.right = function(src, len) {
+	src = src || "";
+	if (typeof len == "number") {
+		return src.slice(- len);
+	}
+	if (typeof len == "string") {
+		if (src.indexOf(len) < 0) return src;
+		return src.substr(src.lastIndexOf(len) + len.length);
+	}
+	return src;
+};
+_.string.startWith = _.string.startsWith = function(src, opt) {
+	return src.indexOf(opt) === 0;
+};
+_.string.endWith = _.string.endsWith = function(src, opt) {
+	var d = src.length - opt.length;
+    return d >= 0 && src.lastIndexOf(opt) === d;
+}; 
+
+_.string.trim = function(src, opt) {
+	return _.string.trimLeft(_.string.trimRight(src, opt), opt);
+};
+_.string.trimLeft = function(src, opt) {
+	if (src == "") return "";
+	if (opt === undefined) return src.replace(/^(\s+)/ig, "");
+	if (_.string.startWith(src, opt)) {
+		if (src == opt) return "";
+		return _.string.trimLeft(src.substr(opt.length), opt);
+	}
+	return src;
+};
+_.string.trimRight = function(src, opt) {
+	if (src == "") return "";
+	if (opt === undefined) return src.replace(/(\s+)$/ig, "");
+	if (_.string.endWith(src, opt)) {
+		if (src == opt) return "";
+		return _.string.trimRight(src.substr(0, src.length - opt.length), opt);
+	}
+	return src;
+};
+_.string.format = function() {
+	return _.format.apply(_, arguments);
+};
+_.string.email = function(str) {
+	return _.string.exp(str, /^([\w\.\-]+)@([\w\.\-]+)$/);
+};
+_.string.url = function(str) {
+	return _.string.exp(str, /^http(s)?\:\/\/(.+?)$/i);
+};
+_.string.test = function(str, exp, option) {
+	exp = _.string.exp_(exp, option);
+	if (exp == null) return false;
+	return exp.test(str);
+};
+_.string.replace = function(src, exp, option, replacement) {
+	if (arguments.length == 3) {
+		replacement = option;
+		option = "";
+	}
+	src = src || "";
+	if (typeof exp != "object") {
+		exp = exp + "";
+		exp = _.string.exp_(exp, option) || exp;
+	}
+	return src.replace(exp, replacement);
+};
+_.string.matches = function(src, exp, option,fn) {
+	var ref=null;
+	if(typeof option=="function")
+	{
+		if(fn) ref = fn;
+		fn = option;
+		option = ""; 
+	}
+	exp = _.string.exp_(exp, option);
+	if (exp == null) return null;
+	if (!exp.global) return exp.exec(src);
+	var ret = [],
+		result = exp.exec(src);
+	while (result) {
+		if(typeof fn=="function")
+		{
+			fn.apply(ref || result,result);
+		}
+		else
+		{
+			ret.push(result);
+		}
+		result = exp.exec(src);
+	}
+	return ret;
+};
+_.string.exp = function(str, exp, option) {
+	if (typeof exp != "object") {
+		if (typeof exp !== "string") return "";
+		exp = _.string.exp_(exp, option);
+		if (exp == null) return "";
+	}
+	str = str || "";
+	return (exp.test(str) ? str : "");
+};
+_.string.exp_ = function(exp, option) {
+	if (typeof exp == "object") return exp;
+	option = option || "";
+	if (!/^\/(.+)\/([igm]*)$/.test(exp)) exp = "/" + exp + "/" + option;
+	try {
+		return (new Function("return " + exp + ";"))()
+	} catch (ex) {
+		ExceptionManager.put(ex, "F.string.exp_");
+		return null;
+	}
+	return exp;
+};
+_.string.fromBinary = function(bin, charset) {
+	var byts, stream = _.activex("ADODB.STREAM", function(){ this.Mode = 3; this.Type = 1;});
+	stream.Open();
+	stream.Write(bin);
+	stream.Position = 0;
+	stream.Type = 2;
+	stream.CharSet = charset || "utf-8";
+	byts = stream.ReadText();
+	stream.Close();
+	stream = null;
+	return byts;
+};
+_.string.getByteArray = function(string) {
+	if (string == "") return [];
+	var enc = _.encode(string);
+	var byteArray = [], _len = enc.length;
+	for (var i = 0; i < _len; i++) {
+		if (enc.substr(i, 1) == "%") {
+			byteArray.push(parseInt(enc.substr(i + 1, 2), 16));
+			i += 2;
+		} else {
+			byteArray.push(enc.charCodeAt(i));
+		}
+	}
+	return byteArray;
+};
+_.string.fromByteArray = function(byteArray) {
+	var string = "", _len = byteArray.length, _bit = 0;
+	if (byteArray.constructor != Array || _len <= 0) return "";
+	for (var i = 0; i < _len; i++) {
+		_bit = byteArray[i];
+		if(_bit<=0) break;
+		string += "%" + _bit.toString(16);
+	}
+	return _.decode(string);
+};
+
+_.object = {};
+_.object.sort = function(src, asc) {
+	_.sortable.data__ = _.object.keys(src);
+	_.sortable.sort(asc);
+	var new_ = {}, _data = _.sortable.data__, _len = _data.length;
+	for (var i = 0; i < _len; i++) {
+		new_[_data[i]] = src[_data[i]];
+	}
+	return new_;
+};
+_.object.keys = function(src) {
+	var returnValue = [];
+	for (var i in src) {
+		if (!src.hasOwnProperty(i)) continue;
+		returnValue.push(i);
+	}
+	return returnValue;
+};
+_.object.values = function(src) {
+	var returnValue = [];
+	for (var i in src) {
+		if (!src.hasOwnProperty(i)) continue;
+		returnValue.push(src[i]);
+	}
+	return returnValue;
+};
+_.object.toArray = function(src, key, value) {
+	var returnValue = [];
+	key = key || "key";
+	value = value || "value";
+	for (var i in src) {
+		if (!src.hasOwnProperty(i)) continue;
+		returnValue.push((function(m, k, v) {
+			var obj = new Object();
+			obj[k] = m;
+			obj[v] = src[m];
+			return obj;
+		})(i, key, value));
+	}
+	return returnValue;
+};
+_.object.toURIString = function(src, charset) {
+	charset = charset || "utf-8";
+	var fn = charset == "utf-8" ? _.encode : escape;
+	if (_.object.toURIString.fn == 0) fn = function(src) {
+		return src;
+	};
+	var returnValue = "";
+	for (var i in src) {
+		if (!src.hasOwnProperty(i)) continue;
+		var cn = true;
+		for (var j = 0; j < _.object.toURIString.filter.length; j++) {
+			if (_.object.toURIString.filter[j].substr(0, 1) == "!" && i == _.object.toURIString.filter[j].substr(1)) cn = false;
+			if (_.object.toURIString.filter[j].substr(0, 1) == "@" && !_.string.startWith(i, _.object.toURIString.filter[j].substr(1))) cn = false;
+			if (!cn) break;
+		}
+		if (cn) returnValue += fn(i) + _.object.toURIString.split_char_1 + fn(src[i]) + _.object.toURIString.split_char_2;
+	}
+	if (returnValue != "") returnValue = returnValue.substr(0, returnValue.length - 1);
+	return returnValue;
+};
+_.object.fromURIString = function(src) {
+	var obj={};
+	var ucs = src.split(_.object.toURIString.split_char_2), _len = ucs.length;
+	for (var i = 0; i < _len; i++) {
+		if (ucs[i].indexOf(_.object.toURIString.split_char_1) > 0) {
+			obj[_.decode(ucs[i].substr(0, ucs[i].indexOf(_.object.toURIString.split_char_1)))] = _.decode(_.string.trimLeft(ucs[i].substr(ucs[i].indexOf(_.object.toURIString.split_char_1)), _.object.toURIString.split_char_1));
+		}
+	}
+	return obj;
+};
+_.object.toURIString.split_char_1 = "=";
+_.object.toURIString.split_char_2 = "&";
+_.object.toURIString.filter = [];
+_.object.toURIString.clearFilter = function() {
+	while (_.object.toURIString.filter.length > 0) _.object.toURIString.filter.pop();
+};
+_.object.toURIString.fn = 1;
+_.dbl = function(value, default_) {
+	if (value == "") return (default_ === undefined ? 0 : default_);
+	if (isNaN(value)) return (default_ === undefined ? 0 : default_);
+	return parseFloat(value);
+};
+_.bool = function(value, default_) {
+	if (value == null) return !!(default_ || false);
+	if (typeof value == "number") return value != 0;
+	if (typeof value == "boolean") return value;
+	if (typeof value != "string") return false;
+	if (value == "") return !!(default_ || false);
+	return (value.toLowerCase() === "true" ? true : false);
+};
+_["int"] = function(value, default_, islist) {
+	if (islist !== true) islist = false;
+	value = String(value).replace(/\s/igm, "");
+	if (value == "") return (default_ === undefined ? 0 : default_);
+	if (!islist) {
+		if (isNaN(value)) return (default_ === undefined ? 0 : default_);
+		return parseInt(value);
+	} else {
+		if (!/^([\d\,]+)$/.test(value)) return [];
+		return value.split(',');
+	}
+};
+_.md5 = function(src) {
+	var md5 = require("md5");
+	if (!md5) return "";
+	return md5.md5(src);
+};
+_.md5_bytes = function(src) {
+	var md5 = require("md5");
+	if (!md5) return "";
+	return md5.md5_bytes(src);
+};
+_.delgate = function() {
+	try {
+		var args, body = (args = Array.prototype.slice.apply(arguments)).pop();
+		return new Function(args, body);
+	} catch (ex) {
+		ExceptionManager.put(ex.number, "F.func", ex.description + " function body [ " + body + " ]");
+	}
+};
+var postinit__ = function() {
+		if (!_postinited_) {
+			_post_ = {};
+			_post_map_ = {};
+			var cname, ex;
+			_.each(Request.Form, function(q) {
+				_post_[q] = String(this(q));
+				_post_map_[q.toUpperCase()] = q;
+				if(q.slice(-2)=="[]"){
+					delete _post_[q];
+					cname = q.slice(0,-2);
+					_post_[cname]=[];
+					_post_map_[cname.toUpperCase()] = cname;
+					ex = new Enumerator(this(q));
+					for (; !ex.atEnd(); ex.moveNext()) {
+						_post_[cname].push(ex.item());
+					}
+				}
+			});
+			_postinited_ = true;
+		}
+	};
+var mthods = ["get", "post", "session", "all"], _len = mthods.length;
+for(var i = 0; i < _len; i++){
+	(function(v){
+		_[v].exp = function(key, exp, option) {
+			return _.string.exp(_[v](key), exp, option);
+		};
+		_[v].email = function(key) {
+			return _.string.email(_[v].safe(key));
+		};
+		_[v].url = function(key) {
+			return _.string.url(_[v].safe(key));
+		};
+		_[v].safe = function(key, len) {
+			if (len !== undefined) return _.safe(_[v](key)).substr(0, len);
+			return _.safe(_[v](key));
+		};
+		_[v].intList = function(key, default_) {
+			return _[v]["int"](key, default_, true);
+		};
+		if (v != "all") {
+			_[v]["int"] = function(key, default_, islist) {
+				return _["int"](_[v](key), default_, islist);
+			};
+			_[v].dbl = function(key, default_) {
+				return _.dbl(_[v](key), default_);
+			};
+			_[v].bool = function(key, default_) {
+				return _.bool(_[v](key), default_);
+			};
+		}
+	})(mthods[i]);
+}
+mthods = ["int", "dbl", "bool"];
+_len = mthods.length;
+for(var i = 0; i < _len; i++){
+	(function(v){
+		_.all[v] = function(key, default_, islist) {
+			if (_.get.exists(key)) return _.get[v](key, default_, islist);
+			postinit__();
+			if (_.post.exists(key)) return _.post[v](key, default_, islist);
+			return default_ || (v == "bool" ? false : 0);
+		};
+	})(mthods[i]);
+}
+_.post.remove = function(key) {
+	postinit__();
+	if (_post_map_.hasOwnProperty(key.toUpperCase())) {
+		delete _post_[_post_map_[key.toUpperCase()]];
+		delete _post_map_[key.toUpperCase()];
+	}
+};
+_.get.remove = function(key) {
+	delete _get_[key];
+};
+_.post.clear = function() {
+	postinit__();
+	_post_ = {};
+	_post_map_ = {};
+};
+_.get.clear = function() {
+	_get_ = {};
+};
+
+_.post.exists = function(key) {
+	postinit__();
+	return _post_map_.hasOwnProperty(key.toUpperCase())
+};
+_.get.exists = function(key) {
+	return _get_[key] != undefined
+};
+_.all.exists = function(key) {
+	postinit__();
+	return _.get.exists(key) || _.post.exists(key);
+};
+_.session.exists = function(key) {
+	if (key == undefined) return false;
+	if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
+	if (Session.Contents(key) != undefined) return true;
+	return false;
+};
+_.session.destroy = function(key) {
+	if (key === true) {
+		Session.Abandon();
+		return;
+	}
+	if (key == undefined) {
+		Session.Contents.RemoveAll();
+		return;
+	}
+	if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) key = Mo.Config.Global.MO_APP_NAME + "_" + key;
+	if (Session.Contents(key) != undefined) {
+		Session.Contents.Remove(key);
+		return;
+	}
+};
+_.session.clear = function() {
+	Session.Contents.RemoveAll();
+};
+_.session.parse = function(name) {
+	var obj = {};
+	_.each(Session.Contents, function(q) {
+		var nq = q;
+		if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) nq = _.string.trimLeft(q, Mo.Config.Global.MO_APP_NAME + "_");
+		if (_.string.startWith(nq, name + ".")) {
+			obj[nq.substr(name.length + 1)] = Session.Contents(q);
+		}
+	});
+	return obj;
+};
+_.get.keys = function() {
+	return _.object.keys(_get_);
+};
+_.post.keys = function() {
+	postinit__();
+	return _.object.keys(_post_);
+};
+_.get.values = function() {
+	return _.object.values(_get_);
+};
+_.post.values = function() {
+	postinit__();
+	return _.object.values(_post_);
+};
+_.get.fromURIString = function(src) {
+	var ucs = src.split(_.object.toURIString.split_char_2), _len = ucs.length;
+	for (var i = 0; i < _len; i++) {
+		if (ucs[i].indexOf(_.object.toURIString.split_char_1) > 0) {
+			_get_[_.decode(ucs[i].substr(0, ucs[i].indexOf(_.object.toURIString.split_char_1)))] = _.decode(_.string.trimLeft(ucs[i].substr(ucs[i].indexOf(_.object.toURIString.split_char_1)), _.object.toURIString.split_char_1));
+		}
+	}
+};
+_.post.fromURIString = function(src) {
+	postinit__();
+	var ucs = src.split(_.object.toURIString.split_char_2), _len = ucs.length;
+	for (var i = 0; i < _len; i++) {
+		if (ucs[i].indexOf(_.object.toURIString.split_char_1) > 0) {
+			var key = _.decode(ucs[i].substr(0, ucs[i].indexOf(_.object.toURIString.split_char_1))),
+				value = _.decode(_.string.trimLeft(ucs[i].substr(ucs[i].indexOf(_.object.toURIString.split_char_1)), _.object.toURIString.split_char_1));
+			_post_[key] = value;
+			_post_map_[key.toUpperCase()] = key;
+		}
+	}
+};
+_.get.toURIString = function(charset) {
+	return _.object.toURIString(_get_, charset || "utf-8");
+};
+_.post.toURIString = function(charset) {
+	postinit__();
+	return _.object.toURIString(_post_, charset || "utf-8");
+};
+_.server.toURIString = function(charset) {
+	return _.object.toURIString(_server_, charset || "utf-8");
+};
+_.session.toURIString = function(charset) {
+	charset = charset || "utf-8";
+	var fn = charset == "utf-8" ? _.encode : escape;
+	var returnValue = "";
+	_.each(Session.Contents, function(q) {
+		var nq = q;
+		if (Mo.Config.Global.MO_SESSION_WITH_SINGLE_TAG) nq = _.string.trimLeft(q, Mo.Config.Global.MO_APP_NAME + "_");
+		returnValue += fn(nq) + "=" + fn(Session.Contents(q)) + "&";
+	});
+	if (returnValue != "") returnValue = returnValue.substr(0, returnValue.length - 1);
+	return returnValue;
+};
+_.get.sort = function(asc) {
+	_get_ = _.object.sort(_get_, asc);
+};
+_.post.sort = function(asc) {
+	postinit__();
+	_post_ = _.object.sort(_post_, asc);
+};
+_.activex.connection = function() {
+	return _.activex("ADODB.CONNECTION");
+};
+_.activex.recordset = function() {
+	return _.activex("ADODB.RECORDSET");
+};
+_.activex.stream = function() {
+	return _.activex("ADODB.STREAM");
+};
+_.activex.dictionary = function() {
+	return _.activex("SCRIPTING.DICTIONARY");
+};
+_.activex.document = function() {
+	return _.activex("MSXML2.DOMDocument");
+};
+_.activex.httprequest = function() {
+	var b = null;
+	var httplist = ["MSXML2.serverXMLHttp.3.0", "MSXML2.serverXMLHttp", "MSXML2.XMLHttp.3.0", "MSXML2.XMLHttp", "Microsoft.XMLHttp"];
+	for (var i = 0; i <= httplist.length - 1; i++) {
+		try {
+			b = new ActiveXObject(httplist[i]);
+			(function(o) {
+				_.activex.httprequest = function() {
+					return new ActiveXObject(o);
+				};
+			})(httplist[i]);
+			return b;
+		} catch (ex) {}
+	}
+	if (b == null) ExceptionManager.put(0x000001A8, "F.activex.httprequest", "can not load httprequest object.");
+	return b;
+};
+_.random.initialize = function(seeds, length) {
+	if (seeds.length <= 0) return "";
+	if (isNaN(length)) {
+		ExceptionManager.put(0x000001A9, "F.random.initialize", "argument 'length' must be a number.");
+		return "";
+	}
+	length = parseInt(length);
+	var returnValue = "";
+	for (var i = 0; i < length; i++) {
+		returnValue += seeds.substr(_.random(0, seeds.length - 1), 1);
+	}
+	return returnValue;
+};
+_.foreach({
+	"number": "123456789012345678901234567890",
+	"letter": "abcdefghiIJKLMNOPQRSTUVWXYZjklmnopqrstuvwxyzABCDEFGH",
+	"hex": "123456789012345678901234567890ABCDEFABCDEFABCDEFABCDEFABCDEF",
+	"word": "abcdefghiIJKLMNOPQRSTUVWXYZjklmnopqrstuvwxyzABCDEFGH12345678906789012678901234534567890126789012345345",
+	"mix": "~!@#$%^&*()_+=-[]{}:'<>/?\\,.|`abcdefghiIJKLMNOPQRSTUVWXYZjklmnopqrstuvwxyzABCDEFGH6789012678901234534567890126789012345345"
+}, function(i, v) {
+	_.random[i] = function(length) {
+		return _.random.initialize(v, length);
+	};
+});
+_.timer.ticks = _.timer.stop;
+init();
+Mo.on("dispose", _.dispose);
+module.exports = _;
+})(modules.exports, require, modules, __filename, __dirname, define);
+module.exports.push(modules.exports);
+modules.exports = {};
+(function(exports,require,module,__filename,__dirname,define){
+/*debug*/
+/*
+** File: io.js
+** Usage: some methods for io
+** About: 
+**		support@mae.im
+*/
+/*find from internet, thanks!*/
+var mapto437 = [], maptostring =[];
+for(var i=0;i<128;i++){
+	maptostring[i] = mapto437[i]=i;
+}
+mapto437[0x80] = 0x00c7;mapto437[0x81] = 0x00fc;mapto437[0x82] = 0x00e9;mapto437[0x83] = 0x00e2;mapto437[0x84] = 0x00e4;mapto437[0x85] = 0x00e0;mapto437[0x86] = 0x00e5;mapto437[0x87] = 0x00e7;mapto437[0x88] = 0x00ea;mapto437[0x89] = 0x00eb;mapto437[0x8a] = 0x00e8;mapto437[0x8b] = 0x00ef;mapto437[0x8c] = 0x00ee;mapto437[0x8d] = 0x00ec;mapto437[0x8e] = 0x00c4;mapto437[0x8f] = 0x00c5;mapto437[0x90] = 0x00c9;mapto437[0x91] = 0x00e6;mapto437[0x92] = 0x00c6;mapto437[0x93] = 0x00f4;mapto437[0x94] = 0x00f6;mapto437[0x95] = 0x00f2;mapto437[0x96] = 0x00fb;mapto437[0x97] = 0x00f9;mapto437[0x98] = 0x00ff;mapto437[0x99] = 0x00d6;mapto437[0x9a] = 0x00dc;mapto437[0x9b] = 0x00a2;mapto437[0x9c] = 0x00a3;mapto437[0x9d] = 0x00a5;mapto437[0x9e] = 0x20a7;mapto437[0x9f] = 0x0192;mapto437[0xa0] = 0x00e1;mapto437[0xa1] = 0x00ed;mapto437[0xa2] = 0x00f3;mapto437[0xa3] = 0x00fa;mapto437[0xa4] = 0x00f1;mapto437[0xa5] = 0x00d1;mapto437[0xa6] = 0x00aa;mapto437[0xa7] = 0x00ba;mapto437[0xa8] = 0x00bf;mapto437[0xa9] = 0x2310;mapto437[0xaa] = 0x00ac;mapto437[0xab] = 0x00bd;mapto437[0xac] = 0x00bc;mapto437[0xad] = 0x00a1;mapto437[0xae] = 0x00ab;mapto437[0xaf] = 0x00bb;mapto437[0xb0] = 0x2591;mapto437[0xb1] = 0x2592;mapto437[0xb2] = 0x2593;mapto437[0xb3] = 0x2502;mapto437[0xb4] = 0x2524;mapto437[0xb5] = 0x2561;mapto437[0xb6] = 0x2562;mapto437[0xb7] = 0x2556;mapto437[0xb8] = 0x2555;mapto437[0xb9] = 0x2563;mapto437[0xba] = 0x2551;mapto437[0xbb] = 0x2557;mapto437[0xbc] = 0x255d;mapto437[0xbd] = 0x255c;mapto437[0xbe] = 0x255b;mapto437[0xbf] = 0x2510;mapto437[0xc0] = 0x2514;mapto437[0xc1] = 0x2534;mapto437[0xc2] = 0x252c;mapto437[0xc3] = 0x251c;mapto437[0xc4] = 0x2500;mapto437[0xc5] = 0x253c;mapto437[0xc6] = 0x255e;mapto437[0xc7] = 0x255f;mapto437[0xc8] = 0x255a;mapto437[0xc9] = 0x2554;mapto437[0xca] = 0x2569;mapto437[0xcb] = 0x2566;mapto437[0xcc] = 0x2560;mapto437[0xcd] = 0x2550;mapto437[0xce] = 0x256c;mapto437[0xcf] = 0x2567;mapto437[0xd0] = 0x2568;mapto437[0xd1] = 0x2564;mapto437[0xd2] = 0x2565;mapto437[0xd3] = 0x2559;mapto437[0xd4] = 0x2558;mapto437[0xd5] = 0x2552;mapto437[0xd6] = 0x2553;mapto437[0xd7] = 0x256b;mapto437[0xd8] = 0x256a;mapto437[0xd9] = 0x2518;mapto437[0xda] = 0x250c;mapto437[0xdb] = 0x2588;mapto437[0xdc] = 0x2584;mapto437[0xdd] = 0x258c;mapto437[0xde] = 0x2590;mapto437[0xdf] = 0x2580;mapto437[0xe0] = 0x03b1;mapto437[0xe1] = 0x00df;mapto437[0xe2] = 0x0393;mapto437[0xe3] = 0x03c0;mapto437[0xe4] = 0x03a3;mapto437[0xe5] = 0x03c3;mapto437[0xe6] = 0x00b5;mapto437[0xe7] = 0x03c4;mapto437[0xe8] = 0x03a6;mapto437[0xe9] = 0x0398;mapto437[0xea] = 0x03a9;mapto437[0xeb] = 0x03b4;mapto437[0xec] = 0x221e;mapto437[0xed] = 0x03c6;mapto437[0xee] = 0x03b5;mapto437[0xef] = 0x2229;mapto437[0xf0] = 0x2261;mapto437[0xf1] = 0x00b1;mapto437[0xf2] = 0x2265;mapto437[0xf3] = 0x2264;mapto437[0xf4] = 0x2320;mapto437[0xf5] = 0x2321;mapto437[0xf6] = 0x00f7;mapto437[0xf7] = 0x2248;mapto437[0xf8] = 0x00b0;mapto437[0xf9] = 0x2219;mapto437[0xfa] = 0x00b7;mapto437[0xfb] = 0x221a;mapto437[0xfc] = 0x207f;mapto437[0xfd] = 0x00b2;mapto437[0xfe] = 0x25a0;mapto437[0xff] = 0x00a0;
+maptostring[0xc7] = 0x80;maptostring[0xfc] = 0x81;maptostring[0xe9] = 0x82;maptostring[0xe2] = 0x83;maptostring[0xe4] = 0x84;maptostring[0xe0] = 0x85;maptostring[0xe5] = 0x86;maptostring[0xe7] = 0x87;maptostring[0xea] = 0x88;maptostring[0xeb] = 0x89;maptostring[0xe8] = 0x8a;maptostring[0xef] = 0x8b;maptostring[0xee] = 0x8c;maptostring[0xec] = 0x8d;maptostring[0xc4] = 0x8e;maptostring[0xc5] = 0x8f;maptostring[0xc9] = 0x90;maptostring[0xe6] = 0x91;maptostring[0xc6] = 0x92;maptostring[0xf4] = 0x93;maptostring[0xf6] = 0x94;maptostring[0xf2] = 0x95;maptostring[0xfb] = 0x96;maptostring[0xf9] = 0x97;maptostring[0xff] = 0x98;maptostring[0xd6] = 0x99;maptostring[0xdc] = 0x9a;maptostring[0xa2] = 0x9b;maptostring[0xa3] = 0x9c;maptostring[0xa5] = 0x9d;maptostring[0x20a7] = 0x9e;maptostring[0x192] = 0x9f;maptostring[0xe1] = 0xa0;maptostring[0xed] = 0xa1;maptostring[0xf3] = 0xa2;maptostring[0xfa] = 0xa3;maptostring[0xf1] = 0xa4;maptostring[0xd1] = 0xa5;maptostring[0xaa] = 0xa6;maptostring[0xba] = 0xa7;maptostring[0xbf] = 0xa8;maptostring[0x2310] = 0xa9;maptostring[0xac] = 0xaa;maptostring[0xbd] = 0xab;maptostring[0xbc] = 0xac;maptostring[0xa1] = 0xad;maptostring[0xab] = 0xae;maptostring[0xbb] = 0xaf;maptostring[0x2591] = 0xb0;maptostring[0x2592] = 0xb1;maptostring[0x2593] = 0xb2;maptostring[0x2502] = 0xb3;maptostring[0x2524] = 0xb4;maptostring[0x2561] = 0xb5;maptostring[0x2562] = 0xb6;maptostring[0x2556] = 0xb7;maptostring[0x2555] = 0xb8;maptostring[0x2563] = 0xb9;maptostring[0x2551] = 0xba;maptostring[0x2557] = 0xbb;maptostring[0x255d] = 0xbc;maptostring[0x255c] = 0xbd;maptostring[0x255b] = 0xbe;maptostring[0x2510] = 0xbf;maptostring[0x2514] = 0xc0;maptostring[0x2534] = 0xc1;maptostring[0x252c] = 0xc2;maptostring[0x251c] = 0xc3;maptostring[0x2500] = 0xc4;maptostring[0x253c] = 0xc5;maptostring[0x255e] = 0xc6;maptostring[0x255f] = 0xc7;maptostring[0x255a] = 0xc8;maptostring[0x2554] = 0xc9;maptostring[0x2569] = 0xca;maptostring[0x2566] = 0xcb;maptostring[0x2560] = 0xcc;maptostring[0x2550] = 0xcd;maptostring[0x256c] = 0xce;maptostring[0x2567] = 0xcf;maptostring[0x2568] = 0xd0;maptostring[0x2564] = 0xd1;maptostring[0x2565] = 0xd2;maptostring[0x2559] = 0xd3;maptostring[0x2558] = 0xd4;maptostring[0x2552] = 0xd5;maptostring[0x2553] = 0xd6;maptostring[0x256b] = 0xd7;maptostring[0x256a] = 0xd8;maptostring[0x2518] = 0xd9;maptostring[0x250c] = 0xda;maptostring[0x2588] = 0xdb;maptostring[0x2584] = 0xdc;maptostring[0x258c] = 0xdd;maptostring[0x2590] = 0xde;maptostring[0x2580] = 0xdf;maptostring[0x3b1] = 0xe0;maptostring[0xdf] = 0xe1;maptostring[0x393] = 0xe2;maptostring[0x3c0] = 0xe3;maptostring[0x3a3] = 0xe4;maptostring[0x3c3] = 0xe5;maptostring[0xb5] = 0xe6;maptostring[0x3c4] = 0xe7;maptostring[0x3a6] = 0xe8;maptostring[0x398] = 0xe9;maptostring[0x3a9] = 0xea;maptostring[0x3b4] = 0xeb;maptostring[0x221e] = 0xec;maptostring[0x3c6] = 0xed;maptostring[0x3b5] = 0xee;maptostring[0x2229] = 0xef;maptostring[0x2261] = 0xf0;maptostring[0xb1] = 0xf1;maptostring[0x2265] = 0xf2;maptostring[0x2264] = 0xf3;maptostring[0x2320] = 0xf4;maptostring[0x2321] = 0xf5;maptostring[0xf7] = 0xf6;maptostring[0x2248] = 0xf7;maptostring[0xb0] = 0xf8;maptostring[0x2219] = 0xf9;maptostring[0xb7] = 0xfa;maptostring[0x221a] = 0xfb;maptostring[0x207f] = 0xfc;maptostring[0xb2] = 0xfd;maptostring[0x25a0] = 0xfe;maptostring[0xa0] = 0xff;
+/* Convert a octet number to a code page 437 char code */
+var buffer2string = function(buffer) {
+	var ret = "";
+	var i = 0;
+	var l = buffer.length;
+	var cc, nb=[];
+	for (; i < l; ++i) {
+		if(buffer[i]>=0x80) nb[i] = mapto437[buffer[i]];
+		else nb[i] = buffer[i];
+	}
+	return String.fromCharCode.apply(null, nb);
+};
+/* Convert a code page 437 char code to a octet number*/
+var string2buffer = function(src) {
+	var buffer = [];
+	var i = 0;
+	var l = src.length;
+	var cc;
+	for (; i < l; ++i) {
+		buffer.push(maptostring[src.charCodeAt(i)]);
+	}
+	return buffer;
+};
+var string2binary = function(src) {
+	var buffer = "";
+	var i = 0;
+	var l = src.length;
+	var cc;
+	for (; i < l; ++i) {
+		buffer += String.fromCharCode(maptostring[src.charCodeAt(i)]);
+	}
+	return buffer;
+};
+var binary2string = function(src) {
+	var ret = "";
+	var i = 0;
+	var l = src.length;
+	var cc;
+	for (; i < l; ++i) {
+		ret += String.fromCharCode(mapto437[src.charCodeAt(i)]);
+	}
+	return ret;
+};
+
+var $io = (function()
+{
+	var $Io = {};
+	$Io.filesize = 0;
+	$Io.is = function(path){if(path.length<2)return false; return path.substr(1,1)==":";};
+	$Io.fso = new ActiveXObject("scripting.filesystemobject");
+	$Io.stream = function(mode,type)
+	{
+		var stream = F.activex("adodb.stream");stream.mode = mode ||3;stream.type = type||1;return stream;
+	};
+	$Io.fps=[];
+	$Io.get_filesize = function(fp)
+	{
+		return $Io.fps[fp][3];
+	};
+	$Io.absolute = function(path)
+	{
+		path = F.mappath(path);
+		return $Io.fso.GetAbsolutePathName(path);
+	};
+	$Io.base = function(path)
+	{
+		path = F.mappath(path);
+		return $Io.fso.GetBaseName (path);
+	};
+	$Io.parent = function(path)
+	{
+		return $Io.fso.GetParentFolderName(F.mappath(path));
+	};
+	$Io.build = function(path,name)
+	{
+		return $Io.fso.GetAbsolutePathName($Io.fso.BuildPath(F.mappath(path),name));
+	};
+	$Io.get = function(path)
+	{
+		path = F.mappath(path);
+		var src = null;
+		if($Io.file.exists(path))
+		{
+			src = $Io.fso.getFile(path);
+		}
+		else if($Io.directory.exists(path))
+		{
+			src = $Io.fso.getFolder(path);
+		}
+		if(src==null)
+		{
+			ExceptionManager.put(0x2d1e,"io.get","file or directory is not exists.");
+			return {};
+		}
+		return {
+			attr : src.Attributes,
+			toString : function(){return $Io.attr.toString(src.Attributes);},
+			date : {
+				created: src.DateCreated,
+				accessed: src.DateLastAccessed,
+				modified: src.DateLastModified
+			},
+			name : src.Name,
+			path : src.Path,
+			size : src.Size,
+			type : src.Type,
+			src : src
+		};
+	};
+	$Io.attr = function(path,attr)
+	{
+		var b = $Io.get(path);
+		if(!b.hasOwnProperty("src")) return -1;
+		if(attr!==undefined)
+		{
+			if(attr & 8 || attr & 16 || attr & 64 || attr & 128)
+			{
+				ExceptionManager.put(0x2d0d,"io.attr","attributes value error.");
+				return -1;
+			}
+			return b.src.Attributes = attr;
+		}
+		else
+		{
+			return b.src.Attributes;
+		}
+	};
+	$Io.attr.add = function(path, attr)
+	{
+		var b = $Io.get(path);
+		if(!b.hasOwnProperty("src")) return -1;
+		if(!(b.src.Attributes & attr)) return b.src.Attributes |= attr;
+		return -1;
+	};
+	$Io.attr.remove = function(path, attr)
+	{
+		var b = $Io.get(path);
+		if(!b.hasOwnProperty("src")) return -1;
+		if(b.src.Attributes & attr) return b.src.Attributes ^= attr;
+		return -1;
+	};
+	$Io.attr.toString = function(attr)
+	{
+		var attrString = "";
+		if(attr>0)
+		{
+			for(var i in $Io.attrs)
+			{
+				if(!$Io.attrs.hasOwnProperty(i))
+				{
+					continue;
+				}
+				if(attr & $Io.attrs[i])
+				{
+					attrString += i + ", ";
+				}
+			}
+			if(attrString != "")
+			{
+				attrString = attrString.substr(0, attrString.length-2);
+			}
+		}
+		else
+		{
+			attrString = "Normal";
+		}
+		return attrString;
+	};
+	return $Io;
+})();
+
+/*some methods for file*/
+$io.file = $io.file || (function()
+{
+	var $file = {};
+	var $fn = function(fp, content)
+	{
+		$file.write(fp,content);
+		var result = $file.flush(fp) === true;
+		$file.close(fp);
+		return result;
+	};
+	$file.get = function(path)
+	{
+		var src = null;
+		path = F.mappath(path);
+		if($io.fso.fileexists(path))
+		{
+			src = $io.fso.getFile(path);
+		}else{
+			ExceptionManager.put(0x2d1e,"io.file.get","file is not exists.");
+		}
+		return src;
+	};
+	$file.exists = function(path)
+	{
+		path = F.mappath(path);
+		return $io.fso.fileexists(path);
+	};
+	$file.del = function(path)
+	{
+		if(!$file.exists(path)) return true;
+		try
+		{
+			$io.fso.deletefile(F.mappath(path));
+			return true;
+		}
+		catch(ex)
+		{
+			ExceptionManager.put(ex,"io.file.del");
+			return false;
+		}
+	};
+	$file.copy = function(src, dest)
+	{
+		try
+		{
+			$io.fso.CopyFile(src, dest);
+		}
+		catch(ex)
+		{
+			ExceptionManager.put(ex,"io.file.copy");
+			return false;
+		}
+	};
+	$file.move = function(src, dest){
+		try
+		{
+			$io.fso.MoveFile(src, dest);
+		}
+		catch(ex)
+		{
+			ExceptionManager.put(ex,"io.file.move");
+			return false;
+		}
+	};
+	$file.readAllText = function(path, encoding){
+		var fp = $io.file.open(path,{forText : true, forRead : true , encoding : encoding || "utf-8"}); var content = $io.file.read(fp); $io.file.close(fp); 
+		return content;
+	};
+	$file.readAllBuffer = function(path){
+		var fp = $io.file.open(path,{forText : true, forRead : true , encoding : "437"}); var content = $io.file.read(fp); $io.file.close(fp); 
+		return string2buffer(content);
+	};
+	$file.readAllTextBinary = function(path){
+		var fp = $io.file.open(path,{forText : true, forRead : true , encoding : "437"}); var content = $io.file.read(fp); $io.file.close(fp); 
+		return string2binary(content);
+	};
+	$file.readAllScript = function(path, encoding){
+		var fp = $io.file.open(path,{forText : true, forRead : true , encoding : encoding || "utf-8"}); var content = $io.file.read(fp); $io.file.close(fp);
+		return content.replace(new RegExp("^(\\s*)<s" + "cript(.+?)>(\\s*)","i"),"").replace(new RegExp("(\\s*)<\\/s" + "cript>(\\s*)$","i"),"");
+	};
+	$file.readAllBytes = function(path){
+		var fp = $io.file.open(path,{forText : false, forRead : true}); var content = $io.file.read(fp);$io.file.close(fp);
+		return content;
+	};
+	$file.writeAllBytes = function(path,content){
+		return $fn($file.open(path, {forText : false}), content);
+	};
+	$file.writeAllText = function(path,content,encoding){
+		return $fn($file.open(path, {encoding : encoding || "utf-8"}), content);
+	};
+	$file.writeAllBuffer = function(path,buffer){
+		return $fn($file.open(path, {encoding : "437"}), buffer2string(buffer));
+	};
+	$file.appendAllBytes = function(path,content){
+		return $fn($file.open(path, {forText : false, forAppend : true}), content);
+	};
+	$file.appendAllText = function(path,content,encoding){
+		return $fn($file.open(path, {encoding : encoding || "utf-8", forAppend : true}), content);
+	};
+	$file.open = function(path,opt)
+	{
+		$io.filesize = 0;
+		path = F.mappath(path);
+		var cfg = 
+		{
+			forAppend : false,
+			forText : true,
+			forRead : false,
+			encoding : "utf-8"
+		};
+		F.extend(cfg, opt||{});
+		var fp = $io.stream(3, cfg.forText ? 2 : 1);
+		if(cfg.forText)
+		{
+			fp.charset=cfg.encoding;
+		}
+		fp.open();
+		if($file.exists(path) && (cfg.forAppend || cfg.forRead))
+		{
+			fp.loadfromfile(path);
+			$io.filesize = fp.size;
+			if(cfg.forAppend)
+			{
+				fp.position = fp.size;
+			}
+		}
+		$io.fps.push([fp,path,cfg,$io.filesize]);
+		return $io.fps.length-1;
+	};
+	$file.seek = function(fp,position)
+	{
+		if(!$io.fps[fp])
+		{
+			ExceptionManager.put(0x2d2e,"io.file.seek","file resource id is invalid.");
+			return;
+		}
+		$io.fps[fp][0].position = position;
+	};
+	$file.write = function(fp,content)
+	{
+		if(!$io.fps[fp])
+		{
+			ExceptionManager.put(0x2d3e,"io.file.write","file resource id is invalid.");
+			return;
+		}
+		try{
+			if($io.fps[fp][2].forText)
+			{
+				$io.fps[fp][0].writeText(content);
+			}
+			else
+			{
+				$io.fps[fp][0].write(content);
+			}
+		}catch(ex){
+			ExceptionManager.put(ex,"io.file.write");
+		}
+	};
+	$file.writeTo = function(fp, fp2, length){
+		if(length){
+			$io.fps[fp][0].CopyTo($io.fps[fp2][0], length);
+		}else{
+			$io.fps[fp][0].CopyTo($io.fps[fp2][0]);
+		}
+	};	
+	$file.writeToResponse = function(fp, blocksize){
+		var stream = $io.fps[fp][0],readed = 0, block = blocksize || 524288;
+		readed =0;
+		if(block>=stream.size){
+			Response.BinaryWrite(stream.Read(stream.size));
+		}else{
+			while(readed<stream.size){
+				if(readed+block>stream.size)block = stream.size-readed;
+				Response.BinaryWrite(stream.read(block));
+				readed += block;
+			}
+		}
+	};	
+	$file.writeBuffer = function(fp,content){
+		return $file.write(fp, buffer2string(content));
+	};
+	$file.read = function(fp,length){
+		if(!$io.fps[fp])
+		{
+			ExceptionManager.put(0x2d4e,"io.file.read","file resource id is invalid.");
+			return null;
+		}
+		if($io.fps[fp][2].forText)
+		{
+			if(length) return $io.fps[fp][0].readText(length);
+			return $io.fps[fp][0].readText();
+		}
+		else
+		{
+			if(length) return $io.fps[fp][0].read(length);
+			return $io.fps[fp][0].read();
+		}
+	};
+	$file.readBuffer = function(fp,length){
+		return string2buffer($file.read(fp, length));
+	};
+	$file.flush = function(fp)
+	{
+		if(!$io.fps[fp])
+		{
+			ExceptionManager.put(0x2d5e,"io.file.flush","file resource id is invalid.");
+			return;
+		}
+		fp = $io.fps[fp];
+		try{
+			fp[0].flush();
+			fp[0].saveToFile(fp[2].saveas || fp[1],2);
+			return true;
+		}catch(ex){
+			ExceptionManager.put(ex,"io.file.flush['" + F.string.right(fp[1],"\\") + "']");
+		}
+	};
+	$file.close = function(fp){
+		if(!$io.fps[fp])
+		{
+			ExceptionManager.put(0x2d6e,"io.file.close","file resource id is invalid.");
+			return;
+		}
+		$io.fps[fp][0].close();
+	};
+	$file.extension = function(path)
+	{
+		return $io.fso.GetExtensionName(F.mappath(path));
+	};
+	return $file;
+})();
+
+/*some methods for directory*/
+$io.directory = $io.directory || (function()
+{
+	var $dir = {};
+	$dir.get = function(path)
+	{
+		var src = null;
+		if($io.fso.folderexists(path))
+		{
+			src = $io.fso.getFolder(path);
+		}else{
+			ExceptionManager.put(0x2d1e,"io.directory.get","directory is not exists.");
+		}
+		return src;
+	};
+	$dir.exists = function(path)
+	{
+		path = F.mappath(path);
+		return $io.fso.folderexists(path);
+	};
+	$dir.del = function(path)
+	{
+		if(!$dir.exists(path)) return true;
+		try
+		{
+			$io.fso.deletefolder(F.mappath(path));
+			return true;
+		}
+		catch(ex)
+		{
+			ExceptionManager.put(ex,"io.directory.del");
+			return false;
+		}
+	};
+	$dir.copy = function(src, dest)
+	{
+		try
+		{
+			$io.fso.CopyFolder(src, dest);
+		}
+		catch(ex)
+		{
+			ExceptionManager.put(ex,"io.directory.copy");
+			return false;
+		}
+	};
+	$dir.move = function(src, dest)
+	{
+		try
+		{
+			$io.fso.MoveFolder(src, dest);
+		}
+		catch(ex)
+		{
+			ExceptionManager.put(ex,"io.directory.move");
+			return false;
+		}
+	};
+	$dir.create = function(path)
+	{
+		path = F.mappath(path);
+		if($dir.exists(path))
+		{
+			return true;
+		}
+		var parent = $io.fso.GetParentFolderName(path);
+		if(!$dir.exists(parent))
+		{
+			$dir.create(parent);
+		}
+		try
+		{
+			$io.fso.CreateFolder(path);
+			return true;
+		}
+		catch(ex)
+		{
+			ExceptionManager.put(ex,"io.directory.create");
+			return false;
+		}
+	};
+	$dir.clear = function(path, filter)
+	{
+		path = F.mappath(path);
+		var isFunc = (typeof filter == "function");
+		if(!$dir.exists(path))
+		{
+			return false;
+		}
+		try
+		{
+			$dir.files(path, function(f){
+				if(isFunc){
+					if(filter(f,true)!==false)f.Delete();
+				}else{
+					f.Delete();
+				}
+			});
+			$dir.directories(path, function(f){
+				if(isFunc){
+					if(filter(f,false)!==false)f.Delete();
+				}else{
+					f.Delete();
+				}
+			});
+			return true;	
+		}
+		catch(ex)
+		{
+			ExceptionManager.put(ex,"io.directory.clear");
+			return false;	
+		}
+	};
+	$dir.files = function(path,callback)
+	{
+		if(!$dir.exists(path))
+		{
+			return [];
+		}
+		var files=[];
+		path = F.mappath(path);
+		var fc = new Enumerator($io.fso.getFolder(path).files);
+		var isFunc = (typeof callback == "function");
+		for (;!fc.atEnd(); fc.moveNext())
+		{
+			if(isFunc) callback(fc.item());
+			else files.push(fc.item().path);
+		}
+		return files;
+	};
+	$dir.directories = function(path,callback)
+	{
+		if(!$dir.exists(path)) return [];
+		var files=[];
+		path = F.mappath(path);
+		var fc = new Enumerator($io.fso.getFolder(path).subfolders);
+		var isFunc = (typeof callback == "function");
+		for (;!fc.atEnd(); fc.moveNext())
+		{
+			if(isFunc) callback(fc.item());
+			else files.push(fc.item().path);
+		}
+		return files;
+	};
+	$dir.windows = $io.fso.GetSpecialFolder(0);
+	$dir.system = $io.fso.GetSpecialFolder(1);
+	$dir.temp = $io.fso.GetSpecialFolder(2);
+	return $dir;
+})();
+
+/*some methods for drive*/
+function get_drive(dr){
+	if(dr.IsReady){
+		return {
+			space : {
+				available : dr.AvailableSpace,
+				free : dr.FreeSpace,
+				total : dr.TotalSize
+			},
+			letter : dr.DriveLetter,
+			type : dr.DriveType,
+			typeString : $io.drive.types[dr.DriveType] || "Unknown",
+			fileSystem : dr.FileSystem,
+			isReady : dr.IsReady,
+			path : dr.Path,
+			sn : (dr.SerialNumber < 0 ? (dr.SerialNumber+0x100000000) : dr.SerialNumber).toString(16),
+			volumename : dr.VolumeName
+		};	
+	}else{
+		return {
+			letter : dr.DriveLetter,
+			type : dr.DriveType,
+			typeString : $io.drive.types[dr.DriveType] || "Unknown",
+			isReady : dr.IsReady,
+			path : dr.Path
+		};
+	}
+}
+$io.drive = $io.drive || function(path)
+{
+	return get_drive($io.fso.GetDrive($io.fso.GetDriveName(F.mappath(path))));
+};
+$io.drive.drives = function(callback, raw){
+	var ds = $io.fso.Drives, e = new Enumerator($io.fso.Drives);
+	for (; !e.atEnd(); e.moveNext())
+	{
+		callback(raw===true ? e.item() : get_drive(e.item()));
+	}
+	e = null;
+};
+$io.drive.types = [
+	"Unknown", 
+	"Removable", 
+	"Fixed", 
+	"Network", 
+	"CDROM", 
+	"RAM"
+];
+$io.attrs = {
+	Normal : 0, 
+	ReadOnly : 1, 
+	Hidden : 2, 
+	System : 4, 
+	Volume : 8, 
+	Directory : 16, 
+	Archive : 32, 
+	Alias : 64, 
+	Compressed : 128
+};
+$io.directory.attr = $io.file.attr = $io.attr;
+$io.directory.base = $io.file.base = $io.base;
+$io.directory.absolute = $io.file.absolute = $io.absolute;
+$io.directory.parent = $io.file.parent = $io.parent;
+$io.binary2buffer = function(bin){
+	return F.activex("ADODB.STREAM", function(data){
+		var byts;
+		this.Mode = 3; this.Type = 1;
+		this.Open();
+		this.Write(data);
+		this.Position = 0;
+		this.Type = 2;
+		this.CharSet = 437;
+		byts = this.ReadText();
+		this.Close();
+		return string2buffer(byts);
+	}, bin);
+};
+$io.buffer2binary = function(bin){
+	return F.activex("ADODB.STREAM", function(data){
+		var byts;
+		this.Mode = 3;
+		this.Type = 2;
+		this.CharSet = 437;
+		this.Open();
+		this.WriteText(buffer2string(data));
+		this.Position = 0;
+		this.Type = 1;
+		byts = this.Read();
+		this.Close();
+		return byts;
+	}, bin);
+};
+$io.string2buffer = string2buffer;
+$io.buffer2string = buffer2string;
+var stream_buffer = null;
+function buffer_init(type, charset){
+	if(stream_buffer){
+		stream_buffer.SetEOS();
+		stream_buffer.Position = 0;
+		stream_buffer.Type = type || 1;
+		if(type==2) stream_buffer.CharSet = charset || 437;
+		return;
+	}
+	stream_buffer = $io.stream(3,1);
+	stream_buffer.Open();
+}
+Mo.on('dispose', function(){
+	if(stream_buffer) stream_buffer.Close();
+	stream_buffer = null;
+});
+$io.buffer_read_bytes = function(stream, size){
+	buffer_init(); 
+	if(stream.EOS) return null;
+	stream.CopyTo(stream_buffer, size);
+	buffer_init(2);
+	return string2buffer(stream_buffer.ReadText(size));
+};
+$io.buffer_read_byte = function(stream){
+	buffer_init();
+	if(stream.EOS) return -1;
+	stream.CopyTo(stream_buffer, 1);
+	buffer_init(2);
+	return string2buffer(stream_buffer.ReadText(1))[0];
+};
+$io.buffer_read_boolean = function(stream){
+	buffer_init();
+	if(stream.EOS){
+		ExceptionManager.put(0x2d25,"io.buffer_read_boolean","end of stream.");
+		return null;
+	}
+	stream.CopyTo(stream_buffer, 1);
+	buffer_init(2);
+	return string2buffer(stream_buffer.ReadText(1))[0]!=0;
+};
+$io.buffer_read_int = function(stream){
+	var bytes = $io.buffer_read_bytes(stream, 4);
+	if(!bytes) return -1;
+	return (bytes[0] << 24 >>> 0) + (bytes[1] << 16) + (bytes[2] << 8) + bytes[3];
+};
+$io.buffer_read_int = function(stream){
+	var bytes = $io.buffer_read_bytes(stream, 4);
+	if(!bytes) return -1;
+	return (bytes[3] << 24 >>> 0) + (bytes[2] << 16) + (bytes[1] << 8) + bytes[0];
+};
+$io.buffer_read_string = function(stream, size, charset){
+	buffer_init();
+	if(stream.EOS){
+		ExceptionManager.put(0x2d25,"io.buffer_read_string","end of stream.");
+		return "";
+	}
+	stream.CopyTo(stream_buffer, size || -1);
+	buffer_init(2, charset || "utf-8");
+	return stream_buffer.ReadText();
+};
+module.exports = $io;
+})(modules.exports, require, modules, __filename, __dirname, define);
+module.exports.push(modules.exports);
+modules.exports = {};
+(function(exports,require,module,__filename,__dirname,define){
+/*
+ ** File: dist.js
+ ** Usage: define some necessary class for MAE.
+ ** Detail:
+ **		IClass, use the interface to create a class quickly.
+ **		IController, user this interface to create a new controller.
+ ** About:
+ **		support@mae.im
+ */
+
+/*IClass*/
+function IClass() {}
+IClass.extend = function(name, fn) {
+	if (name && typeof name == "object") {
+		for (var n in name) {
+			if (!name.hasOwnProperty(n)) continue;
+			if (typeof name[n] == "function") this.prototype[n] = name[n];
+		}
+		return;
+	}
+	if (typeof fn != "function") {
+		ExceptionManager.put("0x5ca", "IClass.extend(...)", "argument 'fn' must be a function.");
+		return;
+	}
+	this.prototype[name] = fn;
+	return new IFunction(fn);
+};
+IClass.extend("__destruct", function() {});
+IClass.create = function(__construct, __destruct) {
+	var _this = this;
+	var newClass = (function(fn) {
+		return function() {
+			_this.call(this);
+			this.__STATUS__ = true;
+			if (typeof fn == "function") this.__STATUS__ = fn.apply(this, arguments) !== false;
+		};
+	})(__construct);
+	newClass.prototype = new _this();
+	newClass.extend = _this.extend;
+	newClass.AsPrivate = function() {
+		this.__PRIVATE__ = true;
+		return this;
+	};
+	if (typeof __destruct == "function") newClass.prototype.__destruct = __destruct;
+	return newClass;
+};
+
+/*IController*/
+function IFunction(fn) {
+	this.fn = fn;
+	this.fn._data = {};
+}
+IFunction.prototype.AsPrivate = function() {
+	this.fn.__PRIVATE__ = true;
+	return this;
+};
+IFunction.prototype.data = function(key, value) {
+	if(value === undefined) return this.fn_data[key];
+	this.fn._data[key] = value;
+	return this;
+};
+
+function IController() {
+	IClass.call(this);
+}
+IController.prototype = new IClass();
+IController.extend = function(name, isPost, fn) {
+	if (name && typeof name == "object") {
+		for (var n in name) {
+			if (!name.hasOwnProperty(n)) continue;
+			IController.extend.call(this, n, name[n]);
+		}
+		return;
+	}
+	if (Mo.Config.Global.MO_ACTION_CASE_SENSITIVITY === false) name = name.toLowerCase();
+	if (isPost === true) {
+		name += "_Post_";
+	} else {
+		fn = isPost;
+	}
+	IClass.extend.call(this, name, fn);
+	return new IFunction(fn);
+};
+IController.extend("assign", function(key, value) {
+	Mo.assign(key, value);
+}).AsPrivate();
+IController.extend("invoke", function(name) {
+	var args = Array.prototype.slice.call(arguments, 1);
+	if (Mo.Config.Global.MO_ACTION_CASE_SENSITIVITY === false) name = name.toLowerCase();
+	if(!this[name]){
+		MEM.put(0x3d4e, "IController.invoke", "No method was found.");
+		return;
+	}
+	return this[name].apply(this, args);
+}).AsPrivate();
+IController.extend("getAction", function(name) {
+	if (Mo.Config.Global.MO_ACTION_CASE_SENSITIVITY === false) name = name.toLowerCase();
+	return this[name];
+}).AsPrivate();
+IController.extend("display", function() {
+	Mo.display.apply(Mo, arguments);
+}).AsPrivate();
+IController.extend("fetch", function() {
+	return Mo.fetch.apply(Mo, arguments);
+}).AsPrivate();
+IController.create = IClass.create;
+
+exports.IController = IController;
+exports.IClass = IClass;
+})(modules.exports, require, modules, __filename, __dirname, define);
+module.exports.push(modules.exports);
+modules.exports = {};
+(function(exports,require,module,__filename,__dirname,define){
+/*
+    json2.js
+    2015-05-03
+    Public Domain.
+    NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
+    See http://www.JSON.org/js.html
+    This code should be minified before deployment.
+    See http://javascript.crockford.com/jsmin.html
+    USE YOUR OWN COPY. IT IS EXTREMELY UNWISE TO LOAD CODE FROM SERVERS YOU DO
+    NOT CONTROL.
+*/
+(function (JSON) {
+    'use strict';
+    var rx_one = /^[\],:{}\s]*$/,
+        rx_two = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
+        rx_three = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
+        rx_four = /(?:^|:|,)(?:\s*\[)+/g,
+        rx_escapable = /[\\\"\u0000-\u001f\u007f-\u009f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        rx_dangerous = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
+	function js(str) {
+		var i, c, es=[], ret = "", len = str.length, buffer=[];
+		es[8]='b';es[9]='t';es[10]='n';es[12]='f';es[13]='r';es[34]='"';es[47]='\/';es[92]='\\';
+		for (i = 0; i < len; i++) {
+			c = str.charCodeAt(i);
+			if(es[c]!==undefined){
+				buffer.push(92, c);
+				continue;
+			}
+			if (c > 31 && c < 127) {
+				buffer.push(c);
+				continue;
+			}
+			if(buffer.length>0){
+				ret += String.fromCharCode.apply(null, buffer);
+				buffer.length = 0;
+			}
+			ret += "\\u" + ("0000" + c.toString(16)).slice(-4);
+		}
+		if(buffer.length>0){
+			ret += String.fromCharCode.apply(null, buffer);
+			buffer.length = 0;
+		}
+		return ret;
+	}
+    function f(n) {
+        return n < 10 
+            ? '0' + n 
+            : n;
+    }
+    function this_value() {
+        return this.valueOf();
+    }
+    if (typeof Date.prototype.toJSON !== 'function') {
+        Date.prototype.toJSON = function () {
+            return isFinite(this.valueOf())
+                ? this.getUTCFullYear() + '-' +
+                        f(this.getUTCMonth() + 1) + '-' +
+                        f(this.getUTCDate()) + 'T' +
+                        f(this.getUTCHours()) + ':' +
+                        f(this.getUTCMinutes()) + ':' +
+                        f(this.getUTCSeconds()) + 'Z'
+                : null;
+        };
+        Boolean.prototype.toJSON = this_value;
+        Number.prototype.toJSON = this_value;
+        String.prototype.toJSON = this_value;
+    }
+    var gap,
+        indent,
+        meta,
+        rep;
+    function quote(string) {
+        rx_escapable.lastIndex = 0;
+        return rx_escapable.test(string) 
+            ? '"' + string.replace(rx_escapable, function (a) {
+                var c = meta[a];
+                return typeof c === 'string'
+                    ? c
+                    : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+            }) + '"' 
+            : '"' + string + '"';
+    }
+    function str(key, holder) {
+        var i,
+            k,
+            v,
+            length,
+            mind = gap,
+            partial,
+            value = holder[key];
+        if (value && typeof value === 'object' &&
+                typeof value.toJSON === 'function') {
+            value = value.toJSON(key);
+        }
+        if (typeof rep === 'function') {
+            value = rep.call(holder, key, value);
+        }
+        switch (typeof value) {
+        case 'string':
+            return JSON.encode ? '"'+js(value)+'"' : quote(value);
+        case 'number':
+            return isFinite(value) 
+                ? String(value) 
+                : 'null';
+        case 'boolean':
+        case 'null':
+            return String(value);
+        case 'object':
+            if (!value) {
+                return 'null';
+            }
+            gap += indent;
+            partial = [];
+            if (Object.prototype.toString.apply(value) === '[object Array]') {
+                length = value.length;
+                for (i = 0; i < length; i += 1) {
+                    partial[i] = str(i, value) || 'null';
+                }
+                v = partial.length === 0
+                    ? '[]'
+                    : gap
+                        ? '[\n' + gap + partial.join(',\n' + gap) + '\n' + mind + ']'
+                        : '[' + partial.join(',') + ']';
+                gap = mind;
+                return v;
+            }
+            if (rep && typeof rep === 'object') {
+                length = rep.length;
+                for (i = 0; i < length; i += 1) {
+                    if (typeof rep[i] === 'string') {
+                        k = rep[i];
+                        v = str(k, value);
+                        if (v) {
+                            partial.push(quote(k) + (
+                                gap 
+                                    ? ': ' 
+                                    : ':'
+                            ) + v);
+                        }
+                    }
+                }
+            } else {
+                for (k in value) {
+                    if (Object.prototype.hasOwnProperty.call(value, k)) {
+                        v = str(k, value);
+                        if (v) {
+                            partial.push(quote(k) + (
+                                gap 
+                                    ? ': ' 
+                                    : ':'
+                            ) + v);
+                        }
+                    }
+                }
+            }
+            v = partial.length === 0
+                ? '{}'
+                : gap
+                    ? '{\n' + gap + partial.join(',\n' + gap) + '\n' + mind + '}'
+                    : '{' + partial.join(',') + '}';
+            gap = mind;
+            return v;
+        }
+    }
+	JSON.encode = false;
+	JSON.encodeUnicode = function(value){JSON.encode = value!==false;};
+    if (typeof JSON.stringify !== 'function') {
+        meta = {
+            '\b': '\\b',
+            '\t': '\\t',
+            '\n': '\\n',
+            '\f': '\\f',
+            '\r': '\\r',
+            '"': '\\"',
+            '\\': '\\\\'
+        };
+        JSON.stringify = function (value, replacer, space) {
+            var i;
+            gap = '';
+            indent = '';
+            if (typeof space === 'number') {
+                for (i = 0; i < space; i += 1) {
+                    indent += ' ';
+                }
+            } else if (typeof space === 'string') {
+                indent = space;
+            }
+            rep = replacer;
+            if (replacer && typeof replacer !== 'function' &&
+                    (typeof replacer !== 'object' ||
+                    typeof replacer.length !== 'number')) {
+                throw new Error('JSON.stringify');
+            }
+            return str('', {'': value});
+        };
+    }
+    if (typeof JSON.parse !== 'function') {
+        JSON.parse = function (text, reviver) {
+            var j;
+            function walk(holder, key) {
+                var k, v, value = holder[key];
+                if (value && typeof value === 'object') {
+                    for (k in value) {
+                        if (Object.prototype.hasOwnProperty.call(value, k)) {
+                            v = walk(value, k);
+                            if (v !== undefined) {
+                                value[k] = v;
+                            } else {
+                                delete value[k];
+                            }
+                        }
+                    }
+                }
+                return reviver.call(holder, key, value);
+            }
+            text = String(text);
+            rx_dangerous.lastIndex = 0;
+            if (rx_dangerous.test(text)) {
+                text = text.replace(rx_dangerous, function (a) {
+                    return '\\u' +
+                            ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+                });
+            }
+            if (
+                rx_one.test(
+                    text
+                        .replace(rx_two, '@')
+                        .replace(rx_three, ']')
+                        .replace(rx_four, '')
+                )
+            ) {
+                j = eval('(' + text + ')');
+                return typeof reviver === 'function'
+                    ? walk({'': j}, '')
+                    : j;
+            }
+            throw new SyntaxError('JSON.parse');
+        };
+    }
+    
+	JSON.ARRAY=1;
+	JSON.OBJECT=2;
+	JSON.create = function(jsonType){
+		if(JSON.class_) return new JSON.class_(jsonType);
+		JSON.class_ = function(_jsonType){
+			if(typeof _jsonType=="object" && _jsonType.constructor==Array)
+			{
+				this.jsonType = JSON.ARRAY;
+				this.data = _jsonType;
+			}
+			else if(typeof _jsonType=="object" && _jsonType.constructor==Object)
+			{
+				this.jsonType = JSON.OBJECT;
+				this.data = _jsonType;
+			}
+			else
+			{
+				this.jsonType = (_jsonType !== JSON.ARRAY ? JSON.OBJECT : JSON.ARRAY);
+				this.data=(this.jsonType == JSON.ARRAY ? [] : {});
+			}
+		};
+		JSON.class_.prototype.put = function(value){
+			if(arguments.length==2) return JSON.class_.prototype.set.apply(this,arguments);
+			if(typeof value=="object" && value.constructor == JSON.class_)
+			{
+				this.data.push(value.data);
+				return value;
+			}
+			this.data.push(value);
+			return this;
+		};
+		JSON.class_.prototype.putArray = function(){
+			var args=arguments, key=null;
+			if(this.jsonType==JSON.OBJECT){
+				key = (args = Array.prototype.slice.apply(arguments)).shift();
+			}
+			var object = (function(json, args){
+				if(args.length==1 && typeof args[0]=="object" && args[0].constructor==Array)
+				{
+					json.data = args[0];
+				}
+				else
+				{
+					json.data = Array.prototype.slice.apply(args);
+				}
+				return json;
+			})(JSON.create(JSON.ARRAY), args);
+			
+			if(this.jsonType==JSON.OBJECT){
+				return this.put(key,object);
+			}else{
+				return this.put(object);
+			}
+		};
+		JSON.class_.prototype.putObject = function(){
+			var args=arguments, key=null;
+			if(this.jsonType==JSON.OBJECT){
+				key = (args = Array.prototype.slice.apply(arguments)).shift();
+			}
+			
+			var object = (function(json, args){
+				if(args.length>0)json.data = args[0];
+				return json;
+			})(JSON.create(), args);
+			
+			if(this.jsonType==JSON.OBJECT){
+				return this.put(key,object);
+			}else{
+				return this.put(object);
+			}
+		};
+		JSON.class_.prototype.set = function(key, value){
+			if(typeof value=="object" && value.constructor == JSON.class_)
+			{
+				this.data[key]=value.data;
+				return value;
+			}
+			this.data[key]=value;
+			return this;
+		};
+		JSON.class_.prototype.get = function(key){
+			return this.data[key];
+		};
+		JSON.class_.prototype.stringify = JSON.class_.prototype.toString = function(space){
+			return JSON.stringify(this.data,null,space||"");
+		};
+		JSON.class_.prototype.toXML = function(rootElementName){
+			rootElementName = rootElementName || "root";
+			return json2xml(this.data, rootElementName);
+		};
+		return new JSON.class_(jsonType); 
+	};
+}(module.exports));
+})(modules.exports, require, modules, __filename, __dirname, define);
+module.exports.push(modules.exports);

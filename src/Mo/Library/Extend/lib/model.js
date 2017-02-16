@@ -26,9 +26,6 @@ Model__.lastRows = -1;
 Model__.useCommand = function(value){
 	UseCommand = !!value;
 };
-Model__.cmd = function(cmd, type, cfg){
-	return new _helper.CMDManager(cmd, Model__.getConnection(cfg), type, 1);
-};
 Model__.setDefault = function(dbConf){
 	Model__.defaultDBConf = dbConf || "DB";
 };
@@ -54,7 +51,7 @@ Model__.rollback = function(cfg){
 
 Model__.getConnection = function(cfg){
 	cfg = cfg || Model__.defaultDBConf;
-	if(Connections[cfg] === undefined)return null;
+	if(Connections[cfg] === undefined && !Model__.connect(cfg)) return null;
 	return Connections[cfg].base;
 };
 
@@ -215,6 +212,8 @@ function __Model__(tablename,pk,cfg,tablePrex){
 	this.onlypkorder = "asc";
 	this.ballowOnlyPKOrder = true;
 	this.connection = null;
+	this.parms = [];
+	if(!tablename) return;
 	if(!Model__.connect(cfg)) return;
 	this.base = Connections[cfg];
 	this.table = F.string.trim(tablename || "");
@@ -264,7 +263,6 @@ function __Model__(tablename,pk,cfg,tablePrex){
 		this.table = this.sp1 + this.table + this.sp2;
 	}
 	this.connection = this.base.base;
-	this.parms = [];
 }
 
 __Model__.prototype.getConnection = function(){
@@ -294,7 +292,7 @@ __Model__.prototype.field = function(){
 };
 
 __Model__.prototype.where = function(where){
-	if(where == undefined)return this;
+	if(where !== 0 && !where) return this;
 	if(!isNaN(where)){
 		this.strwhere = this.pk + " = " + where;
 		return this;
@@ -446,27 +444,6 @@ __Model__.prototype.cname = function(str){
 	this.strcname = str || "";
 	return this;
 };
-__Model__.prototype.createCommandManager = function(cmd,ct){
-	return new _helper.CMDManager(cmd,this,ct);
-};
-__Model__.prototype.exec = function(manager){
-	var fp;
-	try{
-		ALLOWDEBUG && (fp = F.timer.run());
-		if(manager.withQuery){
-			this.rs__ = manager.exec();
-			this.fetch();
-			if(manager.totalRecordsParm != "")this.object_cache.recordcount = this.rc = (manager.getparm(manager.totalRecordsParm).value || 0);
-		}else{
-			manager.exec();
-		}
-		ALLOWDEBUG && PutDebug(manager.cmd + ",[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
-	}catch(ex){
-		ALLOWDEBUG && PutDebug(manager.cmd + ",[UNFINISHED],[#" + fp + "]");
-		_catchException("__Model__.exec(manager)", ex);
-	}
-	return this;
-}
 
 __Model__.prototype.find = function(Id){
 	if(!isNaN(Id))
@@ -500,6 +477,15 @@ __Model__.prototype.query = function(){
 				var rs_ = this.connection.execute(arguments[0]);
 				ALLOWDEBUG && PutDebug(arguments[0]+",[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
 				return rs_;
+			}else if(arguments.length == 2 && arguments[1] === false){
+				ALLOWDEBUG && (fp = F.timer.run());
+				if(has_parms){
+					this.rs__ = _executeCommand.call(this, arguments[0]).dataset;
+				}else{
+					this.rs__ = _executeQuery.call(this, arguments[0]);
+				}
+				ALLOWDEBUG && PutDebug(arguments[0]+",[time taken:" + F.timer.stop(fp) + "MS],[#" + fp + "]");
+				return this;
 			}else if(arguments.length == 2 && (typeof arguments[1] == "string")){
 				this.sql= arguments[0];
 				this.countsql = arguments[1];
@@ -655,6 +641,39 @@ __Model__.prototype.Insert = __Model__.prototype.insert = function(){
 	var d_ = _parseData.call(this, data["table"]);
 	if(d_[0] != "" && d_[1] != "") this.query("insert into " + this.table + "(" + d_[0] + ") values(" + d_[1] + ")");
 	return this;
+};
+__Model__.prototype.Insert2 = __Model__.prototype.insert2 = function(){
+	var fields={}, len = arguments.length;
+	if(len==0) return 0;
+	if(len>1){
+		if(len % 2 != 0) return 0;
+		for(var i=0;i<len;i+=2){
+			fields[arguments[i]] = arguments[i+1];
+		}
+	}
+	else{
+		fields = arguments[0];
+	}
+	if(typeof fields != 'object') return 0;
+	try{
+		var cmdobj=F.activex("ADODB.Recordset"), id = 0;
+		cmdobj.open('select * from ' + this.table + ' where ' + this.pk + '=0',this.connection , 1, 3);
+		cmdobj.AddNew();
+		for(var i in fields){
+			if(!fields.hasOwnProperty(i) || i.toLowerCase() == this.pk.toLowerCase()){
+				continue;
+			}
+			cmdobj(i) = fields[i];
+		}
+		cmdobj.update();
+		id = cmdobj(this.pk).value;
+		cmdobj.close();
+		cmdobj = null;
+		return id;
+	}catch(ex){
+		_catchException('Model__.insert2', ex);
+		return 0;
+	}
 };
 
 __Model__.prototype.Update = __Model__.prototype.update = function(){
@@ -1147,183 +1166,8 @@ var _helper = function(){
 	Driver.Sum = function(k){
 		return this.query("select sum(" + k + ") from " + this.table + (this.strwhere != ""?(" where " + this.strwhere):""),true)(0).value || 0;	
 	};
-	function ModelCMDManager(cmd,model,ct, modeltype){
-		if(modeltype!==1)modeltype=0;
-		this.cmd = cmd ||"";
-		this.model = model || null;
-		this.parms_={};
-		this.cmdobj=F.activex("ADODB.Command");
-		if(modeltype==0){
-			this.cmdobj.ActiveConnection=this.model.getConnection();
-		}else{
-			this.cmdobj.ActiveConnection=this.model;
-		}
-		this.cmdobj.CommandType=ct||4;
-	    this.cmdobj.Prepared = true;
-	    this.withQuery=true;
-	    this.parmsGet=false;
-	    this.totalRecordsParm="";
-	    this.parms_count=0;
-	    this.dataset = null;
-	    this.affectedRows = -1;
-	}
-	ModelCMDManager.prototype.parms = function(){
-		var _this = this;
-		return {
-			"int" : function(value){
-				_this.add_parm_input_int(value);
-				return this;
-			},
-			"varchar" : function(value){
-				_this.add_parm_input_varchar(value);
-				return this;
-			},
-			"bigint" : function(value){
-				_this.add_parm_input_bigint(value)
-				return this;
-			},
-			"input" : function(value, t, size){
-				_this.add_parm_input(value, t, size);
-				return this;
-			},
-			"output" : function(t,size,totalp){
-				_this.add_parm_output(t,size,totalp);
-				return this;
-			},
-			"ret" : function(t,size){
-				if(t===undefined){
-					return _this.getparm("@RETURN");
-				}else{
-					_this.add_parm_return();
-					return this;
-				}
-			}
-		};
-	};
-	ModelCMDManager.New = function(cmd,model,ct){return new ModelCMDManager(cmd,model,ct);};
-	ModelCMDManager.prototype.addParm = function(name,value,direction){
-		this.parms_[name] = this.cmdobj.CreateParameter(name);
-		this.parms_[name].Value = value;
-		this.parms_[name].Direction = direction||1;
-		return this.parms_[name];
-	};
-	ModelCMDManager.prototype.addInput = function(name,value,t,size){
-		this.parms_[name] = this.cmdobj.CreateParameter(name, t, Driver.Enums.ParameterDirection.INPUT, size, value);
-		return this.parms_[name];
-	};
-	/*new method*/
-	ModelCMDManager.prototype.add_parm_input = function(value,t,size){
-		return this.addInput("@PARM" + ++this.parms_count,value,t,size);
-	};
-
-	ModelCMDManager.prototype.addInputInt = function(name,value){
-		return this.addInput(name,value,Driver.Enums.DataType.DBTYPE_I4,4);
-	};
-	/*new method*/
-	ModelCMDManager.prototype.add_parm_input_int = function(value){
-		return this.addInputInt("@PARM" + ++this.parms_count,value);
-	};
-
-	ModelCMDManager.prototype.addInputBigInt = function(name,value){
-		return this.addInput(name,value,Driver.Enums.DataType.DBTYPE_I8,8);
-	};
-	/*new method*/
-	ModelCMDManager.prototype.add_parm_input_bigint = function(value){
-		return this.addInputBigInt("@PARM" + ++this.parms_count,value);
-	};
-
-	ModelCMDManager.prototype.addInputVarchar = function(name,value,size){
-		return this.addInput(name,value,Driver.Enums.DataType.VARCHAR,size||50);
-	};
-	/*new method*/
-	ModelCMDManager.prototype.add_parm_input_varchar = function(value,size){
-		return this.addInputVarchar("@PARM" + ++this.parms_count,value,size);
-	};
-
-	ModelCMDManager.prototype.addOutput = function(name,t,size){
-		this.parms_[name] = this.cmdobj.CreateParameter(name, t, Driver.Enums.ParameterDirection.OUTPUT, size);
-		return this.parms_[name];
-	};
-	/*new method*/
-	ModelCMDManager.prototype.add_parm_output = function(t,size,totalp){
-		var parm_name = "@PARM" + ++this.parms_count;
-		if(size===true || totalp===true){
-			if(size===true)size=undefined;
-			this.totalRecordsParm = parm_name;
-		}
-		return this.addOutput(parm_name,t,size);
-	};
-
-	ModelCMDManager.prototype.addReturn = function(name,t,size){
-		this.parms_[name] = this.cmdobj.CreateParameter(name, t, Driver.Enums.ParameterDirection.RETURNVALUE, size);
-		return this.parms_[name];
-	};
-	/*new method*/
-	ModelCMDManager.prototype.add_parm_return = function(t,size){
-		return this.addReturn("@RETURN",t,size);
-	};
-
-	ModelCMDManager.prototype.getparm = function(name){
-		if(!this.parmsGet){
-			for(var i in this.parms_){
-				if(!this.parms_.hasOwnProperty(i))continue;
-				if(this.parms_[i].Direction>1){
-					this.parms_[i].value = this.cmdobj(i).value;
-				}
-			}
-			this.parmsGet=true;
-		}
-		if(typeof name=="number") name="@PARM" + name;
-		if(!this.parms_.hasOwnProperty(name)) return null;
-		return this.parms_[name];
-	}
-	/*new method*/
-	ModelCMDManager.prototype.get_parm_return = function(){
-		return this.getparm("@RETURN");
-	};
-
-	ModelCMDManager.prototype.execute = function(withQuery){
-		this.withQuery = withQuery===true;
-		this.model.exec(this);
-		return this.model;
-	};
-	ModelCMDManager.prototype.assign = function(name,asobject){
-		return this.model.assign(name,asobject);
-	};
-	ModelCMDManager.prototype.exec = function(){
-		this.cmdobj.CommandText = this.cmd;
-		for(var i in this.parms_){
-			if(!this.parms_.hasOwnProperty(i))continue;
-			this.cmdobj.Parameters.Append(this.parms_[i]);
-		}
-		try{
-			Model__.RecordsAffectedCmd(this);
-		}catch(ex){
-			if(VBS && VBS.ctrl.error.number != 0){
-				ExceptionManager.put(VBS.ctrl.error.number,"ModelCMDManager.exec()",VBS.ctrl.error.description);
-				VBS.ctrl.error.clear();
-			}else{
-				ExceptionManager.put(new Exception(ex.number,"ModelCMDManager.exec()",ex.message));
-			}
-		}
-		return this.dataset;
-	};
-	ModelCMDManager.prototype.next = function(ps){
-		if(this.dataset) {
-			this.dataset = this.dataset.NextRecordset();
-			if(this.dataset) return new DataTable(this.dataset,ps||-1);
-		}
-	};
-	ModelCMDManager.prototype.fetch = function(ps){
-		if(this.dataset) {
-			var dt = new DataTable(this.dataset,ps||-1);
-			try{this.dataset.close();}catch(ex){}
-			return dt;
-		}
-	};
 	return {
 		Helper : Driver,
-		CMDManager :ModelCMDManager,
 		DataTable : DataTable,
 		DataTableRow : DataTableRow
 	}

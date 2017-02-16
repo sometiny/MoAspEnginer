@@ -9,7 +9,6 @@
 var _cookies_received = null;
 function $cookie(key, value, option){
 	if(value===undefined){
-		if(!_cookies_received) $cookie.receive();
 		return _cookies_received[key];
 	}
 	var cookie = {value: null, keys:null, options:F.extend({httponly:true,secure:false,expires:null, path: "/", domain : null}, option || {})};

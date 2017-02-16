@@ -12,6 +12,50 @@ var ms = [
 	["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", ""],
 	["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", ""]
 ];
+var DIFF = function(diff){
+	var dt = this;
+	switch(diff){
+		case "dddd" : return ws[0][dt.getDay()];
+		case "ddd" : return ws[1][dt.getDay()];
+		case "MMMM" : return ms[0][dt.getMonth()];
+		case "MMM" : return ms[1][dt.getMonth()];
+		case "yyyy" : return dt.getFullYear();
+		case "M" : return dt.getMonth() + 1;
+		case "MM" : return ('0' + (dt.getMonth() + 1)).slice(-2);
+		case "d" : return dt.getDate();
+		case "dd" : return ('0' + dt.getDate()).slice(-2);
+		case "HH" : return ('0' + dt.getHours()).slice(-2);
+		case "h" : return dt.getHours();
+		case "m" : return dt.getMinutes();
+		case "mm" : return ('0' + dt.getMinutes()).slice(-2);
+		case "s" : return dt.getSeconds();
+		case "ss" : return ('0' + dt.getSeconds()).slice(-2);
+		case "tttt" : return dt.getMilliseconds();
+		default : return diff;
+	}
+};
+var DIFF_UTC = function(diff){
+	var dt = this;
+	switch(diff){
+		case "dddd" : return ws[0][dt.getUTCDay()];
+		case "ddd" : return ws[1][dt.getUTCDay()];
+		case "MMMM" : return ms[0][dt.getUTCMonth()];
+		case "MMM" : return ms[1][dt.getUTCMonth()];
+		case "yyyy" : return dt.getUTCFullYear();
+		case "M" : return dt.getUTCMonth() + 1;
+		case "MM" : return ('0' + (dt.getUTCMonth() + 1)).slice(-2);
+		case "d" : return dt.getDate();
+		case "dd" : return ('0' + dt.getUTCDate()).slice(-2);
+		case "HH" : return ('0' + dt.getUTCHours()).slice(-2);
+		case "h" : return dt.getUTCHours();
+		case "m" : return dt.getUTCMinutes();
+		case "mm" : return ('0' + dt.getUTCMinutes()).slice(-2);
+		case "s" : return dt.getUTCSeconds();
+		case "ss" : return ('0' + dt.getUTCSeconds()).slice(-2);
+		case "tttt" : return dt.getUTCMilliseconds();
+		default : return diff;
+	}
+};
 var _post_ = null,
 	_get_ = {},
 	_server_ = {},
@@ -357,9 +401,9 @@ _.decodeHtml = function(src, simple) {
 	if(simple===false) return ret.replace(/&#(\d+);/igm, function($0,$1){return String.fromCharCode($1)});
 	return ret.replace(/&#39;/g, '\'');
 };
-_.formatdate = function(dt, fs) {
+_.formatdate = function(dt, fs, utc) {
 	if (dt===null || dt===undefined) return '';
-	if (fs===undefined) return _.formatdate(new Date(), dt);
+	if (fs===undefined) return _.formatdate(new Date(), dt, utc);
 	if(Object.prototype.toString.call(dt) != '[object Date]'){
 		var type = typeof dt;
 		if(type == "string"){
@@ -377,28 +421,7 @@ _.formatdate = function(dt, fs) {
 	}
 	
 	if (!dt.getFullYear) return '';
-
-	fs = fs.replace(/(yyyy|mmmm|mmm|mm|dddd|ddd|dd|hh|ss|tttt|m|d|h|s)/ig,function(diff){
-		switch(diff){
-			case "dddd" : return ws[0][dt.getDay()];
-			case "ddd" : return ws[1][dt.getDay()];
-			case "MMMM" : return ms[0][dt.getMonth()];
-			case "MMM" : return ms[1][dt.getMonth()];
-			case "yyyy" : return dt.getFullYear();
-			case "M" : return dt.getMonth() + 1;
-			case "MM" : return ('0' + (dt.getMonth() + 1)).slice(-2);
-			case "d" : return dt.getDate();
-			case "dd" : return ('0' + dt.getDate()).slice(-2);
-			case "HH" : return ('0' + dt.getHours()).slice(-2);
-			case "h" : return dt.getHours();
-			case "m" : return dt.getMinutes();
-			case "mm" : return ('0' + dt.getMinutes()).slice(-2);
-			case "s" : return dt.getSeconds();
-			case "ss" : return ('0' + dt.getSeconds()).slice(-2);
-			case "tttt" : return dt.getMilliseconds();
-			default : return diff;
-		}
-	});
+	fs = fs.replace(/(yyyy|mmmm|mmm|mm|dddd|ddd|dd|hh|ss|tttt|m|d|h|s)/ig, (function(cb, date){ return function(diff){ return cb.call(date, diff)};})(utc === true ? DIFF_UTC : DIFF, dt));
 
 	return fs;
 };
@@ -504,14 +527,18 @@ _.datetime.prototype.add = function(diff, value) {
 _.datetime.prototype.diff = function(diff, srcdate) {
 	return _.date.datediff(diff, srcdate, this.ticks);
 };
-_.datetime.prototype.toString = function(format) {
-	if (format) return _.formatdate(this.ticks, format);
+_.datetime.prototype.toString = function(format, utc) {
+	if (format) return _.formatdate(this.ticks, format, utc);
 	return (new Date(this.ticks)).toString();
 };
 
-_.untimespan = function(ts, format) {
+_.untimespan = function(ts, format, utc) {
+	if(format === true){
+		utc = true;
+		format = undefined;
+	}
 	if (format === undefined) format = "yyyy-MM-dd HH:mm:ss";
-	return _.formatdate(new Date(ts * 1000), format);
+	return _.formatdate(new Date(ts * 1000), format, utc);
 };
 _.timespan = function(src) {
 	src = _.date.parse(src || new Date());

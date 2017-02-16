@@ -1,0 +1,18 @@
+﻿{
+	"name" : "ga",
+	"version" : "2.1.0",
+	"description" : "GoogleAuthenticator插件。2.1.0-优化。",
+	"keywords" : ["GoogleAuthenticator"],
+	"homepage" : "http://www.thinkasp.cn/extend/ga/",
+	"license" : "GPLv3",
+	"author" : 
+	{
+		"name" : "anlige",
+		"url" : "http://www.thinkasp.cn/",
+		"email" : "zhanghuiguoanlige@126.com"
+	},
+	"files" : [
+		"index.js"
+	],
+	"main" : "ga"
+}

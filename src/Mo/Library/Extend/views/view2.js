@@ -4,6 +4,74 @@
  ** About:
  **		support@mae.im
  */
+var _RightCopy = function(src, target) {
+	var i = 0;
+	while (true) {
+		if (i >= src.length || i >= target.length) break;
+		src[src.length - i - 1] = target[target.length - i - 1];
+		i++;
+	}
+	return src;
+};
+var _LoadTemplate = function(tplstr, assigns) {
+	assigns = assigns || {};
+	var template = __LoadTemplate(tplstr,assigns);
+	template = template.replace(/<selection name\=("|')(\w+)\1(\s*)\/>/ig, "");
+	template = template.replace(/<selection name\=("|')(\w+)\1(\s*)>([\s\S]*?)<\/selection>/ig, "$4");
+	return template;
+};
+var __LoadTemplate = function(template, assigns) {
+	var templatelist, vpath, path, templatelist2;
+	templatelist = template.split(":");
+	if (templatelist.length == 1) {
+		vpath = G.MO_TEMPLATE_NAME + "/" + Mo.Method + G.MO_TEMPLATE_SPLIT + template;
+		templatelist = [G.MO_TEMPLATE_NAME, Mo.Method, template];
+	} else if (templatelist.length == 2) {
+		vpath = G.MO_TEMPLATE_NAME + "/" + template.replace(":", G.MO_TEMPLATE_SPLIT);
+		templatelist = [G.MO_TEMPLATE_NAME].concat(templatelist);
+	} else if (templatelist.length == 3) {
+		vpath = templatelist[0] + "/" + templatelist[1] + G.MO_TEMPLATE_SPLIT + templatelist[2];
+	}
+	path = G.MO_APP + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
+	if (vpath.indexOf("@") > 0) path = G.MO_ROOT + vpath.substr(vpath.indexOf("@") + 1) + "/Views/" + vpath.substr(0, vpath.indexOf("@")) + "." + G.MO_TEMPLATE_PERX;
+	if (!IO.file.exists(path)) path = G.MO_CORE + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
+	if (!IO.file.exists(path)) {
+		ExceptionManager.put(0x6300, "__LoadTemplate()", "template '" + template + "' is not exists.", E_NOTICE);
+		return "";
+	}
+	var tempStr = IO.file.readAllText(path),
+		masterexp = new RegExp("^<extend file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "i"),
+		includeexp = new RegExp("<include file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "igm");
+
+	F.string.matches(tempStr, /<assign ([\s\S]+?)\/>(\s*)/igm, function($0, $1) {
+		var attrs = readAttrs__($1);
+		if (attrs["name"]) {
+			if(!assigns.hasOwnProperty(attrs["name"])) assigns[attrs["name"]] = attrs["value"];
+		}
+	});
+	tempStr = tempStr.replace(/<assign ([\s\S]+?)\/>(\s*)/g, '');
+	var match = masterexp.exec(tempStr),
+		master, callback;
+	if (match) {
+		templatelist2 = _RightCopy(templatelist, match[1].split(":"));
+		master = __LoadTemplate(templatelist2.join(":"), assigns);
+		callback = function($0, $1, $2, $3, $4) {
+			var m = (new RegExp("<selection name\\=(\"|')" + $2 + "\\1>([\\s\\S]*?)<\\/selection>")).exec(tempStr);
+			if (m) {
+				master = F.replace(master, $0, m[0].replace("<super />", $4 || ""));
+			}
+		};
+		F.string.matches(master, /<selection name\=("|')(\w+)\1(\s*)\/>/ig, callback);
+		F.string.matches(master, /<selection name\=("|')(\w+)\1(\s*)>([\s\S]*?)<\/selection>/ig, callback);
+		tempStr = master.replace(match[0], "");
+	}
+	F.string.matches(tempStr, includeexp, function($0, $1) {
+		templatelist2 = _RightCopy(templatelist, $1.split(":"));
+		tempStr = F.replace(tempStr, $0, __LoadTemplate(templatelist2.join(":"), assigns));
+	});
+	return tempStr;
+};
+
 function replacementter(src, starts, ends, callback, state) {
 	var regexp = new RegExp(starts + "((.*?)[^\\\\])?" + ends, "ig");
 	return src.replace(regexp, function($0, $1) {
@@ -48,6 +116,12 @@ function MoAspEnginerView(assub) {
 	this.assigns = "";
 	this.assub = assub === true;
 }
+MoAspEnginerView.compile_path = function(path){
+	var assigns = {};
+	var html = _LoadTemplate(path, assigns);
+	if(!html) return null;
+	return MoAspEnginerView.compile(html, assigns);
+};
 MoAspEnginerView.compile = function(content, assigns) {
 	var _view = new MoAspEnginerView();
 	var assign_str = "";
@@ -473,11 +547,11 @@ MoAspEnginerView.prototype.parseExpressionComponent = function(compare) {
 				if (expression != "") expression += " " + ($1 == "and" ? "&&" : "||") + " ";
 				if (vv_ == "Empty") {
 					var vari = this.parseAssign(varmatches[1]);
-					if (varmatches[2] != "") vari += varmatches[2];
+					if (varmatches[2] != "") vari = '(' + vari + varmatches[2] + ')';
 					expression += (varmatches[5] == 'neq' ? ' !' : ' ') + "(typeof " + vari + " == \"undefined\" || is_empty(" + vari + ")) ";
 				} else {
 					expression += this.parseAssign(varmatches[1]);
-					if (varmatches[2] != "") expression += varmatches[2];
+					if (varmatches[2] != "") expression = '(' + expression + varmatches[2] + ')';
 					if (varmatches[5] == "gt") expression += " > ";
 					if (varmatches[5] == "lt") expression += " < ";
 					if (varmatches[5] == "ngt") expression += " <= ";

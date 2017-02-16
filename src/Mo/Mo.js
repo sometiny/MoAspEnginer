@@ -131,77 +131,6 @@ var
 			}
 			return src;
 		};
-		var _LoadTemplate = function(tplstr, assigns) {
-			assigns = assigns || {};
-			var template = __LoadTemplate(tplstr,assigns);
-			template = template.replace(/<selection name\=("|')(\w+)\1(\s*)\/>/ig, "");
-			template = template.replace(/<selection name\=("|')(\w+)\1(\s*)>([\s\S]*?)<\/selection>/ig, "$4");
-			return template;
-		};
-		var readAttrs__ = function(src) {
-			if (typeof src != "string") return {};
-			if (!src) return {};
-			src = F.string.trim(F.string.trim(src).replace(/^<(\w+)([\s\S]+?)(\/)?>([\s\S]*?)$/i, "$2"));
-			var returnValue = {};
-			var reg = /\b([\w\.]+)\=(\"|\')(.+?)(\2)( |$)/igm;
-			var a = reg.exec(src);
-			while (a != null) {
-				returnValue[a[1]] = a[3];
-				a = reg.exec(src);
-			}
-			return returnValue;
-		};
-		var __LoadTemplate = function(template, assigns) {
-			var templatelist, vpath, path, templatelist2;
-			templatelist = template.split(":");
-			if (templatelist.length == 1) {
-				vpath = G.MO_TEMPLATE_NAME + "/" + M.Method + G.MO_TEMPLATE_SPLIT + template;
-				templatelist = [G.MO_TEMPLATE_NAME, M.Method, template];
-			} else if (templatelist.length == 2) {
-				vpath = G.MO_TEMPLATE_NAME + "/" + template.replace(":", G.MO_TEMPLATE_SPLIT);
-				templatelist = [G.MO_TEMPLATE_NAME].concat(templatelist);
-			} else if (templatelist.length == 3) {
-				vpath = templatelist[0] + "/" + templatelist[1] + G.MO_TEMPLATE_SPLIT + templatelist[2];
-			}
-			path = G.MO_APP + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
-			if (vpath.indexOf("@") > 0) path = G.MO_ROOT + vpath.substr(vpath.indexOf("@") + 1) + "/Views/" + vpath.substr(0, vpath.indexOf("@")) + "." + G.MO_TEMPLATE_PERX;
-			if (!IO.file.exists(path)) path = G.MO_CORE + "Views/" + vpath + "." + G.MO_TEMPLATE_PERX;
-			if (!IO.file.exists(path)) {
-				ExceptionManager.put(0x6300, "__LoadTemplate()", "template '" + template + "' is not exists.", E_NOTICE);
-				return "";
-			}
-			var tempStr = IO.file.readAllText(c(path)),
-				masterexp = new RegExp("^<extend file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "i"),
-				includeexp = new RegExp("<include file\\=\\\"(.+?)(\\." + G.MO_TEMPLATE_PERX + ")?\\\" />", "igm");
-
-			F.string.matches(tempStr, /<assign ([\s\S]+?)\/>(\s*)/igm, function($0, $1) {
-				var attrs = readAttrs__($1);
-				if (attrs["name"]) {
-					if(!assigns.hasOwnProperty(attrs["name"])) assigns[attrs["name"]] = attrs["value"];
-				}
-			});
-			tempStr = tempStr.replace(/<assign ([\s\S]+?)\/>(\s*)/g, '');
-			var match = masterexp.exec(tempStr),
-				master, callback;
-			if (match) {
-				templatelist2 = _RightCopy(templatelist, match[1].split(":"));
-				master = __LoadTemplate(templatelist2.join(":"), assigns);
-				callback = function($0, $1, $2, $3, $4) {
-					var m = (new RegExp("<selection name\\=(\"|')" + $2 + "\\1>([\\s\\S]*?)<\\/selection>")).exec(tempStr);
-					if (m) {
-						master = F.replace(master, $0, m[0].replace("<super />", $4 || ""));
-					}
-				};
-				F.string.matches(master, /<selection name\=("|')(\w+)\1(\s*)\/>/ig, callback);
-				F.string.matches(master, /<selection name\=("|')(\w+)\1(\s*)>([\s\S]*?)<\/selection>/ig, callback);
-				tempStr = master.replace(match[0], "");
-			}
-			F.string.matches(tempStr, includeexp, function($0, $1) {
-				templatelist2 = _RightCopy(templatelist, $1.split(":"));
-				tempStr = F.replace(tempStr, $0, __LoadTemplate(templatelist2.join(":"), assigns));
-			});
-			return tempStr;
-		};
 
 		var _ParseTemplatePath = function(template) {
 			var templatelist, vpath;
@@ -459,7 +388,7 @@ var
 			G = {};
 		M.Initialized = false;
 		M.Runtime = _runtime;
-		M.Version = "MoAspEnginer 3.1.1.419";
+		M.Version = "MoAspEnginer 3.1.2.442";
 		M.Config = {};
 		M.IsRewrite = false;
 		M.Action = "";
@@ -699,15 +628,13 @@ var
 				}
 			}
 			if (!usecache) {
-				var assigns = {};
-				html = _LoadTemplate(template, assigns);
-				if (html == "") return "";
 				if (!View) View = require(G.MO_TEMPLATE_ENGINE);
 				if (!View) {
 					ExceptionManager.put(0x12edf, "Mo.fetch()", "can not load template engine.");
 					return "";
 				}
-				scripts = View.compile(html, assigns);
+				scripts = View.compile_path(template);
+				if(scripts === null) return '';
 				if (G.MO_COMPILE_CACHE) IO.file.writeAllText(cachepath, "\u003cscript language=\"jscript\" runat=\"server\"\u003e\r\n" + scripts + "\r\n\u003c/script\u003e");
 			}
 			_runtime.timelines.compile = _runtime.ticks(_tag);
@@ -972,7 +899,7 @@ Mo.on("load", function(e, __invoke_event__) {
 	var loaddelay = {
 		"base64=Base64": ["e", "d", "encode", "decode", "toBinary", "fromBinary", "setNames", "base64"],
 		"dump": [null, "dump"], "cookie=Cookie": [null, "assets/cookie.js"],
-		"Model__": [null, "cmd", "useCommand", "Debug", "setDefault", "setDefaultPK", "begin", "commit", "rollback", "getConnection", "dispose", "connect", "execute", "executeQuery", "Model__@lib/model.js"],
+		"Model__": [null, "useCommand", "Debug", "setDefault", "setDefaultPK", "begin", "commit", "rollback", "getConnection", "dispose", "connect", "execute", "executeQuery", "Model__@lib/model.js"],
 		"DataTable": [null, "Model__.helper.DataTable@lib/model.js"], "DataTableRow": [null, "Model__.helper.DataTableRow@lib/model.js"],
 		"VBS": ["ns", "include", "eval", "require", "getref", "execute", "run", "assets/vbs.js"],
 		"Mpi": ["downloadAndInstall", "Host", "setDefaultInstallDirectory", "download", "fetchPackagesList", "fetchPackage", "packageExists", "install", "assets/mpi.js"],
@@ -1003,7 +930,7 @@ Mo.on("load", function(e, __invoke_event__) {
 			exports = "." + module.substr(0, index);
 			module = module.substr(index + 1);
 		}
-		executeable += "if(typeof " + lib.replace(/(.+?)\=/,'') + " == 'undefined'){";
+		executeable += "try{";
 		executeable += lib + " = {};";
 		if (index2 > 0) {
 			cname = lib.substr(index2 + 1);
@@ -1016,7 +943,7 @@ Mo.on("load", function(e, __invoke_event__) {
 			executeable += lib + method + " = function(){" + lib + " = require('" + module + "')" + exports + "; return " + lib + method + ".apply(" + lib + ",arguments)};";
 		}
 		if (cname) executeable += cname + " = " + lib + ";";
-		executeable += "}";
+		executeable += "}catch(ex){}";
 	}
 	(new Function(executeable))();
 });
