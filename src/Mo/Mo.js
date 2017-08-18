@@ -619,7 +619,7 @@ var
 				if (!G.MO_INGORE_COMPILE_CACHE && IO.file.exists(cachepath)) {
 					usecache = true;
 					if (G.MO_COMPILE_CACHE_EXPIRED > 0) {
-						OldHash = F.fso.GetFile(cachepath).DateLastModified;
+						OldHash = IO.fso.GetFile(cachepath).DateLastModified;
 						if (F.date.datediff("s", OldHash, new Date()) >= G.MO_COMPILE_CACHE_EXPIRED) usecache = false;
 					}
 					if (usecache) {
