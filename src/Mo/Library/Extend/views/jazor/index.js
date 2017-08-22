@@ -35,6 +35,17 @@ function loadtemplate(template){
 	}
 	return path;
 }
+function make_parentpath(file){
+	return file.substr(0, file.lastIndexOf('/') + 1);
+}
+function make_filepath(base, routes){
+	var file = routes[routes.length-1];
+	var length = routes.length, dir = base;
+	for(var i = 0; i< length - 1; i++){
+		dir = make_parentpath(path(routes[i], dir));
+	}
+	return path(file, dir);
+}
 var G = Mo.Config.Global;
 module.exports = {
 	compile_path : function(template){
@@ -46,10 +57,10 @@ module.exports = {
 			if(!file){
 				return '';
 			}
-			var dir = file.substr(0, file.lastIndexOf('/') + 1);
+			var dir = make_parentpath(file);
 			
-			JazorExtends.compileas(IO.file.readAllText(file), function(file, fn){
-				fn(IO.file.readAllText(path(file, dir)));
+			JazorExtends.compileas(IO.file.readAllText(file), function(files, fn){
+				fn(IO.file.readAllText(make_filepath(dir, typeof files == 'string' ? [files] : files)));
 			});
 			
 			codes = JazorExtends.compile('default');

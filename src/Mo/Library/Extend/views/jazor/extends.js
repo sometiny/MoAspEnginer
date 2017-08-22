@@ -298,7 +298,7 @@ by anlige @ 2017-07-23
 		return __CACHE__[name] = _pjt.compile(lines);
 	};
 	
-	__initlize.compileas = function(content, import_callback, after_import){
+	__initlize.compileas = function(content, import_callback, after_import, parents){
 		
 		var __LINE__ =  0;
 
@@ -395,23 +395,29 @@ by anlige @ 2017-07-23
 			return;
 		}
 		if(length > 0 && import_callback && typeof import_callback == 'function'){
-			imports(_imports, length, import_callback, after_import);
+			imports(_imports, length, import_callback, after_import, parents || []);
 			return;
 		}
 		return _imports;
 	};
 
-	function imports(_imports, length, callback, after_import){
+	function imports(_imports, length, callback, after_import, parents){
 		var count = 0, contents = '';
-		function fn(content){
+		function fn(content, p){
 			contents += content + '\n';
 			count++;
 			if(count >= length){
-				__initlize.compileas(contents, callback, after_import);
+				__initlize.compileas(contents, callback, after_import, p);
 			}
 		}
 		for(var i = 0; i < length; i++){
-			callback(_imports[i], fn);
+			var new_array = parents.slice(0);
+			new_array.push(_imports[i]);
+			callback(new_array.length == 1 ? new_array[0] : new_array, (function(p){ 
+				return function(content){
+					fn(content, p);
+				};
+			})(new_array));
 		}
 	}
 
