@@ -112,6 +112,7 @@ by anlige @ 2017-07-23
 		EACH : 'each',
 		SWITCH : 'switch',
 		WHILE : 'while',
+		CODE1 : 'code1',
 		CODE : 'code',
 		HTML : 'html',
 		LINE : 'line',
@@ -140,7 +141,7 @@ by anlige @ 2017-07-23
 			}
 			if(chr == '{'){
 				token_type.start = start;
-				token_type.type = TOKEN.CODE;
+				token_type.type = TOKEN.CODE1;
 				return;
 			}
 			if(!token_chars_map[chr]){
@@ -410,7 +411,8 @@ by anlige @ 2017-07-23
 			putString : _put_string,
 			putCode : _put_code,
 			putVariable : _put_variable,
-			finish : _end
+			finish : _end,
+			level : __LEVEL__
 		};
 	}
 
@@ -515,6 +517,9 @@ by anlige @ 2017-07-23
 		
 		scanline(content, function(start, end, words, lineno, emptys){
 			var _token = token(start, end, words, lineno), token_change = false;
+			if(_token.type == TOKEN.CODE && result.level.length == 0){
+				_token.type = TOKEN.LINE;
+			}
 			_token.lineno = lineno;
 			
 			publish(_token, words, result);
@@ -537,6 +542,7 @@ by anlige @ 2017-07-23
 				case TOKEN.WHILE : 
 					_token.linetext = _token.type + (_token.linetext || (content.slice(_token.start, _token.end)));
 				case TOKEN.CODE : 
+				case TOKEN.CODE1 : 
 					if(!_region){
 						result.putCode(_token.linetext || (content.slice(_token.start, _token.end)));
 						break;
