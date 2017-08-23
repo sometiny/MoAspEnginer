@@ -494,7 +494,15 @@ by anlige @ 2017-07-23
 		}
 		
 	};
-	
+	function script_style_start(line, htmltag){
+		return line.toLowerCase().indexOf('</' + htmltag + '>') < 0;
+	}
+	function script_style_end(line, htmltag){
+		return line.toLowerCase().indexOf('</' + htmltag + '>') >= 0;
+	}
+	function get_linetext(token, content){
+		return token.linetext || (content.slice(token.start, token.end));
+	}
 	function exception(e, lineno, line){
 		return 'Exception : ' + e + '\nLine: ' + lineno + '\nCode: ' + line;
 	}
@@ -510,7 +518,7 @@ by anlige @ 2017-07-23
 		
 		var result = __result__();
 		result.putCode('var ' + VARIABLE_NAME + ' = \'\';'); 
-		var _region = false;
+		var _region = false, _script_style = '';
 
 		trim_start = global_setting.trim_start;
 
@@ -534,23 +542,39 @@ by anlige @ 2017-07-23
 					break;	
 				case TOKEN.FOREACH : 
 				case TOKEN.EACH : 
-					parse_foreach(_token.linetext || (content.slice(_token.start, _token.end)), _token.type, result, lineno);
+					parse_foreach(get_linetext(_token, content), _token.type, result, lineno);
 					break;
 				case TOKEN.IF : 
 				case TOKEN.FOR : 
 				case TOKEN.SWITCH : 
 				case TOKEN.WHILE : 
-					_token.linetext = _token.type + (_token.linetext || (content.slice(_token.start, _token.end)));
+					_token.linetext = _token.type + get_linetext(_token, content);
 				case TOKEN.CODE : 
 				case TOKEN.CODE1 : 
-					if(!_region){
-						result.putCode(_token.linetext || (content.slice(_token.start, _token.end)));
+					if(!_region && !_script_style){
+						result.putCode(get_linetext(_token, content));
 						break;
 					}
 				
 				case TOKEN.HTML : 
+					if((_token.html_tag == 'script' || _token.html_tag == 'style') 
+						&& result.level.length > 0){
+						if(script_style_start(get_linetext(_token, content), _token.html_tag)){
+							_script_style = _token.html_tag;
+						}
+					}
 				case TOKEN.HTMLEND : 
+					if(_script_style 
+						&& _token.html_tag == _script_style 
+						&& TOKEN.HTMLEND == _token.type){
+						_script_style = '';
+					}
 				case TOKEN.LINE : 
+					if(_script_style 
+						&& TOKEN.CODE == _token.type 
+						&& script_style_end(get_linetext(_token, content), _script_style)){
+						_script_style = '';
+					}
 					if(emptys){
 						result.putString(emptys);
 					}
